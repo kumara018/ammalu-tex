@@ -61,7 +61,7 @@ def health():
     return {"status": "healthy"}
 
 
-@app.post("/seed")
+@app.get("/seed")
 def seed_database():
     from seed_data import seed
     seed()
