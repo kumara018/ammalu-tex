@@ -1,0 +1,178 @@
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from sqlalchemy.orm import Session
+from typing import List, Optional
+import os, shutil, uuid
+from database import get_db
+import models, schemas, auth as auth_utils
+
+router = APIRouter(prefix="/api/admin", tags=["Admin"])
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads/products")
+
+
+@router.get("/dashboard")
+def dashboard(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    total_products = db.query(models.Product).count()
+    active_products = db.query(models.Product).filter(models.Product.is_active == True).count()
+    total_users = db.query(models.User).filter(models.User.is_admin == False).count()
+    total_orders = db.query(models.Order).count()
+    pending_orders = db.query(models.Order).filter(models.Order.status == "confirmed").count()
+    from sqlalchemy import func
+    revenue = db.query(func.sum(models.Order.total)).filter(
+        models.Order.status != "cancelled"
+    ).scalar() or 0
+
+    recent_orders = (
+        db.query(models.Order)
+        .order_by(models.Order.created_at.desc())
+        .limit(10)
+        .all()
+    )
+
+    return {
+        "total_products": total_products,
+        "active_products": active_products,
+        "total_users": total_users,
+        "total_orders": total_orders,
+        "pending_orders": pending_orders,
+        "total_revenue": round(revenue, 2),
+        "recent_orders": [
+            {
+                "id": o.id,
+                "order_number": o.order_number,
+                "total": o.total,
+                "status": o.status,
+                "payment_status": o.payment_status,
+                "created_at": o.created_at,
+            }
+            for o in recent_orders
+        ],
+    }
+
+
+@router.post("/products", response_model=schemas.ProductOut, status_code=201)
+def create_product(
+    payload: schemas.ProductCreate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    if payload.sku:
+        existing = db.query(models.Product).filter(models.Product.sku == payload.sku).first()
+        if existing:
+            raise HTTPException(status_code=409, detail="Product with this SKU already exists")
+
+    product = models.Product(**payload.model_dump())
+    db.add(product)
+    db.commit()
+    db.refresh(product)
+    return product
+
+
+@router.get("/products", response_model=List[schemas.ProductOut])
+def list_all_products(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+    skip: int = 0,
+    limit: int = 50,
+):
+    return db.query(models.Product).order_by(models.Product.created_at.desc()).offset(skip).limit(limit).all()
+
+
+@router.put("/products/{product_id}", response_model=schemas.ProductOut)
+def update_product(
+    product_id: int,
+    payload: schemas.ProductUpdate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    for field, value in payload.model_dump(exclude_none=True).items():
+        setattr(product, field, value)
+
+    db.commit()
+    db.refresh(product)
+    return product
+
+
+@router.delete("/products/{product_id}", status_code=204)
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    product.is_active = False
+    db.commit()
+
+
+@router.post("/products/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG and WebP images are allowed")
+
+    contents = await file.read()
+    max_size = 5 * 1024 * 1024
+    if len(contents) > max_size:
+        raise HTTPException(status_code=400, detail="Image size must be under 5MB")
+
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    filename = f"{uuid.uuid4()}.{ext}"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    path = os.path.join(UPLOAD_DIR, filename)
+
+    with open(path, "wb") as f:
+        f.write(contents)
+
+    return {"url": f"/uploads/products/{filename}", "filename": filename}
+
+
+@router.get("/orders", response_model=List[schemas.OrderOut])
+def get_all_orders(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+    status: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 50,
+):
+    query = db.query(models.Order)
+    if status:
+        query = query.filter(models.Order.status == status)
+    return query.order_by(models.Order.created_at.desc()).offset(skip).limit(limit).all()
+
+
+@router.put("/orders/{order_id}/status")
+def update_order_status(
+    order_id: int,
+    new_status: str,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    allowed = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]
+    if new_status not in allowed:
+        raise HTTPException(status_code=400, detail=f"Status must be one of: {', '.join(allowed)}")
+
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    order.status = new_status
+    db.commit()
+    return {"message": f"Order {order.order_number} status updated to {new_status}"}
+
+
+@router.get("/users", response_model=List[schemas.UserOut])
+def get_all_users(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    return db.query(models.User).filter(models.User.is_admin == False).all()
