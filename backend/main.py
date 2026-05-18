@@ -71,3 +71,34 @@ def seed_database():
     from seed_data import seed
     seed()
     return {"status": "Database seeded successfully"}
+
+
+@app.get("/reset-admin")
+def reset_admin():
+    from database import SessionLocal
+    import models
+    from auth import hash_password
+    import os
+    db = SessionLocal()
+    try:
+        admin_email = os.getenv("ADMIN_EMAIL", "kumaraguru27102@gmail.com")
+        admin_password = os.getenv("ADMIN_PASSWORD", "AmmaluTex@2026")
+        existing = db.query(models.User).filter(models.User.email == admin_email).first()
+        if existing:
+            existing.password_hash = hash_password(admin_password)
+            existing.is_admin = True
+            existing.is_active = True
+        else:
+            admin = models.User(
+                full_name="Ammalu Tex Admin",
+                email=admin_email,
+                phone="9876543210",
+                password_hash=hash_password(admin_password),
+                is_admin=True,
+                is_active=True,
+            )
+            db.add(admin)
+        db.commit()
+        return {"status": "Admin reset successfully", "email": admin_email}
+    finally:
+        db.close()
