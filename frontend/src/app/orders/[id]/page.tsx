@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 
 const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
 
-export default function OrderDetailPage() {
+function OrderDetailContent() {
   const { id } = useParams();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -223,5 +223,13 @@ export default function OrderDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderDetailPage() {
+  return (
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-12 animate-pulse space-y-4"><div className="h-8 bg-gray-200 rounded w-64" /><div className="card p-6 h-48 bg-gray-200 rounded" /></div>}>
+      <OrderDetailContent />
+    </Suspense>
   );
 }

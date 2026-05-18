@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SlidersHorizontal, Search, X, ChevronDown } from 'lucide-react';
 import { productsAPI } from '@/lib/api';
@@ -15,7 +15,7 @@ const SORT_OPTIONS = [
   { label: 'Name A–Z',       value: 'name:asc' },
 ];
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -203,5 +203,13 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{Array(12).fill(0).map((_, i) => <div key={i} className="card animate-pulse"><div className="bg-gray-200 aspect-[3/4]" /><div className="p-3 space-y-2"><div className="h-4 bg-gray-200 rounded" /><div className="h-9 bg-gray-200 rounded" /></div></div>)}</div></div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }
