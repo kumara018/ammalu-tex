@@ -19,10 +19,11 @@ class User(Base):
     city          = Column(String(100), nullable=True)
     state         = Column(String(100), nullable=True)
     pincode       = Column(String(10),  nullable=True)
-    is_admin      = Column(Boolean, default=False)
-    is_active     = Column(Boolean, default=True)
-    created_at    = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at    = Column(DateTime(timezone=True), onupdate=func.now())
+    is_admin             = Column(Boolean, default=False)
+    is_active            = Column(Boolean, default=True)
+    scheduled_delete_at  = Column(DateTime(timezone=True), nullable=True)   # account deletion
+    created_at           = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at           = Column(DateTime(timezone=True), onupdate=func.now())
 
     cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
     orders     = relationship("Order",    back_populates="user")

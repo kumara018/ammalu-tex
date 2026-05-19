@@ -64,10 +64,50 @@ def _ensure_products():
         db.close()
 
 
+def _migrate_db():
+    """Add new columns to existing tables without dropping data (no Alembic needed)."""
+    from sqlalchemy import text, inspect as sa_inspect
+    try:
+        with engine.connect() as conn:
+            inspector = sa_inspect(engine)
+            user_cols = [c["name"] for c in inspector.get_columns("users")]
+            if "scheduled_delete_at" not in user_cols:
+                conn.execute(text(
+                    "ALTER TABLE users ADD COLUMN scheduled_delete_at TIMESTAMP WITH TIME ZONE"
+                ))
+                conn.commit()
+                print("[Startup] Migrated: added scheduled_delete_at to users")
+    except Exception as e:
+        print(f"[Startup] Migration note: {e}")
+
+
+def _cleanup_deleted_accounts():
+    """Permanently remove accounts whose 24-hour deletion window has passed."""
+    from datetime import datetime, timezone
+    db = SessionLocal()
+    try:
+        now = datetime.now(timezone.utc)
+        expired = db.query(models.User).filter(
+            models.User.scheduled_delete_at.isnot(None),
+            models.User.scheduled_delete_at <= now,
+        ).all()
+        for u in expired:
+            db.delete(u)
+        if expired:
+            db.commit()
+            print(f"[Startup] Permanently deleted {len(expired)} expired account(s).")
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create all tables
     Base.metadata.create_all(bind=engine)
+    # Migrate new columns without data loss
+    _migrate_db()
+    # Delete accounts whose 24h deletion window expired
+    _cleanup_deleted_accounts()
     # Always ensure admin + products exist
     _ensure_admin()
     _ensure_products()

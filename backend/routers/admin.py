@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import os, shutil, uuid
 from database import get_db
-import models, schemas, auth as auth_utils
+import models, schemas, auth as auth_utils, notifications
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads/products")
@@ -167,6 +167,15 @@ def update_order_status(
 
     order.status = new_status
     db.commit()
+
+    # Notify the customer by email
+    user = db.query(models.User).filter(models.User.id == order.user_id).first()
+    if user:
+        notifications.send_order_status_email(user.email, user.full_name, order, new_status)
+        # After delivery, also ask for a review
+        if new_status == "delivered":
+            notifications.send_review_request_email(user.email, user.full_name, order)
+
     return {"message": f"Order {order.order_number} status updated to {new_status}"}
 
 

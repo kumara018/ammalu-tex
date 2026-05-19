@@ -16,15 +16,86 @@ const RULES = [
   { test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p), label: 'One special character'     },
 ];
 
-// ─── Country codes ────────────────────────────────────────────────────────────
+// ─── Country codes (comprehensive) ────────────────────────────────────────────
 const COUNTRY_CODES = [
-  { code: '+91',  flag: '🇮🇳', label: 'IN +91'  },
-  { code: '+1',   flag: '🇺🇸', label: 'US +1'   },
-  { code: '+44',  flag: '🇬🇧', label: 'UK +44'  },
-  { code: '+971', flag: '🇦🇪', label: 'AE +971' },
-  { code: '+65',  flag: '🇸🇬', label: 'SG +65'  },
-  { code: '+60',  flag: '🇲🇾', label: 'MY +60'  },
-  { code: '+61',  flag: '🇦🇺', label: 'AU +61'  },
+  // South Asia
+  { code: '+91',  flag: '🇮🇳', label: 'India (+91)'           },
+  { code: '+92',  flag: '🇵🇰', label: 'Pakistan (+92)'         },
+  { code: '+880', flag: '🇧🇩', label: 'Bangladesh (+880)'      },
+  { code: '+94',  flag: '🇱🇰', label: 'Sri Lanka (+94)'        },
+  { code: '+977', flag: '🇳🇵', label: 'Nepal (+977)'           },
+  { code: '+975', flag: '🇧🇹', label: 'Bhutan (+975)'          },
+  { code: '+960', flag: '🇲🇻', label: 'Maldives (+960)'        },
+  // Gulf / Middle East
+  { code: '+971', flag: '🇦🇪', label: 'UAE (+971)'             },
+  { code: '+966', flag: '🇸🇦', label: 'Saudi Arabia (+966)'    },
+  { code: '+974', flag: '🇶🇦', label: 'Qatar (+974)'           },
+  { code: '+973', flag: '🇧🇭', label: 'Bahrain (+973)'         },
+  { code: '+968', flag: '🇴🇲', label: 'Oman (+968)'            },
+  { code: '+965', flag: '🇰🇼', label: 'Kuwait (+965)'          },
+  { code: '+962', flag: '🇯🇴', label: 'Jordan (+962)'          },
+  { code: '+961', flag: '🇱🇧', label: 'Lebanon (+961)'         },
+  { code: '+964', flag: '🇮🇶', label: 'Iraq (+964)'            },
+  { code: '+98',  flag: '🇮🇷', label: 'Iran (+98)'             },
+  { code: '+972', flag: '🇮🇱', label: 'Israel (+972)'          },
+  // Southeast Asia
+  { code: '+65',  flag: '🇸🇬', label: 'Singapore (+65)'        },
+  { code: '+60',  flag: '🇲🇾', label: 'Malaysia (+60)'         },
+  { code: '+66',  flag: '🇹🇭', label: 'Thailand (+66)'         },
+  { code: '+62',  flag: '🇮🇩', label: 'Indonesia (+62)'        },
+  { code: '+63',  flag: '🇵🇭', label: 'Philippines (+63)'      },
+  { code: '+84',  flag: '🇻🇳', label: 'Vietnam (+84)'          },
+  { code: '+95',  flag: '🇲🇲', label: 'Myanmar (+95)'          },
+  { code: '+855', flag: '🇰🇭', label: 'Cambodia (+855)'        },
+  { code: '+856', flag: '🇱🇦', label: 'Laos (+856)'            },
+  // East Asia
+  { code: '+81',  flag: '🇯🇵', label: 'Japan (+81)'            },
+  { code: '+82',  flag: '🇰🇷', label: 'South Korea (+82)'      },
+  { code: '+86',  flag: '🇨🇳', label: 'China (+86)'            },
+  { code: '+852', flag: '🇭🇰', label: 'Hong Kong (+852)'       },
+  { code: '+886', flag: '🇹🇼', label: 'Taiwan (+886)'          },
+  // Oceania
+  { code: '+61',  flag: '🇦🇺', label: 'Australia (+61)'        },
+  { code: '+64',  flag: '🇳🇿', label: 'New Zealand (+64)'      },
+  { code: '+679', flag: '🇫🇯', label: 'Fiji (+679)'            },
+  // Europe
+  { code: '+44',  flag: '🇬🇧', label: 'UK (+44)'               },
+  { code: '+353', flag: '🇮🇪', label: 'Ireland (+353)'         },
+  { code: '+33',  flag: '🇫🇷', label: 'France (+33)'           },
+  { code: '+49',  flag: '🇩🇪', label: 'Germany (+49)'          },
+  { code: '+39',  flag: '🇮🇹', label: 'Italy (+39)'            },
+  { code: '+34',  flag: '🇪🇸', label: 'Spain (+34)'            },
+  { code: '+351', flag: '🇵🇹', label: 'Portugal (+351)'        },
+  { code: '+31',  flag: '🇳🇱', label: 'Netherlands (+31)'      },
+  { code: '+32',  flag: '🇧🇪', label: 'Belgium (+32)'          },
+  { code: '+41',  flag: '🇨🇭', label: 'Switzerland (+41)'      },
+  { code: '+43',  flag: '🇦🇹', label: 'Austria (+43)'          },
+  { code: '+46',  flag: '🇸🇪', label: 'Sweden (+46)'           },
+  { code: '+47',  flag: '🇳🇴', label: 'Norway (+47)'           },
+  { code: '+45',  flag: '🇩🇰', label: 'Denmark (+45)'          },
+  { code: '+358', flag: '🇫🇮', label: 'Finland (+358)'         },
+  { code: '+30',  flag: '🇬🇷', label: 'Greece (+30)'           },
+  { code: '+48',  flag: '🇵🇱', label: 'Poland (+48)'           },
+  { code: '+7',   flag: '🇷🇺', label: 'Russia (+7)'            },
+  { code: '+380', flag: '🇺🇦', label: 'Ukraine (+380)'         },
+  // Americas
+  { code: '+1',   flag: '🇺🇸', label: 'USA / Canada (+1)'      },
+  { code: '+52',  flag: '🇲🇽', label: 'Mexico (+52)'           },
+  { code: '+55',  flag: '🇧🇷', label: 'Brazil (+55)'           },
+  { code: '+54',  flag: '🇦🇷', label: 'Argentina (+54)'        },
+  { code: '+57',  flag: '🇨🇴', label: 'Colombia (+57)'         },
+  { code: '+56',  flag: '🇨🇱', label: 'Chile (+56)'            },
+  { code: '+51',  flag: '🇵🇪', label: 'Peru (+51)'             },
+  // Africa
+  { code: '+27',  flag: '🇿🇦', label: 'South Africa (+27)'     },
+  { code: '+234', flag: '🇳🇬', label: 'Nigeria (+234)'         },
+  { code: '+254', flag: '🇰🇪', label: 'Kenya (+254)'           },
+  { code: '+233', flag: '🇬🇭', label: 'Ghana (+233)'           },
+  { code: '+20',  flag: '🇪🇬', label: 'Egypt (+20)'            },
+  { code: '+212', flag: '🇲🇦', label: 'Morocco (+212)'         },
+  { code: '+256', flag: '🇺🇬', label: 'Uganda (+256)'          },
+  { code: '+255', flag: '🇹🇿', label: 'Tanzania (+255)'        },
+  { code: '+251', flag: '🇪🇹', label: 'Ethiopia (+251)'        },
 ];
 
 // ─── InputRow defined OUTSIDE the component ───────────────────────────────────
@@ -190,8 +261,8 @@ export default function RegisterPage() {
                   className="input-field w-32 flex-shrink-0 px-2 cursor-pointer"
                   aria-label="Country code"
                 >
-                  {COUNTRY_CODES.map(c => (
-                    <option key={c.code} value={c.code}>{c.flag} {c.label}</option>
+                  {COUNTRY_CODES.map((c, i) => (
+                    <option key={`${c.code}-${i}`} value={c.code}>{c.flag} {c.label}</option>
                   ))}
                 </select>
                 <input

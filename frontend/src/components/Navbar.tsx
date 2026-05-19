@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { STORE, SHORT_ADDRESS } from '@/lib/config';
 import { performLogout } from '@/lib/auth';
+import { productsAPI } from '@/lib/api';
 
 const CATEGORIES = [
   'Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears',
@@ -20,31 +21,55 @@ export default function Navbar() {
   const { count } = useCart();
   const router = useRouter();
 
-  const [search, setSearch]         = useState('');
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [catMenuOpen, setCatMenuOpen]   = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  const [search, setSearch]               = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showDrop, setShowDrop]           = useState(false);
+  const [mobileOpen, setMobileOpen]       = useState(false);
+  const [userMenuOpen, setUserMenuOpen]   = useState(false);
+  const [catMenuOpen, setCatMenuOpen]     = useState(false);
+  const userMenuRef  = useRef<HTMLDivElement>(null);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
 
-  /* Close user-menu on outside click */
+  /* Close menus on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node))
         setUserMenuOpen(false);
-      }
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node))
+        setShowDrop(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  /* Live search — debounced 300 ms */
+  useEffect(() => {
+    const q = search.trim();
+    if (q.length < 2) { setSearchResults([]); setShowDrop(false); return; }
+    const t = setTimeout(async () => {
+      try {
+        const res = await productsAPI.getAll({ search: q, limit: 6 });
+        const data = res.data;
+        const items: any[] = Array.isArray(data) ? data : (data.products ?? data.items ?? []);
+        setSearchResults(items);
+        setShowDrop(items.length > 0);
+      } catch { setSearchResults([]); }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
       router.push(`/products?search=${encodeURIComponent(search.trim())}`);
-      setSearch('');
-      setMobileOpen(false);
+      setSearch(''); setShowDrop(false); setMobileOpen(false);
     }
   };
+
+  const goToProduct = useCallback((id: number) => {
+    router.push(`/products/${id}`);
+    setSearch(''); setShowDrop(false);
+  }, [router]);
 
   return (
     <header className="sticky top-0 z-50 shadow-md">
@@ -71,21 +96,58 @@ export default function Navbar() {
               </div>
             </Link>
 
-            {/* Search */}
-            <form onSubmit={handleSearch} className="flex-1 hidden md:flex max-w-xl mx-auto">
-              <div className="flex w-full rounded-lg overflow-hidden">
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search chudithar, tops, lehenga, half saree..."
-                  className="flex-1 px-4 py-2.5 text-gray-900 text-sm outline-none"
-                />
-                <button type="submit" className="bg-gold-600 hover:bg-gold-700 px-4 flex items-center transition-colors">
-                  <Search size={18} />
-                </button>
-              </div>
-            </form>
+            {/* Search with live dropdown */}
+            <div ref={searchBoxRef} className="relative flex-1 hidden md:flex max-w-xl mx-auto">
+              <form onSubmit={handleSearch} className="w-full">
+                <div className="flex w-full rounded-lg overflow-hidden">
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onFocus={() => searchResults.length > 0 && setShowDrop(true)}
+                    placeholder="Search chudithar, tops, lehenga, half saree..."
+                    className="flex-1 px-4 py-2.5 text-gray-900 text-sm outline-none"
+                    autoComplete="off"
+                  />
+                  <button type="submit" className="bg-gold-600 hover:bg-gold-700 px-4 flex items-center transition-colors">
+                    <Search size={18} />
+                  </button>
+                </div>
+              </form>
+
+              {/* Live search dropdown */}
+              {showDrop && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-gray-100 z-50 overflow-hidden">
+                  {searchResults.map((p: any) => (
+                    <button
+                      key={p.id}
+                      onClick={() => goToProduct(p.id)}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-50 border-b border-gray-50 last:border-0 text-left"
+                    >
+                      {p.images?.[0] && (
+                        <img
+                          src={p.images[0].startsWith('http') ? p.images[0] : `https://ammalu-tex.onrender.com${p.images[0]}`}
+                          alt=""
+                          className="w-10 h-10 rounded object-cover flex-shrink-0 bg-gray-100"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-gray-900 text-sm font-medium truncate">{p.name}</p>
+                        <p className="text-xs text-gray-500">{p.category}</p>
+                      </div>
+                      <p className="text-maroon-700 font-bold text-sm flex-shrink-0">₹{Number(p.price).toLocaleString('en-IN')}</p>
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => { router.push(`/products?search=${encodeURIComponent(search.trim())}`); setShowDrop(false); setSearch(''); }}
+                    className="w-full px-4 py-3 text-center text-sm text-maroon-700 hover:bg-orange-50 font-semibold border-t border-gray-100"
+                  >
+                    <Search size={14} className="inline mr-1.5" />
+                    See all results for &quot;{search}&quot;
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Right section */}
             <div className="flex items-center gap-2 ml-auto">

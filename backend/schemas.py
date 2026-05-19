@@ -158,6 +158,18 @@ class LoginOTPVerify(BaseModel):
         return v
 
 
+class DeleteAccountConfirm(BaseModel):
+    otp_code: str
+
+    @field_validator("otp_code")
+    @classmethod
+    def otp_valid(cls, v):
+        v = v.strip()
+        if not re.match(r"^\d{6}$", v):
+            raise ValueError("OTP must be exactly 6 digits")
+        return v
+
+
 class UserOut(BaseModel):
     id:            int
     full_name:     str

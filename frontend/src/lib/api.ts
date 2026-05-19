@@ -68,14 +68,17 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  register:       (data: object) => api.post('/api/auth/register', data),
-  login:          (data: object) => api.post('/api/auth/login', data),
-  sendLoginOtp:   (data: object) => api.post('/api/auth/send-login-otp', data),
-  verifyLoginOtp: (data: object) => api.post('/api/auth/verify-login-otp', data),
-  getMe:          ()             => api.get('/api/auth/me'),
-  updateProfile:  (data: object) => api.put('/api/auth/me', data),
-  forgotPassword: (data: object) => api.post('/api/auth/forgot-password', data),
-  resetPassword:  (data: object) => api.post('/api/auth/reset-password', data),
+  register:            (data: object) => api.post('/api/auth/register', data),
+  login:               (data: object) => api.post('/api/auth/login', data),
+  sendLoginOtp:        (data: object) => api.post('/api/auth/send-login-otp', data),
+  verifyLoginOtp:      (data: object) => api.post('/api/auth/verify-login-otp', data),
+  getMe:               ()             => api.get('/api/auth/me'),
+  updateProfile:       (data: object) => api.put('/api/auth/me', data),
+  forgotPassword:      (data: object) => api.post('/api/auth/forgot-password', data),
+  resetPassword:       (data: object) => api.post('/api/auth/reset-password', data),
+  requestDeleteAccount:()             => api.post('/api/auth/request-delete-account'),
+  confirmDeleteAccount:(data: object) => api.post('/api/auth/confirm-delete-account', data),
+  cancelDeleteAccount: ()             => api.post('/api/auth/cancel-delete-account'),
 };
 
 export const productsAPI = {

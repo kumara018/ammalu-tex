@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-import models, schemas, auth as auth_utils
+import models, schemas, auth as auth_utils, notifications
 
 router = APIRouter(prefix="/api/orders", tags=["Orders"])
 
@@ -103,6 +103,13 @@ def place_order(
 
     db.commit()
     db.refresh(order)
+
+    # Send order confirmation email + SMS
+    notifications.send_order_confirmation_email(current_user.email, current_user.full_name, order)
+    notifications.send_order_sms(current_user.phone, order.order_number, order.total)
+    if order.payment_method != "cod":
+        notifications.send_payment_success_email(current_user.email, current_user.full_name, order)
+
     return order
 
 

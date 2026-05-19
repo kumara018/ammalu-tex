@@ -1,6 +1,7 @@
 import os, re, random, smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta, timezone
+import notifications
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
@@ -125,6 +126,9 @@ def register(payload: schemas.UserRegister, db: Session = Depends(get_db)):
     db.refresh(user)
 
     token = auth_utils.create_access_token({"sub": user.id})
+    # Send welcome email in background
+    notifications.send_welcome_email(user.email, user.full_name)
+    notifications.send_welcome_sms(user.phone, user.full_name)
     return {"access_token": token, "token_type": "bearer", "user": user}
 
 
@@ -247,8 +251,73 @@ def verify_login_otp(payload: schemas.LoginOTPVerify, db: Session = Depends(get_
     if not user.is_active:
         raise HTTPException(403, "Your account has been deactivated. Contact support.")
 
+    # Check if account is past its 24-hour deletion window
+    if user.scheduled_delete_at:
+        now = datetime.now(timezone.utc)
+        sda = user.scheduled_delete_at
+        if sda.tzinfo is None:
+            sda = sda.replace(tzinfo=timezone.utc)
+        if now > sda:
+            raise HTTPException(401, "This account has been permanently deleted.")
+        # Logged in within window → auto-cancel deletion
+        user.scheduled_delete_at = None
+        db.commit()
+
     if not _verify_otp(db, user.email, payload.otp_code, otp_type="login"):
         raise HTTPException(400, "Invalid or expired OTP. Please request a new one.")
 
     token = auth_utils.create_access_token({"sub": user.id})
     return {"access_token": token, "token_type": "bearer", "user": user}
+
+
+# ── REQUEST ACCOUNT DELETION ───────────────────────────────────────────────────
+
+@router.post("/request-delete-account")
+def request_delete_account(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """Send OTP to confirm account deletion."""
+    otp = _create_otp(db, current_user.email, otp_type="delete")
+    notifications.send_deletion_otp_email(current_user.email, current_user.full_name, otp)
+    hint = current_user.email[:3] + "***@" + current_user.email.split("@")[-1]
+    smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
+    response: dict = {"message": "OTP sent to your email to confirm deletion.", "email_hint": hint}
+    if not smtp_ready:
+        response["dev_otp"] = otp
+    return response
+
+
+# ── CONFIRM ACCOUNT DELETION ───────────────────────────────────────────────────
+
+@router.post("/confirm-delete-account")
+def confirm_delete_account(
+    payload: schemas.DeleteAccountConfirm,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """Verify OTP → schedule permanent deletion in 24 hours."""
+    if not _verify_otp(db, current_user.email, payload.otp_code, otp_type="delete"):
+        raise HTTPException(400, "Invalid or expired OTP.")
+    delete_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    current_user.scheduled_delete_at = delete_at
+    db.commit()
+    notifications.send_deletion_scheduled_email(current_user.email, current_user.full_name, delete_at)
+    return {
+        "message": "Account scheduled for deletion in 24 hours.",
+        "delete_at": delete_at.isoformat(),
+        "cancel_info": "Log in within 24 hours to cancel.",
+    }
+
+
+# ── CANCEL ACCOUNT DELETION ────────────────────────────────────────────────────
+
+@router.post("/cancel-delete-account")
+def cancel_delete_account(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """Cancel a pending deletion."""
+    current_user.scheduled_delete_at = None
+    db.commit()
+    return {"message": "Account deletion cancelled. Your account is safe! ✅"}
