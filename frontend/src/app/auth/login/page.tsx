@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -10,7 +11,15 @@ import toast from 'react-hot-toast';
 type Step = 'credentials' | 'otp';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.replace(user.is_admin ? '/admin' : '/');
+    }
+  }, [user, router]);
 
   // Step 1
   const [identifier, setIdentifier] = useState('');

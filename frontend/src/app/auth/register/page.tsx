@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { authAPI } from '@/lib/api';
@@ -123,7 +124,15 @@ function InputRow({ label, error, required = true, children }: InputRowProps) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function RegisterPage() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.replace(user.is_admin ? '/admin' : '/');
+    }
+  }, [user, router]);
 
   const [fullName,    setFullName]    = useState('');
   const [email,       setEmail]       = useState('');
