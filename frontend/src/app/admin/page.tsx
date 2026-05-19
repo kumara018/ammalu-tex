@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Crop Tops', 'Party Wears'];
 const ORDER_STATUSES = ['pending','confirmed','processing','shipped','out_for_delivery','delivered','cancelled'];
-const SIZE_OPTIONS   = ['XS','S','M','L','XL','XXL','Free Size'];
+const SIZE_OPTIONS   = ['XS','S','M','L','XL','XXL','XXXL','Free Size'];
 
 interface DashData { total_products: number; active_products: number; total_users: number; total_orders: number; pending_orders: number; total_revenue: number; recent_orders: any[]; }
 

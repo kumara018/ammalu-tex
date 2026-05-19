@@ -155,7 +155,7 @@ export default function ProductDetailPage() {
           <div className="relative bg-gradient-to-br from-orange-50 to-pink-50 aspect-square rounded-2xl overflow-hidden mb-3">
             {product.images && product.images[activeImg] && !product.images[activeImg].includes('placeholder') ? (
               <img
-                src={`${process.env.NEXT_PUBLIC_API_URL}${product.images[activeImg]}`}
+                src={product.images[activeImg].startsWith('http') ? product.images[activeImg] : `${process.env.NEXT_PUBLIC_API_URL}${product.images[activeImg]}`}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -175,7 +175,7 @@ export default function ProductDetailPage() {
               {product.images.map((img, i) => (
                 <button key={i} onClick={() => setActiveImg(i)}
                   className={`w-16 h-16 rounded-lg border-2 overflow-hidden transition-colors ${i === activeImg ? 'border-maroon-800' : 'border-gray-200'}`}>
-                  <img src={`${process.env.NEXT_PUBLIC_API_URL}${img}`} alt="" className="w-full h-full object-cover" />
+                  <img src={img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL}${img}`} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

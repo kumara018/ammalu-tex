@@ -230,15 +230,11 @@ def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
     notifications.send_otp_sms(user.phone, otp, "Login")
 
     hint = user.email[:3] + "***@" + user.email.split("@")[-1]
-    smtp_configured = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
-
     is_deactivated = bool(getattr(user, 'is_deactivated', False))
     return {
-        "message":        "OTP sent to your registered email and mobile number.",
+        "message":        "OTP sent to your registered email.",
         "email_hint":     hint,
         "is_deactivated": is_deactivated,
-        "otp_code":       otp,           # Always returned — shown on screen as backup
-        "email_sent":     smtp_configured,  # Tells frontend whether email was attempted
     }
 
 
@@ -344,19 +340,12 @@ def request_deactivate_account(
 ):
     """Send OTP to confirm temporary account deactivation (7-day soft suspend)."""
     otp = _create_otp(db, current_user.email, otp_type="deactivate")
-    _send_otp_email(
-        current_user.email, otp,
-        "Account Deactivation"
-    )
+    notifications.send_deletion_otp_email(current_user.email, current_user.full_name, otp)
     hint = current_user.email[:3] + "***@" + current_user.email.split("@")[-1]
-    smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
-    response: dict = {
-        "message": "OTP sent to confirm temporary deactivation.",
+    return {
+        "message": "OTP sent to your email to confirm temporary deactivation.",
         "email_hint": hint,
     }
-    if not smtp_ready:
-        response["dev_otp"] = otp
-    return response
 
 
 # ── CONFIRM TEMPORARY DEACTIVATION ─────────────────────────────────────────────
@@ -383,12 +372,7 @@ def confirm_deactivate_account(
     current_user.scheduled_delete_at = delete_at   # auto-delete after 7 days
     db.commit()
 
-    _send_otp_email(
-        current_user.email,
-        "ACCOUNT DEACTIVATED — your account is deactivated. "
-        "Log in within 7 days to reactivate, otherwise it will be permanently deleted.",
-        "Account Deactivation Confirmed",
-    )
+    notifications.send_deletion_scheduled_email(current_user.email, current_user.full_name, delete_at)
 
     return {
         "message": "Account deactivated. You can reactivate within 7 days by signing in.",

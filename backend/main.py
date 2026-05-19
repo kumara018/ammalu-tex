@@ -138,6 +138,22 @@ def _migrate_db():
             conn.commit()
             print("[Startup] Migrated: created support_ratings table")
 
+        # ── reviews table (verified buyer product reviews) ────────────────
+        if "reviews" not in existing_tables:
+            conn.execute(text("""
+                CREATE TABLE reviews (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+                    rating INTEGER NOT NULL,
+                    title VARCHAR(255),
+                    comment TEXT,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+            """))
+            conn.commit()
+            print("[Startup] Migrated: created reviews table")
+
     except Exception as e:
         print(f"[Startup] Migration note: {e}")
 
