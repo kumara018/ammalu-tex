@@ -226,12 +226,14 @@ def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
 
     otp  = _create_otp(db, user.email, otp_type="login")
     _send_otp_email(user.email, otp, "Login Verification")
+    # Also send OTP via SMS if Twilio is configured
+    notifications.send_otp_sms(user.phone, otp, "Login")
 
     hint = user.email[:3] + "***@" + user.email.split("@")[-1]
     smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
 
     response: dict = {
-        "message":    "OTP sent to your registered email.",
+        "message":    "OTP sent to your registered email and mobile number.",
         "email_hint": hint,
     }
     if not smtp_ready:
@@ -251,7 +253,7 @@ def verify_login_otp(payload: schemas.LoginOTPVerify, db: Session = Depends(get_
     if not user.is_active:
         raise HTTPException(403, "Your account has been deactivated. Contact support.")
 
-    # Check if account is past its 24-hour deletion window
+    # Check if account is past its 5-minute deletion window
     if user.scheduled_delete_at:
         now = datetime.now(timezone.utc)
         sda = user.scheduled_delete_at
@@ -280,9 +282,10 @@ def request_delete_account(
     """Send OTP to confirm account deletion."""
     otp = _create_otp(db, current_user.email, otp_type="delete")
     notifications.send_deletion_otp_email(current_user.email, current_user.full_name, otp)
+    notifications.send_otp_sms(current_user.phone, otp, "Account Deletion")
     hint = current_user.email[:3] + "***@" + current_user.email.split("@")[-1]
     smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
-    response: dict = {"message": "OTP sent to your email to confirm deletion.", "email_hint": hint}
+    response: dict = {"message": "OTP sent to your email and mobile to confirm deletion.", "email_hint": hint}
     if not smtp_ready:
         response["dev_otp"] = otp
     return response
@@ -296,17 +299,17 @@ def confirm_delete_account(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user),
 ):
-    """Verify OTP → schedule permanent deletion in 24 hours."""
+    """Verify OTP → schedule permanent deletion in 5 minutes."""
     if not _verify_otp(db, current_user.email, payload.otp_code, otp_type="delete"):
         raise HTTPException(400, "Invalid or expired OTP.")
-    delete_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    delete_at = datetime.now(timezone.utc) + timedelta(minutes=5)
     current_user.scheduled_delete_at = delete_at
     db.commit()
     notifications.send_deletion_scheduled_email(current_user.email, current_user.full_name, delete_at)
     return {
-        "message": "Account scheduled for deletion in 24 hours.",
+        "message": "Account scheduled for deletion in 5 minutes.",
         "delete_at": delete_at.isoformat(),
-        "cancel_info": "Log in within 24 hours to cancel.",
+        "cancel_info": "Log in within 5 minutes to cancel.",
     }
 
 

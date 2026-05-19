@@ -49,7 +49,7 @@ export default function DeleteAccountPage() {
     try {
       await authAPI.confirmDeleteAccount({ otp_code: otp });
       setStep('done');
-      toast.success('Account scheduled for deletion in 24 hours.');
+      toast.success('Account scheduled for deletion in 5 minutes.');
       setTimeout(() => { performLogout(); }, 3000);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Invalid OTP.');
@@ -86,7 +86,7 @@ export default function DeleteAccountPage() {
                 </div>
               </div>
               <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">Delete Account</h1>
-              <p className="text-center text-gray-500 text-sm mb-6">This action cannot be undone after 24 hours.</p>
+              <p className="text-center text-gray-500 text-sm mb-6">This action cannot be undone after 5 minutes.</p>
 
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 space-y-2">
                 <p className="font-semibold text-red-700 flex items-center gap-2">
@@ -102,7 +102,7 @@ export default function DeleteAccountPage() {
 
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                 <p className="text-amber-800 text-sm font-medium">
-                  ⏳ You have <strong>24 hours</strong> to cancel. Simply log in within 24 hours to restore your account.
+                  ⏳ You have <strong>5 minutes</strong> to cancel. Simply log in within 5 minutes to restore your account.
                 </p>
               </div>
 
@@ -200,11 +200,11 @@ export default function DeleteAccountPage() {
               </div>
               <h1 className="text-xl font-bold text-gray-900 mb-2">Deletion Scheduled</h1>
               <p className="text-gray-500 text-sm mb-4">
-                Your account will be permanently deleted in <strong>24 hours</strong>.
+                Your account will be permanently deleted in <strong>5 minutes</strong>.
               </p>
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
                 <p className="text-green-800 text-sm font-medium">
-                  ✅ Changed your mind? Simply log in within 24 hours to cancel.
+                  ✅ Changed your mind? Simply log in within 5 minutes to cancel.
                 </p>
               </div>
               <p className="text-gray-400 text-xs">Signing you out in 3 seconds...</p>
