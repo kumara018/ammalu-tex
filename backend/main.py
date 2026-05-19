@@ -65,97 +65,96 @@ def _ensure_products():
 
 
 def _migrate_db():
-    """Add new columns to existing tables without dropping data (no Alembic needed)."""
+    """Add new columns/tables without dropping data. Each step is independently safe."""
     from sqlalchemy import text, inspect as sa_inspect
-    try:
-        with engine.connect() as conn:
-            inspector = sa_inspect(engine)
-            user_cols = [c["name"] for c in inspector.get_columns("users")]
+    with engine.connect() as conn:
+        inspector = sa_inspect(engine)
 
+        # ── users columns ──────────────────────────────────────────────────
+        try:
+            user_cols = [c["name"] for c in inspector.get_columns("users")]
             if "scheduled_delete_at" not in user_cols:
-                conn.execute(text(
-                    "ALTER TABLE users ADD COLUMN scheduled_delete_at TIMESTAMP WITH TIME ZONE"
-                ))
+                conn.execute(text("ALTER TABLE users ADD COLUMN scheduled_delete_at TIMESTAMP WITH TIME ZONE"))
                 conn.commit()
                 print("[Startup] Migrated: added scheduled_delete_at to users")
-
             if "is_deactivated" not in user_cols:
-                conn.execute(text(
-                    "ALTER TABLE users ADD COLUMN is_deactivated BOOLEAN NOT NULL DEFAULT FALSE"
-                ))
+                conn.execute(text("ALTER TABLE users ADD COLUMN is_deactivated BOOLEAN NOT NULL DEFAULT FALSE"))
                 conn.commit()
                 print("[Startup] Migrated: added is_deactivated to users")
-
             if "deactivated_at" not in user_cols:
-                conn.execute(text(
-                    "ALTER TABLE users ADD COLUMN deactivated_at TIMESTAMP WITH TIME ZONE"
-                ))
+                conn.execute(text("ALTER TABLE users ADD COLUMN deactivated_at TIMESTAMP WITH TIME ZONE"))
                 conn.commit()
                 print("[Startup] Migrated: added deactivated_at to users")
+        except Exception as e:
+            print(f"[Startup] User migration note: {e}")
 
-        # ── New Order columns ──────────────────────────────────────────────
-        orders_cols = [c["name"] for c in inspector.get_columns("orders")]
-        if "open_box_delivery" not in orders_cols:
-            conn.execute(text("ALTER TABLE orders ADD COLUMN open_box_delivery BOOLEAN NOT NULL DEFAULT FALSE"))
-            conn.commit()
-            print("[Startup] Migrated: added open_box_delivery to orders")
-        if "delivery_otp" not in orders_cols:
-            conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_otp VARCHAR(10)"))
-            conn.commit()
-            print("[Startup] Migrated: added delivery_otp to orders")
-        if "delivery_person_name" not in orders_cols:
-            conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_name VARCHAR(100)"))
-            conn.commit()
-            print("[Startup] Migrated: added delivery_person_name to orders")
-        if "delivery_person_phone" not in orders_cols:
-            conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_phone VARCHAR(20)"))
-            conn.commit()
-            print("[Startup] Migrated: added delivery_person_phone to orders")
+        # ── orders columns ─────────────────────────────────────────────────
+        try:
+            orders_cols = [c["name"] for c in inspector.get_columns("orders")]
+            if "open_box_delivery" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN open_box_delivery BOOLEAN NOT NULL DEFAULT FALSE"))
+                conn.commit()
+                print("[Startup] Migrated: added open_box_delivery to orders")
+            if "delivery_otp" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_otp VARCHAR(10)"))
+                conn.commit()
+                print("[Startup] Migrated: added delivery_otp to orders")
+            if "delivery_person_name" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_name VARCHAR(100)"))
+                conn.commit()
+                print("[Startup] Migrated: added delivery_person_name to orders")
+            if "delivery_person_phone" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_phone VARCHAR(20)"))
+                conn.commit()
+                print("[Startup] Migrated: added delivery_person_phone to orders")
+        except Exception as e:
+            print(f"[Startup] Orders migration note: {e}")
 
-        # ── is_new_arrival on products ─────────────────────────────────────
-        products_cols = [c["name"] for c in inspector.get_columns("products")]
-        if "is_new_arrival" not in products_cols:
-            conn.execute(text("ALTER TABLE products ADD COLUMN is_new_arrival BOOLEAN NOT NULL DEFAULT FALSE"))
-            conn.commit()
-            print("[Startup] Migrated: added is_new_arrival to products")
+        # ── products columns ───────────────────────────────────────────────
+        try:
+            products_cols = [c["name"] for c in inspector.get_columns("products")]
+            if "is_new_arrival" not in products_cols:
+                conn.execute(text("ALTER TABLE products ADD COLUMN is_new_arrival BOOLEAN NOT NULL DEFAULT FALSE"))
+                conn.commit()
+                print("[Startup] Migrated: added is_new_arrival to products")
+        except Exception as e:
+            print(f"[Startup] Products migration note: {e}")
 
-        # ── support_ratings table ──────────────────────────────────────────
-        existing_tables = inspector.get_table_names()
-        if "support_ratings" not in existing_tables:
-            conn.execute(text("""
-                CREATE TABLE support_ratings (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-                    name VARCHAR(100) NOT NULL,
-                    email VARCHAR(255) NOT NULL,
-                    phone VARCHAR(20),
-                    rating INTEGER NOT NULL,
-                    category VARCHAR(100),
-                    message TEXT,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                )
-            """))
-            conn.commit()
-            print("[Startup] Migrated: created support_ratings table")
-
-        # ── reviews table (verified buyer product reviews) ────────────────
-        if "reviews" not in existing_tables:
-            conn.execute(text("""
-                CREATE TABLE reviews (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-                    rating INTEGER NOT NULL,
-                    title VARCHAR(255),
-                    comment TEXT,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                )
-            """))
-            conn.commit()
-            print("[Startup] Migrated: created reviews table")
-
-    except Exception as e:
-        print(f"[Startup] Migration note: {e}")
+        # ── new tables ─────────────────────────────────────────────────────
+        try:
+            existing_tables = inspector.get_table_names()
+            if "support_ratings" not in existing_tables:
+                conn.execute(text("""
+                    CREATE TABLE support_ratings (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                        name VARCHAR(100) NOT NULL,
+                        email VARCHAR(255) NOT NULL,
+                        phone VARCHAR(20),
+                        rating INTEGER NOT NULL,
+                        category VARCHAR(100),
+                        message TEXT,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    )
+                """))
+                conn.commit()
+                print("[Startup] Migrated: created support_ratings table")
+            if "reviews" not in existing_tables:
+                conn.execute(text("""
+                    CREATE TABLE reviews (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+                        rating INTEGER NOT NULL,
+                        title VARCHAR(255),
+                        comment TEXT,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    )
+                """))
+                conn.commit()
+                print("[Startup] Migrated: created reviews table")
+        except Exception as e:
+            print(f"[Startup] New table migration note: {e}")
 
     # Fix size options by category
     try:

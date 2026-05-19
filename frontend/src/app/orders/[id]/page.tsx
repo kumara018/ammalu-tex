@@ -194,27 +194,68 @@ function OrderDetailContent() {
             </div>
           )}
 
+          {/* Estimated delivery banner (for active orders) */}
+          {['confirmed', 'processing', 'shipped'].includes(order.status) && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
+              <Truck size={22} className="text-blue-600 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-blue-800 text-sm">Estimated Delivery: 3–7 Business Days</p>
+                <p className="text-xs text-blue-600 mt-0.5">We&apos;ll notify you when your order ships.</p>
+              </div>
+            </div>
+          )}
+
           {/* Items */}
           <div className="card p-6">
             <h3 className="font-bold text-maroon-900 mb-4">Ordered Items</h3>
             <div className="space-y-4">
-              {(order.items_snapshot as any[]).map((item, i) => (
-                <div key={i} className="flex items-center gap-4 pb-4 border-b border-orange-50 last:border-0 last:pb-0">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-50 to-pink-50 flex items-center justify-center text-2xl flex-shrink-0">
-                    {item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : '👚'}
+              {(order.items_snapshot as any[]).map((item, i) => {
+                const categoryEmoji =
+                  item.category === 'Lehenga' ? '👗'
+                  : item.category === 'Chudithar' ? '👘'
+                  : item.category === 'Half Saree' ? '🥻'
+                  : item.category === 'Crop Tops' ? '🎽'
+                  : item.category === 'Party Wears' ? '✨'
+                  : '👚';
+                return (
+                  <div key={i} className="flex items-start gap-4 pb-4 border-b border-orange-50 last:border-0 last:pb-0">
+                    {/* Product image: Cloudinary URL or emoji fallback */}
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-50 to-pink-50 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden border border-orange-100">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex'; }}
+                        />
+                      ) : null}
+                      <span style={{ display: item.image_url ? 'none' : 'flex' }} className="items-center justify-center w-full h-full">
+                        {categoryEmoji}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-gray-800 truncate">{item.name}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Qty: {item.quantity}
+                        {item.size ? ` · Size: ${item.size}` : ''}
+                        {item.color ? ` · Colour: ${item.color}` : ''}
+                      </p>
+                      <p className="text-xs text-gray-500">₹{item.price.toLocaleString()} each</p>
+                      {/* Write a Review button for delivered orders */}
+                      {order.status === 'delivered' && item.product_id && (
+                        <Link
+                          href={`/products/${item.product_id}#reviews`}
+                          className="inline-flex items-center gap-1 mt-2 text-xs font-medium text-maroon-700 hover:text-maroon-900 border border-maroon-300 hover:border-maroon-500 rounded-lg px-2.5 py-1 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          ✍️ Write a Review
+                        </Link>
+                      )}
+                    </div>
+                    <p className="font-bold text-maroon-900 flex-shrink-0">₹{item.subtotal.toLocaleString()}</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-gray-800 truncate">{item.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Qty: {item.quantity}
-                      {item.size ? ` · Size: ${item.size}` : ''}
-                      {item.color ? ` · Colour: ${item.color}` : ''}
-                    </p>
-                    <p className="text-xs text-gray-500">₹{item.price.toLocaleString()} each</p>
-                  </div>
-                  <p className="font-bold text-maroon-900 flex-shrink-0">₹{item.subtotal.toLocaleString()}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
