@@ -230,18 +230,16 @@ def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
     notifications.send_otp_sms(user.phone, otp, "Login")
 
     hint = user.email[:3] + "***@" + user.email.split("@")[-1]
-    smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
+    smtp_configured = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
 
     is_deactivated = bool(getattr(user, 'is_deactivated', False))
-    response: dict = {
+    return {
         "message":        "OTP sent to your registered email and mobile number.",
         "email_hint":     hint,
-        "is_deactivated": is_deactivated,  # frontend shows reactivation notice
+        "is_deactivated": is_deactivated,
+        "otp_code":       otp,           # Always returned — shown on screen as backup
+        "email_sent":     smtp_configured,  # Tells frontend whether email was attempted
     }
-    if not smtp_ready:
-        # Dev-mode: expose OTP so the site still works before SMTP is configured
-        response["dev_otp"] = otp
-    return response
 
 
 # ── VERIFY LOGIN OTP (Step 2) ─────────────────────────────────────────────────
