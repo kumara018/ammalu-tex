@@ -1,86 +1,104 @@
 'use client';
 import { useState } from 'react';
+import { type ReactNode } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { authAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
-interface FormFields {
-  full_name: string; email: string; phone: string;
-  password: string; confirm_password: string; agree_terms: boolean;
-}
-interface Errors { [k: string]: string; }
-
+// ─── Password rules ───────────────────────────────────────────────────────────
 const RULES = [
-  { test: (p: string) => p.length >= 8,          label: 'At least 8 characters' },
-  { test: (p: string) => /[A-Z]/.test(p),        label: 'One uppercase letter' },
-  { test: (p: string) => /[a-z]/.test(p),        label: 'One lowercase letter' },
-  { test: (p: string) => /\d/.test(p),           label: 'One number' },
-  { test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p), label: 'One special character (!@#$...)' },
+  { test: (p: string) => p.length >= 8,                     label: 'At least 8 characters'    },
+  { test: (p: string) => /[A-Z]/.test(p),                   label: 'One uppercase letter'      },
+  { test: (p: string) => /[a-z]/.test(p),                   label: 'One lowercase letter'      },
+  { test: (p: string) => /\d/.test(p),                      label: 'One number'                },
+  { test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p), label: 'One special character'     },
 ];
 
+// ─── Country codes ────────────────────────────────────────────────────────────
+const COUNTRY_CODES = [
+  { code: '+91',  flag: '🇮🇳', label: 'IN +91'  },
+  { code: '+1',   flag: '🇺🇸', label: 'US +1'   },
+  { code: '+44',  flag: '🇬🇧', label: 'UK +44'  },
+  { code: '+971', flag: '🇦🇪', label: 'AE +971' },
+  { code: '+65',  flag: '🇸🇬', label: 'SG +65'  },
+  { code: '+60',  flag: '🇲🇾', label: 'MY +60'  },
+  { code: '+61',  flag: '🇦🇺', label: 'AU +61'  },
+];
+
+// ─── InputRow defined OUTSIDE the component ───────────────────────────────────
+// IMPORTANT: If this is inside the component, React unmounts+remounts the input
+// on every keystroke (new function reference = new component type) → focus loss.
+interface InputRowProps {
+  label: string;
+  error?: string;
+  required?: boolean;
+  children: ReactNode;
+}
+function InputRow({ label, error, required = true, children }: InputRowProps) {
+  return (
+    <div>
+      <label className="label">{label}{required && ' *'}</label>
+      {children}
+      {error && (
+        <p className="flex items-center gap-1 text-red-600 text-xs mt-1">
+          <AlertCircle size={13} />{error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function RegisterPage() {
   const { login } = useAuth();
-  const router = useRouter();
 
-  const [form, setForm] = useState<FormFields>({
-    full_name: '', email: '', phone: '', password: '', confirm_password: '', agree_terms: false,
-  });
-  const [errors, setErrors] = useState<Errors>({});
-  const [showPass, setShowPass] = useState(false);
+  const [fullName,    setFullName]    = useState('');
+  const [email,       setEmail]       = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [phone,       setPhone]       = useState('');
+  const [password,    setPassword]    = useState('');
+  const [confirm,     setConfirm]     = useState('');
+  const [agreeTerms,  setAgreeTerms]  = useState(false);
+  const [showPass,    setShowPass]    = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState('');
+  const [loading,     setLoading]     = useState(false);
+  const [errors,      setErrors]      = useState<Record<string, string>>({});
+  const [apiError,    setApiError]    = useState('');
 
-  const set = (field: keyof FormFields) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setForm({ ...form, [field]: val });
-    setErrors({ ...errors, [field]: '' });
-    setApiError('');
-  };
+  const clearErr = (key: string) =>
+    setErrors(prev => ({ ...prev, [key]: '' }));
 
   const validate = (): boolean => {
-    const e: Errors = {};
+    const e: Record<string, string> = {};
 
-    if (!form.full_name.trim()) {
-      e.full_name = 'Full name is required';
-    } else if (form.full_name.trim().length < 2) {
-      e.full_name = 'Name must be at least 2 characters';
-    } else if (!/^[a-zA-Z\s]+$/.test(form.full_name.trim())) {
-      e.full_name = 'Name must contain only letters and spaces';
-    }
+    const name = fullName.trim();
+    if (!name)                              e.fullName = 'Full name is required';
+    else if (name.length < 2)              e.fullName = 'Name must be at least 2 characters';
+    else if (!/^[a-zA-Z\s]+$/.test(name)) e.fullName = 'Name must contain only letters and spaces';
 
-    if (!form.email.trim()) {
-      e.email = 'Email address is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      e.email = 'Enter a valid email address (e.g. name@gmail.com)';
-    }
+    const em = email.trim();
+    if (!em)                                        e.email = 'Email address is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) e.email = 'Enter a valid email address';
 
-    const cleanPhone = form.phone.replace(/\s|-/g, '');
-    if (!cleanPhone) {
+    const ph = phone.replace(/\D/g, '');
+    if (!ph) {
       e.phone = 'Mobile number is required';
-    } else if (!/^(\+91|91|0)?[6-9]\d{9}$/.test(cleanPhone)) {
-      e.phone = 'Enter a valid 10-digit Indian mobile number';
+    } else if (countryCode === '+91' && !/^[6-9]\d{9}$/.test(ph)) {
+      e.phone = 'Enter a valid 10-digit Indian number (starts with 6–9)';
+    } else if (countryCode !== '+91' && (ph.length < 7 || ph.length > 15)) {
+      e.phone = 'Enter a valid mobile number (7–15 digits)';
     }
 
-    const failedRules = RULES.filter((r) => !r.test(form.password));
-    if (!form.password) {
-      e.password = 'Password is required';
-    } else if (failedRules.length > 0) {
-      e.password = `Password must have: ${failedRules.map((r) => r.label).join(', ')}`;
-    }
+    const failed = RULES.filter(r => !r.test(password));
+    if (!password)         e.password = 'Password is required';
+    else if (failed.length) e.password = `Need: ${failed.map(r => r.label).join(', ')}`;
 
-    if (!form.confirm_password) {
-      e.confirm_password = 'Please confirm your password';
-    } else if (form.password !== form.confirm_password) {
-      e.confirm_password = 'Passwords do not match. Please re-enter.';
-    }
+    if (!confirm)                  e.confirm = 'Please confirm your password';
+    else if (password !== confirm) e.confirm = 'Passwords do not match';
 
-    if (!form.agree_terms) {
-      e.agree_terms = 'You must agree to the Terms & Conditions to create an account';
-    }
+    if (!agreeTerms) e.terms = 'You must agree to the Terms & Conditions';
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -92,40 +110,33 @@ export default function RegisterPage() {
     setLoading(true);
     setApiError('');
     try {
+      const fullPhone = countryCode + phone.replace(/\D/g, '');
       const res = await authAPI.register({
-        full_name: form.full_name.trim(),
-        email: form.email.trim().toLowerCase(),
-        phone: form.phone.replace(/\s|-/g, ''),
-        password: form.password,
-        confirm_password: form.confirm_password,
-        agree_terms: form.agree_terms,
+        full_name:        fullName.trim(),
+        email:            email.trim().toLowerCase(),
+        phone:            fullPhone,
+        password,
+        confirm_password: confirm,
+        agree_terms:      agreeTerms,
       });
       login(res.data.access_token, res.data.user);
-      toast.success('Account created successfully! Welcome to Ammalu Tex!');
-      router.push('/');
+      toast.success('Account created! Welcome to Ammalu Tex! 🎉');
+      // Hard navigation — signals Chrome/Safari to offer "Save Password"
+      window.location.href = '/';
     } catch (err: any) {
       const detail = err.response?.data?.detail;
-      if (Array.isArray(detail)) {
-        setApiError(detail.map((d: any) => d.msg).join(', '));
-      } else {
-        setApiError(detail || 'Registration failed. Please try again.');
-      }
+      if (Array.isArray(detail)) setApiError(detail.map((d: any) => d.msg).join('. '));
+      else setApiError(detail || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const InputRow = ({ label, children, error, required = true }: any) => (
-    <div>
-      <label className="label">{label}{required && ' *'}</label>
-      {children}
-      {error && <p className="error-msg mt-1"><AlertCircle size={13} />{error}</p>}
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fff9f2]">
       <div className="w-full max-w-lg">
+
+        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
             <h1 className="text-3xl font-display font-bold text-maroon-900">Ammalu Tex</h1>
@@ -136,6 +147,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="card p-8 shadow-lg">
+
           {apiError && (
             <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
@@ -143,61 +155,89 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
-            <InputRow label="Full Name" error={errors.full_name}>
+          <form onSubmit={handleSubmit} noValidate autoComplete="on" className="space-y-4">
+
+            {/* Full Name */}
+            <InputRow label="Full Name" error={errors.fullName}>
               <input
-                type="text"
-                value={form.full_name}
-                onChange={set('full_name')}
+                id="full_name" name="name" type="text"
+                value={fullName}
+                onChange={e => { setFullName(e.target.value); clearErr('fullName'); setApiError(''); }}
                 placeholder="Enter your full name"
-                className={`input-field ${errors.full_name ? 'input-error' : ''}`}
+                className={`input-field ${errors.fullName ? 'border-red-400' : ''}`}
                 autoComplete="name"
               />
             </InputRow>
 
+            {/* Email */}
             <InputRow label="Email Address" error={errors.email}>
               <input
-                type="email"
-                value={form.email}
-                onChange={set('email')}
+                id="email" name="email" type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); clearErr('email'); setApiError(''); }}
                 placeholder="your@email.com"
-                className={`input-field ${errors.email ? 'input-error' : ''}`}
+                className={`input-field ${errors.email ? 'border-red-400' : ''}`}
                 autoComplete="email"
               />
             </InputRow>
 
+            {/* Mobile Number — country code dropdown + number field */}
             <InputRow label="Mobile Number" error={errors.phone}>
-              <input
-                type="tel"
-                value={form.phone}
-                onChange={set('phone')}
-                placeholder="+91 98765 43210"
-                className={`input-field ${errors.phone ? 'input-error' : ''}`}
-                autoComplete="tel"
-                maxLength={13}
-              />
+              <div className="flex gap-2">
+                <select
+                  value={countryCode}
+                  onChange={e => { setCountryCode(e.target.value); clearErr('phone'); }}
+                  className="input-field w-32 flex-shrink-0 px-2 cursor-pointer"
+                  aria-label="Country code"
+                >
+                  {COUNTRY_CODES.map(c => (
+                    <option key={c.code} value={c.code}>{c.flag} {c.label}</option>
+                  ))}
+                </select>
+                <input
+                  id="phone" name="tel" type="tel"
+                  value={phone}
+                  onChange={e => {
+                    setPhone(e.target.value.replace(/[^\d]/g, ''));
+                    clearErr('phone');
+                    setApiError('');
+                  }}
+                  placeholder={countryCode === '+91' ? '9876543210' : 'Mobile number'}
+                  className={`input-field flex-1 ${errors.phone ? 'border-red-400' : ''}`}
+                  autoComplete="tel-national"
+                  inputMode="numeric"
+                  maxLength={15}
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                {countryCode === '+91'
+                  ? 'Enter 10-digit number starting with 6–9'
+                  : 'Enter number without country code'}
+              </p>
             </InputRow>
 
+            {/* Password */}
             <InputRow label="Password" error={errors.password}>
               <div className="relative">
                 <input
+                  id="password" name="password"
                   type={showPass ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={set('password')}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); clearErr('password'); setApiError(''); }}
                   placeholder="Create a strong password"
-                  className={`input-field pr-12 ${errors.password ? 'input-error' : ''}`}
+                  className={`input-field pr-12 ${errors.password ? 'border-red-400' : ''}`}
                   autoComplete="new-password"
                 />
-                <button type="button" onClick={() => setShowPass(!showPass)}
+                <button type="button" onClick={() => setShowPass(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1">
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {/* Password strength */}
-              {form.password && (
+              {/* Strength checklist */}
+              {password && (
                 <div className="mt-2 grid grid-cols-2 gap-1">
-                  {RULES.map((r) => {
-                    const ok = r.test(form.password);
+                  {RULES.map(r => {
+                    const ok = r.test(password);
                     return (
                       <div key={r.label} className={`flex items-center gap-1.5 text-xs ${ok ? 'text-green-600' : 'text-gray-400'}`}>
                         <CheckCircle size={11} className={ok ? 'text-green-500' : 'text-gray-300'} />
@@ -209,63 +249,64 @@ export default function RegisterPage() {
               )}
             </InputRow>
 
-            <InputRow label="Confirm Password" error={errors.confirm_password}>
+            {/* Confirm Password */}
+            <InputRow label="Confirm Password" error={errors.confirm}>
               <div className="relative">
                 <input
+                  id="confirm_password" name="confirm_password"
                   type={showConfirm ? 'text' : 'password'}
-                  value={form.confirm_password}
-                  onChange={set('confirm_password')}
+                  value={confirm}
+                  onChange={e => { setConfirm(e.target.value); clearErr('confirm'); setApiError(''); }}
                   placeholder="Re-enter your password"
-                  className={`input-field pr-12 ${errors.confirm_password ? 'input-error' : ''}`}
+                  className={`input-field pr-12 ${errors.confirm ? 'border-red-400' : ''}`}
                   autoComplete="new-password"
                 />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                <button type="button" onClick={() => setShowConfirm(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1">
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </InputRow>
 
-            {/* Terms */}
+            {/* Terms checkbox */}
             <div>
-              <label className={`flex items-start gap-3 cursor-pointer group ${errors.agree_terms ? 'text-red-600' : 'text-gray-700'}`}>
-                <div className="relative mt-0.5">
+              <label className={`flex items-start gap-3 cursor-pointer group ${errors.terms ? 'text-red-600' : 'text-gray-700'}`}>
+                <div className="relative mt-0.5 flex-shrink-0">
                   <input
                     type="checkbox"
-                    checked={form.agree_terms}
-                    onChange={set('agree_terms')}
+                    checked={agreeTerms}
+                    onChange={e => { setAgreeTerms(e.target.checked); clearErr('terms'); }}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${form.agree_terms ? 'bg-maroon-800 border-maroon-800' : errors.agree_terms ? 'border-red-400' : 'border-gray-300 group-hover:border-maroon-400'}`}>
-                    {form.agree_terms && <CheckCircle size={12} className="text-white" fill="white" />}
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all
+                    ${agreeTerms ? 'bg-maroon-800 border-maroon-800'
+                      : errors.terms ? 'border-red-400'
+                      : 'border-gray-300 group-hover:border-maroon-400'}`}>
+                    {agreeTerms && <CheckCircle size={12} className="text-white" fill="white" />}
                   </div>
                 </div>
                 <span className="text-sm leading-relaxed">
                   I agree to Ammalu Tex&apos;s{' '}
                   <Link href="/support#terms" className="text-maroon-800 underline font-medium" target="_blank">
                     Terms & Conditions
-                  </Link>{' '}
-                  and{' '}
+                  </Link>{' '}and{' '}
                   <Link href="/support#privacy" className="text-maroon-800 underline font-medium" target="_blank">
                     Privacy Policy
-                  </Link>. I confirm I am 18 years or older.
+                  </Link>.
                 </span>
               </label>
-              {errors.agree_terms && (
-                <p className="error-msg mt-1.5"><AlertCircle size={13} />{errors.agree_terms}</p>
+              {errors.terms && (
+                <p className="flex items-center gap-1 text-red-600 text-xs mt-1.5">
+                  <AlertCircle size={13} />{errors.terms}
+                </p>
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2 py-3 mt-2"
-            >
-              {loading ? (
-                <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Creating account...</>
-              ) : (
-                <><UserPlus size={18} /> Create Account</>
-              )}
+            <button type="submit" disabled={loading}
+              className="btn-primary w-full flex items-center justify-center gap-2 py-3 mt-2">
+              {loading
+                ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Creating account...</>
+                : <><UserPlus size={18} /> Create Account</>}
             </button>
           </form>
 

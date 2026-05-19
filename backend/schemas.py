@@ -30,16 +30,16 @@ class UserRegister(BaseModel):
     @classmethod
     def phone_valid(cls, v):
         v = v.strip().replace(" ", "").replace("-", "")
-        if not re.match(r"^(\+91|91|0)?[6-9]\d{9}$", v):
-            raise ValueError("Enter a valid Indian mobile number (10 digits starting with 6-9)")
-        # Normalize to 10-digit
-        if v.startswith("+91"):
-            v = v[3:]
-        elif v.startswith("91") and len(v) == 12:
-            v = v[2:]
-        elif v.startswith("0"):
-            v = v[1:]
-        return v
+        # Indian number (with or without +91 / 91 / 0 prefix)
+        if re.match(r"^(\+91|91|0)?[6-9]\d{9}$", v):
+            if v.startswith("+91"):             v = v[3:]
+            elif v.startswith("91") and len(v) == 12: v = v[2:]
+            elif v.startswith("0"):             v = v[1:]
+            return v
+        # International number with country code (+1, +44, +971, …)
+        if re.match(r"^\+\d{7,15}$", v):
+            return v
+        raise ValueError("Enter a valid mobile number (e.g. +91 9876543210)")
 
     @field_validator("password")
     @classmethod
@@ -134,6 +134,28 @@ class OTPVerify(BaseModel):
         if self.new_password != self.confirm_password:
             raise ValueError("Passwords do not match")
         return self
+
+
+class LoginOTPVerify(BaseModel):
+    """Step-2 of OTP login: identifier + 6-digit OTP."""
+    identifier: str
+    otp_code:   str
+
+    @field_validator("identifier")
+    @classmethod
+    def identifier_valid(cls, v):
+        v = v.strip()
+        if not v:
+            raise ValueError("Email or phone is required")
+        return v
+
+    @field_validator("otp_code")
+    @classmethod
+    def otp_valid(cls, v):
+        v = v.strip()
+        if not re.match(r"^\d{6}$", v):
+            raise ValueError("OTP must be exactly 6 digits")
+        return v
 
 
 class UserOut(BaseModel):

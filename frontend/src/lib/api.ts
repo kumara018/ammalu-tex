@@ -41,10 +41,12 @@ api.interceptors.response.use(
     const status = err.response?.status;
 
     const isAuthEndpoint =
-      url.includes('/api/auth/login')    ||
-      url.includes('/api/auth/register') ||
-      url.includes('/api/auth/forgot')   ||
-      url.includes('/api/auth/reset')    ||
+      url.includes('/api/auth/login')             ||
+      url.includes('/api/auth/register')          ||
+      url.includes('/api/auth/forgot')            ||
+      url.includes('/api/auth/reset')             ||
+      url.includes('/api/auth/send-login-otp')    ||
+      url.includes('/api/auth/verify-login-otp')  ||
       url.includes('/api/auth/me');
 
     if (status === 401 && !isAuthEndpoint && typeof window !== 'undefined') {
@@ -68,6 +70,8 @@ api.interceptors.response.use(
 export const authAPI = {
   register:       (data: object) => api.post('/api/auth/register', data),
   login:          (data: object) => api.post('/api/auth/login', data),
+  sendLoginOtp:   (data: object) => api.post('/api/auth/send-login-otp', data),
+  verifyLoginOtp: (data: object) => api.post('/api/auth/verify-login-otp', data),
   getMe:          ()             => api.get('/api/auth/me'),
   updateProfile:  (data: object) => api.put('/api/auth/me', data),
   forgotPassword: (data: object) => api.post('/api/auth/forgot-password', data),

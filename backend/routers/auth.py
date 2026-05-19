@@ -15,9 +15,14 @@ def _is_email(value: str) -> bool:
 
 def _normalize_phone(v: str) -> str:
     v = v.strip().replace(" ", "").replace("-", "")
-    if v.startswith("+91"):  v = v[3:]
-    elif v.startswith("91") and len(v) == 12: v = v[2:]
-    elif v.startswith("0"): v = v[1:]
+    # Indian numbers — strip country code prefix, store as 10 digits
+    if v.startswith("+91"):
+        v = v[3:]
+    elif v.startswith("91") and len(v) == 12 and v[2:3] in "6789":
+        v = v[2:]
+    elif v.startswith("0") and len(v) == 11:
+        v = v[1:]
+    # International numbers (e.g. "+14155551234") stored as-is
     return v
 
 def _find_user(db: Session, identifier: str):
@@ -199,3 +204,51 @@ def reset_password(payload: schemas.OTPVerify, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Password reset successfully. Please login with your new password."}
+
+
+# ── SEND LOGIN OTP (Step 1) ───────────────────────────────────────────────────
+
+@router.post("/send-login-otp")
+def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
+    """Verify credentials then send a 6-digit OTP to the user's email."""
+    user = _find_user(db, payload.identifier)
+    if not user or not auth_utils.verify_password(payload.password, user.password_hash):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect email/phone or password. Please check and try again.",
+        )
+    if not user.is_active:
+        raise HTTPException(403, "Your account has been deactivated. Contact support.")
+
+    otp  = _create_otp(db, user.email, otp_type="login")
+    _send_otp_email(user.email, otp, "Login Verification")
+
+    hint = user.email[:3] + "***@" + user.email.split("@")[-1]
+    smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
+
+    response: dict = {
+        "message":    "OTP sent to your registered email.",
+        "email_hint": hint,
+    }
+    if not smtp_ready:
+        # Dev-mode: expose OTP so the site still works before SMTP is configured
+        response["dev_otp"] = otp
+    return response
+
+
+# ── VERIFY LOGIN OTP (Step 2) ─────────────────────────────────────────────────
+
+@router.post("/verify-login-otp", response_model=schemas.Token)
+def verify_login_otp(payload: schemas.LoginOTPVerify, db: Session = Depends(get_db)):
+    """Verify the 6-digit OTP and return a JWT if correct."""
+    user = _find_user(db, payload.identifier)
+    if not user:
+        raise HTTPException(404, "Account not found.")
+    if not user.is_active:
+        raise HTTPException(403, "Your account has been deactivated. Contact support.")
+
+    if not _verify_otp(db, user.email, payload.otp_code, otp_type="login"):
+        raise HTTPException(400, "Invalid or expired OTP. Please request a new one.")
+
+    token = auth_utils.create_access_token({"sub": user.id})
+    return {"access_token": token, "token_type": "bearer", "user": user}
