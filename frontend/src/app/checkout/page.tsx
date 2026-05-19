@@ -40,8 +40,7 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) { router.push('/auth/login'); return; }
+    if (authLoading || !user) return;
     if (items.length === 0) { router.push('/cart'); return; }
     // Load Razorpay script
     const script = document.createElement('script');

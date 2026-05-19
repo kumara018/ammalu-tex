@@ -28,12 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const storedUser  = localStorage.getItem('user');
     if (storedToken && storedUser) {
       setToken(storedToken);
       try {
         setUser(JSON.parse(storedUser));
       } catch {}
+      // Restore cookie so middleware can protect routes on hard refresh
+      document.cookie = `auth_token=${storedToken}; path=/; max-age=86400; SameSite=Lax`;
     }
     setLoading(false);
   }, []);
@@ -41,6 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
+    // Cookie for Next.js middleware route protection
+    document.cookie = `auth_token=${newToken}; path=/; max-age=86400; SameSite=Lax`;
     setToken(newToken);
     setUser(newUser);
   };
@@ -48,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    document.cookie = 'auth_token=; path=/; max-age=0';
     setToken(null);
     setUser(null);
   };

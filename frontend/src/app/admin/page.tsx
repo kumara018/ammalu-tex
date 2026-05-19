@@ -38,9 +38,9 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (authLoading) return;          // wait for localStorage restore
-    if (!user) { router.push('/auth/login'); return; }
-    if (!user.is_admin) { router.push('/'); return; }
+    if (authLoading) return;            // wait for localStorage restore
+    if (!user) return;                  // middleware already blocked non-users
+    if (!user.is_admin) { router.push('/'); return; }  // block non-admins
     loadDash();
   }, [user, authLoading]);
 

@@ -25,8 +25,7 @@ function OrderDetailContent() {
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) { router.push('/auth/login'); return; }
+    if (authLoading || !user) return;
     const load = async () => {
       try {
         const res = await ordersAPI.getOne(Number(id));

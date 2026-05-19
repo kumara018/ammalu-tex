@@ -13,13 +13,11 @@ export default function CartPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) { router.push('/auth/login'); return; }
+    if (authLoading || !user) return;
     fetchCart();
   }, [user, authLoading]);
 
-  if (authLoading) return null;
-  if (!user) return null;
+  if (authLoading || !user) return null;
 
   const shipping = total >= 999 ? 0 : 49;
   const grandTotal = total + shipping;

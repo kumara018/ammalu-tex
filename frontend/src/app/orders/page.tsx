@@ -23,8 +23,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) { router.push('/auth/login'); return; }
+    if (authLoading || !user) return;
     const load = async () => {
       try {
         const res = await ordersAPI.getAll();
@@ -34,8 +33,7 @@ export default function OrdersPage() {
     load();
   }, [user, authLoading]);
 
-  if (authLoading) return null;
-  if (!user) return null;
+  if (authLoading || !user) return null;
 
   if (loading) return (
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-4">
