@@ -218,6 +218,7 @@ class ProductCreate(BaseModel):
     stock:         int
     sku:           Optional[str] = None
     is_featured:   bool = False
+    is_new_arrival: bool = False
 
     @field_validator("name")
     @classmethod
@@ -259,8 +260,9 @@ class ProductUpdate(BaseModel):
     colors:        Optional[List[str]] = None
     images:        Optional[List[str]] = None
     stock:         Optional[int]   = None
-    is_active:     Optional[bool]  = None
-    is_featured:   Optional[bool]  = None
+    is_active:      Optional[bool]  = None
+    is_featured:    Optional[bool]  = None
+    is_new_arrival: Optional[bool]  = None
 
 
 class ProductOut(BaseModel):
@@ -276,8 +278,9 @@ class ProductOut(BaseModel):
     images:        List[str] = []
     stock:         int
     sku:           Optional[str]   = None
-    is_active:     bool
-    is_featured:   bool
+    is_active:      bool
+    is_featured:    bool
+    is_new_arrival: bool = False
     rating_avg:    float
     rating_count:  int
     created_at:    datetime

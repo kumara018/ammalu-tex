@@ -41,7 +41,7 @@ export default function ProductCard({ product }: Props) {
         <div className="relative bg-gradient-to-br from-orange-50 to-pink-50 aspect-[3/4] overflow-hidden">
           {product.images && product.images[0] && !product.images[0].includes('placeholder') ? (
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}${product.images[0]}`}
+              src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}${product.images[0]}`}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -67,6 +67,11 @@ export default function ProductCard({ product }: Props) {
             {product.is_featured && (
               <span className="bg-gold-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
                 Featured
+              </span>
+            )}
+            {product.is_new_arrival && (
+              <span className="bg-emerald-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                New Arrival
               </span>
             )}
             {product.stock === 0 && (

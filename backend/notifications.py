@@ -513,7 +513,63 @@ def send_delivery_otp_email(email: str, name: str, otp: str, order_number: str,
     _bg(email, f"🚚 Delivery OTP for order {order_number} — share with delivery agent | {STORE_NAME}", html)
 
 
-# ── 13. Optional SMS via Twilio ─────────────────────────────────────────────────
+# ── 13. Support rating confirmation (to user) ─────────────────────────────────
+def send_support_rating_confirmation(email: str, name: str, rating: int):
+    first = name.split()[0]
+    stars = "⭐" * rating
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">Thank you for your feedback! 🙏</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, we truly appreciate you taking the time to rate your experience with our support team.
+      </p>
+      <div style="background:#fff9f2;border:2px solid #7c1d2e;border-radius:12px;padding:24px;margin:20px 0;text-align:center;">
+        <p style="margin:0;font-size:36px;">{stars}</p>
+        <p style="margin:10px 0 0;color:#7c1d2e;font-weight:bold;font-size:16px;">You rated us {rating}/5</p>
+      </div>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Your feedback helps our support team grow and serve you better. If you have any unresolved issues,
+        please don't hesitate to reach out — we're always here to help.
+      </p>
+      {_btn("Visit Our Store →", STORE_URL)}
+    """)
+    _bg(email, f"Thank you for rating Ammalu Tex Support — {STORE_NAME}", html)
+
+
+# ── 14. Support rating admin notification ──────────────────────────────────────
+def send_support_rating_admin_notify(name: str, email: str, rating: int, category: str, message: str):
+    admin_email = os.getenv("ADMIN_EMAIL", SMTP_EMAIL or SUPPORT_EMAIL)
+    if not admin_email:
+        return
+    stars = "⭐" * rating + "☆" * (5 - rating)
+    color = "#16a34a" if rating >= 4 else "#ea580c" if rating == 3 else "#dc2626"
+    category_row = (
+        f"<tr><td style='color:#888;padding:6px 0;'>Category</td><td style='color:#444;'>{category}</td></tr>"
+        if category else ""
+    )
+    message_block = (
+        f"<div style='background:#f8f4f0;border-radius:8px;padding:16px;margin:16px 0;'>"
+        f"<p style='margin:0;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;'>Customer Comment</p>"
+        f"<p style='margin:8px 0 0;color:#444;font-size:14px;line-height:1.6;'>{message}</p></div>"
+        if message else ""
+    )
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">📊 New Support Rating Received</h2>
+      <div style="background:#f8f4f0;border-left:4px solid {color};border-radius:4px;padding:16px;margin:20px 0;">
+        <p style="margin:0;font-size:28px;">{stars}</p>
+        <p style="margin:8px 0 0;font-size:22px;font-weight:bold;color:{color};">{rating}/5 Stars</p>
+      </div>
+      <table style="width:100%;font-size:14px;margin:16px 0;">
+        <tr><td style="color:#888;padding:6px 0;width:120px;">Customer</td><td style="color:#444;font-weight:bold;">{name}</td></tr>
+        <tr><td style="color:#888;padding:6px 0;">Email</td><td style="color:#444;">{email}</td></tr>
+        {category_row}
+      </table>
+      {message_block}
+      <p style="color:#888;font-size:13px;">View all ratings in the Admin Dashboard → Support Ratings tab.</p>
+    """)
+    _bg(admin_email, f"New {rating}★ Support Rating from {name} — {STORE_NAME}", html)
+
+
+# ── 15. Optional SMS via Twilio ─────────────────────────────────────────────────
 def _send_sms(to_phone: str, message: str):
     if not to_phone.startswith("+"):
         to_phone = "+91" + to_phone

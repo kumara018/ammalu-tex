@@ -9,7 +9,7 @@ load_dotenv()
 
 from database import engine, Base, SessionLocal
 import models
-from routers import auth, products, cart, orders, admin, payments, addresses
+from routers import auth, products, cart, orders, admin, payments, addresses, support
 
 
 os.makedirs(os.getenv("UPLOAD_DIR", "uploads/products"), exist_ok=True)
@@ -111,6 +111,32 @@ def _migrate_db():
             conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_phone VARCHAR(20)"))
             conn.commit()
             print("[Startup] Migrated: added delivery_person_phone to orders")
+
+        # ── is_new_arrival on products ─────────────────────────────────────
+        products_cols = [c["name"] for c in inspector.get_columns("products")]
+        if "is_new_arrival" not in products_cols:
+            conn.execute(text("ALTER TABLE products ADD COLUMN is_new_arrival BOOLEAN NOT NULL DEFAULT FALSE"))
+            conn.commit()
+            print("[Startup] Migrated: added is_new_arrival to products")
+
+        # ── support_ratings table ──────────────────────────────────────────
+        existing_tables = inspector.get_table_names()
+        if "support_ratings" not in existing_tables:
+            conn.execute(text("""
+                CREATE TABLE support_ratings (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                    name VARCHAR(100) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    phone VARCHAR(20),
+                    rating INTEGER NOT NULL,
+                    category VARCHAR(100),
+                    message TEXT,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+            """))
+            conn.commit()
+            print("[Startup] Migrated: created support_ratings table")
 
     except Exception as e:
         print(f"[Startup] Migration note: {e}")
@@ -236,6 +262,7 @@ app.include_router(orders.router)
 app.include_router(admin.router)
 app.include_router(payments.router)
 app.include_router(addresses.router)
+app.include_router(support.router)
 
 
 @app.get("/")

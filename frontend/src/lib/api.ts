@@ -117,16 +117,22 @@ export const addressAPI = {
 };
 
 export const adminAPI = {
-  dashboard:         ()                           => api.get('/api/admin/dashboard'),
-  getProducts:       ()                           => api.get('/api/admin/products'),
-  createProduct:     (data: object)               => api.post('/api/admin/products', data),
-  updateProduct:     (id: number, data: object)   => api.put(`/api/admin/products/${id}`, data),
-  deleteProduct:     (id: number)                 => api.delete(`/api/admin/products/${id}`),
-  uploadImage:       (id: number, form: FormData) => api.post(`/api/admin/products/${id}/image`, form, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  getOrders:         (status?: string)            => api.get('/api/admin/orders', { params: status ? { status } : {} }),
-  updateOrderStatus: (id: number, data: object)   => api.put(`/api/admin/orders/${id}/status`, data),
-  getUsers:          ()                           => api.get('/api/admin/users'),
-  updateSettings:    (data: object)               => api.put('/api/admin/settings', data),
+  dashboard:          ()                           => api.get('/api/admin/dashboard'),
+  getProducts:        ()                           => api.get('/api/admin/products'),
+  createProduct:      (data: object)               => api.post('/api/admin/products', data),
+  updateProduct:      (id: number, data: object)   => api.put(`/api/admin/products/${id}`, data),
+  deleteProduct:      (id: number)                 => api.delete(`/api/admin/products/${id}`),
+  uploadImage:        (form: FormData)             => api.post('/api/admin/products/upload-image', form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  getOrders:          (status?: string)            => api.get('/api/admin/orders', { params: status ? { status } : {} }),
+  updateOrderStatus:  (id: number, data: object)   => api.put(`/api/admin/orders/${id}/status`, data),
+  getUsers:           ()                           => api.get('/api/admin/users'),
+  updateSettings:     (data: object)               => api.put('/api/admin/settings', data),
+  getSupportRatings:  ()                           => api.get('/api/admin/support-ratings'),
+};
+
+export const supportAPI = {
+  submitRating:     (data: object) => api.post('/api/support/rating', data),
+  getRatingSummary: ()             => api.get('/api/support/rating/summary'),
 };
 
 export default api;

@@ -74,8 +74,9 @@ class Product(Base):
     images        = Column(JSON, default=list)
     stock         = Column(Integer, default=0)
     sku           = Column(String(50), unique=True, index=True, nullable=True)
-    is_active     = Column(Boolean, default=True)
-    is_featured   = Column(Boolean, default=False)
+    is_active      = Column(Boolean, default=True)
+    is_featured    = Column(Boolean, default=False)
+    is_new_arrival = Column(Boolean, default=False)
     rating_avg    = Column(Float, default=0.0)
     rating_count  = Column(Integer, default=0)
     created_at    = Column(DateTime(timezone=True), server_default=func.now())
@@ -161,3 +162,17 @@ class Review(Base):
 
     user    = relationship("User",    back_populates="reviews")
     product = relationship("Product", back_populates="reviews")
+
+
+class SupportRating(Base):
+    __tablename__ = "support_ratings"
+    id         = Column(Integer, primary_key=True, index=True)
+    user_id    = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    name       = Column(String(100), nullable=False)
+    email      = Column(String(255), nullable=False)
+    phone      = Column(String(20), nullable=True)
+    rating     = Column(Integer, nullable=False)   # 1-5
+    category   = Column(String(100), nullable=True)  # "Order Issue", "Product Query", etc.
+    message    = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user = relationship("User", foreign_keys=[user_id])

@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import os, shutil, uuid, random
+import os, random
 from database import get_db
 import models, schemas, auth as auth_utils, notifications
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads/products")
 
 
 @router.get("/dashboard")
@@ -117,23 +116,32 @@ async def upload_image(
     file: UploadFile = File(...),
     _: models.User = Depends(auth_utils.get_current_admin),
 ):
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+    api_key    = os.getenv("CLOUDINARY_API_KEY", "")
+    api_secret = os.getenv("CLOUDINARY_API_SECRET", "")
+
+    if not all([cloud_name, api_key, api_secret]):
+        raise HTTPException(500, "Cloudinary not configured. Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET to Render env vars.")
+
     if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
-        raise HTTPException(status_code=400, detail="Only JPEG, PNG and WebP images are allowed")
+        raise HTTPException(400, "Only JPEG, PNG and WebP images are allowed")
 
     contents = await file.read()
-    max_size = 5 * 1024 * 1024
-    if len(contents) > max_size:
-        raise HTTPException(status_code=400, detail="Image size must be under 5MB")
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(400, "Image must be under 10MB")
 
-    ext = file.filename.rsplit(".", 1)[-1].lower()
-    filename = f"{uuid.uuid4()}.{ext}"
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-    path = os.path.join(UPLOAD_DIR, filename)
-
-    with open(path, "wb") as f:
-        f.write(contents)
-
-    return {"url": f"/uploads/products/{filename}", "filename": filename}
+    try:
+        import cloudinary, cloudinary.uploader
+        cloudinary.config(cloud_name=cloud_name, api_key=api_key, api_secret=api_secret, secure=True)
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="ammalutex/products",
+            resource_type="image",
+            transformation=[{"width": 900, "height": 900, "crop": "limit", "quality": "auto", "fetch_format": "auto"}],
+        )
+        return {"url": result["secure_url"], "public_id": result["public_id"]}
+    except Exception as e:
+        raise HTTPException(500, f"Cloudinary upload failed: {e}")
 
 
 @router.get("/orders", response_model=List[schemas.OrderOut])
@@ -220,3 +228,24 @@ def get_all_users(
     _: models.User = Depends(auth_utils.get_current_admin),
 ):
     return db.query(models.User).filter(models.User.is_admin == False).all()
+
+
+@router.get("/support-ratings")
+def get_support_ratings(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    ratings = db.query(models.SupportRating).order_by(models.SupportRating.created_at.desc()).limit(100).all()
+    return [
+        {
+            "id": r.id,
+            "name": r.name,
+            "email": r.email,
+            "phone": r.phone,
+            "rating": r.rating,
+            "category": r.category,
+            "message": r.message,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        }
+        for r in ratings
+    ]

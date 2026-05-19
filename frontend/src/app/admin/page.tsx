@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Package, ShoppingBag, Users, TrendingUp, Plus, Pencil,
-  Trash2, Eye, EyeOff, X, AlertCircle, CheckCircle,
+  Trash2, X, AlertCircle, CheckCircle, Star, Upload, ImagePlus,
 } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -15,20 +15,23 @@ const SIZE_OPTIONS   = ['XS','S','M','L','XL','XXL','Free Size'];
 
 interface DashData { total_products: number; active_products: number; total_users: number; total_orders: number; pending_orders: number; total_revenue: number; recent_orders: any[]; }
 
+const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
+
 const emptyProduct = {
   name:'', description:'', price:'', compare_price:'', category:'Chudithar',
   fabric:'', size_options:[] as string[], colors:[] as string[],
-  images:[] as string[], stock:'', is_featured:false,
+  images:[] as string[], stock:'', is_featured:false, is_new_arrival:false,
 };
 
 export default function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tab, setTab] = useState<'dash'|'products'|'orders'|'users'>('dash');
+  const [tab, setTab] = useState<'dash'|'products'|'orders'|'users'|'ratings'>('dash');
   const [dash, setDash] = useState<DashData | null>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [supportRatings, setSupportRatings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -36,6 +39,8 @@ export default function AdminPage() {
   const [formErrors, setFormErrors] = useState<any>({});
   const [colorInput, setColorInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (authLoading) return;            // wait for localStorage restore
@@ -69,11 +74,18 @@ export default function AdminPage() {
     catch {} finally { setLoading(false); }
   };
 
+  const loadSupportRatings = async () => {
+    setLoading(true);
+    try { const res = await adminAPI.getSupportRatings(); setSupportRatings(res.data); }
+    catch {} finally { setLoading(false); }
+  };
+
   useEffect(() => {
     if (tab === 'dash') loadDash();
     if (tab === 'products') loadProducts();
     if (tab === 'orders') loadOrders();
     if (tab === 'users') loadUsers();
+    if (tab === 'ratings') loadSupportRatings();
   }, [tab]);
 
   const validateForm = () => {
@@ -106,7 +118,8 @@ export default function AdminPage() {
       compare_price: p.compare_price ? String(p.compare_price) : '',
       category: p.category, fabric: p.fabric || '',
       size_options: p.size_options || [], colors: p.colors || [],
-      images: p.images || [], stock: String(p.stock), is_featured: p.is_featured,
+      images: p.images || [], stock: String(p.stock),
+      is_featured: p.is_featured, is_new_arrival: p.is_new_arrival || false,
     });
     setFormErrors({});
     setColorInput('');
@@ -129,6 +142,7 @@ export default function AdminPage() {
         images: form.images,
         stock: Number(form.stock),
         is_featured: form.is_featured,
+        is_new_arrival: form.is_new_arrival,
       };
       if (editing) {
         await adminAPI.updateProduct(editing.id, data);
@@ -182,16 +196,36 @@ export default function AdminPage() {
     setColorInput('');
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    setUploadingImage(true);
+    try {
+      const res = await adminAPI.uploadImage(formData);
+      const url: string = res.data.url;
+      setForm(f => ({ ...f, images: [...f.images, url] }));
+      toast.success('Image uploaded successfully!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
+
   const F = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [field]: e.target.value }));
 
   if (!user?.is_admin) return null;
 
   const TABS = [
-    { key: 'dash',     label: 'Dashboard' },
-    { key: 'products', label: 'Products'  },
-    { key: 'orders',   label: 'Orders'    },
-    { key: 'users',    label: 'Customers' },
+    { key: 'dash',     label: 'Dashboard'        },
+    { key: 'products', label: 'Products'          },
+    { key: 'orders',   label: 'Orders'            },
+    { key: 'users',    label: 'Customers'         },
+    { key: 'ratings',  label: 'Support Ratings'   },
   ] as const;
 
   return (
@@ -291,7 +325,10 @@ export default function AdminPage() {
                   <tr key={p.id} className={`hover:bg-orange-50 ${!p.is_active ? 'opacity-50' : ''}`}>
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-800 line-clamp-1">{p.name}</p>
-                      {p.is_featured && <span className="text-[10px] bg-gold-100 text-gold-700 px-1.5 py-0.5 rounded font-medium">Featured</span>}
+                      <div className="flex gap-1 flex-wrap mt-0.5">
+                        {p.is_featured && <span className="text-[10px] bg-gold-100 text-gold-700 px-1.5 py-0.5 rounded font-medium">Featured</span>}
+                        {p.is_new_arrival && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">New Arrival</span>}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{p.category}</td>
                     <td className="px-4 py-3 font-semibold text-maroon-900">₹{p.price.toLocaleString()}</td>
@@ -401,6 +438,69 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Support Ratings */}
+      {tab === 'ratings' && (
+        <div>
+          <div className="mb-4 flex items-center gap-3">
+            <Star size={20} className="text-yellow-500 fill-yellow-400" />
+            <h2 className="font-bold text-gray-800 text-lg">Customer Support Ratings</h2>
+            {supportRatings.length > 0 && (
+              <span className="ml-auto text-sm text-gray-500">
+                Avg: {(supportRatings.reduce((s, r) => s + r.rating, 0) / supportRatings.length).toFixed(1)} / 5
+                &nbsp;({supportRatings.length} ratings)
+              </span>
+            )}
+          </div>
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-maroon-50">
+                  <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
+                    <th className="px-4 py-3">Customer</th>
+                    <th className="px-4 py-3">Rating</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3">Comment</th>
+                    <th className="px-4 py-3">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-orange-50">
+                  {loading ? Array(5).fill(0).map((_, i) => (
+                    <tr key={i}><td colSpan={5} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                  )) : supportRatings.length === 0 ? (
+                    <tr><td colSpan={5} className="px-4 py-10 text-center text-gray-400">No support ratings yet</td></tr>
+                  ) : supportRatings.map((r) => (
+                    <tr key={r.id} className="hover:bg-orange-50">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-gray-800">{r.name}</p>
+                        <p className="text-xs text-gray-500">{r.email}</p>
+                        {r.phone && <p className="text-xs text-gray-400">{r.phone}</p>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} size={14} className={s <= r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'} fill={s <= r.rating ? '#facc15' : 'none'} />
+                          ))}
+                        </div>
+                        <span className={`text-xs font-medium mt-1 ${r.rating >= 4 ? 'text-green-600' : r.rating === 3 ? 'text-orange-500' : 'text-red-500'}`}>
+                          {r.rating}/5
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-600 text-xs">{r.category || '—'}</td>
+                      <td className="px-4 py-3 text-gray-600 text-xs max-w-xs">
+                        <p className="line-clamp-2">{r.message || '—'}</p>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
+                        {r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Product Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
@@ -436,7 +536,7 @@ export default function AdminPage() {
                 <div>
                   <label className="label">Category *</label>
                   <select value={form.category} onChange={F('category')} className={`input-field ${formErrors.category ? 'input-error' : ''}`}>
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {CATEGORIES_WITH_HALF_SAREE.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
@@ -475,11 +575,64 @@ export default function AdminPage() {
                   ))}
                 </div>
               </div>
+              {/* Image Upload */}
+              <div>
+                <label className="label">Product Images</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {form.images.map((img, idx) => (
+                    <div key={idx} className="relative group">
+                      <img
+                        src={img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL}${img}`}
+                        alt={`Product ${idx + 1}`}
+                        className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, images: f.images.filter((_, i) => i !== idx) }))}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-maroon-400 hover:text-maroon-500 transition-colors disabled:opacity-50"
+                  >
+                    {uploadingImage ? (
+                      <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-maroon-600" />
+                    ) : (
+                      <>
+                        <ImagePlus size={18} />
+                        <span className="text-[9px] mt-1">Upload</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+                <p className="text-xs text-gray-400">JPEG, PNG, WebP. Max 10MB. Images are stored on Cloudinary.</p>
+              </div>
+
               <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-xl hover:bg-orange-50">
                 <input type="checkbox" checked={form.is_featured} onChange={e => setForm(f => ({ ...f, is_featured: e.target.checked }))} className="w-4 h-4 accent-maroon-800" />
                 <div>
                   <p className="font-medium text-sm text-gray-800">Mark as Featured</p>
                   <p className="text-xs text-gray-500">Featured products appear on the homepage</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-xl hover:bg-orange-50">
+                <input type="checkbox" checked={form.is_new_arrival} onChange={e => setForm(f => ({ ...f, is_new_arrival: e.target.checked }))} className="w-4 h-4 accent-maroon-800" />
+                <div>
+                  <p className="font-medium text-sm text-gray-800">Mark as New Arrival</p>
+                  <p className="text-xs text-gray-500">Shows a "New Arrival" badge on the product card</p>
                 </div>
               </label>
             </div>
