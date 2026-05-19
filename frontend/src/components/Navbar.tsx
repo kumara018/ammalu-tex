@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   ShoppingCart, Search, User, Menu, X, ChevronDown,
   LogOut, Package, Settings, MapPin, Phone, LayoutDashboard,
+  Home, HelpCircle, UserCog, UserX, RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -187,7 +188,7 @@ export default function Navbar() {
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-1 w-60 bg-white rounded-xl shadow-xl border border-orange-100 py-2 text-gray-800 z-50">
+                    <div className="absolute right-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-orange-100 py-2 text-gray-800 z-50">
                       {/* User info */}
                       <div className="px-4 py-3 border-b border-orange-100">
                         <p className="font-semibold text-maroon-900">{user.full_name}</p>
@@ -196,6 +197,11 @@ export default function Navbar() {
                           {user.is_admin ? '⚙ Admin' : '👤 Customer'}
                         </span>
                       </div>
+
+                      {/* Navigation */}
+                      <Link href="/" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm" onClick={() => setUserMenuOpen(false)}>
+                        <Home size={16} className="text-maroon-700" /> Home
+                      </Link>
 
                       {user.is_admin && (
                         <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm font-semibold text-maroon-800" onClick={() => setUserMenuOpen(false)}>
@@ -207,11 +213,39 @@ export default function Navbar() {
                         <Package size={16} className="text-maroon-700" /> My Orders
                       </Link>
 
+                      <Link href="/account" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm" onClick={() => setUserMenuOpen(false)}>
+                        <UserCog size={16} className="text-maroon-700" /> Account Settings
+                      </Link>
+
+                      <Link href="/support" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm" onClick={() => setUserMenuOpen(false)}>
+                        <HelpCircle size={16} className="text-maroon-700" /> Help &amp; Policies
+                      </Link>
+
                       {user.is_admin && (
                         <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm" onClick={() => setUserMenuOpen(false)}>
                           <Settings size={16} className="text-maroon-700" /> Manage Products
                         </Link>
                       )}
+
+                      <hr className="border-orange-100 my-1" />
+
+                      {/* Switch account = sign out → login */}
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          localStorage.removeItem('token');
+                          localStorage.removeItem('user');
+                          document.cookie = 'auth_token=; path=/; max-age=0';
+                          router.push('/auth/login');
+                        }}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm text-gray-700 w-full"
+                      >
+                        <RefreshCw size={16} className="text-gray-500" /> Switch Account
+                      </button>
+
+                      <Link href="/account/delete" className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-500" onClick={() => setUserMenuOpen(false)}>
+                        <UserX size={16} /> Delete Account
+                      </Link>
 
                       <hr className="border-orange-100 my-1" />
 
@@ -261,6 +295,14 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center gap-1 h-10">
 
+              {/* Home */}
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 px-4 h-full text-sm font-medium hover:bg-maroon-700 transition-colors"
+              >
+                <Home size={15} /> Home
+              </Link>
+
               {/* All Categories dropdown */}
               <div className="relative h-full" ref={catMenuRef}>
                 <button
@@ -289,10 +331,17 @@ export default function Navbar() {
               </div>
 
               <Link
+                href="/orders"
+                className="px-4 h-full flex items-center text-sm font-medium hover:bg-maroon-700 transition-colors text-maroon-200"
+              >
+                My Orders
+              </Link>
+
+              <Link
                 href="/support"
                 className="ml-auto px-4 h-full flex items-center text-sm font-medium hover:bg-maroon-700 transition-colors text-maroon-200"
               >
-                Support
+                Help
               </Link>
             </div>
           </div>
@@ -316,6 +365,12 @@ export default function Navbar() {
               </div>
             </form>
             <div className="px-4 pb-4 flex flex-col gap-1">
+              {/* Home link */}
+              <Link href="/" onClick={() => setMobileOpen(false)}
+                className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
+                <Home size={15} /> Home
+              </Link>
+              <hr className="border-maroon-700 my-1" />
               {CATEGORIES.map((cat) => (
                 <Link key={cat} href={`/products?category=${encodeURIComponent(cat)}`}
                   onClick={() => setMobileOpen(false)}
@@ -336,6 +391,29 @@ export default function Navbar() {
                     className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
                     <Package size={15} /> My Orders
                   </Link>
+                  <Link href="/account" onClick={() => setMobileOpen(false)}
+                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
+                    <UserCog size={15} /> Account Settings
+                  </Link>
+                  <Link href="/support" onClick={() => setMobileOpen(false)}
+                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
+                    <HelpCircle size={15} /> Help &amp; Policies
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      localStorage.removeItem('token');
+                      localStorage.removeItem('user');
+                      document.cookie = 'auth_token=; path=/; max-age=0';
+                      router.push('/auth/login');
+                    }}
+                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2 w-full text-left">
+                    <RefreshCw size={15} /> Switch Account
+                  </button>
+                  <Link href="/account/delete" onClick={() => setMobileOpen(false)}
+                    className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
+                    <UserX size={15} /> Delete Account
+                  </Link>
                   <button onClick={() => { setMobileOpen(false); performLogout(); }}
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2 w-full text-left">
                     <LogOut size={15} /> Sign Out
@@ -351,12 +429,12 @@ export default function Navbar() {
                     className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium">
                     Create Account
                   </Link>
+                  <Link href="/support" onClick={() => setMobileOpen(false)}
+                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200">
+                    Customer Support
+                  </Link>
                 </>
               )}
-              <Link href="/support" onClick={() => setMobileOpen(false)}
-                className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200">
-                Customer Support
-              </Link>
             </div>
           </div>
         )}
