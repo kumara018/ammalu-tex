@@ -7,11 +7,12 @@ import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 
 const CATEGORIES = [
-  { name: 'Chudithar', emoji: '👘', desc: 'Traditional & Casual', gradient: 'from-rose-100 to-pink-200', border: 'border-rose-300' },
-  { name: 'Tops',      emoji: '👕', desc: 'Trendy & Stylish',    gradient: 'from-orange-100 to-amber-200', border: 'border-orange-300' },
-  { name: 'Lehenga',   emoji: '👗', desc: 'Bridal & Festive',    gradient: 'from-purple-100 to-pink-200',  border: 'border-purple-300' },
-  { name: 'Crop Tops', emoji: '🎽', desc: 'Casual & Modern',     gradient: 'from-sky-100 to-blue-200',     border: 'border-blue-300' },
-  { name: 'Party Wears', emoji: '✨', desc: 'Glam & Elegant',    gradient: 'from-yellow-100 to-gold-200',  border: 'border-yellow-300' },
+  { name: 'Chudithar',   emoji: '👘', desc: 'Traditional & Casual',   gradient: 'from-rose-100 to-pink-200',    border: 'border-rose-300'   },
+  { name: 'Tops',        emoji: '👕', desc: 'Trendy & Stylish',        gradient: 'from-orange-100 to-amber-200', border: 'border-orange-300' },
+  { name: 'Lehenga',     emoji: '👗', desc: 'Bridal & Festive',        gradient: 'from-purple-100 to-pink-200',  border: 'border-purple-300' },
+  { name: 'Half Saree',  emoji: '🥻', desc: 'Traditional & Elegant',   gradient: 'from-teal-100 to-cyan-200',    border: 'border-teal-300'   },
+  { name: 'Crop Tops',   emoji: '🎽', desc: 'Casual & Modern',         gradient: 'from-sky-100 to-blue-200',     border: 'border-blue-300'   },
+  { name: 'Party Wears', emoji: '✨', desc: 'Glam & Elegant',          gradient: 'from-yellow-100 to-amber-200', border: 'border-yellow-300' },
 ];
 
 const FEATURES = [
@@ -103,7 +104,7 @@ export default function HomePage() {
             <h2 className="section-title">Shop by Category</h2>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {CATEGORIES.map(({ name, emoji, desc, gradient, border }) => (
             <Link
               key={name}

@@ -6,7 +6,7 @@ import { productsAPI } from '@/lib/api';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 
-const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Crop Tops', 'Party Wears'];
+const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
 const SORT_OPTIONS = [
   { label: 'Newest First',   value: 'created_at:desc' },
   { label: 'Price: Low–High', value: 'price:asc' },

@@ -112,6 +112,22 @@ def _migrate_db():
                 db.add(models.Product(**p))
             db.commit()
             print(f"[Startup] Added {len(hs_products)} Half Saree product(s).")
+
+        # Seed categories table if empty
+        cat_count = db.query(models.Category).count()
+        if cat_count == 0:
+            DEFAULT_CATEGORIES = [
+                {"name": "Chudithar",   "emoji": "👘", "description": "Traditional & Casual",  "sort_order": 1},
+                {"name": "Tops",        "emoji": "👕", "description": "Trendy & Stylish",       "sort_order": 2},
+                {"name": "Lehenga",     "emoji": "👗", "description": "Bridal & Festive",       "sort_order": 3},
+                {"name": "Half Saree",  "emoji": "🥻", "description": "Traditional & Elegant",  "sort_order": 4},
+                {"name": "Crop Tops",   "emoji": "🎽", "description": "Casual & Modern",        "sort_order": 5},
+                {"name": "Party Wears", "emoji": "✨", "description": "Glam & Elegant",         "sort_order": 6},
+            ]
+            for c in DEFAULT_CATEGORIES:
+                db.add(models.Category(**c))
+            db.commit()
+            print("[Startup] Categories seeded.")
         db.close()
     except Exception as e:
         print(f"[Startup] Size/seed migration note: {e}")
