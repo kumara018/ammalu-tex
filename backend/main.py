@@ -9,7 +9,7 @@ load_dotenv()
 
 from database import engine, Base, SessionLocal
 import models
-from routers import auth, products, cart, orders, admin, payments
+from routers import auth, products, cart, orders, admin, payments, addresses
 
 
 os.makedirs(os.getenv("UPLOAD_DIR", "uploads/products"), exist_ok=True)
@@ -198,6 +198,7 @@ app.include_router(cart.router)
 app.include_router(orders.router)
 app.include_router(admin.router)
 app.include_router(payments.router)
+app.include_router(addresses.router)
 
 
 @app.get("/")

@@ -4,11 +4,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   CreditCard, Smartphone, Truck, AlertCircle, CheckCircle,
-  Lock, Package, ArrowLeft,
+  Lock, Package, ArrowLeft, MapPin, Navigation, Plus, Star,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { ordersAPI } from '@/lib/api';
+import { ordersAPI, addressAPI } from '@/lib/api';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -53,19 +53,77 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [placing, setPlacing] = useState(false);
 
+  // Saved addresses
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddrId, setSelectedAddrId] = useState<number | null>(null);
+  const [showNewAddrForm, setShowNewAddrForm] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    addressAPI.getAll().then(res => {
+      const addrs = res.data || [];
+      setSavedAddresses(addrs);
+      const def = addrs.find((a: any) => a.is_default);
+      if (def) {
+        setSelectedAddrId(def.id);
+        setAddr({
+          full_name:     def.full_name,
+          phone:         def.phone,
+          address_line1: def.address_line1,
+          address_line2: def.address_line2 || '',
+          city:          def.city,
+          state:         def.state,
+          pincode:       def.pincode,
+        });
+      } else if (addrs.length === 0) {
+        setShowNewAddrForm(true);
+      }
+    }).catch(() => setShowNewAddrForm(true));
+  }, [user]);
+
   const [addr, setAddr] = useState({
-    full_name:    user?.full_name || '',
-    phone:        user?.phone || '',
-    address_line1: user?.address_line1 || '',
-    address_line2: user?.address_line2 || '',
-    city:         user?.city || '',
-    state:        user?.state || 'Tamil Nadu',
-    pincode:      user?.pincode || '',
+    full_name:     user?.full_name || '',
+    phone:         user?.phone || '',
+    address_line1: '',
+    address_line2: '',
+    city:          '',
+    state:         'Tamil Nadu',
+    pincode:       '',
   });
   const [addrErrors, setAddrErrors] = useState<Errors>({});
   const [payMethod, setPayMethod] = useState<PayMethod>('razorpay');
   const [upiId, setUpiId]         = useState('');
   const [payErrors, setPayErrors] = useState<Errors>({});
+
+  // Use GPS to fill address
+  const detectLocation = () => {
+    if (!navigator.geolocation) { toast.error('Geolocation not supported'); return; }
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
+          );
+          const data = await res.json();
+          const a = data.address || {};
+          setAddr(prev => ({
+            ...prev,
+            address_line1: [a.road, a.neighbourhood, a.suburb].filter(Boolean).join(', ') || prev.address_line1,
+            city:  a.city || a.town || a.village || a.county || prev.city,
+            state: a.state || prev.state,
+            pincode: a.postcode || prev.pincode,
+          }));
+          toast.success('Location detected!');
+        } catch { toast.error('Could not fetch address from location'); }
+        finally { setGpsLoading(false); }
+      },
+      () => { toast.error('Location access denied. Please allow location.'); setGpsLoading(false); },
+      { timeout: 10000 }
+    );
+  };
 
   const shipping   = total >= 999 ? 0 : 49;
   const grandTotal = total + shipping;
@@ -227,7 +285,54 @@ export default function CheckoutPage() {
               <h2 className="font-bold text-lg text-maroon-900 mb-5 flex items-center gap-2">
                 <Package size={20} /> Delivery Address
               </h2>
+
+              {/* Saved addresses */}
+              {savedAddresses.length > 0 && (
+                <div className="mb-5">
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Saved Addresses</p>
+                  <div className="space-y-2">
+                    {savedAddresses.map((a: any) => (
+                      <label key={a.id}
+                        className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-colors ${selectedAddrId === a.id ? 'border-maroon-700 bg-maroon-50' : 'border-gray-200 hover:border-maroon-300'}`}
+                      >
+                        <input type="radio" name="saved_addr" className="mt-1 accent-maroon-700"
+                          checked={selectedAddrId === a.id}
+                          onChange={() => {
+                            setSelectedAddrId(a.id);
+                            setShowNewAddrForm(false);
+                            setAddr({ full_name: a.full_name, phone: a.phone, address_line1: a.address_line1, address_line2: a.address_line2 || '', city: a.city, state: a.state, pincode: a.pincode });
+                          }}
+                        />
+                        <div className="flex-1 text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-900">{a.full_name}</span>
+                            {a.label && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">{a.label}</span>}
+                            {a.is_default && <span className="text-xs bg-maroon-100 text-maroon-700 px-2 py-0.5 rounded-full flex items-center gap-1"><Star size={10} /> Default</span>}
+                          </div>
+                          <p className="text-gray-500 mt-0.5">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ''}, {a.city}, {a.state} – {a.pincode}</p>
+                          <p className="text-gray-500">{a.phone}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <button onClick={() => { setShowNewAddrForm(v => !v); setSelectedAddrId(null); }}
+                    className="mt-3 flex items-center gap-1.5 text-sm text-maroon-700 font-medium hover:underline">
+                    <Plus size={15} /> {showNewAddrForm ? 'Cancel' : 'Add new address'}
+                  </button>
+                </div>
+              )}
+
+              {/* Address form (new or when no saved addresses) */}
+              {(showNewAddrForm || savedAddresses.length === 0) && (
               <div className="space-y-4">
+                {/* GPS detect button */}
+                <button type="button" onClick={detectLocation} disabled={gpsLoading}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-maroon-300 rounded-xl text-maroon-700 text-sm font-medium hover:bg-maroon-50 transition-colors">
+                  {gpsLoading
+                    ? <><span className="animate-spin h-4 w-4 border-2 border-maroon-600 border-t-transparent rounded-full" /> Detecting location...</>
+                    : <><Navigation size={16} /> Use my current location</>}
+                </button>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="label">Full Name *</label>
@@ -270,8 +375,11 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
-              <button onClick={handleAddrNext} className="btn-primary w-full mt-6 py-3">
-                Continue to Payment →
+              )}
+              {/* end new address form */}
+
+              <button onClick={handleAddrNext} className="btn-primary w-full mt-6 py-3 flex items-center justify-center gap-2">
+                <MapPin size={18} /> Continue to Payment →
               </button>
             </div>
           )}

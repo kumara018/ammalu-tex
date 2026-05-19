@@ -28,6 +28,7 @@ class User(Base):
     cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
     orders     = relationship("Order",    back_populates="user")
     reviews    = relationship("Review",   back_populates="user")
+    addresses  = relationship("Address",  back_populates="user", cascade="all, delete-orphan")
 
 
 class Category(Base):
@@ -80,6 +81,26 @@ class Product(Base):
 
     cart_items = relationship("CartItem", back_populates="product")
     reviews    = relationship("Review",   back_populates="product", cascade="all, delete-orphan")
+
+
+class Address(Base):
+    """Saved delivery addresses per user. Each user can have multiple."""
+    __tablename__ = "addresses"
+
+    id            = Column(Integer, primary_key=True, index=True)   # auto-increment
+    user_id       = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    label         = Column(String(50),  nullable=True)   # "Home", "Work", "Other"
+    full_name     = Column(String(100), nullable=False)
+    phone         = Column(String(20),  nullable=False)
+    address_line1 = Column(String(255), nullable=False)
+    address_line2 = Column(String(255), nullable=True)
+    city          = Column(String(100), nullable=False)
+    state         = Column(String(100), nullable=False)
+    pincode       = Column(String(10),  nullable=False)
+    is_default    = Column(Boolean, default=False)
+    created_at    = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="addresses")
 
 
 class CartItem(Base):

@@ -104,6 +104,14 @@ export const ordersAPI = {
   cancel: (id: number)   => api.post(`/api/orders/${id}/cancel`),
 };
 
+export const addressAPI = {
+  getAll:     ()                             => api.get('/api/addresses/'),
+  add:        (data: object)                 => api.post('/api/addresses/', data),
+  update:     (id: number, data: object)     => api.put(`/api/addresses/${id}`, data),
+  remove:     (id: number)                   => api.delete(`/api/addresses/${id}`),
+  setDefault: (id: number)                   => api.put(`/api/addresses/${id}/set-default`),
+};
+
 export const adminAPI = {
   dashboard:         ()                           => api.get('/api/admin/dashboard'),
   getProducts:       ()                           => api.get('/api/admin/products'),

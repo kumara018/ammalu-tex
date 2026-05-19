@@ -261,7 +261,7 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center gap-1 h-10">
 
-              {/* All Categories dropdown — click to open, outside click to close */}
+              {/* All Categories dropdown */}
               <div className="relative h-full" ref={catMenuRef}>
                 <button
                   onClick={() => setCatMenuOpen(v => !v)}
@@ -273,14 +273,16 @@ export default function Navbar() {
                 {catMenuOpen && (
                   <div className="absolute top-full left-0 w-56 bg-white shadow-xl rounded-b-xl border border-orange-100 py-2 z-50">
                     {CATEGORIES.map((cat) => (
-                      <Link
+                      <button
                         key={cat}
-                        href={`/products?category=${encodeURIComponent(cat)}`}
-                        onClick={() => setCatMenuOpen(false)}
-                        className="block px-4 py-2.5 text-gray-800 hover:bg-orange-50 hover:text-maroon-800 text-sm font-medium transition-colors"
+                        onClick={() => {
+                          setCatMenuOpen(false);
+                          router.push(`/products?category=${encodeURIComponent(cat)}`);
+                        }}
+                        className="w-full text-left block px-4 py-2.5 text-gray-800 hover:bg-orange-50 hover:text-maroon-800 text-sm font-medium transition-colors"
                       >
                         {cat}
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
