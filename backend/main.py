@@ -71,12 +71,28 @@ def _migrate_db():
         with engine.connect() as conn:
             inspector = sa_inspect(engine)
             user_cols = [c["name"] for c in inspector.get_columns("users")]
+
             if "scheduled_delete_at" not in user_cols:
                 conn.execute(text(
                     "ALTER TABLE users ADD COLUMN scheduled_delete_at TIMESTAMP WITH TIME ZONE"
                 ))
                 conn.commit()
                 print("[Startup] Migrated: added scheduled_delete_at to users")
+
+            if "is_deactivated" not in user_cols:
+                conn.execute(text(
+                    "ALTER TABLE users ADD COLUMN is_deactivated BOOLEAN NOT NULL DEFAULT FALSE"
+                ))
+                conn.commit()
+                print("[Startup] Migrated: added is_deactivated to users")
+
+            if "deactivated_at" not in user_cols:
+                conn.execute(text(
+                    "ALTER TABLE users ADD COLUMN deactivated_at TIMESTAMP WITH TIME ZONE"
+                ))
+                conn.commit()
+                print("[Startup] Migrated: added deactivated_at to users")
+
     except Exception as e:
         print(f"[Startup] Migration note: {e}")
 

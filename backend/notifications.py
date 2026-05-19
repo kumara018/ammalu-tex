@@ -296,10 +296,10 @@ def send_deletion_otp_email(email: str, name: str, otp: str):
       </div>
       <div style="background:#fff8e1;border:1px solid #fde68a;border-radius:8px;padding:16px;margin:20px 0;">
         <p style="margin:0;color:#92400e;font-weight:bold;font-size:14px;">
-          ⏳ Your account will be permanently deleted after 5 minutes.
+          ⏳ Your account will be permanently deleted after 24 hours.
         </p>
         <p style="margin:8px 0 0;color:#92400e;font-size:13px;">
-          To cancel: simply log in to your account within 5 minutes.
+          To cancel: simply log in to your account within 24 hours.
         </p>
       </div>
       <p style="color:#888;font-size:13px;">
@@ -324,7 +324,7 @@ def send_deletion_scheduled_email(email: str, name: str, delete_at):
       </div>
       <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:20px 0;text-align:center;">
         <p style="margin:0;color:#15803d;font-size:14px;">
-          Changed your mind? <strong>Simply log in within 5 minutes</strong> to cancel.
+          Changed your mind? <strong>Simply log in within 24 hours</strong> to cancel.
         </p>
       </div>
       <p style="color:#888;font-size:13px;">
