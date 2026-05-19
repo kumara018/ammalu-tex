@@ -80,6 +80,27 @@ def _migrate_db():
     except Exception as e:
         print(f"[Startup] Migration note: {e}")
 
+    # Fix size options by category
+    try:
+        import json
+        db = SessionLocal()
+        tops_sizes      = ["S", "M", "L", "XL", "XXL", "XXXL"]
+        chudithar_sizes = ["L", "XL", "XXL", "XXXL"]
+        updated = 0
+        for product in db.query(models.Product).all():
+            if product.category == "Tops" and product.size_options != tops_sizes:
+                product.size_options = tops_sizes
+                updated += 1
+            elif product.category == "Chudithar" and product.size_options != chudithar_sizes:
+                product.size_options = chudithar_sizes
+                updated += 1
+        if updated:
+            db.commit()
+            print(f"[Startup] Updated size options for {updated} product(s).")
+        db.close()
+    except Exception as e:
+        print(f"[Startup] Size migration note: {e}")
+
 
 def _cleanup_deleted_accounts():
     """Permanently remove accounts whose 24-hour deletion window has passed."""
