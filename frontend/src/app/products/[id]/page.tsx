@@ -10,6 +10,7 @@ import { productsAPI } from '@/lib/api';
 import { Product, Review } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLoginPrompt } from '@/context/LoginPromptContext';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailPage() {
@@ -17,6 +18,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const { addItem } = useCart();
   const { user } = useAuth();
+  const { promptLogin } = useLoginPrompt();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -48,7 +50,10 @@ export default function ProductDetailPage() {
   }, [id]);
 
   const handleAddToCart = async () => {
-    if (!user) { router.push('/auth/login'); return; }
+    if (!user) {
+      promptLogin('Sign in to add this item to your cart and place an order.');
+      return;
+    }
     let hasErr = false;
     if (product!.size_options?.length > 0 && !selectedSize) { setSizeErr(true); hasErr = true; }
     if (product!.colors?.length > 0 && !selectedColor) { setColorErr(true); hasErr = true; }

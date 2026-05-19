@@ -4,7 +4,7 @@ import { ShoppingCart, Star, Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useLoginPrompt } from '@/context/LoginPromptContext';
 import toast from 'react-hot-toast';
 
 interface Props { product: Product; }
@@ -12,7 +12,7 @@ interface Props { product: Product; }
 export default function ProductCard({ product }: Props) {
   const { addItem } = useCart();
   const { user } = useAuth();
-  const router = useRouter();
+  const { promptLogin } = useLoginPrompt();
 
   const discount = product.compare_price
     ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
@@ -20,7 +20,10 @@ export default function ProductCard({ product }: Props) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!user) { router.push('/auth/login'); return; }
+    if (!user) {
+      promptLogin('Sign in to add items to your cart and place orders.');
+      return;
+    }
     try {
       await addItem(product.id, 1);
       toast.success(`${product.name} added to cart!`);

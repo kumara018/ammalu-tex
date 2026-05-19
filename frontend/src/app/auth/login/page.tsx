@@ -128,13 +128,10 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col bg-[#fff9f2]">
 
       {/* Standalone header — brand only, no full navbar */}
-      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center justify-between shadow-md">
-        <Link href="/" className="flex flex-col leading-tight">
+      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center justify-center shadow-md">
+        <Link href="/" className="flex flex-col items-center leading-tight">
           <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
           <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
-        </Link>
-        <Link href="/" className="text-sm text-maroon-200 hover:text-white transition-colors">
-          ← Back to Shop
         </Link>
       </div>
 
