@@ -77,17 +77,17 @@ export default function HomePage() {
       </section>
 
       {/* Features bar */}
-      <section className="bg-white border-b border-orange-100">
+      <section className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-y border-orange-200">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-orange-100">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-orange-200">
             {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-white flex items-center gap-3 px-5 py-4">
-                <div className="p-2 bg-maroon-50 rounded-lg">
-                  <Icon size={20} className="text-maroon-800" />
+              <div key={title} className="bg-gradient-to-br from-amber-50 to-orange-50 flex items-center gap-3 px-5 py-5 hover:from-orange-100 hover:to-amber-100 transition-colors">
+                <div className="p-2.5 bg-maroon-100 rounded-xl flex-shrink-0">
+                  <Icon size={20} className="text-maroon-700" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-maroon-900">{title}</p>
-                  <p className="text-xs text-gray-500">{desc}</p>
+                  <p className="font-bold text-sm text-maroon-900">{title}</p>
+                  <p className="text-xs text-maroon-600 mt-0.5">{desc}</p>
                 </div>
               </div>
             ))}
