@@ -215,6 +215,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://ammalutex.com",
+        "https://www.ammalutex.com",
         "https://ammalu-tex.vercel.app",
         "https://ammalu-tex-git-main-kumara018s-projects.vercel.app",
         "https://ammalu-9bjm3ll9v-kumara018s-projects.vercel.app",
