@@ -345,7 +345,7 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setStep('credentials'); setOtp(''); setError(''); setDevOtp(''); }}
+                  onClick={() => { setStep('credentials'); setOtp(''); setError(''); setOtpCode(''); }}
                   className="text-gray-500 hover:text-gray-700 hover:underline"
                 >
                   ← Change email/password
