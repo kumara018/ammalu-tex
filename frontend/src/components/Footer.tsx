@@ -1,8 +1,9 @@
+'use client';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Facebook, Instagram, MessageCircle, MapIcon } from 'lucide-react';
 import { STORE, WHATSAPP_URL, MAIL_URL, CALL_URL } from '@/lib/config';
 
-// X (Twitter) icon — lucide doesn't have it, use SVG
 function XIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -14,6 +15,8 @@ function XIcon({ size = 16 }: { size?: number }) {
 const SHOP_CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
 
 export default function Footer() {
+  const router = useRouter();
+
   return (
     <footer className="bg-maroon-950 text-maroon-100 mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -22,14 +25,10 @@ export default function Footer() {
           {/* Brand + Social */}
           <div>
             <h3 className="text-xl font-display font-bold text-white mb-1">{STORE.name}</h3>
-            <p className="text-gold-400 text-xs font-medium tracking-widest uppercase mb-4">
-              {STORE.tagline}
-            </p>
+            <p className="text-gold-400 text-xs font-medium tracking-widest uppercase mb-4">{STORE.tagline}</p>
             <p className="text-sm text-maroon-300 leading-relaxed mb-5">
               Your trusted destination for premium quality women&apos;s ethnic and contemporary wear at Texvalley Gangapuram.
             </p>
-
-            {/* Social media icons */}
             <div className="flex gap-2 flex-wrap">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
                 className="p-2 bg-green-700 hover:bg-green-600 rounded-lg transition-colors" title="WhatsApp">
@@ -50,40 +49,46 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Shop categories */}
+          {/* Shop — use router.push for reliable navigation */}
           <div>
             <h4 className="font-semibold text-white mb-4">Shop</h4>
             <ul className="space-y-2 text-sm text-maroon-300">
               {SHOP_CATEGORIES.map((cat) => (
                 <li key={cat}>
-                  <Link href={`/products?category=${encodeURIComponent(cat)}`}
-                    className="hover:text-gold-400 transition-colors">
+                  <button
+                    onClick={() => router.push(`/products?category=${encodeURIComponent(cat)}`)}
+                    className="hover:text-gold-400 transition-colors text-left"
+                  >
                     {cat}
-                  </Link>
+                  </button>
                 </li>
               ))}
+              <li>
+                <button onClick={() => router.push('/products')} className="hover:text-gold-400 transition-colors">
+                  All Products
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Customer service */}
+          {/* Help & Policies */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Customer Service</h4>
+            <h4 className="font-semibold text-white mb-4">Help & Policies</h4>
             <ul className="space-y-2 text-sm text-maroon-300">
-              <li><Link href="/orders"            className="hover:text-gold-400 transition-colors">My Orders</Link></li>
-              <li><Link href="/support"            className="hover:text-gold-400 transition-colors">Contact Us</Link></li>
-              <li><Link href="/support#returns"    className="hover:text-gold-400 transition-colors">Returns & Refunds</Link></li>
-              <li><Link href="/support#shipping"   className="hover:text-gold-400 transition-colors">Shipping Policy</Link></li>
-              <li><Link href="/support#size-guide" className="hover:text-gold-400 transition-colors">Size Guide</Link></li>
-              <li><Link href="/support#faq"        className="hover:text-gold-400 transition-colors">FAQ</Link></li>
+              <li><Link href="/orders"             className="hover:text-gold-400 transition-colors">My Orders</Link></li>
+              <li><Link href="/support"             className="hover:text-gold-400 transition-colors">Contact Us</Link></li>
+              <li><Link href="/support#size-guide"  className="hover:text-gold-400 transition-colors">Size Guide</Link></li>
+              <li><Link href="/support#shipping"    className="hover:text-gold-400 transition-colors">Shipping Policy</Link></li>
+              <li><Link href="/support#returns"     className="hover:text-gold-400 transition-colors">Return & Refund Policy</Link></li>
+              <li><Link href="/support#terms"       className="hover:text-gold-400 transition-colors">Terms & Conditions</Link></li>
+              <li><Link href="/support#privacy"     className="hover:text-gold-400 transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
-          {/* Contact + Map */}
+          {/* Contact */}
           <div>
             <h4 className="font-semibold text-white mb-4">Contact Us</h4>
             <ul className="space-y-3 text-sm text-maroon-300">
-
-              {/* Address + Maps link */}
               <li className="flex items-start gap-2.5">
                 <MapPin size={16} className="text-gold-400 mt-0.5 flex-shrink-0" />
                 <div>
@@ -94,25 +99,25 @@ export default function Footer() {
                   </a>
                 </div>
               </li>
-
-              {/* WhatsApp */}
               <li>
                 <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2.5 hover:text-green-400 transition-colors">
                   <MessageCircle size={16} className="text-green-400 flex-shrink-0" />
-                  WhatsApp Us
+                  WhatsApp: {STORE.phone1}
                 </a>
               </li>
-
-              {/* Phone */}
               <li>
                 <a href={CALL_URL} className="flex items-center gap-2.5 hover:text-gold-400 transition-colors">
                   <Phone size={16} className="text-gold-400 flex-shrink-0" />
                   {STORE.phone1}
                 </a>
               </li>
-
-              {/* Email */}
+              <li>
+                <a href={`tel:${STORE.phone2}`} className="flex items-center gap-2.5 hover:text-gold-400 transition-colors">
+                  <Phone size={16} className="text-gold-400 flex-shrink-0" />
+                  {STORE.phone2}
+                </a>
+              </li>
               <li>
                 <a href={MAIL_URL} className="flex items-center gap-2.5 hover:text-gold-400 transition-colors">
                   <Mail size={16} className="text-gold-400 flex-shrink-0" />
@@ -120,17 +125,14 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-
-            {/* Timings */}
             <div className="mt-4 p-3 bg-maroon-900 rounded-lg text-xs text-maroon-300">
               <p className="font-medium text-white mb-1">Store Timings</p>
               <p>{STORE.weekdays}</p>
-              <p>{STORE.sunday}</p>
+              <p>{STORE.weekend}</p>
             </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
         <div className="border-t border-maroon-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-maroon-400">
           <p>&copy; {new Date().getFullYear()} Ammalu Tex. All rights reserved.</p>
           <div className="flex gap-4">

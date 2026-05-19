@@ -33,6 +33,16 @@ function ProductsContent() {
     sort:     'created_at:desc',
   });
 
+  // Sync filters when URL params change (e.g. clicking category from navbar/footer)
+  useEffect(() => {
+    setFilters(f => ({
+      ...f,
+      category: searchParams.get('category') || '',
+      search:   searchParams.get('search')   || '',
+      featured: searchParams.get('featured') || '',
+    }));
+  }, [searchParams]);
+
   const fetchProducts = useCallback(async (attempt = 1) => {
     setLoading(true);
     const [sortBy, sortOrder] = filters.sort.split(':');
