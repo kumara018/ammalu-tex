@@ -22,8 +22,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Ammalu Tex API",
-    description="Premium Textile Shopping Backend — Texvalley Gangapuram",
-    version="1.0.0",
+    description="Premium Textile Shopping — Texvalley Gangapuram",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -34,6 +34,7 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "https://ammalu-tex.vercel.app",
         "https://ammalu-tex-git-main-kumara018s-projects.vercel.app",
+        "https://ammalu-9bjm3ll9v-kumara018s-projects.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -54,10 +55,10 @@ app.include_router(payments.router)
 @app.get("/")
 def root():
     return {
-        "store": "Ammalu Tex",
+        "store":    "Ammalu Tex",
         "location": "Shop Ground Floor No 129, Texvalley Gangapuram",
-        "status": "API is running",
-        "docs": "/docs",
+        "status":   "API is running",
+        "docs":     "/docs",
     }
 
 
@@ -78,15 +79,14 @@ def reset_admin():
     from database import SessionLocal
     import models
     from auth import hash_password
-    import os
     db = SessionLocal()
     try:
-        admin_email = os.getenv("ADMIN_EMAIL", "kumaraguru27102@gmail.com")
+        admin_email    = os.getenv("ADMIN_EMAIL",    "kumaraguru27102@gmail.com")
         admin_password = os.getenv("ADMIN_PASSWORD", "AmmaluTex@2026")
         existing = db.query(models.User).filter(models.User.email == admin_email).first()
         if existing:
             existing.password_hash = hash_password(admin_password)
-            existing.is_admin = True
+            existing.is_admin  = True
             existing.is_active = True
         else:
             admin = models.User(

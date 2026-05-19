@@ -28,10 +28,12 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  register:      (data: object) => api.post('/api/auth/register', data),
-  login:         (data: object) => api.post('/api/auth/login', data),
-  getMe:         ()             => api.get('/api/auth/me'),
-  updateProfile: (data: object) => api.put('/api/auth/me', data),
+  register:       (data: object) => api.post('/api/auth/register', data),
+  login:          (data: object) => api.post('/api/auth/login', data),
+  getMe:          ()             => api.get('/api/auth/me'),
+  updateProfile:  (data: object) => api.put('/api/auth/me', data),
+  forgotPassword: (data: object) => api.post('/api/auth/forgot-password', data),
+  resetPassword:  (data: object) => api.post('/api/auth/reset-password', data),
 };
 
 export const productsAPI = {

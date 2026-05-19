@@ -7,38 +7,22 @@ import { authAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
-interface Errors { email?: string; password?: string; }
-
 export default function LoginPage() {
   const { login } = useAuth();
-  const router = useRouter();
+  const router    = useRouter();
 
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<Errors>({});
+  const [form, setForm]       = useState({ identifier: '', password: '' });
+  const [errors, setErrors]   = useState<any>({});
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
 
-  const validate = (): boolean => {
-    const e: Errors = {};
-    if (!form.email.trim()) {
-      e.email = 'Email address is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      e.email = 'Enter a valid email address (e.g. name@example.com)';
-    }
-    if (!form.password) {
-      e.password = 'Password is required';
-    } else if (form.password.length < 6) {
-      e.password = 'Password must be at least 6 characters';
-    }
+  const validate = () => {
+    const e: any = {};
+    if (!form.identifier.trim()) e.identifier = 'Email or mobile number is required';
+    if (!form.password)           e.password   = 'Password is required';
     setErrors(e);
     return Object.keys(e).length === 0;
-  };
-
-  const handleChange = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [field]: e.target.value });
-    setErrors({ ...errors, [field]: undefined });
-    setApiError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,12 +31,19 @@ export default function LoginPage() {
     setLoading(true);
     setApiError('');
     try {
-      const res = await authAPI.login({ email: form.email.trim().toLowerCase(), password: form.password });
+      const res = await authAPI.login({
+        identifier: form.identifier.trim(),
+        password:   form.password,
+      });
       login(res.data.access_token, res.data.user);
-      toast.success(`Welcome back, ${res.data.user.full_name.split(' ')[0]}!`);
-      router.push('/');
+      toast.success(`Welcome back, ${res.data.user.full_name.split(' ')[0]}! 👋`);
+      if (res.data.user.is_admin) {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
     } catch (err: any) {
-      const msg = err.response?.data?.detail || 'Login failed. Please try again.';
+      const msg = err.response?.data?.detail || 'Login failed. Please check your credentials.';
       setApiError(msg);
     } finally {
       setLoading(false);
@@ -69,11 +60,10 @@ export default function LoginPage() {
             <p className="text-gold-600 text-xs font-medium tracking-widest uppercase">Premium Textiles</p>
           </Link>
           <h2 className="text-2xl font-bold text-gray-900">Sign in to your account</h2>
-          <p className="text-gray-500 text-sm mt-1">Welcome back! Please enter your credentials.</p>
+          <p className="text-gray-500 text-sm mt-1">Use your email or mobile number</p>
         </div>
 
         <div className="card p-8 shadow-lg">
-          {/* API Error */}
           {apiError && (
             <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
@@ -82,19 +72,19 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
-            {/* Email */}
+            {/* Email or Phone */}
             <div>
-              <label className="label">Email Address *</label>
+              <label className="label">Email or Mobile Number *</label>
               <input
-                type="email"
-                value={form.email}
-                onChange={handleChange('email')}
-                placeholder="your@email.com"
-                className={`input-field ${errors.email ? 'input-error' : ''}`}
-                autoComplete="email"
+                type="text"
+                value={form.identifier}
+                onChange={(e) => { setForm({ ...form, identifier: e.target.value }); setErrors({ ...errors, identifier: undefined }); setApiError(''); }}
+                placeholder="email@example.com or 9876543210"
+                className={`input-field ${errors.identifier ? 'input-error' : ''}`}
+                autoComplete="username"
               />
-              {errors.email && (
-                <p className="error-msg"><AlertCircle size={13} />{errors.email}</p>
+              {errors.identifier && (
+                <p className="error-msg"><AlertCircle size={13} />{errors.identifier}</p>
               )}
             </div>
 
@@ -102,7 +92,7 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="label mb-0">Password *</label>
-                <Link href="/support" className="text-xs text-maroon-700 hover:underline">
+                <Link href="/auth/forgot-password" className="text-xs text-maroon-700 hover:underline font-medium">
                   Forgot password?
                 </Link>
               </div>
@@ -110,16 +100,13 @@ export default function LoginPage() {
                 <input
                   type={showPass ? 'text' : 'password'}
                   value={form.password}
-                  onChange={handleChange('password')}
+                  onChange={(e) => { setForm({ ...form, password: e.target.value }); setErrors({ ...errors, password: undefined }); setApiError(''); }}
                   placeholder="Enter your password"
                   className={`input-field pr-12 ${errors.password ? 'input-error' : ''}`}
                   autoComplete="current-password"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1"
-                >
+                <button type="button" onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1">
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -128,16 +115,11 @@ export default function LoginPage() {
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2 py-3"
-            >
-              {loading ? (
-                <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Signing in...</>
-              ) : (
-                <><LogIn size={18} /> Sign In</>
-              )}
+            <button type="submit" disabled={loading}
+              className="btn-primary w-full flex items-center justify-center gap-2 py-3">
+              {loading
+                ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Signing in...</>
+                : <><LogIn size={18} /> Sign In</>}
             </button>
           </form>
 
@@ -150,12 +132,6 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          By signing in, you agree to our{' '}
-          <Link href="/support#terms" className="underline">Terms of Service</Link> and{' '}
-          <Link href="/support#privacy" className="underline">Privacy Policy</Link>.
-        </p>
       </div>
     </div>
   );
