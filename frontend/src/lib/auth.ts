@@ -37,8 +37,20 @@ export async function performLogin(
 }
 
 export function performLogout() {
+  // Remove only the active session from saved sessions list
+  try {
+    const sessionsRaw = localStorage.getItem('sessions');
+    const userRaw     = localStorage.getItem('user');
+    if (sessionsRaw && userRaw) {
+      const sessions  = JSON.parse(sessionsRaw);
+      const current   = JSON.parse(userRaw);
+      const updated   = sessions.filter((s: any) => s.user?.id !== current?.id);
+      localStorage.setItem('sessions', JSON.stringify(updated));
+    }
+  } catch {}
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  document.cookie = 'auth_token=; path=/; max-age=0';
   window.location.href = '/';
 }
 

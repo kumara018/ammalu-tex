@@ -18,7 +18,7 @@ const CATEGORIES = [
 ];
 
 export default function Navbar() {
-  const { user, logout, sessions, switchAccount } = useAuth();
+  const { user, logout, sessions, switchAccount, removeSession } = useAuth();
   const { count } = useCart();
   const router = useRouter();
 
@@ -286,7 +286,11 @@ export default function Navbar() {
 
                       <hr className="border-orange-100 my-1" />
 
-                      <button onClick={() => { setUserMenuOpen(false); performLogout(); }}
+                      <button onClick={() => {
+                          setUserMenuOpen(false);
+                          logout();                      // removes current session, updates localStorage
+                          window.location.href = '/';    // full reload so all state is clean
+                        }}
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 w-full">
                         <LogOut size={16} /> Sign Out
                       </button>
@@ -468,7 +472,11 @@ export default function Navbar() {
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
                     <UserX size={15} /> Delete Account
                   </Link>
-                  <button onClick={() => { setMobileOpen(false); performLogout(); }}
+                  <button onClick={() => {
+                      setMobileOpen(false);
+                      logout();
+                      window.location.href = '/';
+                    }}
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2 w-full text-left">
                     <LogOut size={15} /> Sign Out
                   </button>

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, ShieldCheck, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -12,14 +12,22 @@ type Step = 'credentials' | 'otp';
 
 export default function LoginPage() {
   const { login, user } = useAuth();
-  const router       = useRouter();
-  const searchParams = useSearchParams();
-  const isAddMode    = searchParams.get('add') === '1';
+  const router = useRouter();
 
-  // Redirect if already logged in — but NOT when adding another account
+  // Redirect if already logged in — but NOT when adding another account (?add=1)
+  // Read window.location.search directly inside the effect to avoid useSearchParams
+  // timing issues (hook may not have params on first render in Next.js App Router)
   useEffect(() => {
-    if (user && !isAddMode) router.replace(user.is_admin ? '/admin' : '/');
-  }, [user, router, isAddMode]);
+    if (!user) return;
+    const params  = new URLSearchParams(window.location.search);
+    const addMode = params.get('add') === '1';
+    if (!addMode) router.replace(user.is_admin ? '/admin' : '/');
+  }, [user, router]);
+
+  // Derive isAddMode for UI labels (always safe on client)
+  const isAddMode = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('add') === '1'
+    : false;
 
   // ── Step 1 fields ─────────────────────────────────────────────────────────
   const [identifier, setIdentifier] = useState('');
