@@ -30,7 +30,7 @@ YEAR          = datetime.now().year
 # ── Low-level send (runs in background thread so API never blocks) ─────────────
 def _send_email(to: str, subject: str, html: str):
     if not SMTP_EMAIL or not SMTP_PASS:
-        print(f"[Email] {subject} → {to}")
+        print(f"[Email SKIP — SMTP not configured] {subject} → {to}")
         return
     try:
         msg = MIMEMultipart("alternative")
@@ -39,11 +39,16 @@ def _send_email(to: str, subject: str, html: str):
         msg["To"]       = to
         msg["Reply-To"] = SUPPORT_EMAIL
         msg.attach(MIMEText(html, "html"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as s:
             s.login(SMTP_EMAIL, SMTP_PASS)
             s.sendmail(SMTP_EMAIL, to, msg.as_string())
+        print(f"[Email SENT ✓] {subject} → {to}")
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"[Email AUTH ERROR] Gmail rejected login for {SMTP_EMAIL}. Check App Password. Error: {e}")
+    except smtplib.SMTPException as e:
+        print(f"[Email SMTP ERROR] {e}")
     except Exception as e:
-        print(f"[Email Error] {e}")
+        print(f"[Email ERROR] {type(e).__name__}: {e}")
 
 def _bg(to: str, subject: str, html: str):
     """Fire-and-forget email in a daemon thread."""
