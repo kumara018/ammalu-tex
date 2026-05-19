@@ -1,60 +1,52 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { performLogin, getRedirectUrl } from '@/lib/auth';
+import { performLogin, redirectAfterLogin } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const router    = useRouter();
 
-  const [form, setForm]         = useState({ identifier: '', password: '' });
-  const [errors, setErrors]     = useState<any>({});
-  const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [apiError, setApiError] = useState('');
-
-  const validate = () => {
-    const e: any = {};
-    if (!form.identifier.trim()) e.identifier = 'Email or mobile number is required';
-    if (!form.password)           e.password   = 'Password is required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+  const [identifier, setIdentifier] = useState('');
+  const [password,   setPassword]   = useState('');
+  const [showPass,   setShowPass]   = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    setApiError('');
+    if (!identifier.trim()) { setError('Email or mobile number is required'); return; }
+    if (!password)           { setError('Password is required');               return; }
 
-    const result = await performLogin(form.identifier, form.password);
+    setLoading(true);
+    setError('');
+
+    const result = await performLogin(identifier, password);
 
     if (result.success) {
-      // Sync AuthContext state with what performLogin already stored
+      // Sync React state (so Navbar shows user name immediately)
       const token = localStorage.getItem('token')!;
       const user  = JSON.parse(localStorage.getItem('user')!);
       login(token, user);
 
       toast.success(`Welcome back, ${result.name!.split(' ')[0]}! 👋`);
 
-      // Redirect: admin → /admin, user → /
-      router.push(getRedirectUrl(result.isAdmin!));
+      // Hard navigation → admin page reads from localStorage cleanly
+      // Admin login  → /admin
+      // User  login  → /
+      redirectAfterLogin(result.isAdmin!);
     } else {
-      setApiError(result.error!);
+      setError(result.error!);
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fff9f2]">
       <div className="w-full max-w-md">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
             <h1 className="text-3xl font-display font-bold text-maroon-900">Ammalu Tex</h1>
@@ -65,32 +57,28 @@ export default function LoginPage() {
         </div>
 
         <div className="card p-8 shadow-lg">
-          {apiError && (
+
+          {error && (
             <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
-              <p className="text-red-700 text-sm">{apiError}</p>
+              <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
 
-            {/* Email or Phone */}
             <div>
               <label className="label">Email or Mobile Number *</label>
               <input
                 type="text"
-                value={form.identifier}
-                onChange={(e) => { setForm({ ...form, identifier: e.target.value }); setErrors({ ...errors, identifier: undefined }); setApiError(''); }}
+                value={identifier}
+                onChange={(e) => { setIdentifier(e.target.value); setError(''); }}
                 placeholder="email@example.com or 9876543210"
-                className={`input-field ${errors.identifier ? 'input-error' : ''}`}
+                className="input-field"
                 autoComplete="username"
               />
-              {errors.identifier && (
-                <p className="error-msg"><AlertCircle size={13} />{errors.identifier}</p>
-              )}
             </div>
 
-            {/* Password */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="label mb-0">Password *</label>
@@ -101,10 +89,10 @@ export default function LoginPage() {
               <div className="relative">
                 <input
                   type={showPass ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={(e) => { setForm({ ...form, password: e.target.value }); setErrors({ ...errors, password: undefined }); setApiError(''); }}
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(''); }}
                   placeholder="Enter your password"
-                  className={`input-field pr-12 ${errors.password ? 'input-error' : ''}`}
+                  className="input-field pr-12"
                   autoComplete="current-password"
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
@@ -112,9 +100,6 @@ export default function LoginPage() {
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="error-msg"><AlertCircle size={13} />{errors.password}</p>
-              )}
             </div>
 
             <button type="submit" disabled={loading}

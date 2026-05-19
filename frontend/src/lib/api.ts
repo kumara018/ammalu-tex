@@ -1,13 +1,29 @@
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Determine backend URL based on where the app is running.
+// - localhost / 127.0.0.1  →  local FastAPI server
+// - anywhere else (Vercel) →  Render backend
+function getApiBase(): string {
+  if (typeof window === 'undefined') {
+    // Server-side (Next.js SSR) — always use Render
+    return 'https://ammalu-tex.onrender.com';
+  }
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://localhost:8000';
+  }
+  return 'https://ammalu-tex.onrender.com';
+}
+
+const API_BASE = getApiBase();
 
 const api = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30000, // 30s timeout (for Render cold starts)
+  timeout: 30000, // 30s — allows for Render cold starts
 });
 
+// Attach JWT token to every request
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
@@ -16,19 +32,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Auto-logout on 401 — but NEVER on auth endpoints (login/register/forgot/reset)
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    // Only auto-logout on 401 for NON-auth endpoints
     const url = err.config?.url || '';
-    const isAuthCall = url.includes('/api/auth/login') ||
-                       url.includes('/api/auth/register') ||
-                       url.includes('/api/auth/forgot') ||
-                       url.includes('/api/auth/reset');
+    const isAuthCall =
+      url.includes('/api/auth/login') ||
+      url.includes('/api/auth/register') ||
+      url.includes('/api/auth/forgot') ||
+      url.includes('/api/auth/reset');
 
     if (err.response?.status === 401 && !isAuthCall && typeof window !== 'undefined') {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      document.cookie = 'auth_token=; path=/; max-age=0';
       window.location.href = '/auth/login';
     }
     return Promise.reject(err);
