@@ -40,12 +40,30 @@ def _send_email(to: str, subject: str, html: str):
     # ── Path A: SendGrid (recommended on Render) ───────────────────────────────
     if sg_key:
         from_email = SMTP_EMAIL or "noreply@ammalu-tex.com"
+        # Plain-text version strips HTML tags for multipart — improves deliverability
+        import re as _re
+        plain = _re.sub(r'<[^>]+>', '', html)
+        plain = _re.sub(r'\s{2,}', '\n', plain).strip()
         payload = _json.dumps({
             "personalizations": [{"to": [{"email": to}]}],
             "from": {"email": from_email, "name": STORE_NAME},
             "reply_to": {"email": SUPPORT_EMAIL},
             "subject": subject,
-            "content": [{"type": "text/html", "value": html}],
+            "content": [
+                {"type": "text/plain", "value": plain},
+                {"type": "text/html",  "value": html},
+            ],
+            # Unsubscribe header — required by Gmail to classify as "wanted" mail
+            "headers": {
+                "List-Unsubscribe": f"<mailto:{SUPPORT_EMAIL}?subject=Unsubscribe>",
+                "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+                "X-Mailer": "Ammalu Tex Notifications",
+            },
+            "tracking_settings": {
+                "click_tracking":      {"enable": False},
+                "open_tracking":       {"enable": False},
+                "subscription_tracking": {"enable": False},
+            },
         }).encode()
         try:
             request = _req.Request(
@@ -352,7 +370,7 @@ def send_deletion_otp_email(email: str, name: str, otp: str):
         If you did NOT request this, ignore this email — your account remains safe.
       </p>
     """)
-    _bg(email, f"⚠️ Account Deletion OTP — {STORE_NAME}", html)
+    _bg(email, f"Confirm account deletion — {STORE_NAME}", html)
 
 
 # ── 8. Deletion confirmed ──────────────────────────────────────────────────────
@@ -404,7 +422,7 @@ def send_login_otp_email(email: str, name: str, otp: str):
         You can safely ignore this email — your account is secure.
       </p>
     """)
-    _bg(email, f"🔐 {otp} is your Ammalu Tex login OTP", html)
+    _bg(email, f"Your Ammalu Tex sign-in code", html)
 
 
 # ── 10. Password reset OTP email ──────────────────────────────────────────────
@@ -429,7 +447,7 @@ def send_password_reset_otp_email(email: str, name: str, otp: str):
       </div>
       {_btn("Go to Reset Password →", f"{STORE_URL}/auth/forgot-password")}
     """)
-    _bg(email, f"🔑 {otp} is your Ammalu Tex password reset OTP", html)
+    _bg(email, f"Reset your Ammalu Tex password", html)
 
 
 # ── 11. Cart reminder email ───────────────────────────────────────────────────
@@ -456,7 +474,7 @@ def send_cart_reminder_email(email: str, name: str, product_name: str, product_i
         Or <a href="{STORE_URL}/products" style="color:#7c1d2e;">continue browsing</a> our collection.
       </p>
     """)
-    _bg(email, f"🛒 {product_name} is in your cart — complete your order | {STORE_NAME}", html)
+    _bg(email, f"You left something behind — {product_name} | {STORE_NAME}", html)
 
 
 # ── 12. Delivery OTP email ─────────────────────────────────────────────────────
