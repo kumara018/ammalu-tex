@@ -22,7 +22,7 @@ const emptyProduct = {
 };
 
 export default function AdminPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState<'dash'|'products'|'orders'|'users'>('dash');
   const [dash, setDash] = useState<DashData | null>(null);
@@ -38,10 +38,11 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;          // wait for localStorage restore
     if (!user) { router.push('/auth/login'); return; }
     if (!user.is_admin) { router.push('/'); return; }
     loadDash();
-  }, [user]);
+  }, [user, authLoading]);
 
   const loadDash = async () => {
     try {

@@ -36,10 +36,11 @@ declare global {
 
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { router.push('/auth/login'); return; }
     if (items.length === 0) { router.push('/cart'); return; }
     // Load Razorpay script
@@ -48,7 +49,7 @@ export default function CheckoutPage() {
     script.async = true;
     document.body.appendChild(script);
     return () => { document.body.removeChild(script); };
-  }, [user, items]);
+  }, [user, items, authLoading]);
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [placing, setPlacing] = useState(false);

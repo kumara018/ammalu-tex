@@ -37,11 +37,10 @@ export default function LoginPage() {
       });
       login(res.data.access_token, res.data.user);
       toast.success(`Welcome back, ${res.data.user.full_name.split(' ')[0]}! 👋`);
-      if (res.data.user.is_admin) {
-        router.push('/admin');
-      } else {
-        router.push('/');
-      }
+      // Use hard navigation so AuthContext re-reads token from localStorage
+      setTimeout(() => {
+        window.location.href = res.data.user.is_admin ? '/admin' : '/';
+      }, 500);
     } catch (err: any) {
       const msg = err.response?.data?.detail || 'Login failed. Please check your credentials.';
       setApiError(msg);

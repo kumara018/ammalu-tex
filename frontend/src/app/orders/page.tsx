@@ -17,12 +17,13 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; b
 };
 
 export default function OrdersPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { router.push('/auth/login'); return; }
     const load = async () => {
       try {
@@ -31,8 +32,9 @@ export default function OrdersPage() {
       } catch {} finally { setLoading(false); }
     };
     load();
-  }, [user]);
+  }, [user, authLoading]);
 
+  if (authLoading) return null;
   if (!user) return null;
 
   if (loading) return (

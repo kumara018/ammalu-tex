@@ -16,7 +16,7 @@ const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'delivere
 function OrderDetailContent() {
   const { id } = useParams();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const isNew = searchParams.get('new') === '1';
 
@@ -25,6 +25,7 @@ function OrderDetailContent() {
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { router.push('/auth/login'); return; }
     const load = async () => {
       try {
@@ -33,7 +34,7 @@ function OrderDetailContent() {
       } catch { router.push('/orders'); } finally { setLoading(false); }
     };
     load();
-  }, [id, user]);
+  }, [id, user, authLoading]);
 
   const handleCancel = async () => {
     if (!confirm('Are you sure you want to cancel this order?')) return;

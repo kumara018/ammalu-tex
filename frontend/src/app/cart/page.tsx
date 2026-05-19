@@ -9,14 +9,16 @@ import toast from 'react-hot-toast';
 
 export default function CartPage() {
   const { items, count, total, loading, fetchCart, updateItem, removeItem, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { router.push('/auth/login'); return; }
     fetchCart();
-  }, [user]);
+  }, [user, authLoading]);
 
+  if (authLoading) return null;
   if (!user) return null;
 
   const shipping = total >= 999 ? 0 : 49;
