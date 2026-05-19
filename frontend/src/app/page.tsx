@@ -65,7 +65,7 @@ export default function HomePage() {
               <Link href="/products" className="btn-gold inline-flex items-center gap-2">
                 Shop Now <ArrowRight size={18} />
               </Link>
-              <Link href="/products?featured=true" className="btn-secondary border-white text-white hover:bg-white/10 hover:text-white inline-flex items-center gap-2">
+              <Link href="/products?featured=true" className="inline-flex items-center gap-2 font-semibold py-2.5 px-6 rounded-lg border-2 border-white text-white hover:bg-white/15 transition-all duration-200 active:scale-95">
                 View Featured
               </Link>
             </div>
