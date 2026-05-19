@@ -263,3 +263,80 @@ def reset_admin():
     _ensure_admin()
     admin_email = os.getenv("ADMIN_EMAIL", "kumaraguru27102@gmail.com")
     return {"status": "Admin reset successfully", "email": admin_email}
+
+
+@app.get("/test-email")
+def test_email(to: str = ""):
+    """
+    Diagnostic endpoint — tests SMTP connectivity and returns the exact result.
+    Usage: GET /test-email?to=youremail@gmail.com
+    No background thread — errors are returned directly in the response.
+    """
+    import smtplib
+    from email.mime.text import MIMEText
+
+    smtp_email = os.getenv("SMTP_EMAIL", "")
+    smtp_pass  = os.getenv("SMTP_PASSWORD", "")
+
+    if not smtp_email or not smtp_pass:
+        return {
+            "status":  "error",
+            "message": "SMTP_EMAIL or SMTP_PASSWORD is not set in Render environment variables.",
+            "smtp_email_set":    bool(smtp_email),
+            "smtp_password_set": bool(smtp_pass),
+        }
+
+    target = to.strip() if to.strip() else smtp_email
+
+    try:
+        msg = MIMEText(
+            "This is a test email from Ammalu Tex backend (Render).\n\n"
+            "If you receive this, SMTP is working correctly!\n\n"
+            "— Ammalu Tex System"
+        )
+        msg["Subject"] = "✅ Ammalu Tex — SMTP Test Email"
+        msg["From"]    = f"Ammalu Tex <{smtp_email}>"
+        msg["To"]      = target
+
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as s:
+            s.ehlo()
+            s.starttls()
+            s.ehlo()
+            s.login(smtp_email, smtp_pass)
+            s.sendmail(smtp_email, target, msg.as_string())
+
+        return {
+            "status":  "success",
+            "message": f"Test email sent successfully to {target}. Check your inbox (and spam folder).",
+            "from":    smtp_email,
+            "to":      target,
+        }
+
+    except smtplib.SMTPAuthenticationError as e:
+        return {
+            "status":  "error",
+            "type":    "SMTPAuthenticationError",
+            "message": (
+                f"Gmail rejected the login for {smtp_email}. "
+                "Make sure SMTP_PASSWORD is a 16-character Gmail App Password with NO spaces. "
+                f"Raw error: {e}"
+            ),
+        }
+    except smtplib.SMTPConnectError as e:
+        return {
+            "status":  "error",
+            "type":    "SMTPConnectError",
+            "message": f"Could not connect to smtp.gmail.com:587. Render may be blocking outbound port 587. Error: {e}",
+        }
+    except smtplib.SMTPException as e:
+        return {
+            "status":  "error",
+            "type":    "SMTPException",
+            "message": str(e),
+        }
+    except Exception as e:
+        return {
+            "status":  "error",
+            "type":    type(e).__name__,
+            "message": str(e),
+        }

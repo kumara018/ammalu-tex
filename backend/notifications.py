@@ -39,7 +39,10 @@ def _send_email(to: str, subject: str, html: str):
         msg["To"]       = to
         msg["Reply-To"] = SUPPORT_EMAIL
         msg.attach(MIMEText(html, "html"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as s:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as s:
+            s.ehlo()
+            s.starttls()
+            s.ehlo()
             s.login(SMTP_EMAIL, SMTP_PASS)
             s.sendmail(SMTP_EMAIL, to, msg.as_string())
         print(f"[Email SENT ✓] {subject} → {to}")
