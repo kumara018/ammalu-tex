@@ -82,24 +82,39 @@ def _migrate_db():
 
     # Fix size options by category
     try:
-        import json
         db = SessionLocal()
-        tops_sizes      = ["S", "M", "L", "XL", "XXL", "XXXL"]
-        chudithar_sizes = ["L", "XL", "XXL", "XXXL"]
+        s_to_xxxl = ["S", "M", "L", "XL", "XXL", "XXXL"]
+        l_to_xxxl = ["L", "XL", "XXL", "XXXL"]
+        size_map  = {
+            "Tops":       s_to_xxxl,
+            "Crop Tops":  s_to_xxxl,
+            "Chudithar":  l_to_xxxl,
+            "Lehenga":    l_to_xxxl,
+            "Half Saree": l_to_xxxl,
+            "Party Wears":l_to_xxxl,
+        }
         updated = 0
         for product in db.query(models.Product).all():
-            if product.category == "Tops" and product.size_options != tops_sizes:
-                product.size_options = tops_sizes
-                updated += 1
-            elif product.category == "Chudithar" and product.size_options != chudithar_sizes:
-                product.size_options = chudithar_sizes
+            target = size_map.get(product.category)
+            if target and product.size_options != target:
+                product.size_options = target
                 updated += 1
         if updated:
             db.commit()
             print(f"[Startup] Updated size options for {updated} product(s).")
+
+        # Seed Half Saree products if none exist
+        hs_count = db.query(models.Product).filter(models.Product.category == "Half Saree").count()
+        if hs_count == 0:
+            from seed_data import PRODUCTS
+            hs_products = [p for p in PRODUCTS if p["category"] == "Half Saree"]
+            for p in hs_products:
+                db.add(models.Product(**p))
+            db.commit()
+            print(f"[Startup] Added {len(hs_products)} Half Saree product(s).")
         db.close()
     except Exception as e:
-        print(f"[Startup] Size migration note: {e}")
+        print(f"[Startup] Size/seed migration note: {e}")
 
 
 def _cleanup_deleted_accounts():

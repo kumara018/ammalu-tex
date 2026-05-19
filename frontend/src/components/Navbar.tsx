@@ -258,19 +258,22 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center gap-1 h-10">
 
-              {/* All Categories dropdown */}
-              <button
+              {/* All Categories dropdown — wrapper div keeps hover active over menu */}
+              <div
+                className="relative h-full"
                 onMouseEnter={() => setCatMenuOpen(true)}
                 onMouseLeave={() => setCatMenuOpen(false)}
-                className="relative flex items-center gap-1 px-4 h-full text-sm font-medium hover:bg-maroon-700 transition-colors"
               >
-                <Menu size={16} /> All Categories <ChevronDown size={14} />
+                <button className="flex items-center gap-1.5 px-4 h-full text-sm font-medium hover:bg-maroon-700 transition-colors">
+                  <Menu size={16} /> All Categories <ChevronDown size={14} className={`transition-transform ${catMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
                 {catMenuOpen && (
-                  <div className="absolute top-full left-0 w-52 bg-white shadow-xl rounded-b-xl border border-orange-100 py-2 z-50">
+                  <div className="absolute top-full left-0 w-56 bg-white shadow-xl rounded-b-xl border border-orange-100 py-2 z-50">
                     {CATEGORIES.map((cat) => (
                       <Link
                         key={cat}
                         href={`/products?category=${encodeURIComponent(cat)}`}
+                        onClick={() => setCatMenuOpen(false)}
                         className="block px-4 py-2.5 text-gray-800 hover:bg-orange-50 hover:text-maroon-800 text-sm font-medium transition-colors"
                       >
                         {cat}
@@ -278,18 +281,7 @@ export default function Navbar() {
                     ))}
                   </div>
                 )}
-              </button>
-
-              {/* Individual category links */}
-              {CATEGORIES.map((cat) => (
-                <Link
-                  key={cat}
-                  href={`/products?category=${encodeURIComponent(cat)}`}
-                  className="px-3 h-full flex items-center text-sm font-medium hover:bg-maroon-700 transition-colors text-maroon-100 hover:text-white whitespace-nowrap"
-                >
-                  {cat}
-                </Link>
-              ))}
+              </div>
 
               <Link
                 href="/support"
