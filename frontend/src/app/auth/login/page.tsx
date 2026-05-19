@@ -52,8 +52,8 @@ export default function LoginPage() {
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
   // ── Step 1: verify credentials → send OTP ──────────────────────────────────
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendOtp = async (e: React.FormEvent, isRetry = false) => {
+    if (!isRetry) e.preventDefault();
     if (!identifier.trim()) { setError('Email or mobile number is required'); return; }
     if (!password)           { setError('Password is required');               return; }
 
@@ -67,7 +67,13 @@ export default function LoginPage() {
       startTimer();
       toast.success('OTP sent! Check your email.');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid credentials. Please try again.');
+      if (!err.response) {
+        // Network error — Render backend was sleeping and waking up
+        setError('⏳ Server is starting up. Retrying in 15 seconds automatically...');
+        setTimeout(() => handleSendOtp(e, true), 15000);
+      } else {
+        setError(err.response?.data?.detail || 'Incorrect email/phone or password.');
+      }
     } finally {
       setLoading(false);
     }
@@ -108,7 +114,11 @@ export default function LoginPage() {
       startTimer();
       toast.success('New OTP sent!');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to resend OTP. Please try again.');
+      if (!err.response) {
+        setError('⏳ Connection issue. Please wait a moment and try again.');
+      } else {
+        setError(err.response?.data?.detail || 'Failed to resend OTP. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

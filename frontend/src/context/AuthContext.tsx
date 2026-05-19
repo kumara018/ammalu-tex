@@ -40,6 +40,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
+  // ── Keep Render backend awake ─────────────────────────────────────────────
+  useEffect(() => {
+    const API = process.env.NEXT_PUBLIC_API_URL || 'https://ammalu-tex.onrender.com';
+    const ping = () => fetch(`${API}/health`, { method: 'GET' }).catch(() => {});
+    ping(); // Wake up immediately when app loads
+    const iv = setInterval(ping, 14 * 60 * 1000); // Ping every 14 min
+    return () => clearInterval(iv);
+  }, []);
+
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));

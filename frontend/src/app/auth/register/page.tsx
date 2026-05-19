@@ -204,9 +204,13 @@ export default function RegisterPage() {
       // Hard navigation — signals Chrome/Safari to offer "Save Password"
       window.location.href = '/';
     } catch (err: any) {
-      const detail = err.response?.data?.detail;
-      if (Array.isArray(detail)) setApiError(detail.map((d: any) => d.msg).join('. '));
-      else setApiError(detail || 'Registration failed. Please try again.');
+      if (!err.response) {
+        setApiError('⏳ Server is starting up. Please wait 15 seconds and try again.');
+      } else {
+        const detail = err.response?.data?.detail;
+        if (Array.isArray(detail)) setApiError(detail.map((d: any) => d.msg).join('. '));
+        else setApiError(detail || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
