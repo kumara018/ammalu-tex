@@ -32,22 +32,34 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto-logout on 401 — but NEVER on auth endpoints (login/register/forgot/reset)
+// Auto-logout on 401 — but NEVER on auth endpoints or page-load API calls.
+// Only redirect to login if /api/auth/me ALSO fails (token truly invalid).
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
-    const url = err.config?.url || '';
-    const isAuthCall =
-      url.includes('/api/auth/login') ||
-      url.includes('/api/auth/register') ||
-      url.includes('/api/auth/forgot') ||
-      url.includes('/api/auth/reset');
+  async (err) => {
+    const url    = err.config?.url || '';
+    const status = err.response?.status;
 
-    if (err.response?.status === 401 && !isAuthCall && typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      document.cookie = 'auth_token=; path=/; max-age=0';
-      window.location.href = '/auth/login';
+    const isAuthEndpoint =
+      url.includes('/api/auth/login')    ||
+      url.includes('/api/auth/register') ||
+      url.includes('/api/auth/forgot')   ||
+      url.includes('/api/auth/reset')    ||
+      url.includes('/api/auth/me');
+
+    if (status === 401 && !isAuthEndpoint && typeof window !== 'undefined') {
+      // Verify the token is truly dead before logging out
+      try {
+        await api.get('/api/auth/me');
+        // Token is still valid — just this endpoint had an issue, don't logout
+      } catch (meErr: any) {
+        if (meErr.response?.status === 401) {
+          // Token is truly invalid — clear everything and redirect
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/auth/login';
+        }
+      }
     }
     return Promise.reject(err);
   }
