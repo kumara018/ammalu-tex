@@ -33,26 +33,30 @@ function ProductsContent() {
     sort:     'created_at:desc',
   });
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = useCallback(async (attempt = 1) => {
     setLoading(true);
-    try {
-      const [sortBy, sortOrder] = filters.sort.split(':');
-      const params: any = {
-        sort_by: sortBy, sort_order: sortOrder, limit: 40,
-      };
-      if (filters.category) params.category = filters.category;
-      if (filters.search)   params.search   = filters.search;
-      if (filters.minPrice) params.min_price = Number(filters.minPrice);
-      if (filters.maxPrice) params.max_price = Number(filters.maxPrice);
-      if (filters.featured) params.featured  = true;
+    const [sortBy, sortOrder] = filters.sort.split(':');
+    const params: any = { sort_by: sortBy, sort_order: sortOrder, limit: 40 };
+    if (filters.category) params.category = filters.category;
+    if (filters.search)   params.search   = filters.search;
+    if (filters.minPrice) params.min_price = Number(filters.minPrice);
+    if (filters.maxPrice) params.max_price = Number(filters.maxPrice);
+    if (filters.featured) params.featured  = true;
 
+    try {
       const res = await productsAPI.getAll(params);
-      setProducts(res.data);
-      setTotal(res.data.length);
-    } catch {
-      setProducts([]);
-    } finally {
+      const data = Array.isArray(res.data) ? res.data : [];
+      setProducts(data);
+      setTotal(data.length);
       setLoading(false);
+    } catch (err: any) {
+      if (!err.response && attempt === 1) {
+        // Backend is waking up — retry once after 10 seconds, keep spinner
+        setTimeout(() => fetchProducts(2), 10000);
+      } else {
+        setProducts([]);
+        setLoading(false);
+      }
     }
   }, [filters]);
 
