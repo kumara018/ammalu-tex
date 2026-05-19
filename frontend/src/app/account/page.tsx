@@ -15,7 +15,7 @@ import toast from 'react-hot-toast';
 type Tab = 'profile' | 'password';
 
 export default function AccountPage() {
-  const { user, refresh } = useAuth();
+  const { user, refresh, logout } = useAuth();
   const router = useRouter();
 
   // Redirect if not logged in
@@ -330,12 +330,7 @@ export default function AccountPage() {
         <h3 className="font-bold text-red-700 mb-3 text-sm uppercase tracking-wide">Danger Zone</h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <button
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              document.cookie = 'auth_token=; path=/; max-age=0';
-              router.push('/auth/login');
-            }}
+            onClick={() => { logout(); window.location.href = '/auth/login'; }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors"
           >
             <RefreshCw size={15} /> Switch Account

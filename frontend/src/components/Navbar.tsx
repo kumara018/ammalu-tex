@@ -18,7 +18,7 @@ const CATEGORIES = [
 ];
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { count } = useCart();
   const router = useRouter();
 
@@ -233,10 +233,8 @@ export default function Navbar() {
                       <button
                         onClick={() => {
                           setUserMenuOpen(false);
-                          localStorage.removeItem('token');
-                          localStorage.removeItem('user');
-                          document.cookie = 'auth_token=; path=/; max-age=0';
-                          router.push('/auth/login');
+                          logout();
+                          window.location.href = '/auth/login';
                         }}
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm text-gray-700 w-full"
                       >
@@ -402,10 +400,8 @@ export default function Navbar() {
                   <button
                     onClick={() => {
                       setMobileOpen(false);
-                      localStorage.removeItem('token');
-                      localStorage.removeItem('user');
-                      document.cookie = 'auth_token=; path=/; max-age=0';
-                      router.push('/auth/login');
+                      logout();
+                      window.location.href = '/auth/login';
                     }}
                     className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2 w-full text-left">
                     <RefreshCw size={15} /> Switch Account

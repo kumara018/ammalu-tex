@@ -21,6 +21,8 @@ class User(Base):
     pincode       = Column(String(10),  nullable=True)
     is_admin             = Column(Boolean, default=False)
     is_active            = Column(Boolean, default=True)
+    is_deactivated       = Column(Boolean, default=False)          # user-initiated soft suspend
+    deactivated_at       = Column(DateTime(timezone=True), nullable=True)
     scheduled_delete_at  = Column(DateTime(timezone=True), nullable=True)   # account deletion
     created_at           = Column(DateTime(timezone=True), server_default=func.now())
     updated_at           = Column(DateTime(timezone=True), onupdate=func.now())

@@ -232,9 +232,11 @@ def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
     hint = user.email[:3] + "***@" + user.email.split("@")[-1]
     smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
 
+    is_deactivated = bool(getattr(user, 'is_deactivated', False))
     response: dict = {
-        "message":    "OTP sent to your registered email and mobile number.",
-        "email_hint": hint,
+        "message":        "OTP sent to your registered email and mobile number.",
+        "email_hint":     hint,
+        "is_deactivated": is_deactivated,  # frontend shows reactivation notice
     }
     if not smtp_ready:
         # Dev-mode: expose OTP so the site still works before SMTP is configured
@@ -253,7 +255,14 @@ def verify_login_otp(payload: schemas.LoginOTPVerify, db: Session = Depends(get_
     if not user.is_active:
         raise HTTPException(403, "Your account has been deactivated. Contact support.")
 
-    # Check if account is past its 5-minute deletion window
+    # If account is deactivated by the user → auto-reactivate on successful login
+    if getattr(user, 'is_deactivated', False):
+        user.is_deactivated      = False
+        user.deactivated_at      = None
+        user.scheduled_delete_at = None
+        db.commit()
+
+    # Check if account is past its deletion window
     if user.scheduled_delete_at:
         now = datetime.now(timezone.utc)
         sda = user.scheduled_delete_at
@@ -299,17 +308,17 @@ def confirm_delete_account(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user),
 ):
-    """Verify OTP → schedule permanent deletion in 5 minutes."""
+    """Verify OTP → schedule permanent deletion in 24 hours."""
     if not _verify_otp(db, current_user.email, payload.otp_code, otp_type="delete"):
         raise HTTPException(400, "Invalid or expired OTP.")
-    delete_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+    delete_at = datetime.now(timezone.utc) + timedelta(hours=24)
     current_user.scheduled_delete_at = delete_at
     db.commit()
     notifications.send_deletion_scheduled_email(current_user.email, current_user.full_name, delete_at)
     return {
-        "message": "Account scheduled for deletion in 5 minutes.",
+        "message": "Account scheduled for permanent deletion in 24 hours.",
         "delete_at": delete_at.isoformat(),
-        "cancel_info": "Log in within 5 minutes to cancel.",
+        "cancel_info": "Log in within 24 hours to cancel.",
     }
 
 
@@ -322,5 +331,68 @@ def cancel_delete_account(
 ):
     """Cancel a pending deletion."""
     current_user.scheduled_delete_at = None
+    current_user.is_deactivated      = False
+    current_user.deactivated_at      = None
     db.commit()
     return {"message": "Account deletion cancelled. Your account is safe! ✅"}
+
+
+# ── REQUEST TEMPORARY DEACTIVATION ─────────────────────────────────────────────
+
+@router.post("/request-deactivate-account")
+def request_deactivate_account(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """Send OTP to confirm temporary account deactivation (7-day soft suspend)."""
+    otp = _create_otp(db, current_user.email, otp_type="deactivate")
+    _send_otp_email(
+        current_user.email, otp,
+        "Account Deactivation"
+    )
+    hint = current_user.email[:3] + "***@" + current_user.email.split("@")[-1]
+    smtp_ready = bool(os.getenv("SMTP_EMAIL") and os.getenv("SMTP_PASSWORD"))
+    response: dict = {
+        "message": "OTP sent to confirm temporary deactivation.",
+        "email_hint": hint,
+    }
+    if not smtp_ready:
+        response["dev_otp"] = otp
+    return response
+
+
+# ── CONFIRM TEMPORARY DEACTIVATION ─────────────────────────────────────────────
+
+@router.post("/confirm-deactivate-account")
+def confirm_deactivate_account(
+    payload: schemas.DeleteAccountConfirm,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """
+    Verify OTP → suspend account for 7 days.
+    After 7 days the account is permanently deleted (scheduled_delete_at).
+    User can reactivate any time within 7 days by logging in.
+    """
+    if not _verify_otp(db, current_user.email, payload.otp_code, otp_type="deactivate"):
+        raise HTTPException(400, "Invalid or expired OTP.")
+
+    now        = datetime.now(timezone.utc)
+    delete_at  = now + timedelta(days=7)
+
+    current_user.is_deactivated      = True
+    current_user.deactivated_at      = now
+    current_user.scheduled_delete_at = delete_at   # auto-delete after 7 days
+    db.commit()
+
+    _send_otp_email(
+        current_user.email,
+        "ACCOUNT DEACTIVATED — your account is deactivated. "
+        "Log in within 7 days to reactivate, otherwise it will be permanently deleted.",
+        "Account Deactivation Confirmed",
+    )
+
+    return {
+        "message": "Account deactivated. You can reactivate within 7 days by signing in.",
+        "reactivate_before": delete_at.isoformat(),
+    }

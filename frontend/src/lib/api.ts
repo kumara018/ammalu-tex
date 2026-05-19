@@ -76,17 +76,20 @@ export const authAPI = {
   updateProfile:       (data: object) => api.put('/api/auth/me', data),
   forgotPassword:      (data: object) => api.post('/api/auth/forgot-password', data),
   resetPassword:       (data: object) => api.post('/api/auth/reset-password', data),
-  requestDeleteAccount:()             => api.post('/api/auth/request-delete-account'),
-  confirmDeleteAccount:(data: object) => api.post('/api/auth/confirm-delete-account', data),
-  cancelDeleteAccount: ()             => api.post('/api/auth/cancel-delete-account'),
+  requestDeleteAccount:    ()             => api.post('/api/auth/request-delete-account'),
+  confirmDeleteAccount:    (data: object) => api.post('/api/auth/confirm-delete-account', data),
+  cancelDeleteAccount:     ()             => api.post('/api/auth/cancel-delete-account'),
+  requestDeactivateAccount:()             => api.post('/api/auth/request-deactivate-account'),
+  confirmDeactivateAccount:(data: object) => api.post('/api/auth/confirm-deactivate-account', data),
 };
 
 export const productsAPI = {
-  getAll:        (params?: object)          => api.get('/api/products/', { params }),
-  getOne:        (id: number)               => api.get(`/api/products/${id}`),
-  getCategories: ()                         => api.get('/api/products/categories'),
-  getReviews:    (id: number)               => api.get(`/api/products/${id}/reviews`),
-  addReview:     (id: number, data: object) => api.post(`/api/products/${id}/reviews`, data),
+  getAll:           (params?: object)          => api.get('/api/products/', { params }),
+  getOne:           (id: number)               => api.get(`/api/products/${id}`),
+  getCategories:    ()                         => api.get('/api/products/categories'),
+  getReviews:       (id: number)               => api.get(`/api/products/${id}/reviews`),
+  addReview:        (id: number, data: object) => api.post(`/api/products/${id}/reviews`, data),
+  getRecentReviews: (limit = 6)               => api.get('/api/products/recent-reviews', { params: { limit, min_rating: 4 } }),
 };
 
 export const cartAPI = {

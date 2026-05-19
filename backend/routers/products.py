@@ -65,6 +65,39 @@ def get_products(
     return query.offset(skip).limit(limit).all()
 
 
+@router.get("/recent-reviews")
+def get_recent_reviews(
+    limit: int = Query(6, ge=1, le=20),
+    min_rating: int = Query(4, ge=1, le=5),
+    db: Session = Depends(get_db),
+):
+    """Return recent high-rated reviews across all products for the home page."""
+    rows = (
+        db.query(models.Review, models.User, models.Product)
+        .join(models.User,    models.Review.user_id    == models.User.id)
+        .join(models.Product, models.Review.product_id == models.Product.id)
+        .filter(models.Review.rating >= min_rating)
+        .filter(models.Review.comment != None)
+        .filter(models.Review.comment != "")
+        .order_by(models.Review.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "id":           r.id,
+            "rating":       r.rating,
+            "title":        r.title,
+            "comment":      r.comment,
+            "reviewer":     u.full_name,
+            "product_name": p.name,
+            "product_id":   p.id,
+            "created_at":   r.created_at.isoformat() if r.created_at else None,
+        }
+        for r, u, p in rows
+    ]
+
+
 @router.get("/{product_id}", response_model=schemas.ProductOut)
 def get_product(product_id: int, db: Session = Depends(get_db)):
     product = db.query(models.Product).filter(

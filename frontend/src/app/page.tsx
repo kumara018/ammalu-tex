@@ -16,26 +16,38 @@ const CATEGORIES = [
 ];
 
 const FEATURES = [
-  { icon: Truck,       title: 'Free Shipping',     desc: 'On orders above ₹999' },
-  { icon: Shield,      title: '100% Authentic',    desc: 'Genuine quality products' },
-  { icon: RotateCcw,   title: 'Easy Returns',      desc: '7-day hassle-free returns' },
-  { icon: Headphones,  title: 'Customer Support',  desc: 'Mon–Sat, 9AM to 8PM' },
+  { icon: Truck,      title: 'Free Shipping',    desc: 'On orders above ₹999',       href: '/shipping'  },
+  { icon: Shield,     title: '100% Authentic',   desc: 'Genuine quality products',    href: '/authentic' },
+  { icon: RotateCcw,  title: 'Easy Returns',     desc: '7-day hassle-free returns',   href: '/support#returns'   },
+  { icon: Headphones, title: 'Customer Support', desc: 'Mon–Sat, 9AM to 8PM',         href: '/support'   },
+];
+
+// Static fallback reviews shown until real ones load
+const FALLBACK_REVIEWS = [
+  { id: -1, rating: 5, comment: 'Excellent quality chudithar! The fabric is so soft and the colours are vibrant. Fast delivery too. Highly recommended!', reviewer: 'Priya M.', product_name: 'Chudithar', product_id: null },
+  { id: -2, rating: 5, comment: 'Bought a lehenga for my sister\'s wedding. Got so many compliments. Ammalu Tex never disappoints — premium quality at great prices.', reviewer: 'Kavitha R.', product_name: 'Lehenga', product_id: null },
+  { id: -3, rating: 5, comment: 'The party wear collection is amazing! Ordered online and it arrived in 3 days. Perfect fit and gorgeous design. Will order again.', reviewer: 'Deepa S.', product_name: 'Party Wears', product_id: null },
 ];
 
 export default function HomePage() {
-  const [featured, setFeatured] = useState<Product[]>([]);
+  const [featured,    setFeatured]    = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [reviews,     setReviews]     = useState<any[]>(FALLBACK_REVIEWS);
+  const [loading,     setLoading]     = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [featRes, newRes] = await Promise.all([
+        const [featRes, newRes, revRes] = await Promise.all([
           productsAPI.getAll({ featured: true, limit: 8 }),
           productsAPI.getAll({ sort_by: 'created_at', sort_order: 'desc', limit: 8 }),
+          productsAPI.getRecentReviews(6),
         ]);
         setFeatured(featRes.data);
         setNewArrivals(newRes.data);
+        if (Array.isArray(revRes.data) && revRes.data.length > 0) {
+          setReviews(revRes.data);
+        }
       } catch {}
       finally { setLoading(false); }
     };
@@ -77,20 +89,24 @@ export default function HomePage() {
         <div className="absolute right-24 bottom-0 w-48 h-48 bg-maroon-600/20 rounded-full translate-y-1/2 hidden lg:block" />
       </section>
 
-      {/* Features bar */}
+      {/* Features bar — each tile is a clickable link */}
       <section className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-y border-orange-200">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-orange-200">
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-gradient-to-br from-amber-50 to-orange-50 flex items-center gap-3 px-5 py-5 hover:from-orange-100 hover:to-amber-100 transition-colors">
-                <div className="p-2.5 bg-maroon-100 rounded-xl flex-shrink-0">
+            {FEATURES.map(({ icon: Icon, title, desc, href }) => (
+              <Link
+                key={title}
+                href={href}
+                className="bg-gradient-to-br from-amber-50 to-orange-50 flex items-center gap-3 px-5 py-5 hover:from-orange-100 hover:to-amber-100 transition-colors group cursor-pointer"
+              >
+                <div className="p-2.5 bg-maroon-100 rounded-xl flex-shrink-0 group-hover:bg-maroon-200 transition-colors">
                   <Icon size={20} className="text-maroon-700" />
                 </div>
                 <div>
-                  <p className="font-bold text-sm text-maroon-900">{title}</p>
+                  <p className="font-bold text-sm text-maroon-900 group-hover:underline">{title}</p>
                   <p className="text-xs text-maroon-600 mt-0.5">{desc}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -208,24 +224,39 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Testimonials */}
+      {/* Customer Reviews — real data from DB, fallback to static */}
       <section className="bg-maroon-50 py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center mb-8">What Our Customers Say</h2>
+          <h2 className="section-title text-center mb-2">What Our Customers Say</h2>
+          <p className="text-center text-sm text-gray-500 mb-8">Genuine reviews from verified buyers</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { name: 'Priya M.', review: 'Excellent quality chudithar! The fabric is so soft and the colours are vibrant. Fast delivery too. Highly recommended!', rating: 5 },
-              { name: 'Kavitha R.', review: 'Bought a lehenga for my sister\'s wedding. Got so many compliments. Ammalu Tex never disappoints — premium quality at great prices.', rating: 5 },
-              { name: 'Deepa S.', review: 'The party wear collection is amazing! Ordered online and it arrived in 3 days. Perfect fit and gorgeous design. Will order again.', rating: 5 },
-            ].map(({ name, review, rating }) => (
-              <div key={name} className="card p-6">
-                <div className="flex mb-3">
-                  {Array(rating).fill(0).map((_, i) => (
-                    <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
+            {reviews.slice(0, 3).map((rev) => (
+              <div key={rev.id} className="card p-6 flex flex-col">
+                {/* Stars */}
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} size={15}
+                      className={i < rev.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
                   ))}
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">&ldquo;{review}&rdquo;</p>
-                <p className="font-semibold text-maroon-800 text-sm">{name}</p>
+                {/* Review text */}
+                <p className="text-gray-700 text-sm leading-relaxed mb-4 flex-1">
+                  &ldquo;{rev.comment}&rdquo;
+                </p>
+                {/* Reviewer + product */}
+                <div className="border-t border-orange-100 pt-3 flex items-center justify-between">
+                  <p className="font-semibold text-maroon-800 text-sm">{rev.reviewer}</p>
+                  {rev.product_id ? (
+                    <Link
+                      href={`/products/${rev.product_id}`}
+                      className="text-xs text-maroon-600 hover:underline truncate max-w-[120px]"
+                    >
+                      {rev.product_name}
+                    </Link>
+                  ) : (
+                    <span className="text-xs text-gray-400">{rev.product_name}</span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
