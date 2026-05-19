@@ -334,7 +334,59 @@ def send_deletion_scheduled_email(email: str, name: str, delete_at):
     _bg(email, f"Account Deletion Scheduled — {STORE_NAME}", html)
 
 
-# ── 9. Optional SMS via Twilio ─────────────────────────────────────────────────
+# ── 9. Login OTP email ────────────────────────────────────────────────────────
+def send_login_otp_email(email: str, name: str, otp: str):
+    first = name.split()[0]
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">🔐 Your Login OTP</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, use the OTP below to complete your sign-in to <strong>{STORE_NAME}</strong>.
+      </p>
+      <div style="background:#fff9f2;border:2px solid #7c1d2e;border-radius:12px;padding:28px;margin:24px 0;text-align:center;">
+        <p style="margin:0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:3px;">One-Time Password</p>
+        <p style="margin:14px 0 6px;font-size:46px;font-weight:bold;color:#7c1d2e;letter-spacing:14px;font-family:monospace;">{otp}</p>
+        <p style="margin:0;color:#999;font-size:12px;">Valid for <strong>10 minutes</strong> only</p>
+      </div>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:14px;margin:20px 0;">
+        <p style="margin:0;color:#92400e;font-size:13px;line-height:1.6;">
+          🛡️ <strong>Security tip:</strong> Never share this OTP with anyone.
+          Ammalu Tex staff will never ask for your OTP.
+        </p>
+      </div>
+      <p style="color:#888;font-size:13px;line-height:1.6;">
+        Didn't request this? Someone may have tried to sign in with your account.
+        You can safely ignore this email — your account is secure.
+      </p>
+    """)
+    _bg(email, f"🔐 {otp} is your Ammalu Tex login OTP", html)
+
+
+# ── 10. Password reset OTP email ──────────────────────────────────────────────
+def send_password_reset_otp_email(email: str, name: str, otp: str):
+    first = name.split()[0]
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">🔑 Password Reset OTP</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, we received a request to reset your <strong>{STORE_NAME}</strong> password.
+        Use the OTP below to continue.
+      </p>
+      <div style="background:#fff9f2;border:2px solid #7c1d2e;border-radius:12px;padding:28px;margin:24px 0;text-align:center;">
+        <p style="margin:0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:3px;">Password Reset OTP</p>
+        <p style="margin:14px 0 6px;font-size:46px;font-weight:bold;color:#7c1d2e;letter-spacing:14px;font-family:monospace;">{otp}</p>
+        <p style="margin:0;color:#999;font-size:12px;">Valid for <strong>10 minutes</strong> only</p>
+      </div>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:14px;margin:20px 0;">
+        <p style="margin:0;color:#92400e;font-size:13px;line-height:1.6;">
+          🛡️ <strong>Security tip:</strong> Never share this OTP with anyone.
+          If you did NOT request a password reset, please ignore this email.
+        </p>
+      </div>
+      {_btn("Go to Reset Password →", f"{STORE_URL}/auth/forgot-password")}
+    """)
+    _bg(email, f"🔑 {otp} is your Ammalu Tex password reset OTP", html)
+
+
+# ── 11. Optional SMS via Twilio ─────────────────────────────────────────────────
 def _send_sms(to_phone: str, message: str):
     if not to_phone.startswith("+"):
         to_phone = "+91" + to_phone

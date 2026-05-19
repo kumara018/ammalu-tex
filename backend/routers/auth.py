@@ -184,7 +184,7 @@ def forgot_password(payload: schemas.OTPRequest, db: Session = Depends(get_db)):
 
     # Use email as identifier for OTP
     otp = _create_otp(db, user.email, otp_type="reset")
-    _send_otp_email(user.email, otp, "Password Reset")
+    notifications.send_password_reset_otp_email(user.email, user.full_name, otp)
 
     return {
         "message": f"OTP sent to your registered email ({user.email[:3]}***). Valid for 10 minutes.",
@@ -225,8 +225,8 @@ def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(403, "Your account has been deactivated. Contact support.")
 
     otp  = _create_otp(db, user.email, otp_type="login")
-    _send_otp_email(user.email, otp, "Login Verification")
-    # Also send OTP via SMS if Twilio is configured
+    # Send styled HTML OTP email + optional SMS
+    notifications.send_login_otp_email(user.email, user.full_name, otp)
     notifications.send_otp_sms(user.phone, otp, "Login")
 
     hint = user.email[:3] + "***@" + user.email.split("@")[-1]
