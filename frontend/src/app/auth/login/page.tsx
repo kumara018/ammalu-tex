@@ -115,15 +115,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fff9f2]">
+    <div className="min-h-screen flex flex-col bg-[#fff9f2]">
+
+      {/* Standalone header — brand only, no full navbar */}
+      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center justify-between shadow-md">
+        <Link href="/" className="flex flex-col leading-tight">
+          <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
+          <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
+        </Link>
+        <Link href="/" className="text-sm text-maroon-200 hover:text-white transition-colors">
+          ← Back to Shop
+        </Link>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-4">
-            <h1 className="text-3xl font-display font-bold text-maroon-900">Ammalu Tex</h1>
-            <p className="text-gold-600 text-xs font-medium tracking-widest uppercase">Premium Textiles</p>
-          </Link>
           <h2 className="text-2xl font-bold text-gray-900">
             {step === 'credentials' ? 'Sign in to your account' : 'Verify your identity'}
           </h2>
@@ -270,6 +279,7 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

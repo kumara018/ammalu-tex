@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import NavbarWrapper from '@/components/NavbarWrapper';
+import FooterWrapper from '@/components/FooterWrapper';
 import { Toaster } from 'react-hot-toast';
 
 import { STORE } from '@/lib/config';
@@ -35,9 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-[#fff9f2] min-h-screen flex flex-col">
         <AuthProvider>
           <CartProvider>
-            <Navbar />
+            <NavbarWrapper />
             <main className="flex-1">{children}</main>
-            <Footer />
+            <FooterWrapper />
             <Toaster
               position="top-right"
               toastOptions={{

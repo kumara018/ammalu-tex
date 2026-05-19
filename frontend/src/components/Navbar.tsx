@@ -152,102 +152,75 @@ export default function Navbar() {
             {/* Right section */}
             <div className="flex items-center gap-2 ml-auto">
 
-              {/* ── User menu ── */}
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-lg transition-colors"
-                >
-                  <User size={20} />
-                  <span className="text-[11px] mt-0.5 hidden sm:block">
-                    {user ? user.full_name.split(' ')[0] : 'Account'}
-                  </span>
-                </button>
+              {/* ── Logged-out: Sign In + Create Account buttons ── */}
+              {!user && (
+                <div className="hidden sm:flex items-center gap-2">
+                  <Link
+                    href="/auth/login"
+                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white border border-white/40 hover:bg-maroon-700 rounded-lg transition-colors"
+                  >
+                    <LogIn size={15} /> Sign In
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold bg-gold-600 hover:bg-gold-700 text-white rounded-lg transition-colors"
+                  >
+                    <User size={15} /> Create Account
+                  </Link>
+                </div>
+              )}
 
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-1 w-60 bg-white rounded-xl shadow-xl border border-orange-100 py-2 text-gray-800 z-50">
+              {/* ── Logged-in: User menu ── */}
+              {user && (
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-lg transition-colors"
+                  >
+                    <User size={20} />
+                    <span className="text-[11px] mt-0.5 hidden sm:block">
+                      {user.full_name.split(' ')[0]}
+                    </span>
+                  </button>
 
-                    {/* ── LOGGED IN ── */}
-                    {user ? (
-                      <>
-                        {/* User info */}
-                        <div className="px-4 py-3 border-b border-orange-100">
-                          <p className="font-semibold text-maroon-900">{user.full_name}</p>
-                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                          <span className={`inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-green-50 text-green-700'}`}>
-                            {user.is_admin ? '⚙ Admin' : '👤 Customer'}
-                          </span>
-                        </div>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-1 w-60 bg-white rounded-xl shadow-xl border border-orange-100 py-2 text-gray-800 z-50">
+                      {/* User info */}
+                      <div className="px-4 py-3 border-b border-orange-100">
+                        <p className="font-semibold text-maroon-900">{user.full_name}</p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        <span className={`inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-green-50 text-green-700'}`}>
+                          {user.is_admin ? '⚙ Admin' : '👤 Customer'}
+                        </span>
+                      </div>
 
-                        {/* Admin-only: Admin Panel */}
-                        {user.is_admin && (
-                          <Link
-                            href="/admin"
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm font-semibold text-maroon-800"
-                            onClick={() => setUserMenuOpen(false)}
-                          >
-                            <LayoutDashboard size={16} className="text-maroon-700" />
-                            Admin Dashboard
-                          </Link>
-                        )}
-
-                        {/* All users: My Orders */}
-                        <Link
-                          href="/orders"
-                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <Package size={16} className="text-maroon-700" />
-                          My Orders
+                      {user.is_admin && (
+                        <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm font-semibold text-maroon-800" onClick={() => setUserMenuOpen(false)}>
+                          <LayoutDashboard size={16} className="text-maroon-700" /> Admin Dashboard
                         </Link>
+                      )}
 
-                        {/* Admin settings shortcut */}
-                        {user.is_admin && (
-                          <Link
-                            href="/admin"
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm"
-                            onClick={() => setUserMenuOpen(false)}
-                          >
-                            <Settings size={16} className="text-maroon-700" />
-                            Manage Products
-                          </Link>
-                        )}
+                      <Link href="/orders" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm" onClick={() => setUserMenuOpen(false)}>
+                        <Package size={16} className="text-maroon-700" /> My Orders
+                      </Link>
 
-                        <hr className="border-orange-100 my-1" />
-
-                        {/* Logout */}
-                        <button
-                          onClick={() => { setUserMenuOpen(false); performLogout(); }}
-                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 w-full"
-                        >
-                          <LogOut size={16} /> Sign Out
-                        </button>
-                      </>
-                    ) : (
-                      /* ── NOT LOGGED IN ── */
-                      <>
-                        <div className="px-4 py-3 border-b border-orange-100">
-                          <p className="text-sm text-gray-500">Sign in to track orders, manage your account and more.</p>
-                        </div>
-                        <Link
-                          href="/auth/login"
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 text-sm font-semibold text-maroon-800"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <LogIn size={16} /> Sign In
+                      {user.is_admin && (
+                        <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm" onClick={() => setUserMenuOpen(false)}>
+                          <Settings size={16} className="text-maroon-700" /> Manage Products
                         </Link>
-                        <Link
-                          href="/auth/register"
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 text-sm"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <User size={16} /> Create Account
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
+                      )}
+
+                      <hr className="border-orange-100 my-1" />
+
+                      <button onClick={() => { setUserMenuOpen(false); performLogout(); }}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 w-full">
+                        <LogOut size={16} /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               {/* Cart */}
               <Link
@@ -264,6 +237,13 @@ export default function Navbar() {
                 </div>
                 <span className="text-[11px] mt-0.5 hidden sm:block">Cart</span>
               </Link>
+
+              {/* Mobile: show Sign In button when logged out */}
+              {!user && (
+                <Link href="/auth/login" className="sm:hidden flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-gold-600 hover:bg-gold-700 rounded-lg transition-colors">
+                  Sign In
+                </Link>
+              )}
 
               {/* Mobile toggle */}
               <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 hover:bg-maroon-700 rounded-lg">
