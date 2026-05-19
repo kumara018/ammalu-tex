@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {
-  Truck, Clock, MapPin, Package, IndianRupee,
+  Truck, Clock, MapPin, Package,
   CheckCircle, ChevronRight, Headphones,
 } from 'lucide-react';
 import { STORE } from '@/lib/config';
@@ -67,7 +67,7 @@ export default function ShippingPage() {
             <p className="font-bold text-gray-800 mb-1">{title}</p>
             <div className="space-y-1.5 text-sm text-gray-600">
               <p className="flex items-center gap-2"><Clock size={14} className="text-maroon-600" /> {time}</p>
-              <p className="flex items-center gap-2"><IndianRupee size={14} className="text-maroon-600" /> {fee}</p>
+              <p className="flex items-center gap-2"><span className="text-maroon-600 font-bold text-base leading-none">₹</span> {fee}</p>
               <p className="text-gray-400 text-xs mt-2">{note}</p>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {
-  Shield, CheckCircle, Star, Award, Leaf,
+  Shield, CheckCircle, Star, Award,
   ChevronRight, Headphones, Truck,
 } from 'lucide-react';
 

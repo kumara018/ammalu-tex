@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { authAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { performLogout } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 type Mode   = 'choose' | 'deactivate' | 'delete';

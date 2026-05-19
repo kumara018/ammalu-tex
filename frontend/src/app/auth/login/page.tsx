@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, Mail, ShieldCheck, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { authAPI } from '@/lib/api';
 import { redirectAfterLogin } from '@/lib/auth';
@@ -16,70 +16,118 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
-      router.replace(user.is_admin ? '/admin' : '/');
-    }
+    if (user) router.replace(user.is_admin ? '/admin' : '/');
   }, [user, router]);
 
-  // Step 1
+  // ── Step 1 fields ─────────────────────────────────────────────────────────
   const [identifier, setIdentifier] = useState('');
   const [password,   setPassword]   = useState('');
   const [showPass,   setShowPass]   = useState(false);
 
-  // Step 2
+  // ── Step 2 fields ─────────────────────────────────────────────────────────
   const [otp,       setOtp]       = useState('');
   const [emailHint, setEmailHint] = useState('');
-  const [devOtp,    setDevOtp]    = useState('');   // shown when SMTP not configured
-  const [timer,     setTimer]     = useState(60);   // resend countdown
+  const [devOtp,    setDevOtp]    = useState('');
+  const [timer,     setTimer]     = useState(60);   // resend cooldown
 
+  // ── Shared state ──────────────────────────────────────────────────────────
   const [step,    setStep]    = useState<Step>('credentials');
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // ── Retry state (replaces the old infinite-loop setTimeout) ───────────────
+  const [retryIn,   setRetryIn]   = useState(0);   // countdown seconds
+  const retryCountRef    = useRef(0);               // max 1 auto-retry
+  const retryTimeoutRef  = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const retryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resendIntervalRef= useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const startTimer = () => {
+  // ── Cleanup on unmount ────────────────────────────────────────────────────
+  useEffect(() => () => {
+    if (retryTimeoutRef.current)  clearTimeout(retryTimeoutRef.current);
+    if (retryIntervalRef.current) clearInterval(retryIntervalRef.current);
+    if (resendIntervalRef.current)clearInterval(resendIntervalRef.current);
+  }, []);
+
+  const cancelPendingRetry = useCallback(() => {
+    if (retryTimeoutRef.current)  { clearTimeout(retryTimeoutRef.current);  retryTimeoutRef.current  = null; }
+    if (retryIntervalRef.current) { clearInterval(retryIntervalRef.current); retryIntervalRef.current = null; }
+    setRetryIn(0);
+  }, []);
+
+  // ── OTP resend countdown ──────────────────────────────────────────────────
+  const startResendTimer = useCallback(() => {
     setTimer(60);
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
+    if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+    resendIntervalRef.current = setInterval(() => {
       setTimer(t => {
-        if (t <= 1) { clearInterval(timerRef.current!); return 0; }
+        if (t <= 1) { clearInterval(resendIntervalRef.current!); return 0; }
         return t - 1;
       });
     }, 1000);
-  };
+  }, []);
 
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
-
-  // ── Step 1: verify credentials → send OTP ──────────────────────────────────
-  const handleSendOtp = async (e: React.FormEvent, isRetry = false) => {
-    if (!isRetry) e.preventDefault();
+  // ── Step 1: verify credentials → send OTP ────────────────────────────────
+  const handleSendOtp = useCallback(async (e: React.FormEvent, isRetry = false) => {
+    if (!isRetry) {
+      e.preventDefault();
+      retryCountRef.current = 0;   // reset counter on every fresh submit
+      cancelPendingRetry();
+    }
     if (!identifier.trim()) { setError('Email or mobile number is required'); return; }
     if (!password)           { setError('Password is required');               return; }
 
     setLoading(true);
     setError('');
+
     try {
       const res = await authAPI.sendLoginOtp({ identifier: identifier.trim(), password });
+      retryCountRef.current = 0;
       setEmailHint(res.data.email_hint || '');
       setDevOtp(res.data.dev_otp || '');
       setStep('otp');
-      startTimer();
+      startResendTimer();
       toast.success('OTP sent! Check your email.');
     } catch (err: any) {
-      if (!err.response) {
-        // Network error — Render backend was sleeping and waking up
-        setError('⏳ Server is starting up. Retrying in 15 seconds automatically...');
-        setTimeout(() => handleSendOtp(e, true), 15000);
+      if (!err.response && retryCountRef.current < 1) {
+        // ── First network failure → schedule exactly ONE auto-retry ──────────
+        retryCountRef.current += 1;
+        const WAIT = 20;
+        setRetryIn(WAIT);
+
+        // Countdown display
+        let count = WAIT;
+        retryIntervalRef.current = setInterval(() => {
+          count -= 1;
+          setRetryIn(count);
+          if (count <= 0) {
+            clearInterval(retryIntervalRef.current!);
+            retryIntervalRef.current = null;
+          }
+        }, 1000);
+
+        // Single retry after WAIT seconds
+        retryTimeoutRef.current = setTimeout(() => {
+          retryTimeoutRef.current = null;
+          handleSendOtp(e, true);
+        }, WAIT * 1000);
+
+      } else if (!err.response) {
+        // ── Already retried once — stop, let user decide ──────────────────
+        cancelPendingRetry();
+        setError('Server is temporarily unavailable. Please check your internet and click "Send OTP" to try again.');
       } else {
+        // ── HTTP error (wrong password, etc.) — no retry ──────────────────
+        retryCountRef.current = 0;
+        cancelPendingRetry();
         setError(err.response?.data?.detail || 'Incorrect email/phone or password.');
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [identifier, password, cancelPendingRetry, startResendTimer]);
 
-  // ── Step 2: verify OTP → login ─────────────────────────────────────────────
+  // ── Step 2: verify OTP → login ────────────────────────────────────────────
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length !== 6) { setError('Enter the 6-digit OTP sent to your email'); return; }
@@ -101,7 +149,7 @@ export default function LoginPage() {
     }
   };
 
-  // ── Resend OTP ─────────────────────────────────────────────────────────────
+  // ── Resend OTP ────────────────────────────────────────────────────────────
   const handleResend = async () => {
     if (timer > 0 || loading) return;
     setLoading(true);
@@ -111,11 +159,11 @@ export default function LoginPage() {
       const res = await authAPI.sendLoginOtp({ identifier: identifier.trim(), password });
       setDevOtp(res.data.dev_otp || '');
       setOtp('');
-      startTimer();
+      startResendTimer();
       toast.success('New OTP sent!');
     } catch (err: any) {
       if (!err.response) {
-        setError('⏳ Connection issue. Please wait a moment and try again.');
+        setError('Connection issue. Please wait a moment and try again.');
       } else {
         setError(err.response?.data?.detail || 'Failed to resend OTP. Please try again.');
       }
@@ -127,7 +175,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#fff9f2]">
 
-      {/* Standalone header — brand only, no full navbar */}
+      {/* Standalone header */}
       <div className="bg-brand-gradient text-white py-4 px-6 flex items-center justify-center shadow-md">
         <Link href="/" className="flex flex-col items-center leading-tight">
           <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
@@ -138,7 +186,6 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">
             {step === 'credentials' ? 'Sign in to your account' : 'Verify your identity'}
@@ -152,24 +199,46 @@ export default function LoginPage() {
 
         <div className="card p-8 shadow-lg">
 
-          {/* Error banner */}
-          {error && (
+          {/* ── Retry countdown banner ───────────────────────────────── */}
+          {retryIn > 0 && (
+            <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock size={16} className="text-amber-600 flex-shrink-0" />
+                  <p className="text-amber-800 text-sm">
+                    Server is starting up — retrying in <strong>{retryIn}s</strong>…
+                  </p>
+                </div>
+                <button
+                  onClick={() => { cancelPendingRetry(); retryCountRef.current = 1; }}
+                  className="text-xs text-amber-600 hover:text-amber-800 font-medium ml-2 flex-shrink-0"
+                >
+                  Cancel
+                </button>
+              </div>
+              <p className="text-amber-600 text-xs mt-1 ml-6">
+                This is a one-time delay while the server wakes up (Render free tier).
+              </p>
+            </div>
+          )}
+
+          {/* ── Error banner (only shown when no countdown) ──────────── */}
+          {error && retryIn === 0 && (
             <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
 
-          {/* ── STEP 1: Credentials ────────────────────────────────────────── */}
+          {/* ── STEP 1: Credentials ──────────────────────────────────── */}
           {step === 'credentials' && (
             <form onSubmit={handleSendOtp} noValidate autoComplete="on" className="space-y-5">
-
               <div>
                 <label className="label">Email or Mobile Number *</label>
                 <input
                   id="identifier" name="username" type="text"
                   value={identifier}
-                  onChange={e => { setIdentifier(e.target.value); setError(''); }}
+                  onChange={e => { setIdentifier(e.target.value); setError(''); cancelPendingRetry(); retryCountRef.current = 0; }}
                   placeholder="email@example.com or 9876543210"
                   className="input-field"
                   autoComplete="username"
@@ -188,7 +257,7 @@ export default function LoginPage() {
                     id="password" name="password"
                     type={showPass ? 'text' : 'password'}
                     value={password}
-                    onChange={e => { setPassword(e.target.value); setError(''); }}
+                    onChange={e => { setPassword(e.target.value); setError(''); cancelPendingRetry(); retryCountRef.current = 0; }}
                     placeholder="Enter your password"
                     className="input-field pr-12"
                     autoComplete="current-password"
@@ -200,20 +269,23 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <button type="submit" disabled={loading}
-                className="btn-primary w-full flex items-center justify-center gap-2 py-3">
+              <button
+                type="submit"
+                disabled={loading || retryIn > 0}
+                className="btn-primary w-full flex items-center justify-center gap-2 py-3 disabled:opacity-60"
+              >
                 {loading
-                  ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Sending OTP...</>
+                  ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Sending OTP…</>
+                  : retryIn > 0
+                  ? <><Clock size={18} /> Retrying in {retryIn}s…</>
                   : <><Mail size={18} /> Send OTP</>}
               </button>
             </form>
           )}
 
-          {/* ── STEP 2: OTP ────────────────────────────────────────────────── */}
+          {/* ── STEP 2: OTP ──────────────────────────────────────────── */}
           {step === 'otp' && (
             <form onSubmit={handleVerifyOtp} noValidate className="space-y-5">
-
-              {/* Dev-mode OTP notice (only visible when SMTP not configured) */}
               {devOtp && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                   <p className="text-amber-800 text-xs font-semibold mb-1">
@@ -233,10 +305,7 @@ export default function LoginPage() {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   value={otp}
-                  onChange={e => {
-                    setOtp(e.target.value.replace(/\D/g, '').slice(0, 6));
-                    setError('');
-                  }}
+                  onChange={e => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setError(''); }}
                   placeholder="• • • • • •"
                   className="input-field text-center text-2xl tracking-[0.5em] font-mono"
                   maxLength={6}
@@ -251,11 +320,10 @@ export default function LoginPage() {
               <button type="submit" disabled={loading || otp.length !== 6}
                 className="btn-primary w-full flex items-center justify-center gap-2 py-3 disabled:opacity-60">
                 {loading
-                  ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Verifying...</>
+                  ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Verifying…</>
                   : <><ShieldCheck size={18} /> Verify & Sign In</>}
               </button>
 
-              {/* Resend + Back */}
               <div className="flex items-center justify-between text-sm pt-1">
                 <button
                   type="button"
