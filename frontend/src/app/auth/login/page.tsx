@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, ShieldCheck, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -12,12 +12,14 @@ type Step = 'credentials' | 'otp';
 
 export default function LoginPage() {
   const { login, user } = useAuth();
-  const router = useRouter();
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const isAddMode    = searchParams.get('add') === '1';
 
-  // Redirect if already logged in
+  // Redirect if already logged in — but NOT when adding another account
   useEffect(() => {
-    if (user) router.replace(user.is_admin ? '/admin' : '/');
-  }, [user, router]);
+    if (user && !isAddMode) router.replace(user.is_admin ? '/admin' : '/');
+  }, [user, router, isAddMode]);
 
   // ── Step 1 fields ─────────────────────────────────────────────────────────
   const [identifier, setIdentifier] = useState('');
@@ -191,11 +193,13 @@ export default function LoginPage() {
 
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">
-            {step === 'credentials' ? 'Sign in to your account' : 'Verify your identity'}
+            {step === 'credentials'
+              ? (isAddMode ? 'Add another account' : 'Sign in to your account')
+              : 'Verify your identity'}
           </h2>
           <p className="text-gray-500 text-sm mt-1">
             {step === 'credentials'
-              ? 'Enter your email or mobile number'
+              ? (isAddMode ? 'Sign in with a different account' : 'Enter your email or mobile number')
               : `OTP sent to ${emailHint}`}
           </p>
         </div>

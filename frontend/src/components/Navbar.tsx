@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   ShoppingCart, Search, User, Menu, X, ChevronDown,
   LogOut, Package, Settings, MapPin, Phone, LayoutDashboard,
-  Home, HelpCircle, UserCog, UserX, RefreshCw,
+  Home, HelpCircle, UserCog, UserX, RefreshCw, UserPlus, Check,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -18,7 +18,7 @@ const CATEGORIES = [
 ];
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, sessions, switchAccount } = useAuth();
   const { count } = useCart();
   const router = useRouter();
 
@@ -177,28 +177,81 @@ export default function Navbar() {
               {/* ── Logged-in: User menu ── */}
               {user && (
                 <div className="relative" ref={userMenuRef}>
+                  {/* Avatar button */}
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-lg transition-colors"
                   >
-                    <User size={20} />
+                    <div className="w-7 h-7 rounded-full bg-gold-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {user.full_name.charAt(0).toUpperCase()}
+                    </div>
                     <span className="text-[11px] mt-0.5 hidden sm:block">
                       {user.full_name.split(' ')[0]}
                     </span>
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-orange-100 py-2 text-gray-800 z-50">
-                      {/* User info */}
+                    <div className="absolute right-0 mt-1 w-72 bg-white rounded-xl shadow-xl border border-orange-100 py-2 text-gray-800 z-50 max-h-[90vh] overflow-y-auto">
+
+                      {/* ── Current account ── */}
                       <div className="px-4 py-3 border-b border-orange-100">
-                        <p className="font-semibold text-maroon-900">{user.full_name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                        <span className={`inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-green-50 text-green-700'}`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-maroon-700 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                            {user.full_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-maroon-900 truncate">{user.full_name}</p>
+                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                          </div>
+                          <Check size={16} className="text-green-600 flex-shrink-0" />
+                        </div>
+                        <span className={`inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-green-50 text-green-700'}`}>
                           {user.is_admin ? '⚙ Admin' : '👤 Customer'}
                         </span>
                       </div>
 
-                      {/* Navigation */}
+                      {/* ── Other saved accounts ── */}
+                      {sessions.filter(s => s.user.id !== user.id).length > 0 && (
+                        <>
+                          <p className="px-4 pt-2.5 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Saved Accounts</p>
+                          {sessions
+                            .filter(s => s.user.id !== user.id)
+                            .map(session => (
+                              <button
+                                key={session.user.id}
+                                onClick={() => {
+                                  setUserMenuOpen(false);
+                                  switchAccount(session);
+                                  router.push(session.user.is_admin ? '/admin' : '/');
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 transition-colors text-left"
+                              >
+                                <div className="w-8 h-8 rounded-full bg-gray-400 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                  {session.user.full_name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-800 truncate">{session.user.full_name}</p>
+                                  <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
+                                </div>
+                                <RefreshCw size={14} className="text-gray-400 flex-shrink-0" />
+                              </button>
+                            ))}
+                          <hr className="border-orange-100 my-1" />
+                        </>
+                      )}
+
+                      {/* ── Add another account ── */}
+                      <Link
+                        href="/auth/login?add=1"
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm text-maroon-700 font-medium"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <UserPlus size={16} className="text-maroon-600" /> Add another account
+                      </Link>
+
+                      <hr className="border-orange-100 my-1" />
+
+                      {/* ── Navigation ── */}
                       <Link href="/" className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm" onClick={() => setUserMenuOpen(false)}>
                         <Home size={16} className="text-maroon-700" /> Home
                       </Link>
@@ -226,20 +279,6 @@ export default function Navbar() {
                           <Settings size={16} className="text-maroon-700" /> Manage Products
                         </Link>
                       )}
-
-                      <hr className="border-orange-100 my-1" />
-
-                      {/* Switch account = sign out → login */}
-                      <button
-                        onClick={() => {
-                          setUserMenuOpen(false);
-                          logout();
-                          window.location.href = '/auth/login';
-                        }}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm text-gray-700 w-full"
-                      >
-                        <RefreshCw size={16} className="text-gray-500" /> Switch Account
-                      </button>
 
                       <Link href="/account/delete" className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-500" onClick={() => setUserMenuOpen(false)}>
                         <UserX size={16} /> Delete Account
@@ -397,15 +436,34 @@ export default function Navbar() {
                     className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
                     <HelpCircle size={15} /> Help &amp; Policies
                   </Link>
-                  <button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      logout();
-                      window.location.href = '/auth/login';
-                    }}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2 w-full text-left">
-                    <RefreshCw size={15} /> Switch Account
-                  </button>
+                  {/* Other saved accounts in mobile menu */}
+                  {sessions.filter(s => s.user.id !== user.id).length > 0 && (
+                    <>
+                      <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-maroon-400 uppercase tracking-widest">Switch Account</p>
+                      {sessions.filter(s => s.user.id !== user.id).map(session => (
+                        <button
+                          key={session.user.id}
+                          onClick={() => {
+                            setMobileOpen(false);
+                            switchAccount(session);
+                            router.push(session.user.is_admin ? '/admin' : '/');
+                          }}
+                          className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 w-full text-left"
+                        >
+                          <div className="w-6 h-6 rounded-full bg-gold-500 text-white text-xs font-bold flex items-center justify-center">
+                            {session.user.full_name.charAt(0).toUpperCase()}
+                          </div>
+                          {session.user.full_name.split(' ')[0]}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                  <Link
+                    href="/auth/login?add=1"
+                    onClick={() => setMobileOpen(false)}
+                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2">
+                    <UserPlus size={15} /> Add another account
+                  </Link>
                   <Link href="/account/delete" onClick={() => setMobileOpen(false)}
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
                     <UserX size={15} /> Delete Account
