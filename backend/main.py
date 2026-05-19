@@ -93,6 +93,25 @@ def _migrate_db():
                 conn.commit()
                 print("[Startup] Migrated: added deactivated_at to users")
 
+        # ── New Order columns ──────────────────────────────────────────────
+        orders_cols = [c["name"] for c in inspector.get_columns("orders")]
+        if "open_box_delivery" not in orders_cols:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN open_box_delivery BOOLEAN NOT NULL DEFAULT FALSE"))
+            conn.commit()
+            print("[Startup] Migrated: added open_box_delivery to orders")
+        if "delivery_otp" not in orders_cols:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_otp VARCHAR(10)"))
+            conn.commit()
+            print("[Startup] Migrated: added delivery_otp to orders")
+        if "delivery_person_name" not in orders_cols:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_name VARCHAR(100)"))
+            conn.commit()
+            print("[Startup] Migrated: added delivery_person_name to orders")
+        if "delivery_person_phone" not in orders_cols:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_phone VARCHAR(20)"))
+            conn.commit()
+            print("[Startup] Migrated: added delivery_person_phone to orders")
+
     except Exception as e:
         print(f"[Startup] Migration note: {e}")
 

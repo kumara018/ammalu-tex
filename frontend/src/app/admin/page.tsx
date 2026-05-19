@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Crop Tops', 'Party Wears'];
-const ORDER_STATUSES = ['pending','confirmed','processing','shipped','delivered','cancelled'];
+const ORDER_STATUSES = ['pending','confirmed','processing','shipped','out_for_delivery','delivered','cancelled'];
 const SIZE_OPTIONS   = ['XS','S','M','L','XL','XXL','Free Size'];
 
 interface DashData { total_products: number; active_products: number; total_users: number; total_orders: number; pending_orders: number; total_revenue: number; recent_orders: any[]; }
@@ -156,8 +156,12 @@ export default function AdminPage() {
 
   const handleOrderStatus = async (id: number, status: string) => {
     try {
-      await adminAPI.updateOrderStatus(id, status);
-      toast.success('Order status updated');
+      const res = await adminAPI.updateOrderStatus(id, { status });
+      if (status === 'out_for_delivery' && res.data?.delivery_otp) {
+        toast.success(`Status updated! Delivery OTP sent to customer: ${res.data.delivery_otp}`, { duration: 8000 });
+      } else {
+        toast.success('Order status updated — customer notified by email');
+      }
       loadOrders();
     } catch { toast.error('Failed to update status'); }
   };

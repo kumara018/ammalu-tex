@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-import models, schemas, auth as auth_utils
+import models, schemas, auth as auth_utils, notifications
 
 router = APIRouter(prefix="/api/cart", tags=["Cart"])
 
@@ -69,6 +69,17 @@ def add_to_cart(
     db.add(item)
     db.commit()
     db.refresh(item)
+
+    # Send cart reminder email (fire-and-forget, don't block response)
+    cat = product.category
+    emoji_map = {
+        "Lehenga": "👗", "Chudithar": "👘", "Party Wears": "✨",
+        "Crop Tops": "🎽", "Tops": "👕", "Half Saree": "🥻",
+    }
+    notifications.send_cart_reminder_email(
+        current_user.email, current_user.full_name,
+        product.name, emoji_map.get(cat, "🛍️"),
+    )
     return item
 
 

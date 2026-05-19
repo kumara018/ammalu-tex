@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import os, shutil, uuid
+import os, shutil, uuid, random
 from database import get_db
 import models, schemas, auth as auth_utils, notifications
 
@@ -153,30 +153,65 @@ def get_all_orders(
 @router.put("/orders/{order_id}/status")
 def update_order_status(
     order_id: int,
-    new_status: str,
+    payload: schemas.OrderStatusUpdate,
     db: Session = Depends(get_db),
     _: models.User = Depends(auth_utils.get_current_admin),
 ):
-    allowed = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]
-    if new_status not in allowed:
+    allowed = ["pending", "confirmed", "processing", "shipped", "out_for_delivery", "delivered", "cancelled"]
+    if payload.status not in allowed:
         raise HTTPException(status_code=400, detail=f"Status must be one of: {', '.join(allowed)}")
 
     order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    order.status = new_status
-    db.commit()
+    order.status = payload.status
 
-    # Notify the customer by email
+    # Update tracking number if provided
+    if payload.tracking_number:
+        order.tracking_number = payload.tracking_number
+
+    # Set delivery person info if provided
+    if payload.delivery_person_name:
+        order.delivery_person_name = payload.delivery_person_name
+    if payload.delivery_person_phone:
+        order.delivery_person_phone = payload.delivery_person_phone
+
+    # ── Out for Delivery: generate a 6-digit delivery OTP ─────────────────────
+    if payload.status == "out_for_delivery":
+        otp = str(random.randint(100000, 999999))
+        order.delivery_otp = otp
+
+    db.commit()
+    db.refresh(order)
+
+    # ── Notify the customer by email ──────────────────────────────────────────
     user = db.query(models.User).filter(models.User.id == order.user_id).first()
     if user:
-        notifications.send_order_status_email(user.email, user.full_name, order, new_status)
-        # After delivery, also ask for a review
-        if new_status == "delivered":
+        if payload.status == "out_for_delivery":
+            notifications.send_delivery_otp_email(
+                user.email, user.full_name, order.delivery_otp,
+                order.order_number,
+                agent_name=order.delivery_person_name or "",
+                agent_phone=order.delivery_person_phone or "",
+            )
+            # Also SMS the OTP
+            notifications.send_otp_sms(
+                user.phone,
+                f"Delivery OTP for order {order.order_number}: {order.delivery_otp}. Share with delivery agent only.",
+                "Delivery",
+            )
+        else:
+            notifications.send_order_status_email(user.email, user.full_name, order, payload.status)
+
+        # After delivered, ask for a review
+        if payload.status == "delivered":
             notifications.send_review_request_email(user.email, user.full_name, order)
 
-    return {"message": f"Order {order.order_number} status updated to {new_status}"}
+    return {
+        "message": f"Order {order.order_number} updated to {payload.status}",
+        "delivery_otp": order.delivery_otp if payload.status == "out_for_delivery" else None,
+    }
 
 
 @router.get("/users", response_model=List[schemas.UserOut])

@@ -52,6 +52,7 @@ export default function CheckoutPage() {
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [placing, setPlacing] = useState(false);
+  const [openBox, setOpenBox] = useState(false);
 
   // Saved addresses
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
@@ -185,6 +186,7 @@ export default function CheckoutPage() {
           pincode:      addr.pincode.trim(),
         },
         payment: { method, upi_id: upiId.trim() || undefined, ...extraPayment },
+        open_box_delivery: openBox,
       });
       await clearCart();
       toast.success('Order placed successfully!');
@@ -513,6 +515,19 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
+
+              {/* Open Box Delivery option */}
+              <label className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors mb-4">
+                <input type="checkbox" checked={openBox} onChange={e => setOpenBox(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-blue-700 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-blue-900 text-sm">📦 Request Open Box Delivery</p>
+                  <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
+                    Inspect the package before accepting. If the product is damaged or doesn't match,
+                    you can refuse delivery on the spot for a full refund.
+                  </p>
+                </div>
+              </label>
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="btn-secondary flex-1 py-3">← Back</button>

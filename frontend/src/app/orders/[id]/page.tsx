@@ -4,14 +4,18 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Package, Truck, CheckCircle, Clock, XCircle,
-  MapPin, CreditCard, ArrowLeft, AlertCircle, Sparkles,
+  MapPin, CreditCard, ArrowLeft, Sparkles, Phone, ShieldCheck, PackageOpen,
 } from 'lucide-react';
 import { ordersAPI } from '@/lib/api';
 import { Order } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
-const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pending', confirmed: 'Confirmed', processing: 'Processing',
+  shipped: 'Shipped', out_for_delivery: 'Out for Delivery', delivered: 'Delivered',
+};
 
 function OrderDetailContent() {
   const { id } = useParams();
@@ -108,25 +112,75 @@ function OrderDetailContent() {
                   {STATUS_STEPS.map((s, i) => {
                     const done = i <= currentStep;
                     const icons: any = {
-                      pending: Clock, confirmed: CheckCircle, processing: Package, shipped: Truck, delivered: CheckCircle,
+                      pending: Clock, confirmed: CheckCircle, processing: Package,
+                      shipped: Truck, out_for_delivery: Truck, delivered: CheckCircle,
                     };
-                    const Icon = icons[s];
+                    const Icon = icons[s] || Clock;
                     return (
                       <div key={s} className="flex flex-col items-center gap-2">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${done ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-white border-gray-300 text-gray-400'}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${done ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-white border-gray-300 text-gray-400'} ${s === 'out_for_delivery' && done ? 'bg-orange-600 border-orange-600' : ''}`}>
                           <Icon size={16} />
                         </div>
-                        <span className={`text-xs font-medium capitalize hidden sm:block ${done ? 'text-maroon-800' : 'text-gray-400'}`}>{s}</span>
+                        <span className={`text-xs font-medium text-center hidden sm:block ${done ? 'text-maroon-800' : 'text-gray-400'}`} style={{ maxWidth: 60 }}>
+                          {STATUS_LABELS[s]}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
               </div>
+
+              {/* Tracking number */}
               {order.tracking_number && (
                 <div className="mt-5 pt-4 border-t border-orange-100">
                   <p className="text-sm text-gray-600">Tracking Number: <span className="font-mono font-bold text-maroon-800">{order.tracking_number}</span></p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── Open Box Delivery badge ──────────────────────────────────── */}
+          {order.open_box_delivery && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
+              <PackageOpen size={24} className="text-blue-600 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-blue-800 text-sm">Open Box Delivery Requested</p>
+                <p className="text-xs text-blue-600 mt-0.5">You can inspect the package before accepting delivery.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Delivery OTP — shown when out for delivery ───────────────── */}
+          {order.status === 'out_for_delivery' && order.delivery_otp && (
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck size={22} className="text-orange-700" />
+                <h3 className="font-bold text-orange-900">Your Delivery OTP</h3>
+              </div>
+              <p className="text-sm text-gray-700 mb-4">
+                Your order is out for delivery! Share this OTP with the delivery agent when they arrive.
+              </p>
+              <div className="bg-white border-2 border-orange-300 rounded-xl p-4 text-center mb-4">
+                <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Delivery OTP</p>
+                <p className="text-5xl font-bold tracking-[0.4em] font-mono text-orange-700">{order.delivery_otp}</p>
+              </div>
+              {(order.delivery_person_name || order.delivery_person_phone) && (
+                <div className="bg-white border border-orange-200 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Your Delivery Agent</p>
+                  {order.delivery_person_name && (
+                    <p className="text-sm font-semibold text-gray-800">{order.delivery_person_name}</p>
+                  )}
+                  {order.delivery_person_phone && (
+                    <a href={`tel:${order.delivery_person_phone}`}
+                      className="flex items-center gap-1.5 text-sm text-maroon-700 hover:underline font-medium mt-1">
+                      <Phone size={14} /> {order.delivery_person_phone}
+                    </a>
+                  )}
+                </div>
+              )}
+              <p className="text-xs text-orange-700 mt-3 font-medium">
+                ⚠️ Never share this OTP via phone call or message. Only share it in person at your door.
+              </p>
             </div>
           )}
 

@@ -117,6 +117,34 @@ def get_reviews(product_id: int, db: Session = Depends(get_db)):
     return product.reviews
 
 
+@router.get("/{product_id}/can-review")
+def can_user_review(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """Check if the logged-in user is eligible to review this product (verified buyer)."""
+    already = db.query(models.Review).filter(
+        models.Review.user_id    == current_user.id,
+        models.Review.product_id == product_id,
+    ).first()
+    if already:
+        return {"can_review": False, "reason": "already_reviewed"}
+
+    # Check if user has a delivered order containing this product
+    delivered_orders = db.query(models.Order).filter(
+        models.Order.user_id == current_user.id,
+        models.Order.status  == "delivered",
+    ).all()
+    has_bought = any(
+        any(item.get("product_id") == product_id for item in (o.items_snapshot or []))
+        for o in delivered_orders
+    )
+    if not has_bought:
+        return {"can_review": False, "reason": "not_purchased"}
+    return {"can_review": True, "reason": ""}
+
+
 @router.post("/{product_id}/reviews", response_model=schemas.ReviewOut, status_code=201)
 def add_review(
     product_id:   int,
@@ -134,6 +162,18 @@ def add_review(
     ).first()
     if existing:
         raise HTTPException(409, "You have already reviewed this product")
+
+    # Verified buyer check: must have a delivered order containing this product
+    delivered_orders = db.query(models.Order).filter(
+        models.Order.user_id == current_user.id,
+        models.Order.status  == "delivered",
+    ).all()
+    has_bought = any(
+        any(item.get("product_id") == product_id for item in (o.items_snapshot or []))
+        for o in delivered_orders
+    )
+    if not has_bought:
+        raise HTTPException(403, "Only verified buyers who have received this product can leave a review.")
 
     review = models.Review(
         user_id=current_user.id, product_id=product_id,

@@ -233,10 +233,11 @@ def send_payment_failed_email(email: str, name: str, order):
 
 # ── 5. Order status update ─────────────────────────────────────────────────────
 _STATUS_MAP = {
-    "processing": ("🔄 Order Being Processed", "#2563eb", "#eff6ff", "Your order is being prepared by our team."),
-    "shipped":    ("📦 Your Order is Shipped!", "#7c3aed", "#f5f3ff", "Your order is on its way — expect it soon!"),
-    "delivered":  ("✅ Order Delivered!",        "#16a34a", "#f0fdf4", "Your order has been delivered. We hope you love it!"),
-    "cancelled":  ("❌ Order Cancelled",          "#dc2626", "#fef2f2", "Your order has been cancelled."),
+    "processing":       ("🔄 Order Being Processed",   "#2563eb", "#eff6ff", "Your order is being prepared by our team."),
+    "shipped":          ("📦 Your Order is Shipped!",   "#7c3aed", "#f5f3ff", "Your order is on its way — expect it soon!"),
+    "out_for_delivery": ("🚚 Out for Delivery Today!",  "#ea580c", "#fff7ed", "Your order is out for delivery — stay at home!"),
+    "delivered":        ("✅ Order Delivered!",          "#16a34a", "#f0fdf4", "Your order has been delivered. We hope you love it!"),
+    "cancelled":        ("❌ Order Cancelled",            "#dc2626", "#fef2f2", "Your order has been cancelled."),
 }
 
 def send_order_status_email(email: str, name: str, order, new_status: str):
@@ -386,7 +387,70 @@ def send_password_reset_otp_email(email: str, name: str, otp: str):
     _bg(email, f"🔑 {otp} is your Ammalu Tex password reset OTP", html)
 
 
-# ── 11. Optional SMS via Twilio ─────────────────────────────────────────────────
+# ── 11. Cart reminder email ───────────────────────────────────────────────────
+def send_cart_reminder_email(email: str, name: str, product_name: str, product_image_emoji: str = "🛍️"):
+    first = name.split()[0]
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">🛒 Item added to your cart!</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, great choice! <strong>{product_name}</strong> is waiting in your cart.
+      </p>
+      <div style="background:#fff9f2;border:2px solid #f97316;border-radius:12px;padding:24px;margin:20px 0;text-align:center;">
+        <div style="font-size:60px;margin-bottom:12px;">{product_image_emoji}</div>
+        <p style="margin:0;font-size:16px;font-weight:bold;color:#7c1d2e;">{product_name}</p>
+        <p style="margin:8px 0 0;color:#888;font-size:13px;">Saved in your cart — stock is limited!</p>
+      </div>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:14px;margin:20px 0;">
+        <p style="margin:0;color:#92400e;font-size:13px;line-height:1.6;">
+          ⚡ <strong>Don't wait too long!</strong> Popular items sell out quickly.
+          Complete your order to secure your purchase.
+        </p>
+      </div>
+      {_btn("Complete Your Order →", f"{STORE_URL}/cart", "#f97316")}
+      <p style="color:#888;font-size:12px;text-align:center;margin-top:8px;">
+        Or <a href="{STORE_URL}/products" style="color:#7c1d2e;">continue browsing</a> our collection.
+      </p>
+    """)
+    _bg(email, f"🛒 {product_name} is in your cart — complete your order | {STORE_NAME}", html)
+
+
+# ── 12. Delivery OTP email ─────────────────────────────────────────────────────
+def send_delivery_otp_email(email: str, name: str, otp: str, order_number: str,
+                             agent_name: str = "", agent_phone: str = ""):
+    first = name.split()[0]
+    agent_block = ""
+    if agent_name or agent_phone:
+        agent_block = f"""
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;margin:16px 0;">
+        <p style="margin:0;color:#0369a1;font-weight:bold;font-size:14px;">📦 Your Delivery Agent</p>
+        {"<p style='margin:8px 0 0;color:#0c4a6e;font-size:14px;'>👤 " + agent_name + "</p>" if agent_name else ""}
+        {"<p style='margin:6px 0 0;color:#0c4a6e;font-size:14px;'>📞 " + agent_phone + "</p>" if agent_phone else ""}
+      </div>"""
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">🚚 Your order is out for delivery!</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, your order <strong>{order_number}</strong> is on its way and will be delivered today!
+      </p>
+      {agent_block}
+      <div style="background:#fff9f2;border:2px solid #7c1d2e;border-radius:12px;padding:28px;margin:24px 0;text-align:center;">
+        <p style="margin:0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:3px;">Your Delivery OTP</p>
+        <p style="margin:14px 0 6px;font-size:52px;font-weight:bold;color:#7c1d2e;letter-spacing:14px;font-family:monospace;">{otp}</p>
+        <p style="margin:0;color:#666;font-size:13px;">Share this OTP with the delivery agent to confirm receipt</p>
+      </div>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:14px;margin:20px 0;">
+        <p style="margin:0;color:#92400e;font-weight:bold;font-size:14px;">⚠️ Important Security Note</p>
+        <p style="margin:8px 0 0;color:#92400e;font-size:13px;line-height:1.6;">
+          • Only share this OTP with the delivery person at your door<br>
+          • Do NOT share via phone call or message<br>
+          • The OTP confirms you received the package
+        </p>
+      </div>
+      {_btn("Track Your Order →", f"{STORE_URL}/orders")}
+    """)
+    _bg(email, f"🚚 Delivery OTP for order {order_number} — share with delivery agent | {STORE_NAME}", html)
+
+
+# ── 13. Optional SMS via Twilio ─────────────────────────────────────────────────
 def _send_sms(to_phone: str, message: str):
     if not to_phone.startswith("+"):
         to_phone = "+91" + to_phone

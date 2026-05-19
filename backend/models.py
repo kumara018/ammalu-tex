@@ -138,6 +138,10 @@ class Order(Base):
     shipping_address       = Column(JSON,  nullable=False)
     tracking_number        = Column(String(100), nullable=True)
     notes                  = Column(Text, nullable=True)
+    open_box_delivery      = Column(Boolean, default=False)          # customer requested open-box
+    delivery_otp           = Column(String(10),  nullable=True)      # 6-digit OTP for delivery confirmation
+    delivery_person_name   = Column(String(100), nullable=True)      # agent name (set on out_for_delivery)
+    delivery_person_phone  = Column(String(20),  nullable=True)      # agent phone
     created_at             = Column(DateTime(timezone=True), server_default=func.now())
     updated_at             = Column(DateTime(timezone=True), onupdate=func.now())
 

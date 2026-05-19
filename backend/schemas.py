@@ -393,9 +393,17 @@ class PaymentDetails(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    shipping_address: ShippingAddress
-    payment:          PaymentDetails
-    notes:            Optional[str] = None
+    shipping_address:  ShippingAddress
+    payment:           PaymentDetails
+    notes:             Optional[str] = None
+    open_box_delivery: bool = False    # customer can request open-box inspection
+
+
+class OrderStatusUpdate(BaseModel):
+    status:               str
+    tracking_number:      Optional[str] = None
+    delivery_person_name: Optional[str] = None
+    delivery_person_phone:Optional[str] = None
 
 
 class OrderOut(BaseModel):
@@ -412,6 +420,10 @@ class OrderOut(BaseModel):
     shipping_address:       Any
     tracking_number:        Optional[str] = None
     notes:                  Optional[str] = None
+    open_box_delivery:      bool = False
+    delivery_otp:           Optional[str] = None
+    delivery_person_name:   Optional[str] = None
+    delivery_person_phone:  Optional[str] = None
     created_at:             datetime
 
     model_config = {"from_attributes": True}

@@ -91,6 +91,7 @@ def place_order(
         payment_transaction_id=transaction_id,
         shipping_address=payload.shipping_address.model_dump(),
         notes=payload.notes,
+        open_box_delivery=payload.open_box_delivery,
     )
     db.add(order)
 

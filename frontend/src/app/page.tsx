@@ -22,17 +22,12 @@ const FEATURES = [
   { icon: Headphones, title: 'Customer Support', desc: 'Mon–Sat, 9AM to 8PM',         href: '/support'   },
 ];
 
-// Static fallback reviews shown until real ones load
-const FALLBACK_REVIEWS = [
-  { id: -1, rating: 5, comment: 'Excellent quality chudithar! The fabric is so soft and the colours are vibrant. Fast delivery too. Highly recommended!', reviewer: 'Priya M.', product_name: 'Chudithar', product_id: null },
-  { id: -2, rating: 5, comment: 'Bought a lehenga for my sister\'s wedding. Got so many compliments. Ammalu Tex never disappoints — premium quality at great prices.', reviewer: 'Kavitha R.', product_name: 'Lehenga', product_id: null },
-  { id: -3, rating: 5, comment: 'The party wear collection is amazing! Ordered online and it arrived in 3 days. Perfect fit and gorgeous design. Will order again.', reviewer: 'Deepa S.', product_name: 'Party Wears', product_id: null },
-];
+// No static fallback — only real verified-buyer reviews from the database
 
 export default function HomePage() {
   const [featured,    setFeatured]    = useState<Product[]>([]);
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
-  const [reviews,     setReviews]     = useState<any[]>(FALLBACK_REVIEWS);
+  const [reviews,     setReviews]     = useState<any[]>([]);
   const [loading,     setLoading]     = useState(true);
 
   useEffect(() => {
@@ -45,9 +40,7 @@ export default function HomePage() {
         ]);
         setFeatured(featRes.data);
         setNewArrivals(newRes.data);
-        if (Array.isArray(revRes.data) && revRes.data.length > 0) {
-          setReviews(revRes.data);
-        }
+        if (Array.isArray(revRes.data)) setReviews(revRes.data);
       } catch {}
       finally { setLoading(false); }
     };
@@ -224,44 +217,45 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Customer Reviews — real data from DB, fallback to static */}
-      <section className="bg-maroon-50 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center mb-2">What Our Customers Say</h2>
-          <p className="text-center text-sm text-gray-500 mb-8">Genuine reviews from verified buyers</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {reviews.slice(0, 3).map((rev) => (
-              <div key={rev.id} className="card p-6 flex flex-col">
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} size={15}
-                      className={i < rev.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
-                  ))}
-                </div>
-                {/* Review text */}
-                <p className="text-gray-700 text-sm leading-relaxed mb-4 flex-1">
-                  &ldquo;{rev.comment}&rdquo;
-                </p>
-                {/* Reviewer + product */}
-                <div className="border-t border-orange-100 pt-3 flex items-center justify-between">
-                  <p className="font-semibold text-maroon-800 text-sm">{rev.reviewer}</p>
-                  {rev.product_id ? (
+      {/* Customer Reviews — real verified-buyer reviews from DB only */}
+      {reviews.length > 0 && (
+        <section className="bg-maroon-50 py-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="section-title text-center mb-2">What Our Customers Say</h2>
+            <p className="text-center text-sm text-gray-500 mb-8">Genuine reviews from verified buyers ✓</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {reviews.slice(0, 3).map((rev) => (
+                <div key={rev.id} className="card p-6 flex flex-col">
+                  {/* Stars */}
+                  <div className="flex gap-0.5 mb-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={15}
+                        className={i < rev.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'} />
+                    ))}
+                  </div>
+                  {/* Review text */}
+                  <p className="text-gray-700 text-sm leading-relaxed mb-4 flex-1">
+                    &ldquo;{rev.comment}&rdquo;
+                  </p>
+                  {/* Reviewer + product */}
+                  <div className="border-t border-orange-100 pt-3 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-maroon-800 text-sm">{rev.reviewer}</p>
+                      <p className="text-xs text-green-600 font-medium">✓ Verified Buyer</p>
+                    </div>
                     <Link
                       href={`/products/${rev.product_id}`}
                       className="text-xs text-maroon-600 hover:underline truncate max-w-[120px]"
                     >
                       {rev.product_name}
                     </Link>
-                  ) : (
-                    <span className="text-xs text-gray-400">{rev.product_name}</span>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

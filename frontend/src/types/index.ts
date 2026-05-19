@@ -78,6 +78,10 @@ export interface Order {
   shipping_address: ShippingAddress;
   tracking_number?: string;
   notes?: string;
+  open_box_delivery: boolean;
+  delivery_otp?: string;
+  delivery_person_name?: string;
+  delivery_person_phone?: string;
   created_at: string;
 }
 

@@ -88,6 +88,7 @@ export const productsAPI = {
   getOne:           (id: number)               => api.get(`/api/products/${id}`),
   getCategories:    ()                         => api.get('/api/products/categories'),
   getReviews:       (id: number)               => api.get(`/api/products/${id}/reviews`),
+  canReview:        (id: number)               => api.get(`/api/products/${id}/can-review`),
   addReview:        (id: number, data: object) => api.post(`/api/products/${id}/reviews`, data),
   getRecentReviews: (limit = 6)               => api.get('/api/products/recent-reviews', { params: { limit, min_rating: 4 } }),
 };
@@ -123,7 +124,7 @@ export const adminAPI = {
   deleteProduct:     (id: number)                 => api.delete(`/api/admin/products/${id}`),
   uploadImage:       (id: number, form: FormData) => api.post(`/api/admin/products/${id}/image`, form, { headers: { 'Content-Type': 'multipart/form-data' } }),
   getOrders:         (status?: string)            => api.get('/api/admin/orders', { params: status ? { status } : {} }),
-  updateOrderStatus: (id: number, status: string) => api.put(`/api/admin/orders/${id}/status?new_status=${status}`),
+  updateOrderStatus: (id: number, data: object)   => api.put(`/api/admin/orders/${id}/status`, data),
   getUsers:          ()                           => api.get('/api/admin/users'),
   updateSettings:    (data: object)               => api.put('/api/admin/settings', data),
 };
