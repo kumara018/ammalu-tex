@@ -29,8 +29,45 @@ YEAR          = datetime.now().year
 
 # ── Low-level send (runs in background thread so API never blocks) ─────────────
 def _send_email(to: str, subject: str, html: str):
+    """
+    Tries SendGrid HTTP API first (works on Render — no port blocking).
+    Falls back to Gmail SMTP only if SENDGRID_API_KEY is not set.
+    """
+    import json as _json, urllib.request as _req, urllib.error as _uerr
+
+    sg_key = os.getenv("SENDGRID_API_KEY", "")
+
+    # ── Path A: SendGrid (recommended on Render) ───────────────────────────────
+    if sg_key:
+        from_email = SMTP_EMAIL or "noreply@ammalu-tex.com"
+        payload = _json.dumps({
+            "personalizations": [{"to": [{"email": to}]}],
+            "from": {"email": from_email, "name": STORE_NAME},
+            "reply_to": {"email": SUPPORT_EMAIL},
+            "subject": subject,
+            "content": [{"type": "text/html", "value": html}],
+        }).encode()
+        try:
+            request = _req.Request(
+                "https://api.sendgrid.com/v3/mail/send",
+                data=payload,
+                headers={
+                    "Authorization": f"Bearer {sg_key}",
+                    "Content-Type":  "application/json",
+                },
+            )
+            with _req.urlopen(request, timeout=15) as resp:
+                print(f"[Email SENT ✓ SendGrid {resp.status}] {subject} → {to}")
+        except _uerr.HTTPError as e:
+            body = e.read().decode(errors="ignore")
+            print(f"[Email SendGrid HTTP {e.code}] {subject} → {to} | {body}")
+        except Exception as e:
+            print(f"[Email SendGrid ERROR] {type(e).__name__}: {e}")
+        return  # never fall through to SMTP when API key is set
+
+    # ── Path B: Gmail SMTP (blocked on Render free tier — local dev only) ──────
     if not SMTP_EMAIL or not SMTP_PASS:
-        print(f"[Email SKIP — SMTP not configured] {subject} → {to}")
+        print(f"[Email SKIP — no SendGrid key and no SMTP config] {subject} → {to}")
         return
     try:
         msg = MIMEMultipart("alternative")
@@ -45,9 +82,9 @@ def _send_email(to: str, subject: str, html: str):
             s.ehlo()
             s.login(SMTP_EMAIL, SMTP_PASS)
             s.sendmail(SMTP_EMAIL, to, msg.as_string())
-        print(f"[Email SENT ✓] {subject} → {to}")
+        print(f"[Email SENT ✓ SMTP] {subject} → {to}")
     except smtplib.SMTPAuthenticationError as e:
-        print(f"[Email AUTH ERROR] Gmail rejected login for {SMTP_EMAIL}. Check App Password. Error: {e}")
+        print(f"[Email AUTH ERROR] Gmail rejected login. Check App Password. {e}")
     except smtplib.SMTPException as e:
         print(f"[Email SMTP ERROR] {e}")
     except Exception as e:

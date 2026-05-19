@@ -268,75 +268,74 @@ def reset_admin():
 @app.get("/test-email")
 def test_email(to: str = ""):
     """
-    Diagnostic endpoint — tests SMTP connectivity and returns the exact result.
+    Diagnostic endpoint — tests email delivery and returns the exact result.
+    Uses SendGrid HTTP API (works on Render). Falls back to SMTP.
     Usage: GET /test-email?to=youremail@gmail.com
-    No background thread — errors are returned directly in the response.
     """
-    import smtplib
-    from email.mime.text import MIMEText
+    import json as _json, urllib.request as _req, urllib.error as _uerr
 
+    sg_key     = os.getenv("SENDGRID_API_KEY", "")
     smtp_email = os.getenv("SMTP_EMAIL", "")
-    smtp_pass  = os.getenv("SMTP_PASSWORD", "")
+    target     = to.strip() if to.strip() else smtp_email or "kumaraguru27102@gmail.com"
 
-    if not smtp_email or not smtp_pass:
-        return {
-            "status":  "error",
-            "message": "SMTP_EMAIL or SMTP_PASSWORD is not set in Render environment variables.",
-            "smtp_email_set":    bool(smtp_email),
-            "smtp_password_set": bool(smtp_pass),
-        }
+    # ── Test via SendGrid ──────────────────────────────────────────────────────
+    if sg_key:
+        from_email = smtp_email or "noreply@ammalu-tex.com"
+        payload = _json.dumps({
+            "personalizations": [{"to": [{"email": target}]}],
+            "from": {"email": from_email, "name": "Ammalu Tex"},
+            "subject": "✅ Ammalu Tex — Email Test (SendGrid)",
+            "content": [{
+                "type": "text/html",
+                "value": (
+                    "<h2 style='color:#7c1d2e'>Email delivery is working! ✅</h2>"
+                    "<p>This test email was sent from the Ammalu Tex backend on Render "
+                    "using SendGrid. If you're reading this, emails (OTPs, order confirmations, etc.) "
+                    "are now working correctly.</p>"
+                    "<p style='color:#888;font-size:12px;'>Sent from ammalu-tex.onrender.com</p>"
+                ),
+            }],
+        }).encode()
+        try:
+            request = _req.Request(
+                "https://api.sendgrid.com/v3/mail/send",
+                data=payload,
+                headers={"Authorization": f"Bearer {sg_key}", "Content-Type": "application/json"},
+            )
+            with _req.urlopen(request, timeout=15) as resp:
+                return {
+                    "status":  "success",
+                    "method":  "SendGrid",
+                    "message": f"Test email sent to {target}. Check inbox + spam folder.",
+                    "from":    from_email,
+                    "to":      target,
+                    "http_status": resp.status,
+                }
+        except _uerr.HTTPError as e:
+            body = e.read().decode(errors="ignore")
+            return {
+                "status":  "error",
+                "method":  "SendGrid",
+                "type":    f"HTTP {e.code}",
+                "message": body,
+                "hint":    (
+                    "Common causes: (1) API key is wrong/expired — regenerate at app.sendgrid.com/settings/api_keys, "
+                    "(2) Sender email not verified — go to app.sendgrid.com → Settings → Sender Authentication."
+                ),
+            }
+        except Exception as e:
+            return {"status": "error", "method": "SendGrid", "type": type(e).__name__, "message": str(e)}
 
-    target = to.strip() if to.strip() else smtp_email
-
-    try:
-        msg = MIMEText(
-            "This is a test email from Ammalu Tex backend (Render).\n\n"
-            "If you receive this, SMTP is working correctly!\n\n"
-            "— Ammalu Tex System"
-        )
-        msg["Subject"] = "✅ Ammalu Tex — SMTP Test Email"
-        msg["From"]    = f"Ammalu Tex <{smtp_email}>"
-        msg["To"]      = target
-
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as s:
-            s.ehlo()
-            s.starttls()
-            s.ehlo()
-            s.login(smtp_email, smtp_pass)
-            s.sendmail(smtp_email, target, msg.as_string())
-
-        return {
-            "status":  "success",
-            "message": f"Test email sent successfully to {target}. Check your inbox (and spam folder).",
-            "from":    smtp_email,
-            "to":      target,
-        }
-
-    except smtplib.SMTPAuthenticationError as e:
-        return {
-            "status":  "error",
-            "type":    "SMTPAuthenticationError",
-            "message": (
-                f"Gmail rejected the login for {smtp_email}. "
-                "Make sure SMTP_PASSWORD is a 16-character Gmail App Password with NO spaces. "
-                f"Raw error: {e}"
-            ),
-        }
-    except smtplib.SMTPConnectError as e:
-        return {
-            "status":  "error",
-            "type":    "SMTPConnectError",
-            "message": f"Could not connect to smtp.gmail.com:587. Render may be blocking outbound port 587. Error: {e}",
-        }
-    except smtplib.SMTPException as e:
-        return {
-            "status":  "error",
-            "type":    "SMTPException",
-            "message": str(e),
-        }
-    except Exception as e:
-        return {
-            "status":  "error",
-            "type":    type(e).__name__,
-            "message": str(e),
-        }
+    # ── No SendGrid key — report setup instructions ────────────────────────────
+    return {
+        "status":  "not_configured",
+        "message": (
+            "SENDGRID_API_KEY is not set. "
+            "Render free tier blocks SMTP ports, so SendGrid is required. "
+            "Steps: (1) Sign up free at sendgrid.com, "
+            "(2) Settings → Sender Authentication → Single Sender → verify your Gmail, "
+            "(3) Settings → API Keys → Create API Key → Full Access, "
+            "(4) Add SENDGRID_API_KEY to Render environment variables."
+        ),
+        "smtp_email_set": bool(smtp_email),
+    }
