@@ -310,6 +310,7 @@ export default function AdminPage() {
             <table className="w-full text-sm">
               <thead className="bg-maroon-50">
                 <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
+                  <th className="px-4 py-3 w-8">ID</th>
                   <th className="px-4 py-3">Product</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3">Price</th>
@@ -320,20 +321,59 @@ export default function AdminPage() {
               </thead>
               <tbody className="divide-y divide-orange-50">
                 {loading ? Array(5).fill(0).map((_, i) => (
-                  <tr key={i}><td colSpan={6} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
-                )) : products.map((p) => (
+                  <tr key={i}><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                )) : products.map((p) => {
+                  const imgSrc = p.images?.[0]
+                    ? (p.images[0].startsWith('http') ? p.images[0] : `${process.env.NEXT_PUBLIC_API_URL}${p.images[0]}`)
+                    : null;
+                  const catEmoji: Record<string,string> = {
+                    'Lehenga':'👗','Chudithar':'👘','Half Saree':'🥻',
+                    'Crop Tops':'🎽','Tops':'👕','Party Wears':'✨',
+                  };
+                  return (
                   <tr key={p.id} className={`hover:bg-orange-50 ${!p.is_active ? 'opacity-50' : ''}`}>
+                    {/* ID */}
+                    <td className="px-4 py-3 text-xs font-mono text-gray-400 whitespace-nowrap">#{p.id}</td>
+
+                    {/* Image + Name */}
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-800 line-clamp-1">{p.name}</p>
-                      <div className="flex gap-1 flex-wrap mt-0.5">
-                        {p.is_featured && <span className="text-[10px] bg-gold-100 text-gold-700 px-1.5 py-0.5 rounded font-medium">Featured</span>}
-                        {p.is_new_arrival && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">New Arrival</span>}
+                      <div className="flex items-center gap-3">
+                        {/* Thumbnail */}
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-orange-50 to-pink-50 flex-shrink-0 flex items-center justify-center border border-orange-100">
+                          {imgSrc ? (
+                            <img
+                              src={imgSrc}
+                              alt={p.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <span
+                            className="text-xl"
+                            style={{ display: imgSrc ? 'none' : 'flex' }}
+                          >
+                            {catEmoji[p.category] || '👕'}
+                          </span>
+                        </div>
+                        {/* Name + badges */}
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-800 line-clamp-1 text-sm">{p.name}</p>
+                          <div className="flex gap-1 flex-wrap mt-0.5">
+                            {p.is_featured    && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Featured</span>}
+                            {p.is_new_arrival && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">New Arrival</span>}
+                            {!p.is_active     && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">Inactive</span>}
+                          </div>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{p.category}</td>
-                    <td className="px-4 py-3 font-semibold text-maroon-900">₹{p.price.toLocaleString()}</td>
+
+                    <td className="px-4 py-3 text-gray-600 text-sm">{p.category}</td>
+                    <td className="px-4 py-3 font-semibold text-maroon-900 text-sm">₹{p.price.toLocaleString()}</td>
                     <td className="px-4 py-3">
-                      <span className={`font-medium ${p.stock === 0 ? 'text-red-600' : p.stock <= 5 ? 'text-orange-600' : 'text-green-600'}`}>
+                      <span className={`font-medium text-sm ${p.stock === 0 ? 'text-red-600' : p.stock <= 5 ? 'text-orange-600' : 'text-green-600'}`}>
                         {p.stock}
                       </span>
                     </td>
@@ -342,7 +382,7 @@ export default function AdminPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-maroon-100 rounded-lg text-maroon-700 transition-colors" title="Edit">
+                        <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-maroon-100 rounded-lg text-maroon-700 transition-colors" title={`Edit #${p.id}`}>
                           <Pencil size={15} />
                         </button>
                         <button onClick={() => handleDelete(p.id, p.name)} className="p-1.5 hover:bg-red-100 rounded-lg text-red-600 transition-colors" title="Deactivate">
@@ -351,7 +391,8 @@ export default function AdminPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
