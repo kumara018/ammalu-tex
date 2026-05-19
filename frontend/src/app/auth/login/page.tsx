@@ -3,18 +3,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
-import { authAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { performLogin, getRedirectUrl } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const router    = useRouter();
 
-  const [form, setForm]       = useState({ identifier: '', password: '' });
-  const [errors, setErrors]   = useState<any>({});
+  const [form, setForm]         = useState({ identifier: '', password: '' });
+  const [errors, setErrors]     = useState<any>({});
   const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]   = useState(false);
   const [apiError, setApiError] = useState('');
 
   const validate = () => {
@@ -30,25 +30,30 @@ export default function LoginPage() {
     if (!validate()) return;
     setLoading(true);
     setApiError('');
-    try {
-      const res = await authAPI.login({
-        identifier: form.identifier.trim(),
-        password:   form.password,
-      });
-      login(res.data.access_token, res.data.user);
-      toast.success(`Welcome back, ${res.data.user.full_name.split(' ')[0]}! 👋`);
-      router.push(res.data.user.is_admin ? '/admin' : '/');
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || 'Login failed. Please check your credentials.';
-      setApiError(msg);
-    } finally {
-      setLoading(false);
+
+    const result = await performLogin(form.identifier, form.password);
+
+    if (result.success) {
+      // Sync AuthContext state with what performLogin already stored
+      const token = localStorage.getItem('token')!;
+      const user  = JSON.parse(localStorage.getItem('user')!);
+      login(token, user);
+
+      toast.success(`Welcome back, ${result.name!.split(' ')[0]}! 👋`);
+
+      // Redirect: admin → /admin, user → /
+      router.push(getRedirectUrl(result.isAdmin!));
+    } else {
+      setApiError(result.error!);
     }
+
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fff9f2]">
       <div className="w-full max-w-md">
+
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
@@ -68,6 +73,7 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
+
             {/* Email or Phone */}
             <div>
               <label className="label">Email or Mobile Number *</label>
