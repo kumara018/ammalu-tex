@@ -35,11 +35,9 @@ export default function LoginPage() {
   const [showPass,   setShowPass]   = useState(false);
 
   // ── Step 2 fields ─────────────────────────────────────────────────────────
-  const [otp,        setOtp]        = useState('');
-  const [emailHint,  setEmailHint]  = useState('');
-  const [otpCode,    setOtpCode]    = useState('');    // always shown on screen
-  const [emailSent,  setEmailSent]  = useState(false); // whether email was attempted
-  const [timer,      setTimer]      = useState(60);    // resend cooldown
+  const [otp,       setOtp]       = useState('');
+  const [emailHint, setEmailHint] = useState('');
+  const [timer,     setTimer]     = useState(60);    // resend cooldown
 
   // ── Shared state ──────────────────────────────────────────────────────────
   const [step,    setStep]    = useState<Step>('credentials');
@@ -95,8 +93,6 @@ export default function LoginPage() {
       const res = await authAPI.sendLoginOtp({ identifier: identifier.trim(), password });
       retryCountRef.current = 0;
       setEmailHint(res.data.email_hint || '');
-      setOtpCode(res.data.otp_code || '');
-      setEmailSent(res.data.email_sent || false);
       setStep('otp');
       startResendTimer();
       toast.success('OTP generated! Check your email or use the code below.');
@@ -166,11 +162,8 @@ export default function LoginPage() {
     if (timer > 0 || loading) return;
     setLoading(true);
     setError('');
-    setOtpCode('');
     try {
-      const res = await authAPI.sendLoginOtp({ identifier: identifier.trim(), password });
-      setOtpCode(res.data.otp_code || '');
-      setEmailSent(res.data.email_sent || false);
+      await authAPI.sendLoginOtp({ identifier: identifier.trim(), password });
       setOtp('');
       startResendTimer();
       toast.success('New OTP generated!');
@@ -301,23 +294,6 @@ export default function LoginPage() {
           {/* ── STEP 2: OTP ──────────────────────────────────────────── */}
           {step === 'otp' && (
             <form onSubmit={handleVerifyOtp} noValidate className="space-y-5">
-              {/* OTP display — always shown so login never breaks */}
-              {otpCode && (
-                <div className="bg-maroon-50 border border-maroon-200 rounded-xl p-4">
-                  <p className="text-maroon-800 text-xs font-semibold mb-1 flex items-center gap-1.5">
-                    🔐 Your One-Time Password
-                  </p>
-                  <p className="text-maroon-900 text-sm">
-                    Use this OTP to sign in:{' '}
-                    <span className="font-mono font-bold text-2xl tracking-[0.35em] text-maroon-800">{otpCode}</span>
-                  </p>
-                  {emailSent && (
-                    <p className="text-maroon-600 text-xs mt-1.5">
-                      📧 Also sent to your email — check inbox &amp; spam folder.
-                    </p>
-                  )}
-                </div>
-              )}
 
               <div>
                 <label className="label">6-Digit OTP *</label>
@@ -357,7 +333,7 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setStep('credentials'); setOtp(''); setError(''); setOtpCode(''); }}
+                  onClick={() => { setStep('credentials'); setOtp(''); setError(''); }}
                   className="text-gray-500 hover:text-gray-700 hover:underline"
                 >
                   ← Change email/password

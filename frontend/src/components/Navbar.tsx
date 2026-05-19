@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   ShoppingCart, Search, User, Menu, X, ChevronDown,
   LogOut, Package, Settings, MapPin, Phone, LayoutDashboard,
-  Home, HelpCircle, UserCog, UserX, RefreshCw, UserPlus, Check,
+  Home, HelpCircle, UserCog, UserX, RefreshCw, UserPlus, Check, ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -210,45 +210,6 @@ export default function Navbar() {
                         </span>
                       </div>
 
-                      {/* ── Other saved accounts ── */}
-                      {sessions.filter(s => s.user.id !== user.id).length > 0 && (
-                        <>
-                          <p className="px-4 pt-2.5 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Saved Accounts</p>
-                          {sessions
-                            .filter(s => s.user.id !== user.id)
-                            .map(session => (
-                              <button
-                                key={session.user.id}
-                                onClick={() => {
-                                  setUserMenuOpen(false);
-                                  switchAccount(session);
-                                  router.push(session.user.is_admin ? '/admin' : '/');
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 transition-colors text-left"
-                              >
-                                <div className="w-8 h-8 rounded-full bg-gray-400 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                  {session.user.full_name.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-800 truncate">{session.user.full_name}</p>
-                                  <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
-                                </div>
-                                <RefreshCw size={14} className="text-gray-400 flex-shrink-0" />
-                              </button>
-                            ))}
-                          <hr className="border-orange-100 my-1" />
-                        </>
-                      )}
-
-                      {/* ── Add another account ── */}
-                      <Link
-                        href="/auth/login?add=1"
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm text-maroon-700 font-medium"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        <UserPlus size={16} className="text-maroon-600" /> Add another account
-                      </Link>
-
                       <hr className="border-orange-100 my-1" />
 
                       {/* ── Navigation ── */}
@@ -286,10 +247,43 @@ export default function Navbar() {
 
                       <hr className="border-orange-100 my-1" />
 
+                      {/* ── Switch Account ── */}
+                      <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Switch Account</p>
+                      {sessions.filter(s => s.user.id !== user.id).map(session => (
+                        <button
+                          key={session.user.id}
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            switchAccount(session);
+                            window.location.href = session.user.is_admin ? '/admin' : '/';
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-maroon-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                            {session.user.full_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">{session.user.full_name}</p>
+                            <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
+                          </div>
+                          <ChevronRight size={14} className="text-gray-400 flex-shrink-0" />
+                        </button>
+                      ))}
+                      <Link
+                        href="/auth/login?add=1"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm text-gray-600"
+                      >
+                        <UserPlus size={15} className="text-gray-500" />
+                        Sign in to another account
+                      </Link>
+
+                      <hr className="border-orange-100 my-1" />
+
                       <button onClick={() => {
                           setUserMenuOpen(false);
-                          logout();                      // removes current session, updates localStorage
-                          window.location.href = '/';    // full reload so all state is clean
+                          logout();
+                          window.location.href = '/';
                         }}
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 w-full">
                         <LogOut size={16} /> Sign Out
@@ -440,33 +434,32 @@ export default function Navbar() {
                     className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
                     <HelpCircle size={15} /> Help &amp; Policies
                   </Link>
-                  {/* Other saved accounts in mobile menu */}
-                  {sessions.filter(s => s.user.id !== user.id).length > 0 && (
-                    <>
-                      <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-maroon-400 uppercase tracking-widest">Switch Account</p>
-                      {sessions.filter(s => s.user.id !== user.id).map(session => (
-                        <button
-                          key={session.user.id}
-                          onClick={() => {
-                            setMobileOpen(false);
-                            switchAccount(session);
-                            router.push(session.user.is_admin ? '/admin' : '/');
-                          }}
-                          className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 w-full text-left"
-                        >
-                          <div className="w-6 h-6 rounded-full bg-gold-500 text-white text-xs font-bold flex items-center justify-center">
-                            {session.user.full_name.charAt(0).toUpperCase()}
-                          </div>
-                          {session.user.full_name.split(' ')[0]}
-                        </button>
-                      ))}
-                    </>
-                  )}
+                  {/* Switch Account — mobile */}
+                  <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-maroon-400 uppercase tracking-widest">Switch Account</p>
+                  {sessions.filter(s => s.user.id !== user.id).map(session => (
+                    <button
+                      key={session.user.id}
+                      onClick={() => {
+                        setMobileOpen(false);
+                        switchAccount(session);
+                        window.location.href = session.user.is_admin ? '/admin' : '/';
+                      }}
+                      className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 w-full text-left"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-maroon-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        {session.user.full_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate">{session.user.full_name.split(' ')[0]}</p>
+                        <p className="text-xs text-maroon-300 truncate">{session.user.email}</p>
+                      </div>
+                    </button>
+                  ))}
                   <Link
                     href="/auth/login?add=1"
                     onClick={() => setMobileOpen(false)}
                     className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2">
-                    <UserPlus size={15} /> Add another account
+                    <UserPlus size={15} /> Sign in to another account
                   </Link>
                   <Link href="/account/delete" onClick={() => setMobileOpen(false)}
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
