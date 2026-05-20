@@ -182,11 +182,22 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col bg-[#fff9f2]">
 
       {/* Standalone header */}
-      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center justify-center shadow-md">
-        <Link href="/" className="flex flex-col items-center leading-tight">
-          <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
-          <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
-        </Link>
+      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md">
+        {isAddMode && (
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 text-sm text-white/80 hover:text-white mr-4 transition-colors"
+          >
+            ← Go Back
+          </button>
+        )}
+        <div className="flex-1 flex flex-col items-center leading-tight">
+          <Link href="/" className="flex flex-col items-center leading-tight">
+            <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
+            <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
+          </Link>
+        </div>
+        {isAddMode && <div className="w-20" />}{/* balance the back button */}
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
@@ -342,14 +353,16 @@ export default function LoginPage() {
             </form>
           )}
 
-          <div className="mt-6 pt-5 border-t border-orange-100 text-center">
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/register" className="text-maroon-800 font-semibold hover:underline">
-                Create Account
-              </Link>
-            </p>
-          </div>
+          {!isAddMode && (
+            <div className="mt-6 pt-5 border-t border-orange-100 text-center">
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{' '}
+                <Link href="/auth/register" className="text-maroon-800 font-semibold hover:underline">
+                  Create Account
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
       </div>
