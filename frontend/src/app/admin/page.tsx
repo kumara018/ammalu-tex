@@ -235,18 +235,18 @@ export default function AdminPage() {
   };
 
 
-  const [markingRefunded, setMarkingRefunded] = useState<number | null>(null);
+  const [initiatingRefund, setInitiatingRefund] = useState<number | null>(null);
 
-  const handleMarkRefunded = async (orderId: number, orderNum: string, total: number) => {
-    if (!confirm(`Mark order ${orderNum} as REFUNDED?\n\nThis tells the website the customer's ₹${total} has been refunded.\nMake sure you've already issued the refund from Razorpay Dashboard.\n\nThe customer will receive a refund confirmation email + WhatsApp.`)) return;
-    setMarkingRefunded(orderId);
+  const handleInitiateRefund = async (orderId: number, orderNum: string, total: number) => {
+    if (!confirm(`Initiate Razorpay refund for order ${orderNum}?\n\n₹${total} will be refunded to the customer's original payment method.\n\nThe customer will receive an email + WhatsApp: "Refund Initiated".\nOnce Razorpay processes it (5–7 days), they will receive a "Refund Credited" notification automatically.`)) return;
+    setInitiatingRefund(orderId);
     try {
-      await adminAPI.markRefunded(orderId);
-      toast.success(`✅ Order ${orderNum} marked as refunded — customer notified!`, { duration: 6000 });
+      await adminAPI.initiateRefund(orderId);
+      toast.success(`✅ Refund initiated for ${orderNum} — customer notified!`, { duration: 6000 });
       loadOrders();
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to mark as refunded');
-    } finally { setMarkingRefunded(null); }
+      toast.error(err.response?.data?.detail || 'Failed to initiate refund');
+    } finally { setInitiatingRefund(null); }
   };
 
   const handleCreateDelhivery = async (orderId: number, orderNum: string) => {
@@ -546,9 +546,15 @@ export default function AdminPage() {
                     <td className="px-4 py-3 text-gray-700">{(o.shipping_address as any)?.full_name}</td>
                     <td className="px-4 py-3 font-bold text-maroon-900">₹{o.total.toLocaleString()}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium capitalize ${o.payment_status === 'paid' ? 'text-green-600' : o.payment_status === 'refunded' ? 'text-purple-600' : 'text-orange-600'}`}>
-                        {o.payment_method === 'razorpay' ? 'Razorpay' : o.payment_method === 'upi' ? 'UPI' : 'COD'} · {o.payment_status}
-                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs font-medium text-gray-700">
+                          {o.payment_method === 'razorpay' ? 'Razorpay' : o.payment_method === 'upi' ? 'UPI' : 'COD'}
+                        </span>
+                        {o.payment_status === 'paid' && <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded w-fit">✅ PAID</span>}
+                        {o.payment_status === 'refund_initiated' && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded w-fit">🔄 REFUND INITIATED</span>}
+                        {o.payment_status === 'refunded' && <span className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded w-fit">💜 REFUNDED</span>}
+                        {o.payment_status === 'pending' && <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded w-fit">⏳ PENDING</span>}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       {o.payment_transaction_id ? (
@@ -608,16 +614,28 @@ export default function AdminPage() {
                             📍 Track
                           </a>
                         )}
-                        {/* Mark Refunded — show for cancelled online-paid orders not yet refunded */}
+                        {/* Initiate Refund — show only for cancelled, online-paid, not yet refunded */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'paid' && (
                           <button
-                            onClick={() => handleMarkRefunded(o.id, o.order_number, o.total)}
-                            disabled={markingRefunded === o.id}
-                            className="text-xs bg-purple-50 border border-purple-300 text-purple-700 hover:bg-purple-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
-                            title="Mark this order as refunded after issuing refund from Razorpay Dashboard"
+                            onClick={() => handleInitiateRefund(o.id, o.order_number, o.total)}
+                            disabled={initiatingRefund === o.id}
+                            className="text-xs bg-orange-50 border border-orange-300 text-orange-700 hover:bg-orange-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
+                            title="Initiate Razorpay refund — customer gets email + WhatsApp notification"
                           >
-                            {markingRefunded === o.id ? '⏳...' : '↩️ Mark Refunded'}
+                            {initiatingRefund === o.id ? '⏳...' : '💸 Initiate Refund'}
                           </button>
+                        )}
+                        {/* Refund Initiated badge — waiting for Razorpay to credit */}
+                        {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refund_initiated' && (
+                          <span className="text-[10px] bg-orange-50 border border-orange-200 text-orange-600 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund is processing — customer will be notified when credited">
+                            🔄 Refund Processing
+                          </span>
+                        )}
+                        {/* Refunded badge — webhook confirmed, amount credited */}
+                        {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refunded' && (
+                          <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund credited to customer's account">
+                            ✅ Refunded
+                          </span>
                         )}
                       </div>
                     </td>

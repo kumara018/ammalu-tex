@@ -1087,6 +1087,69 @@ def send_refund_initiated_whatsapp(phone: str, name: str, order, refund_id: str 
     )
 
 
+def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""):
+    """Sent when Razorpay webhook confirms refund.processed — money is in customer's account."""
+    first = name.split()[0]
+    pm    = (getattr(order, "payment_method", "") or "").lower()
+    txn   = getattr(order, "payment_transaction_id", "") or ""
+    html  = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
+      <div style="background:linear-gradient(135deg,#14532d,#16a34a);padding:28px 32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:22px;font-weight:bold">{STORE_NAME}</h1>
+        <p style="color:#bbf7d0;margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Refund Credited ✅</p>
+      </div>
+      <div style="padding:32px">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px">✅</div>
+        </div>
+        <h2 style="color:#111;margin-top:0;text-align:center">Refund Credited to Your Account!</h2>
+        <p style="color:#555;text-align:center">Hi {first}, great news! Your refund has been successfully credited to your original payment method.</p>
+
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px;margin:20px 0">
+          <table width="100%" style="border-collapse:collapse;font-size:14px">
+            <tr><td style="color:#555;padding:5px 0">Order Number</td><td style="text-align:right;font-weight:bold;color:#111">{order.order_number}</td></tr>
+            <tr><td style="color:#555;padding:5px 0">Refund Amount</td><td style="text-align:right;font-weight:bold;color:#16a34a;font-size:18px">₹{order.total:,.0f}</td></tr>
+            <tr><td style="color:#555;padding:5px 0">Payment Method</td><td style="text-align:right;font-weight:bold;color:#111">{'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}</td></tr>
+            {f"<tr><td style='color:#555;padding:5px 0'>Transaction ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px'>{txn}</td></tr>" if txn else ""}
+            {f"<tr><td style='color:#555;padding:5px 0'>Refund ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px'>{refund_id}</td></tr>" if refund_id and refund_id != 'manual' else ""}
+          </table>
+        </div>
+
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin:16px 0">
+          <p style="margin:0;color:#14532d;font-size:14px">💳 The amount has been returned to your <b>original payment method</b>. Please check your bank account or card statement.</p>
+        </div>
+
+        <div style="text-align:center;margin:24px 0">
+          <a href="{STORE_URL}/orders" style="background:#16a34a;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px">View My Orders</a>
+        </div>
+
+        <p style="color:#888;font-size:13px;text-align:center">Questions? <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e">{SUPPORT_EMAIL}</a></p>
+      </div>
+      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
+        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
+      </div>
+    </div>"""
+    _send_email(email, f"✅ Refund Credited — ₹{order.total:,.0f} · {order.order_number}", html)
+
+
+def send_refund_credited_whatsapp(phone: str, name: str, order, refund_id: str = ""):
+    """Sent when Razorpay webhook confirms refund.processed — money is in customer's account."""
+    first = name.split()[0]
+    pm    = (getattr(order, "payment_method", "") or "").lower()
+    txn   = getattr(order, "payment_transaction_id", "") or ""
+    txn_line    = f"\n🔖 *Txn ID:* `{txn}`"        if txn                              else ""
+    refund_line = f"\n📋 *Refund ID:* `{refund_id}`" if refund_id and refund_id != "manual" else ""
+    _send_whatsapp(phone,
+        f"✅ *Refund Credited — {order.order_number}*\n\n"
+        f"Hi {first}! Great news — your refund has been *successfully credited* to your account! 🎉\n\n"
+        f"💸 *Amount:* ₹{order.total:,.0f}\n"
+        f"💳 *Mode:* {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}"
+        f"{txn_line}{refund_line}\n\n"
+        f"💳 Please check your bank account or card statement.\n\n"
+        f"📦 View orders: {STORE_URL}/orders"
+    )
+
+
 # ── Invoice email ──────────────────────────────────────────────────────────────
 
 # ── Return / Exchange / Replace notifications ─────────────────────────────────

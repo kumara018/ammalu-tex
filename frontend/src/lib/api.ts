@@ -129,6 +129,7 @@ export const adminAPI = {
   updateOrderStatus:       (id: number, data: object)   => api.put(`/api/admin/orders/${id}/status`, data),
   createDelhiveryShipment: (id: number)                 => api.post(`/api/admin/orders/${id}/create-delhivery-shipment`),
   checkServiceability:     (id: number)                 => api.get(`/api/admin/orders/${id}/check-serviceability`),
+  initiateRefund:          (id: number)                 => api.post(`/api/payments/admin/orders/${id}/initiate-refund`),
   markRefunded:            (id: number)                 => api.post(`/api/payments/admin/orders/${id}/mark-refunded`),
   getUsers:                ()                           => api.get('/api/admin/users'),
   updateSettings:          (data: object)               => api.put('/api/admin/settings', data),

@@ -79,6 +79,11 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
       URL:    https://ammalu-tex.onrender.com/api/payments/webhook/razorpay
       Events: refund.processed, refund.created, refund.speed_changed
       Secret: set RAZORPAY_WEBHOOK_SECRET in Render env vars (optional but recommended)
+
+    Flow:
+      1. Customer cancels → Razorpay refund API called → payment_status = "refund_initiated"
+      2. Razorpay processes refund → fires refund.processed webhook → payment_status = "refunded"
+      3. Customer notified: "Refund Credited — amount returned to your account"
     """
     body = await request.body()
     signature = request.headers.get("X-Razorpay-Signature", "")
@@ -99,13 +104,13 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     event = payload.get("event", "")
     print(f"[Webhook] Razorpay event received: {event}")
 
-    # Handle refund events
-    if event in ("refund.processed", "refund.created", "refund.speed_changed"):
+    # Handle refund.processed — amount has actually been credited to customer
+    if event == "refund.processed":
         entity     = payload.get("payload", {}).get("refund", {}).get("entity", {})
         payment_id = entity.get("payment_id", "")
         refund_id  = entity.get("id", "")
 
-        print(f"[Webhook] Refund {refund_id} for payment {payment_id}")
+        print(f"[Webhook] Refund PROCESSED: {refund_id} for payment {payment_id}")
 
         if payment_id:
             order = db.query(models.Order).filter(
@@ -115,41 +120,118 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
             if order and order.payment_status != "refunded":
                 order.payment_status = "refunded"
                 db.commit()
-                print(f"[Webhook] ✅ Order {order.order_number} marked refunded")
+                print(f"[Webhook] ✅ Order {order.order_number} — refund credited to customer")
 
-                # Notify customer
+                # Notify customer: refund has been CREDITED (not just initiated)
                 user = db.query(models.User).filter(models.User.id == order.user_id).first()
                 if user:
                     try:
-                        notifications.send_refund_initiated_email(
+                        notifications.send_refund_credited_email(
                             user.email, user.full_name, order, refund_id
                         )
-                        notifications.send_refund_initiated_whatsapp(
+                        notifications.send_refund_credited_whatsapp(
                             user.phone, user.full_name, order, refund_id
-                        )
-                        notifications.send_refund_initiated_sms(
-                            user.phone, order.order_number, order.total
                         )
                     except Exception as e:
                         print(f"[Webhook] Notification error: {e}")
             else:
                 print(f"[Webhook] Order already refunded or not found for payment {payment_id}")
 
+    # Handle refund.created — refund has been created but not yet credited (optional)
+    elif event in ("refund.created", "refund.speed_changed"):
+        entity     = payload.get("payload", {}).get("refund", {}).get("entity", {})
+        payment_id = entity.get("payment_id", "")
+        refund_id  = entity.get("id", "")
+        print(f"[Webhook] Refund created/updated: {refund_id} for payment {payment_id} — waiting for refund.processed")
+
     return {"status": "ok"}
 
 
-# ── Admin: Mark order as refunded (for manually processed refunds) ────────────
-@router.post("/admin/orders/{order_id}/mark-refunded")
-def admin_mark_refunded(
+# ── Admin: Initiate refund via Razorpay for cancelled paid orders ─────────────
+@router.post("/admin/orders/{order_id}/initiate-refund")
+def admin_initiate_refund(
     order_id: int,
-    db:    Session    = Depends(get_db),
+    db:    Session     = Depends(get_db),
     _:     models.User = Depends(auth_utils.get_current_admin),
 ):
     """
-    Mark a cancelled paid order as refunded.
-    Use this when you've already issued the refund manually from Razorpay Dashboard
-    and want the website to show '↩️ REFUNDED' to the customer.
-    Also triggers refund notification email + WhatsApp to the customer.
+    Admin triggers Razorpay refund for a cancelled paid order.
+    - Calls Razorpay refund API → payment_status = "refund_initiated"
+    - Customer gets email + WhatsApp: "Refund initiated, will credit in 5-7 days"
+    - When Razorpay processes the refund, webhook auto-updates to "refunded"
+      and sends "Refund Credited" notification.
+    """
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(404, "Order not found")
+    if order.payment_method == "cod":
+        raise HTTPException(400, "COD orders don't require a digital refund")
+    if order.payment_status == "refunded":
+        raise HTTPException(400, "Order is already fully refunded")
+    if order.payment_status == "refund_initiated":
+        raise HTTPException(400, "Refund is already initiated for this order")
+    if not order.payment_transaction_id or not order.payment_transaction_id.startswith("pay_"):
+        raise HTTPException(400, "No valid Razorpay payment ID found for this order")
+
+    key_id     = os.getenv("RAZORPAY_KEY_ID", "")
+    key_secret = os.getenv("RAZORPAY_KEY_SECRET", "")
+    if not key_id or not key_secret:
+        raise HTTPException(503, "Razorpay credentials not configured in environment variables")
+
+    try:
+        client = razorpay.Client(auth=(key_id, key_secret))
+        refund = client.payment.refund(
+            order.payment_transaction_id,
+            {
+                "amount": int(order.total * 100),  # paise
+                "speed":  "normal",
+                "notes":  {
+                    "order_number": order.order_number,
+                    "reason":       order.cancel_reason or "Admin initiated refund",
+                },
+            },
+        )
+        refund_id = refund.get("id", "")
+        print(f"[Admin Refund] ✅ Refund {refund_id} initiated for {order.order_number} ₹{order.total}")
+    except Exception as e:
+        print(f"[Admin Refund] ❌ Razorpay refund failed: {e}")
+        raise HTTPException(500, f"Razorpay refund failed: {str(e)}")
+
+    order.payment_status = "refund_initiated"
+    db.commit()
+    db.refresh(order)
+
+    # Notify customer — refund has been initiated
+    user = db.query(models.User).filter(models.User.id == order.user_id).first()
+    if user:
+        try:
+            notifications.send_refund_initiated_email(
+                user.email, user.full_name, order, refund_id
+            )
+            notifications.send_refund_initiated_whatsapp(
+                user.phone, user.full_name, order, refund_id
+            )
+        except Exception as e:
+            print(f"[Admin] Refund notification error: {e}")
+
+    return {
+        "message":        f"Refund initiated for {order.order_number} ✅",
+        "order_id":       order_id,
+        "refund_id":      refund_id,
+        "payment_status": "refund_initiated",
+    }
+
+
+# ── Admin: Mark refunded manually (fallback — when webhook never fires) ────────
+@router.post("/admin/orders/{order_id}/mark-refunded")
+def admin_mark_refunded(
+    order_id: int,
+    db:    Session     = Depends(get_db),
+    _:     models.User = Depends(auth_utils.get_current_admin),
+):
+    """
+    Fallback: manually mark an order as refunded when Razorpay webhook didn't fire.
+    Only use this if you've already confirmed the refund was credited in Razorpay dashboard.
     """
     order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not order:
@@ -163,24 +245,21 @@ def admin_mark_refunded(
     db.commit()
     db.refresh(order)
 
-    # Notify customer
+    # Notify customer — refund credited
     user = db.query(models.User).filter(models.User.id == order.user_id).first()
     if user:
         try:
-            notifications.send_refund_initiated_email(
+            notifications.send_refund_credited_email(
                 user.email, user.full_name, order, "manual"
             )
-            notifications.send_refund_initiated_whatsapp(
+            notifications.send_refund_credited_whatsapp(
                 user.phone, user.full_name, order, "manual"
             )
-            notifications.send_refund_initiated_sms(
-                user.phone, order.order_number, order.total
-            )
         except Exception as e:
-            print(f"[Admin] Refund notification error: {e}")
+            print(f"[Admin] Refund credited notification error: {e}")
 
     return {
-        "message":   f"Order {order.order_number} marked as refunded ✅",
-        "order_id":  order_id,
+        "message":        f"Order {order.order_number} marked as refunded ✅",
+        "order_id":       order_id,
         "payment_status": "refunded",
     }

@@ -225,7 +225,7 @@ def cancel_order(
                         },
                     },
                 )
-                order.payment_status = "refunded"
+                order.payment_status = "refund_initiated"
                 refund_status = refund.get("id", "initiated")
                 print(f"[Razorpay] ✅ Refund {refund_status} initiated for {order.order_number} ₹{order.total}")
             except Exception as e:
