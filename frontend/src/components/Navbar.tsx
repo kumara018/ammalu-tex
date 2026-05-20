@@ -95,10 +95,16 @@ export default function Navbar() {
       {/* Top bar */}
       <div className="bg-maroon-950 text-maroon-100 text-xs py-1.5 px-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1"><MapPin size={11} /> {SHORT_ADDRESS}</span>
-          <span className="hidden sm:flex items-center gap-1"><Phone size={11} /> {STORE.phone1}</span>
+          <a href={STORE.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-gold-300 transition-colors cursor-pointer">
+            <MapPin size={11} /> {SHORT_ADDRESS}
+          </a>
+          <a href={`tel:${STORE.phone1.replace(/\s/g,'')}`} className="hidden sm:flex items-center gap-1 hover:text-gold-300 transition-colors cursor-pointer">
+            <Phone size={11} /> {STORE.phone1}
+          </a>
         </div>
-        <span className="text-gold-400 font-medium">Free shipping on orders above ₹999</span>
+        <a href="/shipping" className="text-gold-400 font-medium hover:text-gold-300 transition-colors">
+          Free shipping on orders above ₹1,499
+        </a>
       </div>
 
       {/* Main navbar */}

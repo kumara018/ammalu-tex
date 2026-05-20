@@ -278,7 +278,7 @@ export default function SupportPage() {
           {[
             {
               title: '🚚 Standard Delivery',
-              desc:  '5–7 business days across India. Free shipping on orders above ₹999. Flat ₹49 shipping fee for orders below ₹999.',
+              desc:  '5–7 business days across India. Free shipping on orders above ₹1,499. Flat ₹49 shipping fee for orders below ₹1,499.',
             },
             {
               title: '⚡ Express Delivery',
@@ -435,7 +435,7 @@ export default function SupportPage() {
         {[
           {
             q: 'What are your delivery timelines?',
-            a: `Standard delivery takes 5–7 business days across India. Express delivery (1–3 days) is available in select cities. Free shipping on orders above ₹999; flat ₹49 for orders below ₹999.`,
+            a: `Standard delivery takes 5–7 business days across India. Express delivery (1–3 days) is available in select cities. Free shipping on orders above ₹1,499; flat ₹49 for orders below ₹1,499.`,
           },
           {
             q: 'What is your return and refund policy?',

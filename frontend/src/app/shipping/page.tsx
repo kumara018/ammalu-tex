@@ -7,7 +7,7 @@ import { STORE } from '@/lib/config';
 
 export const metadata = {
   title: 'Shipping Policy — Ammalu Tex',
-  description: 'Free shipping on orders above ₹999. Standard delivery 5–7 days across India.',
+  description: 'Free shipping on orders above ₹1,499. Standard delivery 5–7 days across India.',
 };
 
 export default function ShippingPage() {
@@ -37,10 +37,10 @@ export default function ShippingPage() {
       <div className="bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
         <div className="text-5xl">🚚</div>
         <div>
-          <p className="text-xl font-bold mb-1">FREE Shipping on orders above ₹999</p>
+          <p className="text-xl font-bold mb-1">FREE Shipping on orders above ₹1,499</p>
           <p className="text-green-100 text-sm">
-            Add ₹999 or more to your cart and enjoy completely free delivery anywhere in India.
-            For orders below ₹999, a flat ₹{STORE.shippingFee} shipping fee applies.
+            Add ₹1,499 or more to your cart and enjoy completely free delivery anywhere in India.
+            For orders below ₹1,499, a flat ₹{STORE.shippingFee} shipping fee applies.
           </p>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default function ShippingPage() {
           {
             icon: '🚚', title: 'Standard Delivery',
             time: '5–7 Business Days',
-            fee: `Free above ₹999 / ₹${STORE.shippingFee} below`,
+            fee: `Free above ₹1,499 / ₹${STORE.shippingFee} below`,
             note: 'Available pan-India including remote areas.',
           },
           {

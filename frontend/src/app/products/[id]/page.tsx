@@ -205,7 +205,7 @@ export default function ProductDetailPage() {
             )}
             {discount && <span className="text-green-600 font-semibold text-sm">{discount}% off</span>}
           </div>
-          <p className="text-xs text-gray-500 mb-5">Inclusive of all taxes. {product.price >= 999 ? '✓ Free shipping' : `Add ₹${(999 - product.price).toFixed(0)} more for free shipping`}</p>
+          <p className="text-xs text-gray-500 mb-5">Inclusive of all taxes. {product.price >= 1499 ? '✓ Free shipping' : `Add ₹${(1499 - product.price).toFixed(0)} more for free shipping`}</p>
 
           <hr className="border-orange-100 mb-5" />
 
