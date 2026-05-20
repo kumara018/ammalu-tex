@@ -15,13 +15,14 @@ import toast from 'react-hot-toast';
 type Tab = 'profile' | 'password';
 
 export default function AccountPage() {
-  const { user, refresh, logout } = useAuth();
+  const { user, loading: authLoading, refresh, logout } = useAuth();
   const router = useRouter();
 
-  // Redirect if not logged in
+  // Redirect if not logged in — but wait for auth to restore from localStorage first
   useEffect(() => {
+    if (authLoading) return;          // still restoring — don't redirect yet
     if (!user) router.replace('/auth/login');
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   // ── Tabs ──────────────────────────────────────────────────────────────────
   const [tab, setTab] = useState<Tab>('profile');

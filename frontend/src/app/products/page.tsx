@@ -74,20 +74,18 @@ function ProductsContent() {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
-  // Update a single filter in both state AND the URL (so refresh restores it)
+  // Update a filter: write to URL (searchParams is always fresh — no stale closure)
   const setF = (key: string, val: string) => {
-    const newFilters = { ...filters, [key]: val };
-    setFilters(newFilters);
+    // Optimistic local update so UI responds instantly
+    setFilters(f => ({ ...f, [key]: val }));
 
-    const params = new URLSearchParams();
-    if (newFilters.category) params.set('category', newFilters.category);
-    if (newFilters.search)   params.set('search',   newFilters.search);
-    if (newFilters.minPrice) params.set('min_price', newFilters.minPrice);
-    if (newFilters.maxPrice) params.set('max_price', newFilters.maxPrice);
-    if (newFilters.featured) params.set('featured',  newFilters.featured);
-    if (newFilters.sort && newFilters.sort !== 'created_at:desc') params.set('sort', newFilters.sort);
-    const qs = params.toString();
-    router.replace(`/products${qs ? '?' + qs : ''}`, { scroll: false });
+    // Build new URL from current searchParams (avoids stale-closure bugs)
+    const urlKeyMap: Record<string, string> = { minPrice: 'min_price', maxPrice: 'max_price' };
+    const urlKey = urlKeyMap[key] ?? key;
+    const params = new URLSearchParams(searchParams.toString());
+    if (val) params.set(urlKey, val);
+    else     params.delete(urlKey);
+    router.replace(`/products${params.toString() ? '?' + params.toString() : ''}`, { scroll: false });
   };
 
   const clearFilters = () => {
