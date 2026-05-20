@@ -222,6 +222,20 @@ export default function AdminPage() {
   };
 
 
+  const [markingRefunded, setMarkingRefunded] = useState<number | null>(null);
+
+  const handleMarkRefunded = async (orderId: number, orderNum: string, total: number) => {
+    if (!confirm(`Mark order ${orderNum} as REFUNDED?\n\nThis tells the website the customer's ₹${total} has been refunded.\nMake sure you've already issued the refund from Razorpay Dashboard.\n\nThe customer will receive a refund confirmation email + WhatsApp.`)) return;
+    setMarkingRefunded(orderId);
+    try {
+      await adminAPI.markRefunded(orderId);
+      toast.success(`✅ Order ${orderNum} marked as refunded — customer notified!`, { duration: 6000 });
+      loadOrders();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to mark as refunded');
+    } finally { setMarkingRefunded(null); }
+  };
+
   const handleCreateDelhivery = async (orderId: number, orderNum: string) => {
     if (!confirm(`Create Delhivery shipment for ${orderNum}? This will generate an AWB and notify the customer.`)) return;
     setCreatingDelhivery(orderId);
@@ -564,6 +578,17 @@ export default function AdminPage() {
                           >
                             📍 Track
                           </a>
+                        )}
+                        {/* Mark Refunded — show for cancelled online-paid orders not yet refunded */}
+                        {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'paid' && (
+                          <button
+                            onClick={() => handleMarkRefunded(o.id, o.order_number, o.total)}
+                            disabled={markingRefunded === o.id}
+                            className="text-xs bg-purple-50 border border-purple-300 text-purple-700 hover:bg-purple-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
+                            title="Mark this order as refunded after issuing refund from Razorpay Dashboard"
+                          >
+                            {markingRefunded === o.id ? '⏳...' : '↩️ Mark Refunded'}
+                          </button>
                         )}
                       </div>
                     </td>
