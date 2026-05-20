@@ -11,18 +11,18 @@ import toast from 'react-hot-toast';
 type Step = 'credentials' | 'otp';
 
 export default function LoginPage() {
-  const { login, user } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   // Redirect if already logged in — but NOT when adding another account (?add=1)
-  // Read window.location.search directly inside the effect to avoid useSearchParams
-  // timing issues (hook may not have params on first render in Next.js App Router)
+  // Wait for auth to finish loading before redirecting (avoids flash on refresh)
   useEffect(() => {
+    if (authLoading) return;
     if (!user) return;
     const params  = new URLSearchParams(window.location.search);
     const addMode = params.get('add') === '1';
     if (!addMode) router.replace(user.is_admin ? '/admin' : '/');
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   // Derive isAddMode for UI labels (always safe on client)
   const isAddMode = typeof window !== 'undefined'

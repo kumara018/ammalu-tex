@@ -124,15 +124,16 @@ function InputRow({ label, error, required = true, children }: InputRowProps) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function RegisterPage() {
-  const { login, user } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (wait for auth to finish loading first)
   useEffect(() => {
+    if (authLoading) return;
     if (user) {
       router.replace(user.is_admin ? '/admin' : '/');
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const [fullName,    setFullName]    = useState('');
   const [email,       setEmail]       = useState('');
