@@ -74,7 +74,11 @@ def place_order(
     if payload.payment.method == "cod":
         payment_status = "pending"
     else:
-        transaction_id = f"TXN{''.join(random.choices(string.digits, k=12))}"
+        # Use the real Razorpay payment ID (pay_xxx) if provided by frontend
+        transaction_id = (
+            payload.payment.razorpay_payment_id
+            or f"TXN{''.join(random.choices(string.digits, k=12))}"
+        )
         payment_status = "paid"
 
     order = models.Order(
@@ -190,6 +194,37 @@ def cancel_order(
                 sr.cancel_order([int(order.shiprocket_order_id)])
         except Exception as e:
             print(f"[Courier cancel error] {e}")
+
+    # ── Auto-refund via Razorpay for paid online orders ───────────────────────
+    refund_status = None
+    if (
+        order.payment_method != "cod"
+        and order.payment_status == "paid"
+        and order.payment_transaction_id
+        and order.payment_transaction_id.startswith("pay_")
+    ):
+        try:
+            import razorpay as _rp, os as _os
+            key_id     = _os.getenv("RAZORPAY_KEY_ID", "")
+            key_secret = _os.getenv("RAZORPAY_KEY_SECRET", "")
+            if key_id and key_secret:
+                client = _rp.Client(auth=(key_id, key_secret))
+                refund = client.payment.refund(
+                    order.payment_transaction_id,
+                    {
+                        "amount": int(order.total * 100),   # paise
+                        "speed":  "normal",
+                        "notes":  {
+                            "order_number": order.order_number,
+                            "reason":       order.cancel_reason,
+                        },
+                    },
+                )
+                order.payment_status = "refunded"
+                refund_status = refund.get("id", "initiated")
+                print(f"[Razorpay] Refund {refund_status} for {order.order_number}")
+        except Exception as e:
+            print(f"[Razorpay refund error] {e}")
 
     db.commit()
     db.refresh(order)

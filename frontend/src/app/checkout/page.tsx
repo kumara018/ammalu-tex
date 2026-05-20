@@ -142,7 +142,7 @@ export default function CheckoutPage() {
     );
   };
 
-  const shipping   = total >= 999 ? 0 : 49;
+  const shipping   = total >= 1499 ? 0 : 49;
   const grandTotal = total + shipping;
 
   const setA = (f: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -241,8 +241,8 @@ export default function CheckoutPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature:  response.razorpay_signature,
             });
-            await placeDirectOrder('card', {
-              transaction_id: response.razorpay_payment_id,
+            await placeDirectOrder('razorpay', {
+              razorpay_payment_id: response.razorpay_payment_id,
             });
           } catch {
             toast.error('Payment verification failed. Contact support.');
@@ -587,7 +587,7 @@ export default function CheckoutPage() {
             </div>
             {shipping > 0 && (
               <p className="mt-3 text-xs text-gold-700 bg-gold-50 rounded-lg p-2.5">
-                💡 Add ₹{(999 - total).toFixed(0)} more for FREE shipping!
+                💡 Add ₹{(1499 - total).toFixed(0)} more for FREE shipping!
               </p>
             )}
             <div className="mt-4 pt-4 border-t border-orange-100 space-y-1.5">
