@@ -56,9 +56,9 @@ export default function HomePage() {
         />
         <div className="max-w-7xl mx-auto px-4 py-16 md:py-24 relative">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 bg-gold-600/20 border border-gold-500/30 rounded-full px-4 py-1.5 text-gold-300 text-sm font-medium mb-6">
-              <Sparkles size={14} /> New Collection 2024 — Now Available
-            </div>
+            <a href="#featured-products" className="inline-flex items-center gap-2 bg-gold-600/20 border border-gold-500/30 rounded-full px-4 py-1.5 text-gold-300 text-sm font-medium mb-6 hover:bg-gold-600/30 transition-colors cursor-pointer">
+              <Sparkles size={14} /> New Collection 2026 — Now Available
+            </a>
             <h1 className="text-4xl md:text-6xl font-display font-bold leading-tight mb-4">
               Discover Premium<br />
               <span className="text-gold-400">Women&apos;s Textiles</span>
@@ -129,7 +129,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="bg-orange-50/50 py-12">
+      <section id="featured-products" className="bg-orange-50/50 py-12">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-6">
             <div>
