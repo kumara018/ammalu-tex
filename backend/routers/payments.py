@@ -71,6 +71,12 @@ def get_key(current_user: models.User = Depends(auth_utils.get_current_user)):
 
 
 # ── Razorpay Webhook ──────────────────────────────────────────────────────────
+@router.get("/webhook/razorpay")
+def webhook_info():
+    """Browser / health-check hit — just confirm the endpoint is live."""
+    return {"status": "active", "endpoint": "Razorpay webhook — POST only"}
+
+
 @router.post("/webhook/razorpay")
 async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     """

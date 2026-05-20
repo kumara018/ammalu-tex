@@ -13,12 +13,22 @@ export const metadata: Metadata = {
   title: `${STORE.name} — ${STORE.tagline} | ${STORE.area}`,
   description: STORE.description,
   keywords: `${STORE.name}, textile, chudithar, tops, lehenga, crop top, party wear, Texvalley, Gangapuram, women fashion`,
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
