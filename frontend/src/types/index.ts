@@ -83,6 +83,15 @@ export interface Order {
   delivery_otp?: string;
   delivery_person_name?: string;
   delivery_person_phone?: string;
+  // Shiprocket / courier tracking
+  awb_code?: string;
+  courier_name?: string;
+  tracking_url?: string;
+  estimated_delivery?: string;
+  status_location?: string;
+  // Cancellation
+  cancel_reason?: string;
+  cancelled_by?: string;
   created_at: string;
 }
 

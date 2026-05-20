@@ -175,9 +175,19 @@ def update_order_status(
 
     order.status = payload.status
 
-    # Update tracking number if provided
+    # Update tracking / courier info if provided
     if payload.tracking_number:
         order.tracking_number = payload.tracking_number
+    if payload.awb_code:
+        order.awb_code = payload.awb_code
+    if payload.courier_name:
+        order.courier_name = payload.courier_name
+    if payload.tracking_url:
+        order.tracking_url = payload.tracking_url
+    if payload.estimated_delivery:
+        order.estimated_delivery = payload.estimated_delivery
+    if payload.status_location:
+        order.status_location = payload.status_location
 
     # Set delivery person info if provided
     if payload.delivery_person_name:
@@ -235,6 +245,96 @@ def get_all_users(
     _: models.User = Depends(auth_utils.get_current_admin),
 ):
     return db.query(models.User).filter(models.User.is_admin == False).all()
+
+
+@router.post("/orders/{order_id}/create-shipment")
+def create_shiprocket_shipment(
+    order_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    """
+    Create a shipment on Shiprocket for this order.
+    Requires SHIPROCKET_EMAIL + SHIPROCKET_PASSWORD in Render env vars.
+    Also requires a 'Primary' pickup location set up in your Shiprocket account.
+    """
+    from shiprocket import shiprocket as sr
+
+    if not sr.is_configured():
+        raise HTTPException(400, "Shiprocket not configured. Add SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD to Render env vars.")
+
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(404, "Order not found")
+    if order.status == "cancelled":
+        raise HTTPException(400, "Cannot create shipment for a cancelled order")
+
+    user = db.query(models.User).filter(models.User.id == order.user_id).first()
+    addr = order.shipping_address or {}
+
+    # Build Shiprocket forward-shipment payload
+    sr_payload = {
+        "order_id":           order.order_number,
+        "order_date":         order.created_at.strftime("%Y-%m-%d %H:%M"),
+        "pickup_location":    os.getenv("SHIPROCKET_PICKUP_LOCATION", "Primary"),
+        "billing_customer_name": addr.get("full_name", user.full_name if user else "Customer"),
+        "billing_last_name":  "",
+        "billing_address":    addr.get("address_line1", ""),
+        "billing_address_2":  addr.get("address_line2", ""),
+        "billing_city":       addr.get("city", ""),
+        "billing_pincode":    addr.get("pincode", ""),
+        "billing_state":      addr.get("state", ""),
+        "billing_country":    "India",
+        "billing_email":      user.email if user else "",
+        "billing_phone":      addr.get("phone", user.phone if user else ""),
+        "shipping_is_billing": True,
+        "order_items": [
+            {
+                "name":          item.get("name", "Product"),
+                "sku":           f"AMT-{item.get('product_id', 0)}",
+                "units":         item.get("quantity", 1),
+                "selling_price": item.get("price", 0),
+            }
+            for item in (order.items_snapshot or [])
+        ],
+        "payment_method":  "COD" if order.payment_method == "cod" else "Prepaid",
+        "sub_total":       order.subtotal,
+        "length":          25,
+        "breadth":         20,
+        "height":          5,
+        "weight":          0.5,
+    }
+
+    result = sr.create_forward_shipment(sr_payload)
+    if not result:
+        raise HTTPException(502, "Shiprocket API call failed. Check SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD.")
+
+    # Extract shipment details from response
+    payload_data = result.get("payload", {})
+    awb        = payload_data.get("awb_code", "")
+    shipment_id= str(payload_data.get("shipment_id", ""))
+    sr_order_id= str(payload_data.get("order_id", ""))
+    courier    = payload_data.get("courier_name", "")
+
+    if awb:
+        order.awb_code              = awb
+        order.shiprocket_order_id   = sr_order_id
+        order.shiprocket_shipment_id= shipment_id
+        order.courier_name          = courier
+        order.tracking_url          = f"https://shiprocket.co/tracking/{awb}"
+        if order.status in ["confirmed", "pending"]:
+            order.status = "processing"
+        db.commit()
+        db.refresh(order)
+
+    return {
+        "message":     "Shipment created on Shiprocket",
+        "awb_code":    awb,
+        "courier":     courier,
+        "shipment_id": shipment_id,
+        "tracking_url": f"https://shiprocket.co/tracking/{awb}" if awb else None,
+        "shiprocket_response": result,
+    }
 
 
 @router.get("/support-ratings")

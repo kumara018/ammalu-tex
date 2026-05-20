@@ -946,3 +946,69 @@ def send_review_request_whatsapp(phone: str, name: str, order_number: str):
         f"and takes less than 2 minutes.\n\n"
         f"✍️ Write a review: {STORE_URL}/orders"
     )
+
+
+# ── 15j. Order cancelled by user ─────────────────────────────────────────────
+def send_order_cancelled_email(email: str, name: str, order):
+    first  = name.split()[0]
+    reason = getattr(order, "cancel_reason", "") or "Cancelled by customer"
+    items_html = "".join(
+        f"<tr><td style='padding:8px 0;border-bottom:1px solid #fde8d8'>{i.get('name','')}</td>"
+        f"<td style='padding:8px 0;border-bottom:1px solid #fde8d8;text-align:center'>×{i.get('quantity',1)}</td>"
+        f"<td style='padding:8px 0;border-bottom:1px solid #fde8d8;text-align:right'>₹{i.get('subtotal',0):,.0f}</td></tr>"
+        for i in (order.items_snapshot or [])
+    )
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
+      <div style="background:#b91c1c;padding:28px 32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:22px">{STORE_NAME}</h1>
+        <p style="color:#fca5a5;margin:6px 0 0;font-size:14px">Order Cancellation Confirmed</p>
+      </div>
+      <div style="padding:32px">
+        <h2 style="color:#111;margin-top:0">Order Cancelled ❌</h2>
+        <p style="color:#555">Hi {first}, your order has been successfully cancelled.</p>
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:16px 0">
+          <p style="margin:0;color:#991b1b"><b>Order:</b> {order.order_number}</p>
+          <p style="margin:6px 0 0;color:#991b1b"><b>Reason:</b> {reason}</p>
+          <p style="margin:6px 0 0;color:#991b1b"><b>Total:</b> ₹{order.total:,.0f}</p>
+        </div>
+        <table width="100%" style="border-collapse:collapse;margin:16px 0">
+          <thead><tr style="background:#fef2f2">
+            <th style="padding:8px;text-align:left;font-size:13px">Item</th>
+            <th style="padding:8px;text-align:center;font-size:13px">Qty</th>
+            <th style="padding:8px;text-align:right;font-size:13px">Amount</th>
+          </tr></thead>
+          <tbody>{items_html}</tbody>
+        </table>
+        {"<div style='background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:14px;margin:16px 0'><p style='margin:0;color:#92400e;font-size:14px'>💰 <b>Refund:</b> If you paid online, your refund will be processed within 5–7 business days to your original payment method.</p></div>" if order.payment_method != 'cod' else ""}
+        <p style="color:#555;font-size:14px">Changed your mind? You can always <a href="{STORE_URL}/products" style="color:#7c1d2e">shop again</a>.</p>
+        <p style="color:#888;font-size:13px">Questions? Email us at <a href="mailto:{SUPPORT_EMAIL}">{SUPPORT_EMAIL}</a></p>
+      </div>
+      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
+        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
+      </div>
+    </div>"""
+    _send_email(email, f"Order Cancelled — {order.order_number}", html)
+
+
+def send_order_cancelled_whatsapp(phone: str, name: str, order):
+    first  = name.split()[0]
+    reason = getattr(order, "cancel_reason", "") or "Cancelled by customer"
+    items_text = "\n".join(
+        f"  • {i.get('name','')} ×{i.get('quantity',1)} — ₹{i.get('subtotal',0):,.0f}"
+        for i in (order.items_snapshot or [])
+    )
+    refund_note = (
+        "\n💰 *Refund:* Will be credited within 5–7 business days."
+        if getattr(order, "payment_method", "cod") != "cod" else ""
+    )
+    _send_whatsapp(phone,
+        f"❌ *Order Cancelled*\n\n"
+        f"Hi {first}, your order has been cancelled.\n\n"
+        f"📦 *Order:* {order.order_number}\n"
+        f"📝 *Reason:* {reason}\n"
+        f"💸 *Total:* ₹{order.total:,.0f}\n\n"
+        f"*Items:*\n{items_text}"
+        f"{refund_note}\n\n"
+        f"🛍️ Shop again: {STORE_URL}/products"
+    )

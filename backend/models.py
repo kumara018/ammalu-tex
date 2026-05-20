@@ -143,6 +143,17 @@ class Order(Base):
     delivery_otp           = Column(String(10),  nullable=True)      # 6-digit OTP for delivery confirmation
     delivery_person_name   = Column(String(100), nullable=True)      # agent name (set on out_for_delivery)
     delivery_person_phone  = Column(String(20),  nullable=True)      # agent phone
+    # ── Shiprocket / courier tracking ──────────────────────────────────────
+    awb_code              = Column(String(50),  nullable=True)       # courier AWB / tracking code
+    courier_name          = Column(String(100), nullable=True)       # e.g. "Delhivery", "BlueDart"
+    tracking_url          = Column(String(500), nullable=True)       # direct tracking link
+    estimated_delivery    = Column(String(50),  nullable=True)       # e.g. "25 May 2026"
+    status_location       = Column(String(255), nullable=True)       # e.g. "In Transit – Erode Hub"
+    shiprocket_order_id   = Column(String(50),  nullable=True)
+    shiprocket_shipment_id= Column(String(50),  nullable=True)
+    # ── Cancellation info ──────────────────────────────────────────────────
+    cancel_reason         = Column(String(255), nullable=True)
+    cancelled_by          = Column(String(20),  nullable=True)       # 'user' or 'admin'
     created_at             = Column(DateTime(timezone=True), server_default=func.now())
     updated_at             = Column(DateTime(timezone=True), onupdate=func.now())
 

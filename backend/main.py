@@ -107,6 +107,42 @@ def _migrate_db():
                 conn.execute(text("ALTER TABLE orders ADD COLUMN delivery_person_phone VARCHAR(20)"))
                 conn.commit()
                 print("[Startup] Migrated: added delivery_person_phone to orders")
+            if "awb_code" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN awb_code VARCHAR(50)"))
+                conn.commit()
+                print("[Startup] Migrated: added awb_code to orders")
+            if "courier_name" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN courier_name VARCHAR(100)"))
+                conn.commit()
+                print("[Startup] Migrated: added courier_name to orders")
+            if "tracking_url" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN tracking_url VARCHAR(500)"))
+                conn.commit()
+                print("[Startup] Migrated: added tracking_url to orders")
+            if "estimated_delivery" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN estimated_delivery VARCHAR(50)"))
+                conn.commit()
+                print("[Startup] Migrated: added estimated_delivery to orders")
+            if "status_location" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN status_location VARCHAR(255)"))
+                conn.commit()
+                print("[Startup] Migrated: added status_location to orders")
+            if "shiprocket_order_id" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN shiprocket_order_id VARCHAR(50)"))
+                conn.commit()
+                print("[Startup] Migrated: added shiprocket_order_id to orders")
+            if "shiprocket_shipment_id" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN shiprocket_shipment_id VARCHAR(50)"))
+                conn.commit()
+                print("[Startup] Migrated: added shiprocket_shipment_id to orders")
+            if "cancel_reason" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN cancel_reason VARCHAR(255)"))
+                conn.commit()
+                print("[Startup] Migrated: added cancel_reason to orders")
+            if "cancelled_by" not in orders_cols:
+                conn.execute(text("ALTER TABLE orders ADD COLUMN cancelled_by VARCHAR(20)"))
+                conn.commit()
+                print("[Startup] Migrated: added cancelled_by to orders")
         except Exception as e:
             print(f"[Startup] Orders migration note: {e}")
 
@@ -278,6 +314,7 @@ app.include_router(admin.router)
 app.include_router(payments.router)
 app.include_router(addresses.router)
 app.include_router(support.router)
+# Tracking is wired into orders router (/api/orders/{id}/track)
 
 
 @app.get("/")

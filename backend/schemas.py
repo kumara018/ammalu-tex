@@ -403,10 +403,19 @@ class OrderCreate(BaseModel):
 
 
 class OrderStatusUpdate(BaseModel):
-    status:               str
-    tracking_number:      Optional[str] = None
-    delivery_person_name: Optional[str] = None
-    delivery_person_phone:Optional[str] = None
+    status:                str
+    tracking_number:       Optional[str] = None
+    delivery_person_name:  Optional[str] = None
+    delivery_person_phone: Optional[str] = None
+    awb_code:              Optional[str] = None
+    courier_name:          Optional[str] = None
+    tracking_url:          Optional[str] = None
+    estimated_delivery:    Optional[str] = None
+    status_location:       Optional[str] = None   # current location note e.g. "In Transit – Erode Hub"
+
+
+class CancelOrderPayload(BaseModel):
+    reason: Optional[str] = None
 
 
 class OrderOut(BaseModel):
@@ -427,6 +436,13 @@ class OrderOut(BaseModel):
     delivery_otp:           Optional[str] = None
     delivery_person_name:   Optional[str] = None
     delivery_person_phone:  Optional[str] = None
+    awb_code:               Optional[str] = None
+    courier_name:           Optional[str] = None
+    tracking_url:           Optional[str] = None
+    estimated_delivery:     Optional[str] = None
+    status_location:        Optional[str] = None
+    cancel_reason:          Optional[str] = None
+    cancelled_by:           Optional[str] = None
     created_at:             datetime
 
     model_config = {"from_attributes": True}

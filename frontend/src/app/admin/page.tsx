@@ -41,6 +41,14 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  // Order shipping details modal
+  const [shipModal, setShipModal] = useState<any>(null); // holds the order being shipped
+  const [shipForm, setShipForm] = useState({
+    status: '', awb_code: '', courier_name: '', tracking_url: '',
+    estimated_delivery: '', status_location: '',
+    delivery_person_name: '', delivery_person_phone: '',
+  });
+  const [shipSaving, setShipSaving] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;            // wait for localStorage restore
@@ -172,12 +180,44 @@ export default function AdminPage() {
     try {
       const res = await adminAPI.updateOrderStatus(id, { status });
       if (status === 'out_for_delivery' && res.data?.delivery_otp) {
-        toast.success(`Status updated! Delivery OTP sent to customer: ${res.data.delivery_otp}`, { duration: 8000 });
+        toast.success(`Status updated! Delivery OTP: ${res.data.delivery_otp}`, { duration: 8000 });
       } else {
-        toast.success('Order status updated — customer notified by email');
+        toast.success('Order status updated — customer notified');
       }
       loadOrders();
     } catch { toast.error('Failed to update status'); }
+  };
+
+  const openShipModal = (order: any) => {
+    setShipForm({
+      status:               order.status,
+      awb_code:             order.awb_code || '',
+      courier_name:         order.courier_name || '',
+      tracking_url:         order.tracking_url || '',
+      estimated_delivery:   order.estimated_delivery || '',
+      status_location:      order.status_location || '',
+      delivery_person_name: order.delivery_person_name || '',
+      delivery_person_phone:order.delivery_person_phone || '',
+    });
+    setShipModal(order);
+  };
+
+  const handleShipSave = async () => {
+    if (!shipModal) return;
+    setShipSaving(true);
+    try {
+      const payload: any = { ...shipForm };
+      // Remove empty strings
+      Object.keys(payload).forEach(k => { if (!payload[k]) delete payload[k]; });
+      const res = await adminAPI.updateOrderStatus(shipModal.id, payload);
+      if (shipForm.status === 'out_for_delivery' && res.data?.delivery_otp) {
+        toast.success(`Updated! Delivery OTP: ${res.data.delivery_otp}`, { duration: 8000 });
+      } else {
+        toast.success('Order updated — customer notified via Email & WhatsApp');
+      }
+      setShipModal(null);
+      loadOrders();
+    } catch { toast.error('Failed to update order'); } finally { setShipSaving(false); }
   };
 
   const toggleSize = (s: string) => {
@@ -429,15 +469,26 @@ export default function AdminPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className="capitalize badge badge-info text-xs">{o.status}</span>
+                      {o.status_location && <p className="text-[10px] text-gray-500 mt-0.5 truncate max-w-[120px]">📍 {o.status_location}</p>}
+                      {o.awb_code && <p className="text-[10px] font-mono text-maroon-600 mt-0.5">{o.awb_code}</p>}
                     </td>
                     <td className="px-4 py-3">
-                      <select
-                        value={o.status}
-                        onChange={(e) => handleOrderStatus(o.id, e.target.value)}
-                        className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-maroon-500"
-                      >
-                        {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <div className="flex gap-1.5 flex-wrap">
+                        <select
+                          value={o.status}
+                          onChange={(e) => handleOrderStatus(o.id, e.target.value)}
+                          className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-maroon-500"
+                        >
+                          {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <button
+                          onClick={() => openShipModal(o)}
+                          className="text-xs bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap"
+                          title="Set AWB, location, delivery person"
+                        >
+                          📦 Ship Details
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -683,6 +734,91 @@ export default function AdminPage() {
               <button onClick={() => setShowForm(false)} className="btn-secondary flex-1 py-3">Cancel</button>
               <button onClick={handleSave} disabled={saving} className="btn-primary flex-1 py-3 flex items-center justify-center gap-2">
                 {saving ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Saving...</> : <><CheckCircle size={16} /> {editing ? 'Save Changes' : 'Add Product'}</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Shipping Details Modal ── */}
+      {shipModal && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShipModal(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">📦 Ship Order Details</h3>
+                <p className="text-sm text-gray-500">{shipModal.order_number}</p>
+              </div>
+              <button onClick={() => setShipModal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Status */}
+              <div>
+                <label className="label">Order Status *</label>
+                <select value={shipForm.status} onChange={e => setShipForm(f => ({...f, status: e.target.value}))} className="input-field">
+                  {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              {/* Current Location */}
+              <div>
+                <label className="label">📍 Current Location (shown to customer)</label>
+                <input value={shipForm.status_location} onChange={e => setShipForm(f => ({...f, status_location: e.target.value}))}
+                  placeholder="e.g. In Transit – Erode Hub / Reached Chennai Facility"
+                  className="input-field" />
+              </div>
+
+              {/* AWB + Courier */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">AWB / Tracking No.</label>
+                  <input value={shipForm.awb_code} onChange={e => setShipForm(f => ({...f, awb_code: e.target.value}))}
+                    placeholder="123456789012" className="input-field" />
+                </div>
+                <div>
+                  <label className="label">Courier Name</label>
+                  <input value={shipForm.courier_name} onChange={e => setShipForm(f => ({...f, courier_name: e.target.value}))}
+                    placeholder="Delhivery / BlueDart / DTDC" className="input-field" />
+                </div>
+              </div>
+
+              {/* Tracking URL + Estimated Delivery */}
+              <div>
+                <label className="label">Tracking URL</label>
+                <input value={shipForm.tracking_url} onChange={e => setShipForm(f => ({...f, tracking_url: e.target.value}))}
+                  placeholder="https://www.delhivery.com/track/..." className="input-field" />
+              </div>
+              <div>
+                <label className="label">Estimated Delivery Date</label>
+                <input value={shipForm.estimated_delivery} onChange={e => setShipForm(f => ({...f, estimated_delivery: e.target.value}))}
+                  placeholder="e.g. 25 May 2026 / 3–5 Business Days" className="input-field" />
+              </div>
+
+              {/* Delivery Person (for Out for Delivery) */}
+              {shipForm.status === 'out_for_delivery' && (
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 space-y-3">
+                  <p className="text-sm font-semibold text-orange-800">🚴 Delivery Agent (OTP will be auto-sent to customer)</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="label">Agent Name</label>
+                      <input value={shipForm.delivery_person_name} onChange={e => setShipForm(f => ({...f, delivery_person_name: e.target.value}))}
+                        placeholder="Raju Kumar" className="input-field" />
+                    </div>
+                    <div>
+                      <label className="label">Agent Phone</label>
+                      <input value={shipForm.delivery_person_phone} onChange={e => setShipForm(f => ({...f, delivery_person_phone: e.target.value}))}
+                        placeholder="+91 9876543210" className="input-field" />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShipModal(null)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-gray-50">Cancel</button>
+              <button onClick={handleShipSave} disabled={shipSaving} className="flex-1 px-4 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2">
+                {shipSaving ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Saving...</> : '✅ Save & Notify Customer'}
               </button>
             </div>
           </div>

@@ -146,6 +146,7 @@ def get_order(
 @router.post("/{order_id}/cancel", response_model=schemas.OrderOut)
 def cancel_order(
     order_id: int,
+    payload: schemas.CancelOrderPayload = schemas.CancelOrderPayload(),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user),
 ):
@@ -156,13 +157,19 @@ def cancel_order(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    if order.status not in ["pending", "confirmed"]:
+    # Allow cancel up to shipped — not once out for delivery or delivered
+    cancellable = ["pending", "confirmed", "processing", "shipped"]
+    if order.status not in cancellable:
         raise HTTPException(
             status_code=400,
-            detail=f"Order cannot be cancelled. Current status: {order.status}",
+            detail=f"Order cannot be cancelled once it is '{order.status}'. Please contact support.",
         )
 
-    order.status = "cancelled"
+    order.status       = "cancelled"
+    order.cancelled_by = "user"
+    order.cancel_reason = (payload.reason or "Cancelled by customer").strip()
+
+    # Restore stock
     for item in order.items_snapshot:
         product = db.query(models.Product).filter(
             models.Product.id == item["product_id"]
@@ -170,6 +177,62 @@ def cancel_order(
         if product:
             product.stock += item["quantity"]
 
+    # Also cancel on Shiprocket if shipment was created
+    if order.shiprocket_order_id:
+        try:
+            from shiprocket import shiprocket as sr
+            sr.cancel_order([int(order.shiprocket_order_id)])
+        except Exception as e:
+            print(f"[Shiprocket cancel error] {e}")
+
     db.commit()
     db.refresh(order)
+
+    # Notify customer by email + WhatsApp
+    try:
+        notifications.send_order_cancelled_email(current_user.email, current_user.full_name, order)
+    except Exception as e:
+        print(f"[Cancel email error] {e}")
+    try:
+        notifications.send_order_cancelled_whatsapp(current_user.phone, current_user.full_name, order)
+    except Exception as e:
+        print(f"[Cancel WhatsApp error] {e}")
+
     return order
+
+
+@router.get("/{order_id}/track")
+def track_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """Return Shiprocket live tracking events if AWB is set, else order timeline."""
+    order = db.query(models.Order).filter(
+        models.Order.id == order_id,
+        models.Order.user_id == current_user.id,
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    result = {
+        "order_number":     order.order_number,
+        "status":           order.status,
+        "status_location":  order.status_location,
+        "courier_name":     order.courier_name,
+        "awb_code":         order.awb_code,
+        "tracking_url":     order.tracking_url,
+        "estimated_delivery": order.estimated_delivery,
+        "shiprocket_data":  None,
+    }
+
+    if order.awb_code:
+        try:
+            from shiprocket import shiprocket as sr
+            data = sr.track_awb(order.awb_code)
+            if data:
+                result["shiprocket_data"] = data
+        except Exception as e:
+            print(f"[Track fetch error] {e}")
+
+    return result
