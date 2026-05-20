@@ -144,6 +144,61 @@ async def upload_image(
         raise HTTPException(500, f"Cloudinary upload failed: {e}")
 
 
+@router.post("/orders/create-test", response_model=schemas.OrderOut, status_code=201)
+def create_test_order(
+    db:    Session      = Depends(get_db),
+    admin: models.User = Depends(auth_utils.get_current_admin),
+):
+    """Create a dummy order so admin can test Delhivery / shipping integrations."""
+    import random, string as _string
+
+    product = db.query(models.Product).filter(models.Product.is_active == True).first()
+    if not product:
+        raise HTTPException(400, "No active products found — add a product first.")
+
+    suffix       = "".join(random.choices(_string.ascii_uppercase + _string.digits, k=6))
+    order_number = f"TEST-{suffix}"
+
+    items_snapshot = [{
+        "product_id": product.id,
+        "name":       product.name,
+        "category":   product.category,
+        "price":      product.price,
+        "quantity":   1,
+        "size":       (product.size_options or ["M"])[0],
+        "color":      (product.colors or ["Default"])[0],
+        "image":      (product.images or [None])[0],
+        "subtotal":   product.price,
+    }]
+
+    order = models.Order(
+        order_number    = order_number,
+        user_id         = admin.id,
+        items_snapshot  = items_snapshot,
+        subtotal        = product.price,
+        shipping_fee    = 49.0,
+        discount        = 0.0,
+        total           = product.price + 49.0,
+        status          = "confirmed",
+        payment_status  = "pending",
+        payment_method  = "cod",
+        shipping_address = {
+            "full_name":    "Test Customer",
+            "phone":        "9999999999",
+            "address_line1":"123 Test Street",
+            "city":         "Coimbatore",
+            "state":        "Tamil Nadu",
+            "pincode":      "641001",
+            "country":      "India",
+        },
+        notes = "🧪 TEST ORDER — for Delhivery integration testing only. Safe to cancel.",
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+    return order
+
+
 @router.get("/orders", response_model=List[schemas.OrderOut])
 def get_all_orders(
     db: Session = Depends(get_db),

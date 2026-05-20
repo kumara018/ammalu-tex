@@ -221,6 +221,17 @@ export default function AdminPage() {
     setShipModal(order);
   };
 
+  const handleCreateTestOrder = async () => {
+    if (!confirm('Create a dummy test order for Delhivery testing?')) return;
+    try {
+      await adminAPI.createTestOrder();
+      toast.success('🧪 Test order created! Now click 🚚 Delhivery to test.');
+      loadOrders();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to create test order');
+    }
+  };
+
   const handleCreateDelhivery = async (orderId: number, orderNum: string) => {
     if (!confirm(`Create Delhivery shipment for ${orderNum}? This will generate an AWB and notify the customer.`)) return;
     setCreatingDelhivery(orderId);
@@ -480,6 +491,15 @@ export default function AdminPage() {
       {/* Orders */}
       {tab === 'orders' && (
         <div className="card overflow-hidden">
+          <div className="flex items-center justify-end px-4 pt-4 pb-2">
+            <button
+              onClick={handleCreateTestOrder}
+              className="text-xs bg-purple-50 border border-purple-300 text-purple-700 hover:bg-purple-100 rounded-lg px-3 py-1.5 font-medium transition-colors"
+              title="Create a dummy order to test Delhivery shipping"
+            >
+              🧪 Create Test Order
+            </button>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-maroon-50">
