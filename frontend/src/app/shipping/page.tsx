@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {
   Truck, Clock, MapPin, Package,
-  CheckCircle, ChevronRight, Headphones,
+  CheckCircle, Headphones,
 } from 'lucide-react';
 import { STORE } from '@/lib/config';
 
@@ -13,13 +13,6 @@ export const metadata = {
 export default function ShippingPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-6">
-        <Link href="/" className="hover:text-maroon-700">Home</Link>
-        <ChevronRight size={12} />
-        <span className="text-gray-800 font-medium">Shipping Policy</span>
-      </nav>
 
       {/* Header */}
       <div className="text-center mb-10">
