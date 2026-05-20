@@ -228,9 +228,9 @@ export default function RegisterPage() {
 
       {/* Standalone header */}
       <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md gap-3">
-        {/* Back to Login — always shown */}
+        {/* Back to Login — always shown; ?add=1 prevents auto-redirect on login page */}
         <Link
-          href="/auth/login"
+          href="/auth/login?add=1"
           className="flex flex-col items-start text-sm text-white/80 hover:text-white transition-colors leading-tight flex-shrink-0"
         >
           <span className="text-xs">← Back to</span>
