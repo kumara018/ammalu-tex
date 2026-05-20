@@ -1365,3 +1365,52 @@ def send_invoice_email(email: str, name: str, order, user_email: str = ""):
       </div>
     </div>"""
     _send_email(email, f"📄 Invoice — {order.order_number} · {STORE_NAME}", html)
+
+
+# ── Support Interaction Rating Request ────────────────────────────────────────
+
+def send_support_rating_request_email(email: str, customer_name: str, cs_name: str, token: str, issue: str = ""):
+    first = customer_name.split()[0]
+    rating_url = f"{STORE_URL}/support/rate/{token}"
+    issue_row = f"<tr><td style='color:#555;padding:5px 0'>Topic</td><td style='text-align:right;color:#111'>{issue}</td></tr>" if issue else ""
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
+      <div style="background:linear-gradient(135deg,#7c1d2e,#b91c1c);padding:28px 32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:22px;font-weight:bold">{STORE_NAME}</h1>
+        <p style="color:#fca5a5;margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Support Experience</p>
+      </div>
+      <div style="padding:32px">
+        <div style="text-align:center;margin-bottom:20px">
+          <div style="width:64px;height:64px;background:#fff7ed;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:32px">⭐</div>
+        </div>
+        <h2 style="color:#111;margin-top:0;text-align:center">How was your support experience?</h2>
+        <p style="color:#555;text-align:center">Hi {first}, <b>{cs_name}</b> from our support team helped you recently. We'd love to know how we did!</p>
+        <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:16px;margin:20px 0">
+          <table width="100%" style="border-collapse:collapse;font-size:14px">
+            <tr><td style="color:#555;padding:5px 0">Support Agent</td><td style="text-align:right;font-weight:bold;color:#7c1d2e">{cs_name}</td></tr>
+            {issue_row}
+          </table>
+        </div>
+        <p style="color:#555;text-align:center;font-size:14px">Click below to rate your experience — it only takes 2 seconds:</p>
+        <div style="text-align:center;margin:24px 0">
+          <a href="{rating_url}" style="background:#7c1d2e;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px">⭐ Rate My Experience</a>
+        </div>
+        <p style="color:#aaa;font-size:12px;text-align:center">This link is unique to you and can only be used once.</p>
+      </div>
+      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
+        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
+      </div>
+    </div>"""
+    _send_email(email, f"⭐ How was your support experience? | {STORE_NAME}", html)
+
+
+def send_support_rating_request_whatsapp(phone: str, customer_name: str, cs_name: str, token: str):
+    first = customer_name.split()[0]
+    rating_url = f"{STORE_URL}/support/rate/{token}"
+    _send_whatsapp(phone,
+        f"⭐ *Rate Your Support Experience*\n\n"
+        f"Hi {first}! *{cs_name}* from {STORE_NAME} support helped you recently.\n\n"
+        f"We'd love your feedback — tap the link to rate in 2 seconds:\n"
+        f"👉 {rating_url}\n\n"
+        f"_(This link is unique to you and works only once)_"
+    )

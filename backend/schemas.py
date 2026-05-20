@@ -514,3 +514,58 @@ class ReturnRequestOut(BaseModel):
     refund_id:    Optional[str] = None
     created_at:   datetime
     model_config = {"from_attributes": True}
+
+
+# ─── SUPPORT INTERACTION SCHEMAS ──────────────────────────────────────────────
+
+class SupportInteractionCreate(BaseModel):
+    cs_name:        str
+    cs_email:       Optional[str] = None
+    cs_phone:       Optional[str] = None
+    customer_name:  str
+    customer_email: str
+    customer_phone: Optional[str] = None
+    issue_summary:  Optional[str] = None
+
+    @field_validator("cs_name", "customer_name")
+    @classmethod
+    def name_required(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Name is required")
+        return v.strip()
+
+    @field_validator("customer_email")
+    @classmethod
+    def email_required(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Customer email is required")
+        return v.strip()
+
+
+class SupportRatingSubmit(BaseModel):
+    rating:  int
+    comment: Optional[str] = None
+
+    @field_validator("rating")
+    @classmethod
+    def rating_valid(cls, v):
+        if v < 1 or v > 5:
+            raise ValueError("Rating must be between 1 and 5")
+        return v
+
+
+class SupportInteractionOut(BaseModel):
+    id:               int
+    cs_name:          str
+    cs_email:         Optional[str] = None
+    cs_phone:         Optional[str] = None
+    customer_name:    str
+    customer_email:   str
+    customer_phone:   Optional[str] = None
+    issue_summary:    Optional[str] = None
+    rating_token:     str
+    rating:           Optional[int] = None
+    rating_comment:   Optional[str] = None
+    rated_at:         Optional[datetime] = None
+    created_at:       datetime
+    model_config = {"from_attributes": True}

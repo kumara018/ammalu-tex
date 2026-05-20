@@ -184,10 +184,35 @@ class SupportRating(Base):
     email      = Column(String(255), nullable=False)
     phone      = Column(String(20), nullable=True)
     rating     = Column(Integer, nullable=False)   # 1-5
-    category   = Column(String(100), nullable=True)  # "Order Issue", "Product Query", etc.
+    category   = Column(String(100), nullable=True)
     message    = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", foreign_keys=[user_id])
+
+
+class SupportInteraction(Base):
+    """Admin logs a CS interaction → customer gets a unique rating link via email/WhatsApp."""
+    __tablename__ = "support_interactions"
+    id               = Column(Integer, primary_key=True, index=True)
+    # CS engineer who handled the interaction
+    cs_name          = Column(String(100), nullable=False)
+    cs_email         = Column(String(255), nullable=True)
+    cs_phone         = Column(String(20),  nullable=True)
+    # Customer who was helped
+    customer_name    = Column(String(100), nullable=False)
+    customer_email   = Column(String(255), nullable=False)
+    customer_phone   = Column(String(20),  nullable=True)
+    customer_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # Interaction details
+    issue_summary    = Column(String(500), nullable=True)
+    # Unique token sent to customer for rating
+    rating_token     = Column(String(100), unique=True, nullable=False, index=True)
+    # Rating result (filled when customer rates)
+    rating           = Column(Integer, nullable=True)      # 1-5, null = not yet rated
+    rating_comment   = Column(Text,    nullable=True)
+    rated_at         = Column(DateTime(timezone=True), nullable=True)
+    created_at       = Column(DateTime(timezone=True), server_default=func.now())
+    customer_user    = relationship("User", foreign_keys=[customer_user_id])
 
 
 class ReturnRequest(Base):

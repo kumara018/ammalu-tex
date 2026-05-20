@@ -197,6 +197,27 @@ def _migrate_db():
                 """))
                 conn.commit()
                 print("[Startup] Migrated: created reviews table")
+            if "support_interactions" not in existing_tables:
+                conn.execute(text("""
+                    CREATE TABLE support_interactions (
+                        id SERIAL PRIMARY KEY,
+                        cs_name VARCHAR(100) NOT NULL,
+                        cs_email VARCHAR(255),
+                        cs_phone VARCHAR(20),
+                        customer_name VARCHAR(100) NOT NULL,
+                        customer_email VARCHAR(255) NOT NULL,
+                        customer_phone VARCHAR(20),
+                        customer_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                        issue_summary VARCHAR(500),
+                        rating_token VARCHAR(100) UNIQUE NOT NULL,
+                        rating INTEGER,
+                        rating_comment TEXT,
+                        rated_at TIMESTAMP WITH TIME ZONE,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    )
+                """))
+                conn.commit()
+                print("[Startup] Migrated: created support_interactions table")
             if "return_requests" not in existing_tables:
                 conn.execute(text("""
                     CREATE TABLE return_requests (

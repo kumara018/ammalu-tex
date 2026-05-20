@@ -139,6 +139,11 @@ export const adminAPI = {
 export const supportAPI = {
   submitRating:     (data: object) => api.post('/api/support/rating', data),
   getRatingSummary: ()             => api.get('/api/support/rating/summary'),
+  // CS Interaction flow
+  createInteraction: (data: object) => api.post('/api/support/interactions', data),
+  listInteractions:  ()             => api.get('/api/support/interactions'),
+  getRatingPage:     (token: string) => api.get(`/api/support/rate/${token}`),
+  submitTokenRating: (token: string, data: object) => api.post(`/api/support/rate/${token}`, data),
 };
 
 export const returnsAPI = {

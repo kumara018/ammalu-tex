@@ -5,7 +5,7 @@ import {
   Package, ShoppingBag, Users, TrendingUp, Plus, Pencil,
   Trash2, X, AlertCircle, CheckCircle, Star, Upload, ImagePlus,
 } from 'lucide-react';
-import { adminAPI, adminReturnsAPI } from '@/lib/api';
+import { adminAPI, adminReturnsAPI, supportAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -16,6 +16,184 @@ const SIZE_OPTIONS   = ['XS','S','M','L','XL','XXL','XXXL','Free Size'];
 interface DashData { total_products: number; active_products: number; total_users: number; total_orders: number; pending_orders: number; total_revenue: number; recent_orders: any[]; }
 
 const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
+
+// ── CS Interactions Tab ───────────────────────────────────────────────────────
+function CSInteractionsTab() {
+  const [interactions, setInteractions] = useState<any[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [showForm, setShowForm]         = useState(false);
+  const [saving, setSaving]             = useState(false);
+  const [form, setForm] = useState({
+    cs_name:'', cs_email:'', cs_phone:'',
+    customer_name:'', customer_email:'', customer_phone:'', issue_summary:'',
+  });
+
+  const load = async () => {
+    setLoading(true);
+    try { const r = await supportAPI.listInteractions(); setInteractions(r.data); }
+    catch { toast.error('Failed to load interactions'); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleLog = async () => {
+    if (!form.cs_name.trim())            { toast.error('CS engineer name is required'); return; }
+    if (!form.customer_name.trim())      { toast.error('Customer name is required'); return; }
+    if (!form.customer_email.trim())     { toast.error('Customer email is required'); return; }
+    setSaving(true);
+    try {
+      await supportAPI.createInteraction(form);
+      toast.success('Interaction logged! Rating link sent to customer via email & WhatsApp ✅', { duration: 5000 });
+      setShowForm(false);
+      setForm({ cs_name:'', cs_email:'', cs_phone:'', customer_name:'', customer_email:'', customer_phone:'', issue_summary:'' });
+      load();
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail || 'Failed to log interaction');
+    } finally { setSaving(false); }
+  };
+
+  const rated    = interactions.filter(i => i.rating !== null);
+  const avgRating = rated.length ? (rated.reduce((s, i) => s + i.rating, 0) / rated.length).toFixed(1) : null;
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center gap-3 flex-wrap">
+        <Star size={20} className="text-yellow-500 fill-yellow-400" />
+        <h2 className="font-bold text-gray-800 text-lg">Customer Support Ratings</h2>
+        {avgRating && (
+          <span className="text-sm text-gray-500 ml-auto">
+            Avg: <b className="text-maroon-700">{avgRating}/5</b> · {rated.length} rated / {interactions.length} total
+          </span>
+        )}
+        <button onClick={() => setShowForm(true)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2 ml-auto">
+          <Plus size={15} /> Log CS Interaction
+        </button>
+      </div>
+
+      {/* Log Interaction Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div className="bg-maroon-800 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-white font-bold text-lg">Log Support Interaction</h3>
+              <button onClick={() => setShowForm(false)} className="text-maroon-200 hover:text-white"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-gray-500 bg-orange-50 border border-orange-100 rounded-lg px-3 py-2">
+                After saving, the customer will receive a <b>unique rating link</b> via email + WhatsApp. Only they can use it.
+              </p>
+
+              <p className="text-xs font-bold text-maroon-700 uppercase tracking-wide">CS Engineer Details</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Name *</label>
+                  <input value={form.cs_name} onChange={e => setForm(f=>({...f, cs_name:e.target.value}))} placeholder="Engineer name" className="input-field" />
+                </div>
+                <div>
+                  <label className="label">Mobile</label>
+                  <input value={form.cs_phone} onChange={e => setForm(f=>({...f, cs_phone:e.target.value}))} placeholder="9876543210" className="input-field" />
+                </div>
+              </div>
+              <div>
+                <label className="label">Email</label>
+                <input type="email" value={form.cs_email} onChange={e => setForm(f=>({...f, cs_email:e.target.value}))} placeholder="cs@ammalutex.com" className="input-field" />
+              </div>
+
+              <p className="text-xs font-bold text-maroon-700 uppercase tracking-wide mt-4">Customer Details</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Name *</label>
+                  <input value={form.customer_name} onChange={e => setForm(f=>({...f, customer_name:e.target.value}))} placeholder="Customer name" className="input-field" />
+                </div>
+                <div>
+                  <label className="label">Mobile</label>
+                  <input value={form.customer_phone} onChange={e => setForm(f=>({...f, customer_phone:e.target.value}))} placeholder="9876543210" className="input-field" />
+                </div>
+              </div>
+              <div>
+                <label className="label">Email *</label>
+                <input type="email" value={form.customer_email} onChange={e => setForm(f=>({...f, customer_email:e.target.value}))} placeholder="customer@email.com" className="input-field" />
+              </div>
+              <div>
+                <label className="label">Issue / Topic (optional)</label>
+                <input value={form.issue_summary} onChange={e => setForm(f=>({...f, issue_summary:e.target.value}))} placeholder="e.g. Order delivery query, size issue..." className="input-field" />
+              </div>
+            </div>
+            <div className="px-6 pb-6 flex gap-3">
+              <button onClick={() => setShowForm(false)} className="btn-secondary flex-1 py-2.5">Cancel</button>
+              <button onClick={handleLog} disabled={saving} className="btn-primary flex-1 py-2.5 flex items-center justify-center gap-2">
+                {saving ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Sending...</> : '📨 Log & Send Rating Link'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interactions Table */}
+      <div className="card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-maroon-50">
+              <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
+                <th className="px-4 py-3">CS Engineer</th>
+                <th className="px-4 py-3">Customer</th>
+                <th className="px-4 py-3">Issue</th>
+                <th className="px-4 py-3">Rating</th>
+                <th className="px-4 py-3">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-orange-50">
+              {loading ? Array(4).fill(0).map((_,i) => (
+                <tr key={i}><td colSpan={5} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+              )) : interactions.length === 0 ? (
+                <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">
+                  <div className="text-3xl mb-2">💬</div>
+                  No interactions logged yet. Click "Log CS Interaction" to start.
+                </td></tr>
+              ) : interactions.map(i => (
+                <tr key={i.id} className="hover:bg-orange-50">
+                  <td className="px-4 py-3">
+                    <p className="font-semibold text-gray-800">{i.cs_name}</p>
+                    {i.cs_phone && <p className="text-xs text-gray-500">{i.cs_phone}</p>}
+                    {i.cs_email && <p className="text-xs text-gray-400">{i.cs_email}</p>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-gray-800">{i.customer_name}</p>
+                    <p className="text-xs text-gray-500">{i.customer_email}</p>
+                    {i.customer_phone && <p className="text-xs text-gray-400">{i.customer_phone}</p>}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-600 max-w-[160px]">
+                    <p className="line-clamp-2">{i.issue_summary || '—'}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    {i.rating ? (
+                      <div>
+                        <div className="flex gap-0.5 mb-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} size={13} fill={s<=i.rating?'#facc15':'none'} className={s<=i.rating?'text-yellow-400':'text-gray-200'} />
+                          ))}
+                        </div>
+                        <p className={`text-xs font-semibold ${i.rating>=4?'text-green-600':i.rating===3?'text-orange-500':'text-red-500'}`}>{i.rating}/5</p>
+                        {i.rating_comment && <p className="text-xs text-gray-500 mt-0.5 italic line-clamp-1">"{i.rating_comment}"</p>}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-orange-500 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">⏳ Awaiting</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
+                    {new Date(i.created_at).toLocaleDateString('en-IN')}
+                    {i.rated_at && <p className="text-green-600">Rated: {new Date(i.rated_at).toLocaleDateString('en-IN')}</p>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const emptyProduct = {
   name:'', description:'', price:'', compare_price:'', category:'',
@@ -683,67 +861,9 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Support Ratings */}
+      {/* Support Ratings — CS Interactions */}
       {tab === 'ratings' && (
-        <div>
-          <div className="mb-4 flex items-center gap-3">
-            <Star size={20} className="text-yellow-500 fill-yellow-400" />
-            <h2 className="font-bold text-gray-800 text-lg">Customer Support Ratings</h2>
-            {supportRatings.length > 0 && (
-              <span className="ml-auto text-sm text-gray-500">
-                Avg: {(supportRatings.reduce((s, r) => s + r.rating, 0) / supportRatings.length).toFixed(1)} / 5
-                &nbsp;({supportRatings.length} ratings)
-              </span>
-            )}
-          </div>
-          <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-maroon-50">
-                  <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
-                    <th className="px-4 py-3">Customer</th>
-                    <th className="px-4 py-3">Rating</th>
-                    <th className="px-4 py-3">Category</th>
-                    <th className="px-4 py-3">Comment</th>
-                    <th className="px-4 py-3">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-orange-50">
-                  {loading ? Array(5).fill(0).map((_, i) => (
-                    <tr key={i}><td colSpan={5} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
-                  )) : supportRatings.length === 0 ? (
-                    <tr><td colSpan={5} className="px-4 py-10 text-center text-gray-400">No support ratings yet</td></tr>
-                  ) : supportRatings.map((r) => (
-                    <tr key={r.id} className="hover:bg-orange-50">
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-gray-800">{r.name}</p>
-                        <p className="text-xs text-gray-500">{r.email}</p>
-                        {r.phone && <p className="text-xs text-gray-400">{r.phone}</p>}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-0.5">
-                          {[1,2,3,4,5].map(s => (
-                            <Star key={s} size={14} className={s <= r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'} fill={s <= r.rating ? '#facc15' : 'none'} />
-                          ))}
-                        </div>
-                        <span className={`text-xs font-medium mt-1 ${r.rating >= 4 ? 'text-green-600' : r.rating === 3 ? 'text-orange-500' : 'text-red-500'}`}>
-                          {r.rating}/5
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600 text-xs">{r.category || '—'}</td>
-                      <td className="px-4 py-3 text-gray-600 text-xs max-w-xs">
-                        <p className="line-clamp-2">{r.message || '—'}</p>
-                      </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
-                        {r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN') : '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <CSInteractionsTab />
       )}
 
       {/* Returns */}

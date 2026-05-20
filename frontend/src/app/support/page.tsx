@@ -5,11 +5,9 @@ import Link from 'next/link';
 import {
   Phone, Mail, MapPin, Clock, ChevronDown, ChevronUp,
   MessageCircle, Package, RotateCcw, Truck, Shield,
-  Ruler, FileText, Lock, HelpCircle, Star,
+  Ruler, FileText, Lock, HelpCircle,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { supportAPI } from '@/lib/api';
-import toast from 'react-hot-toast';
 
 // ── Size data ────────────────────────────────────────────────────────────────
 const SIZE_ROWS = [
@@ -85,34 +83,8 @@ export default function SupportPage() {
   const { user } = useAuth();
 
   // Rating form state
-  const [ratingValue, setRatingValue]     = useState(0);
-  const [hoverRating, setHoverRating]     = useState(0);
-  const [ratingComment, setRatingComment] = useState('');
-  const [ratingSubmitting, setRatingSubmitting] = useState(false);
-  const [ratingSubmitted, setRatingSubmitted]   = useState(false);
-
-  const RATING_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent!'];
-  const RATING_EMOJI  = ['', '😞',   '😐',   '🙂',    '😊',        '😍'];
-
-  const handleRatingSubmit = async (star: number) => {
-    if (ratingSubmitting) return;
-    setRatingValue(star);
-    setRatingSubmitting(true);
-    try {
-      await supportAPI.submitRating({
-        name:    user?.full_name || 'Customer',
-        email:   user?.email    || 'unknown@ammalu.com',
-        phone:   user?.phone    || undefined,
-        rating:  star,
-        message: ratingComment.trim() || undefined,
-      });
-      setRatingSubmitted(true);
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to submit. Please try again.');
-    } finally {
-      setRatingSubmitting(false);
-    }
-  };
+  // Rating widget removed — ratings are now sent via unique link after each support interaction
+  // Admin logs CS interaction → customer receives email/WhatsApp with rating link
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -482,76 +454,6 @@ export default function SupportPage() {
           className="btn-primary text-sm flex-shrink-0">
           Open in Maps
         </a>
-      </div>
-
-      {/* ── Support Rating — Amazon style ───────────────────────────────── */}
-      <div className="card p-6 mt-8 text-center">
-        {ratingSubmitted ? (
-          /* ── Thank-you screen ── */
-          <div className="py-8">
-            <div className="text-6xl mb-3">{RATING_EMOJI[ratingValue]}</div>
-            <h3 className="font-bold text-gray-800 text-xl mb-1">Thank you, {user?.full_name?.split(' ')[0] || 'Customer'}!</h3>
-            <p className="text-gray-500 text-sm mb-4">Your feedback helps us improve our support.</p>
-            <div className="flex justify-center gap-1 mb-2">
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star key={i} size={28} fill={i < ratingValue ? '#facc15' : 'none'} className={i < ratingValue ? 'text-yellow-400' : 'text-gray-200'} />
-              ))}
-            </div>
-            <p className="text-sm font-semibold text-maroon-700">{RATING_LABELS[ratingValue]}</p>
-          </div>
-        ) : (
-          /* ── Rating screen ── */
-          <div className="py-4">
-            <p className="text-xs font-semibold text-maroon-600 uppercase tracking-widest mb-2">Customer Support</p>
-            <h2 className="text-xl font-bold text-gray-800 mb-1">How was your support experience?</h2>
-            <p className="text-sm text-gray-400 mb-6">Tap a star to rate — it only takes a second</p>
-
-            {/* Big stars — tap to submit instantly */}
-            <div className="flex justify-center gap-3 mb-3">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => !ratingSubmitting && handleRatingSubmit(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  disabled={ratingSubmitting}
-                  className="transition-all hover:scale-125 focus:outline-none disabled:opacity-50"
-                  title={RATING_LABELS[star]}
-                >
-                  <Star
-                    size={48}
-                    fill={(hoverRating || ratingValue) >= star ? '#facc15' : 'none'}
-                    className={(hoverRating || ratingValue) >= star ? 'text-yellow-400 drop-shadow-sm' : 'text-gray-300'}
-                  />
-                </button>
-              ))}
-            </div>
-
-            {/* Label under stars */}
-            <p className={`text-sm font-semibold h-5 transition-all ${hoverRating ? 'text-maroon-700' : 'text-gray-400'}`}>
-              {hoverRating ? `${RATING_EMOJI[hoverRating]} ${RATING_LABELS[hoverRating]}` : 'Poor · Fair · Good · Very Good · Excellent'}
-            </p>
-
-            {/* Optional comment — shows after hovering */}
-            <div className="mt-5 max-w-md mx-auto">
-              <textarea
-                value={ratingComment}
-                onChange={e => setRatingComment(e.target.value)}
-                rows={2}
-                maxLength={200}
-                placeholder="Add a comment (optional)..."
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 resize-none focus:outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-200 bg-gray-50"
-              />
-            </div>
-
-            {user && (
-              <p className="text-xs text-gray-400 mt-2">
-                Submitting as <span className="font-medium text-gray-600">{user.full_name}</span>
-              </p>
-            )}
-          </div>
-        )}
       </div>
 
     </div>

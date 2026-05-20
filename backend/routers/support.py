@@ -1,57 +1,118 @@
+"""Support interactions — admin logs CS call/chat → customer gets rating link."""
+import uuid
+from datetime import datetime, timezone
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
-import models, notifications
-from pydantic import BaseModel
-from typing import Optional
+import models, schemas, auth as auth_utils, notifications
 
 router = APIRouter(prefix="/api/support", tags=["Support"])
 
 
-class SupportRatingCreate(BaseModel):
-    name: str
-    email: str
-    phone: Optional[str] = None
-    rating: int           # 1-5
-    category: Optional[str] = None
-    message: Optional[str] = None
-
-
-@router.post("/rating", status_code=201)
-def submit_support_rating(
-    payload: SupportRatingCreate,
-    db: Session = Depends(get_db),
+# ── Admin: log a CS interaction & send rating link to customer ────────────────
+@router.post("/interactions", response_model=schemas.SupportInteractionOut, status_code=201)
+def create_interaction(
+    payload: schemas.SupportInteractionCreate,
+    db:      Session     = Depends(get_db),
+    _:       models.User = Depends(auth_utils.get_current_admin),
 ):
-    if not 1 <= payload.rating <= 5:
-        raise HTTPException(400, "Rating must be between 1 and 5")
+    """
+    Admin logs that CS engineer [cs_name] helped customer [customer_email].
+    System auto-sends a unique rating link to the customer via email + WhatsApp.
+    """
+    token = str(uuid.uuid4())
 
-    rating = models.SupportRating(
-        name=payload.name,
-        email=payload.email,
-        phone=payload.phone,
-        rating=payload.rating,
-        category=payload.category,
-        message=payload.message,
+    # Try to find matching registered user
+    customer_user = db.query(models.User).filter(
+        models.User.email == payload.customer_email
+    ).first()
+
+    interaction = models.SupportInteraction(
+        cs_name          = payload.cs_name,
+        cs_email         = payload.cs_email,
+        cs_phone         = payload.cs_phone,
+        customer_name    = payload.customer_name,
+        customer_email   = payload.customer_email,
+        customer_phone   = payload.customer_phone,
+        customer_user_id = customer_user.id if customer_user else None,
+        issue_summary    = payload.issue_summary,
+        rating_token     = token,
     )
-    db.add(rating)
+    db.add(interaction)
     db.commit()
-    db.refresh(rating)
+    db.refresh(interaction)
 
-    # Send confirmation email to user + notify admin + WhatsApp if phone provided
-    notifications.send_support_rating_confirmation(payload.email, payload.name, payload.rating)
-    notifications.send_support_rating_admin_notify(
-        payload.name, payload.email, payload.rating,
-        payload.category or "", payload.message or ""
-    )
-    if payload.phone:
-        notifications.send_support_rating_whatsapp(payload.phone, payload.name, payload.rating)
+    # Send rating link to customer
+    try:
+        notifications.send_support_rating_request_email(
+            payload.customer_email, payload.customer_name,
+            payload.cs_name, token, payload.issue_summary or ""
+        )
+    except Exception as e:
+        print(f"[Support] Email error: {e}")
 
-    return {"message": "Thank you for your feedback! It helps us serve you better."}
+    if payload.customer_phone:
+        try:
+            notifications.send_support_rating_request_whatsapp(
+                payload.customer_phone, payload.customer_name,
+                payload.cs_name, token
+            )
+        except Exception as e:
+            print(f"[Support] WhatsApp error: {e}")
+
+    return interaction
 
 
-@router.get("/rating/summary")
-def get_rating_summary(db: Session = Depends(get_db)):
-    from sqlalchemy import func
-    total = db.query(models.SupportRating).count()
-    avg = db.query(func.avg(models.SupportRating.rating)).scalar() or 0
-    return {"total_ratings": total, "average_rating": round(float(avg), 1)}
+# ── Admin: list all interactions ──────────────────────────────────────────────
+@router.get("/interactions", response_model=List[schemas.SupportInteractionOut])
+def list_interactions(
+    db: Session     = Depends(get_db),
+    _:  models.User = Depends(auth_utils.get_current_admin),
+):
+    return db.query(models.SupportInteraction).order_by(
+        models.SupportInteraction.created_at.desc()
+    ).all()
+
+
+# ── Public: get interaction info by token (for rating page) ──────────────────
+@router.get("/rate/{token}")
+def get_interaction_for_rating(token: str, db: Session = Depends(get_db)):
+    interaction = db.query(models.SupportInteraction).filter(
+        models.SupportInteraction.rating_token == token
+    ).first()
+    if not interaction:
+        raise HTTPException(404, "Rating link not found or expired")
+    if interaction.rating is not None:
+        raise HTTPException(400, "You have already submitted a rating for this interaction")
+    return {
+        "cs_name":       interaction.cs_name,
+        "customer_name": interaction.customer_name,
+        "issue_summary": interaction.issue_summary,
+        "created_at":    interaction.created_at,
+    }
+
+
+# ── Public: submit rating via token ───────────────────────────────────────────
+@router.post("/rate/{token}", status_code=200)
+def submit_rating(
+    token:   str,
+    payload: schemas.SupportRatingSubmit,
+    db:      Session = Depends(get_db),
+):
+    interaction = db.query(models.SupportInteraction).filter(
+        models.SupportInteraction.rating_token == token
+    ).first()
+    if not interaction:
+        raise HTTPException(404, "Rating link not found or expired")
+    if interaction.rating is not None:
+        raise HTTPException(400, "You have already submitted a rating for this interaction")
+
+    interaction.rating         = payload.rating
+    interaction.rating_comment = payload.comment
+    interaction.rated_at       = datetime.now(timezone.utc)
+    db.commit()
+
+    print(f"[Support] ✅ Rating {payload.rating}/5 received for CS {interaction.cs_name} from {interaction.customer_name}")
+
+    return {"message": "Thank you for your feedback!"}
