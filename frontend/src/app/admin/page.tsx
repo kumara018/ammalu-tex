@@ -489,22 +489,41 @@ export default function AdminPage() {
                   <th className="px-4 py-3">Customer</th>
                   <th className="px-4 py-3">Amount</th>
                   <th className="px-4 py-3">Payment</th>
+                  <th className="px-4 py-3">Transaction ID</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Update Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-orange-50">
                 {loading ? Array(5).fill(0).map((_, i) => (
-                  <tr key={i}><td colSpan={6} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                  <tr key={i}><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
                 )) : orders.map((o) => (
                   <tr key={o.id} className="hover:bg-orange-50">
                     <td className="px-4 py-3 font-mono font-medium text-maroon-800 text-xs">{o.order_number}</td>
                     <td className="px-4 py-3 text-gray-700">{(o.shipping_address as any)?.full_name}</td>
                     <td className="px-4 py-3 font-bold text-maroon-900">₹{o.total.toLocaleString()}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium capitalize ${o.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>
-                        {o.payment_method} · {o.payment_status}
+                      <span className={`text-xs font-medium capitalize ${o.payment_status === 'paid' ? 'text-green-600' : o.payment_status === 'refunded' ? 'text-purple-600' : 'text-orange-600'}`}>
+                        {o.payment_method === 'razorpay' ? 'Razorpay' : o.payment_method === 'upi' ? 'UPI' : 'COD'} · {o.payment_status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {o.payment_transaction_id ? (
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono text-[10px] text-gray-600 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 max-w-[120px] truncate" title={o.payment_transaction_id}>
+                            {o.payment_transaction_id}
+                          </span>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(o.payment_transaction_id); toast.success('Copied!'); }}
+                            className="text-gray-400 hover:text-maroon-700 flex-shrink-0"
+                            title="Copy transaction ID"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-gray-400">{o.payment_method === 'cod' ? 'COD' : '—'}</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className="capitalize badge badge-info text-xs">{o.status}</span>

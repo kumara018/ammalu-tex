@@ -429,6 +429,7 @@ class OrderOut(BaseModel):
     status:                 str
     payment_status:         str
     payment_method:         str
+    payment_transaction_id: Optional[str] = None
     shipping_address:       Any
     tracking_number:        Optional[str] = None
     notes:                  Optional[str] = None

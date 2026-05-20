@@ -76,6 +76,7 @@ export interface Order {
   status: string;
   payment_status: string;
   payment_method: string;
+  payment_transaction_id?: string;
   shipping_address: ShippingAddress;
   tracking_number?: string;
   notes?: string;

@@ -404,6 +404,14 @@ function OrderDetailContent() {
                    order.payment_status === 'refunded' ? '↩️ REFUNDED' : '⏳ PENDING'}
                 </span>
               </p>
+              {order.payment_transaction_id && order.payment_method !== 'cod' && (
+                <div className="mt-2 pt-2 border-t border-orange-50">
+                  <p className="text-[10px] text-gray-400 mb-1">Transaction ID</p>
+                  <p className="font-mono text-[10px] text-gray-600 bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 break-all leading-relaxed">
+                    {order.payment_transaction_id}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

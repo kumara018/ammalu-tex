@@ -267,6 +267,7 @@ def send_payment_success_email(email: str, name: str, order):
         <tr><td style="color:#888;padding:6px 0;">Payment Method</td><td style="color:#444;font-weight:bold;text-align:right;">{order.payment_method.upper()}</td></tr>
         <tr><td style="color:#888;padding:6px 0;">Amount Paid</td><td style="color:#7c1d2e;font-weight:bold;text-align:right;">₹{order.total:,.0f}</td></tr>
         <tr><td style="color:#888;padding:6px 0;">Order Number</td><td style="color:#444;font-weight:bold;text-align:right;">{order.order_number}</td></tr>
+        {f'<tr><td style="color:#888;padding:6px 0;">Transaction ID</td><td style="color:#444;font-weight:bold;text-align:right;font-family:monospace;font-size:12px;">{order.payment_transaction_id}</td></tr>' if getattr(order, "payment_transaction_id", None) else ""}
       </table>
       {_btn("View Order Details →", f"{STORE_URL}/orders/{order.id}")}
     """)
@@ -829,13 +830,15 @@ def send_order_whatsapp(phone: str, name: str, order, items_snapshot: list):
         for i in items_snapshot
     )
     addr = order.shipping_address or {}
+    txn_line = (f"\n🔐 Txn ID: `{order.payment_transaction_id}`"
+                if getattr(order, "payment_transaction_id", None) else "")
     _send_whatsapp(phone,
         f"✅ *Order Confirmed — {order.order_number}*\n\n"
         f"Hi {first}, your order has been placed successfully!\n\n"
         f"📦 *Items Ordered:*\n{rows}\n\n"
         f"💰 *Total: ₹{order.total:,.0f}*\n"
         f"🚚 Shipping: {'FREE' if order.shipping_fee == 0 else f'₹{order.shipping_fee:,.0f}'}\n"
-        f"💳 Payment: {order.payment_method.upper()}\n\n"
+        f"💳 Payment: {order.payment_method.upper()}{txn_line}\n\n"
         f"📍 *Delivering to:*\n"
         f"  {addr.get('full_name','')}\n"
         f"  {addr.get('address_line1','')}, {addr.get('city','')}\n"

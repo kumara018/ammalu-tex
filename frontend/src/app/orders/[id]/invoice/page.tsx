@@ -68,7 +68,7 @@ function InvoiceContent() {
 
   const addr = order.shipping_address as any;
   const pm   = (order.payment_method || 'cod').toLowerCase();
-  const txn  = (order as any).payment_transaction_id || '';
+  const txn  = order.payment_transaction_id || '';
   const isCod = pm === 'cod';
   const date = new Date(order.created_at).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric'
@@ -239,7 +239,7 @@ function InvoiceContent() {
                   {order.payment_status.toUpperCase()}
                 </span>
               </div>
-              {!isCod && txn && txn.startsWith('pay_') && (
+              {!isCod && txn && (
                 <div className="sm:col-span-2">
                   <p className="text-gray-500 text-xs mb-1">Transaction ID</p>
                   <p className="font-mono text-xs bg-white border border-blue-200 rounded-lg px-3 py-2 text-gray-700 break-all">{txn}</p>
