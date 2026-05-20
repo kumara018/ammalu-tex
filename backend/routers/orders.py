@@ -229,7 +229,7 @@ def cancel_order(
     db.commit()
     db.refresh(order)
 
-    # Notify customer by email + WhatsApp
+    # Notify customer — cancellation
     try:
         notifications.send_order_cancelled_email(current_user.email, current_user.full_name, order)
     except Exception as e:
@@ -239,7 +239,50 @@ def cancel_order(
     except Exception as e:
         print(f"[Cancel WhatsApp error] {e}")
 
+    # Notify customer — refund (if refund was triggered)
+    if refund_status:
+        try:
+            notifications.send_refund_initiated_email(
+                current_user.email, current_user.full_name, order, refund_status
+            )
+        except Exception as e:
+            print(f"[Refund email error] {e}")
+        try:
+            notifications.send_refund_initiated_sms(
+                current_user.phone, order.order_number, order.total
+            )
+        except Exception as e:
+            print(f"[Refund SMS error] {e}")
+        try:
+            notifications.send_refund_initiated_whatsapp(
+                current_user.phone, current_user.full_name, order, refund_status
+            )
+        except Exception as e:
+            print(f"[Refund WhatsApp error] {e}")
+
     return order
+
+
+@router.post("/{order_id}/send-invoice")
+def send_invoice(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """Send the invoice email for this order to the customer."""
+    order = db.query(models.Order).filter(
+        models.Order.id == order_id,
+        models.Order.user_id == current_user.id,
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    try:
+        notifications.send_invoice_email(
+            current_user.email, current_user.full_name, order, current_user.email
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send invoice: {e}")
+    return {"message": "Invoice sent to your email successfully"}
 
 
 @router.get("/{order_id}/track")

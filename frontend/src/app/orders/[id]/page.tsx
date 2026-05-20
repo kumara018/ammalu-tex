@@ -6,6 +6,7 @@ import {
   Package, Truck, CheckCircle, Clock, XCircle,
   MapPin, CreditCard, ArrowLeft, Sparkles, Phone, ShieldCheck,
   PackageOpen, Navigation, ExternalLink, AlertTriangle, RefreshCw,
+  FileText, RotateCcw,
 } from 'lucide-react';
 import { ordersAPI } from '@/lib/api';
 import { Order } from '@/types';
@@ -314,7 +315,15 @@ function OrderDetailContent() {
                   </p>
                 </div>
               </div>
-              {order.payment_method !== 'cod' && (
+              {order.payment_status === 'refunded' ? (
+                <div className="flex items-center gap-3 bg-purple-50 border border-purple-200 rounded-xl px-4 py-3">
+                  <RotateCcw size={18} className="text-purple-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold text-purple-800">Refund Initiated ✅</p>
+                    <p className="text-xs text-purple-600 mt-0.5">₹{order.total.toLocaleString()} will be credited within 5–7 business days.</p>
+                  </div>
+                </div>
+              ) : order.payment_method !== 'cod' && (
                 <p className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-xl px-4 py-2.5">
                   💰 Refund will be processed within 5–7 business days to your original payment method.
                 </p>
@@ -378,15 +387,34 @@ function OrderDetailContent() {
                 <span>Total Paid</span><span className="text-maroon-900">₹{order.total.toLocaleString()}</span>
               </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-orange-50">
+            <div className="mt-4 pt-3 border-t border-orange-50 space-y-2">
               <p className="text-xs text-gray-500 flex items-center gap-1.5">
                 <CreditCard size={12} />
-                Payment: <b className="capitalize">{order.payment_method.toUpperCase()}</b>
-                <span className={`ml-1 font-medium ${order.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>
-                  ({order.payment_status === 'paid' ? 'Paid' : 'Pending'})
+                Mode: <b className="capitalize">
+                  {order.payment_method === 'razorpay' ? 'Online (Razorpay)' :
+                   order.payment_method === 'upi' ? 'UPI' : 'Cash on Delivery'}
+                </b>
+              </p>
+              <p className="text-xs flex items-center gap-1.5">
+                <span className={`inline-block font-bold px-2 py-0.5 rounded-full text-[10px] border
+                  ${order.payment_status === 'paid'     ? 'text-green-700 bg-green-50 border-green-300'   :
+                    order.payment_status === 'refunded' ? 'text-purple-700 bg-purple-50 border-purple-300' :
+                    'text-amber-700 bg-amber-50 border-amber-300'}`}>
+                  {order.payment_status === 'paid' ? '✅ PAID' :
+                   order.payment_status === 'refunded' ? '↩️ REFUNDED' : '⏳ PENDING'}
                 </span>
               </p>
             </div>
+          </div>
+
+          {/* Invoice */}
+          <div className="card p-5">
+            <h3 className="font-bold text-maroon-900 mb-3 flex items-center gap-2"><FileText size={16} /> Invoice</h3>
+            <p className="text-xs text-gray-500 mb-3">Download or share your order invoice</p>
+            <Link href={`/orders/${order.id}/invoice`}
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-maroon-800 hover:bg-maroon-900 text-white text-sm font-medium rounded-xl transition-colors">
+              <FileText size={15} /> View & Download Invoice
+            </Link>
           </div>
 
           {/* Delivery address */}

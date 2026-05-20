@@ -1012,3 +1012,196 @@ def send_order_cancelled_whatsapp(phone: str, name: str, order):
         f"{refund_note}\n\n"
         f"🛍️ Shop again: {STORE_URL}/products"
     )
+
+
+# ── Refund notifications ───────────────────────────────────────────────────────
+
+def send_refund_initiated_email(email: str, name: str, order, refund_id: str = ""):
+    first = name.split()[0]
+    pm    = (getattr(order, "payment_method", "") or "").lower()
+    txn   = getattr(order, "payment_transaction_id", "") or ""
+    html  = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
+      <div style="background:linear-gradient(135deg,#7c1d2e,#b91c1c);padding:28px 32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:22px;font-weight:bold">{STORE_NAME}</h1>
+        <p style="color:#fca5a5;margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Refund Initiated</p>
+      </div>
+      <div style="padding:32px">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px">💰</div>
+        </div>
+        <h2 style="color:#111;margin-top:0;text-align:center">Refund Initiated!</h2>
+        <p style="color:#555;text-align:center">Hi {first}, your refund has been successfully initiated.</p>
+
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px;margin:20px 0">
+          <table width="100%" style="border-collapse:collapse;font-size:14px">
+            <tr><td style="color:#555;padding:5px 0">Order Number</td><td style="text-align:right;font-weight:bold;color:#111">{order.order_number}</td></tr>
+            <tr><td style="color:#555;padding:5px 0">Refund Amount</td><td style="text-align:right;font-weight:bold;color:#16a34a;font-size:18px">₹{order.total:,.0f}</td></tr>
+            <tr><td style="color:#555;padding:5px 0">Payment Method</td><td style="text-align:right;font-weight:bold;color:#111">{'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}</td></tr>
+            {f"<tr><td style='color:#555;padding:5px 0'>Transaction ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px'>{txn}</td></tr>" if txn else ""}
+            {f"<tr><td style='color:#555;padding:5px 0'>Refund ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px'>{refund_id}</td></tr>" if refund_id else ""}
+          </table>
+        </div>
+
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px;margin:16px 0">
+          <p style="margin:0;color:#92400e;font-size:14px">⏱️ <b>Timeline:</b> The refund will be credited to your original payment method within <b>5–7 business days</b>.</p>
+        </div>
+
+        <div style="text-align:center;margin:24px 0">
+          <a href="{STORE_URL}/orders" style="background:#7c1d2e;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px">View My Orders</a>
+        </div>
+
+        <p style="color:#888;font-size:13px;text-align:center">Questions? <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e">{SUPPORT_EMAIL}</a></p>
+      </div>
+      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
+        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
+      </div>
+    </div>"""
+    _send_email(email, f"💰 Refund Initiated — ₹{order.total:,.0f} · {order.order_number}", html)
+
+
+def send_refund_initiated_sms(phone: str, order_number: str, total: float):
+    _bg_sms(phone,
+        f"💰 {STORE_NAME}: Refund of ₹{total:,.0f} initiated for order {order_number}. "
+        f"Will be credited in 5-7 business days. Track: {STORE_URL}/orders"
+    )
+
+
+def send_refund_initiated_whatsapp(phone: str, name: str, order, refund_id: str = ""):
+    first = name.split()[0]
+    pm    = (getattr(order, "payment_method", "") or "").lower()
+    txn   = getattr(order, "payment_transaction_id", "") or ""
+    txn_line   = f"\n🔖 *Txn ID:* `{txn}`"   if txn       else ""
+    refund_line = f"\n📋 *Refund ID:* `{refund_id}`" if refund_id else ""
+    _send_whatsapp(phone,
+        f"💰 *Refund Initiated — {order.order_number}*\n\n"
+        f"Hi {first}! Your refund has been successfully initiated.\n\n"
+        f"💸 *Amount:* ₹{order.total:,.0f}\n"
+        f"💳 *Mode:* {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}"
+        f"{txn_line}{refund_line}\n\n"
+        f"⏱️ Will be credited within *5–7 business days* to your original payment method.\n\n"
+        f"📦 Track orders: {STORE_URL}/orders"
+    )
+
+
+# ── Invoice email ──────────────────────────────────────────────────────────────
+
+def send_invoice_email(email: str, name: str, order, user_email: str = ""):
+    first = name.split()[0]
+    addr  = order.shipping_address or {}
+    pm    = (getattr(order, "payment_method", "") or "cod").lower()
+    txn   = getattr(order, "payment_transaction_id", "") or ""
+    date  = getattr(order, "created_at", None)
+    date_str = date.strftime("%d %B %Y") if date else ""
+
+    pay_label = {
+        "razorpay": "Online Payment (Razorpay)",
+        "upi":      "UPI Payment",
+        "cod":      "Cash on Delivery",
+    }.get(pm, pm.upper())
+
+    items_rows = "".join(
+        f"""<tr>
+          <td style='padding:10px 8px;border-bottom:1px solid #fde8d8;font-size:13px'>
+            <b>{i.get('name','')}</b>
+            <br><span style='color:#888;font-size:11px'>Product ID: #{i.get('product_id','—')}
+            {('· ' + i.get('size','')) if i.get('size') else ''}
+            {('· ' + i.get('color','')) if i.get('color') else ''}</span>
+          </td>
+          <td style='padding:10px 8px;border-bottom:1px solid #fde8d8;text-align:center;font-size:13px'>{i.get('quantity',1)}</td>
+          <td style='padding:10px 8px;border-bottom:1px solid #fde8d8;text-align:right;font-size:13px'>₹{i.get('price',0):,.0f}</td>
+          <td style='padding:10px 8px;border-bottom:1px solid #fde8d8;text-align:right;font-size:13px;font-weight:bold'>₹{i.get('subtotal',0):,.0f}</td>
+        </tr>"""
+        for i in (order.items_snapshot or [])
+    )
+
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#7c1d2e 0%,#b91c1c 100%);padding:32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:26px;font-weight:900;letter-spacing:1px">{STORE_NAME}</h1>
+        <p style="color:#f9a8d4;margin:4px 0 0;font-size:11px;letter-spacing:3px;text-transform:uppercase">Premium Women's Textiles</p>
+        <div style="margin-top:16px;display:inline-block;background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 20px">
+          <p style="color:#fff;margin:0;font-size:13px;font-weight:bold">TAX INVOICE</p>
+        </div>
+      </div>
+
+      <div style="padding:28px 32px">
+
+        <!-- Invoice meta -->
+        <table width="100%" style="border-collapse:collapse;margin-bottom:24px">
+          <tr>
+            <td style="font-size:13px;color:#555">
+              <p style="margin:0 0 4px"><b>Invoice For:</b></p>
+              <p style="margin:0;font-size:15px;font-weight:bold;color:#111">{name}</p>
+              <p style="margin:2px 0;color:#666;font-size:12px">{user_email or email}</p>
+              <p style="margin:2px 0;color:#666;font-size:12px">📞 {addr.get('phone','')}</p>
+            </td>
+            <td style="text-align:right;font-size:13px;color:#555">
+              <p style="margin:0 0 4px"><b>Order Number:</b> <span style="color:#7c1d2e;font-weight:bold">{order.order_number}</span></p>
+              <p style="margin:4px 0"><b>Date:</b> {date_str}</p>
+              <p style="margin:4px 0"><b>Status:</b> <span style="text-transform:capitalize">{order.status}</span></p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Delivery address -->
+        <div style="background:#fdf2f4;border-radius:8px;padding:14px 16px;margin-bottom:20px">
+          <p style="margin:0 0 6px;font-size:11px;font-weight:bold;color:#7c1d2e;text-transform:uppercase;letter-spacing:1px">Shipping Address</p>
+          <p style="margin:0;font-size:13px;color:#333">
+            {addr.get('full_name','')}, {addr.get('address_line1','')}{(', ' + addr.get('address_line2','')) if addr.get('address_line2') else ''}<br>
+            {addr.get('city','')}, {addr.get('state','')} — {addr.get('pincode','')}<br>
+            📞 {addr.get('phone','')}
+          </p>
+        </div>
+
+        <!-- Items table -->
+        <table width="100%" style="border-collapse:collapse;margin-bottom:20px">
+          <thead>
+            <tr style="background:#7c1d2e;color:#fff">
+              <th style="padding:10px 8px;text-align:left;font-size:12px;font-weight:600">Item</th>
+              <th style="padding:10px 8px;text-align:center;font-size:12px;font-weight:600">Qty</th>
+              <th style="padding:10px 8px;text-align:right;font-size:12px;font-weight:600">Price</th>
+              <th style="padding:10px 8px;text-align:right;font-size:12px;font-weight:600">Total</th>
+            </tr>
+          </thead>
+          <tbody>{items_rows}</tbody>
+        </table>
+
+        <!-- Totals -->
+        <table width="100%" style="border-collapse:collapse;margin-bottom:20px">
+          <tr><td style="padding:5px 8px;font-size:13px;color:#666">Subtotal</td><td style="text-align:right;font-size:13px;color:#333;padding:5px 8px">₹{order.subtotal:,.0f}</td></tr>
+          <tr><td style="padding:5px 8px;font-size:13px;color:#666">Shipping</td><td style="text-align:right;font-size:13px;color:{'#16a34a' if order.shipping_fee == 0 else '#333'};padding:5px 8px">{'FREE' if order.shipping_fee == 0 else f'₹{order.shipping_fee:,.0f}'}</td></tr>
+          {f"<tr><td style='padding:5px 8px;font-size:13px;color:#16a34a'>Discount</td><td style='text-align:right;font-size:13px;color:#16a34a;padding:5px 8px'>-₹{order.discount:,.0f}</td></tr>" if order.discount > 0 else ""}
+          <tr style="background:#fdf2f4">
+            <td style="padding:12px 8px;font-size:16px;font-weight:bold;color:#7c1d2e">Grand Total</td>
+            <td style="text-align:right;font-size:16px;font-weight:bold;color:#7c1d2e;padding:12px 8px">₹{order.total:,.0f}</td>
+          </tr>
+        </table>
+
+        <!-- Payment info -->
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:14px 16px;margin-bottom:20px">
+          <p style="margin:0 0 6px;font-size:11px;font-weight:bold;color:#0369a1;text-transform:uppercase;letter-spacing:1px">Payment Details</p>
+          <table width="100%" style="border-collapse:collapse;font-size:13px">
+            <tr><td style="color:#555;padding:3px 0">Mode</td><td style="text-align:right;font-weight:bold;color:#111">{pay_label}</td></tr>
+            <tr><td style="color:#555;padding:3px 0">Status</td><td style="text-align:right;font-weight:bold;color:{'#16a34a' if order.payment_status == 'paid' else '#d97706' if order.payment_status == 'pending' else '#7c3aed'}">{order.payment_status.upper()}</td></tr>
+            {f"<tr><td style='color:#555;padding:3px 0'>Transaction ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px'>{txn}</td></tr>" if txn and txn.startswith('pay_') else ""}
+          </table>
+        </div>
+
+        <!-- Download button -->
+        <div style="text-align:center;margin:24px 0">
+          <a href="{STORE_URL}/orders/{order.id}/invoice" style="background:#7c1d2e;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px">📄 View & Download Invoice</a>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#7c1d2e;padding:20px 32px;text-align:center">
+        <p style="color:#f9a8d4;margin:0 0 4px;font-size:13px;font-weight:bold">{STORE_NAME}</p>
+        <p style="color:#fecdd3;margin:0;font-size:11px">{STORE_ADDR}</p>
+        <p style="color:#fecdd3;margin:4px 0 0;font-size:11px">© {YEAR} All rights reserved</p>
+      </div>
+    </div>"""
+    _send_email(email, f"📄 Invoice — {order.order_number} · {STORE_NAME}", html)
