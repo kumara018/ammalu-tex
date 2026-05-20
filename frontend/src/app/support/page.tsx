@@ -81,45 +81,34 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-const SUPPORT_CATEGORIES = [
-  'Order Issue', 'Product Quality', 'Delivery', 'Payment', 'General Query', 'Other',
-];
-
 export default function SupportPage() {
   const { user } = useAuth();
 
   // Rating form state
-  const [ratingValue, setRatingValue] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [ratingForm, setRatingForm] = useState({
-    name: user?.full_name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    category: '',
-    message: '',
-  });
+  const [ratingValue, setRatingValue]     = useState(0);
+  const [hoverRating, setHoverRating]     = useState(0);
+  const [ratingComment, setRatingComment] = useState('');
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
-  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [ratingSubmitted, setRatingSubmitted]   = useState(false);
 
-  const handleRatingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (ratingValue === 0) { toast.error('Please select a star rating'); return; }
-    if (!ratingForm.name.trim()) { toast.error('Please enter your name'); return; }
-    if (!ratingForm.email.trim()) { toast.error('Please enter your email'); return; }
+  const RATING_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent!'];
+  const RATING_EMOJI  = ['', '😞',   '😐',   '🙂',    '😊',        '😍'];
+
+  const handleRatingSubmit = async (star: number) => {
+    if (ratingSubmitting) return;
+    setRatingValue(star);
     setRatingSubmitting(true);
     try {
       await supportAPI.submitRating({
-        name: ratingForm.name.trim(),
-        email: ratingForm.email.trim(),
-        phone: ratingForm.phone.trim() || undefined,
-        rating: ratingValue,
-        category: ratingForm.category || undefined,
-        message: ratingForm.message.trim() || undefined,
+        name:    user?.full_name || 'Customer',
+        email:   user?.email    || 'unknown@ammalu.com',
+        phone:   user?.phone    || undefined,
+        rating:  star,
+        message: ratingComment.trim() || undefined,
       });
       setRatingSubmitted(true);
-      toast.success('Thank you for your feedback!');
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to submit rating. Please try again.');
+      toast.error(err.response?.data?.detail || 'Failed to submit. Please try again.');
     } finally {
       setRatingSubmitting(false);
     }
@@ -495,127 +484,73 @@ export default function SupportPage() {
         </a>
       </div>
 
-      {/* ── Support Rating Form ─────────────────────────────────────────── */}
-      <div className="card p-6 mt-8">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="p-2 bg-maroon-100 rounded-lg text-maroon-800"><Star size={20} /></span>
-          <div>
-            <h2 className="font-bold text-gray-800 text-lg">Rate Your Support Experience</h2>
-            <p className="text-sm text-gray-500">Your feedback helps us serve you better</p>
-          </div>
-        </div>
-
+      {/* ── Support Rating — Amazon style ───────────────────────────────── */}
+      <div className="card p-6 mt-8 text-center">
         {ratingSubmitted ? (
-          <div className="text-center py-10">
-            <div className="text-5xl mb-4">🙏</div>
-            <h3 className="font-bold text-gray-800 text-xl mb-2">Thank you for your feedback!</h3>
-            <p className="text-gray-500 text-sm">Your rating has been submitted. We truly appreciate you taking the time.</p>
-            <div className="flex justify-center gap-1 mt-4">
+          /* ── Thank-you screen ── */
+          <div className="py-8">
+            <div className="text-6xl mb-3">{RATING_EMOJI[ratingValue]}</div>
+            <h3 className="font-bold text-gray-800 text-xl mb-1">Thank you, {user?.full_name?.split(' ')[0] || 'Customer'}!</h3>
+            <p className="text-gray-500 text-sm mb-4">Your feedback helps us improve our support.</p>
+            <div className="flex justify-center gap-1 mb-2">
               {Array.from({ length: 5 }, (_, i) => (
-                <Star key={i} size={28} className={i < ratingValue ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'} fill={i < ratingValue ? '#facc15' : 'none'} />
+                <Star key={i} size={28} fill={i < ratingValue ? '#facc15' : 'none'} className={i < ratingValue ? 'text-yellow-400' : 'text-gray-200'} />
               ))}
             </div>
+            <p className="text-sm font-semibold text-maroon-700">{RATING_LABELS[ratingValue]}</p>
           </div>
         ) : (
-          <form onSubmit={handleRatingSubmit} className="space-y-5">
-            {/* Star selector */}
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Your Rating *</p>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => setRatingValue(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="transition-transform hover:scale-110 focus:outline-none"
-                  >
-                    <Star
-                      size={36}
-                      className={(hoverRating || ratingValue) >= star ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                      fill={(hoverRating || ratingValue) >= star ? '#facc15' : 'none'}
-                    />
-                  </button>
-                ))}
-                {ratingValue > 0 && (
-                  <span className="ml-2 self-center text-sm font-medium text-gray-600">
-                    {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][ratingValue]}
-                  </span>
-                )}
-              </div>
-            </div>
+          /* ── Rating screen ── */
+          <div className="py-4">
+            <p className="text-xs font-semibold text-maroon-600 uppercase tracking-widest mb-2">Customer Support</p>
+            <h2 className="text-xl font-bold text-gray-800 mb-1">How was your support experience?</h2>
+            <p className="text-sm text-gray-400 mb-6">Tap a star to rate — it only takes a second</p>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="label">Your Name *</label>
-                <input
-                  value={ratingForm.name}
-                  onChange={e => setRatingForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Full name"
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div>
-                <label className="label">Email Address *</label>
-                <input
-                  type="email"
-                  value={ratingForm.email}
-                  onChange={e => setRatingForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="your@email.com"
-                  className="input-field"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="label">Phone (optional)</label>
-                <input
-                  value={ratingForm.phone}
-                  onChange={e => setRatingForm(f => ({ ...f, phone: e.target.value }))}
-                  placeholder="+91 98765 43210"
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="label">Category</label>
-                <select
-                  value={ratingForm.category}
-                  onChange={e => setRatingForm(f => ({ ...f, category: e.target.value }))}
-                  className="input-field"
+            {/* Big stars — tap to submit instantly */}
+            <div className="flex justify-center gap-3 mb-3">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => !ratingSubmitting && handleRatingSubmit(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  disabled={ratingSubmitting}
+                  className="transition-all hover:scale-125 focus:outline-none disabled:opacity-50"
+                  title={RATING_LABELS[star]}
                 >
-                  <option value="">Select a category</option>
-                  {SUPPORT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
+                  <Star
+                    size={48}
+                    fill={(hoverRating || ratingValue) >= star ? '#facc15' : 'none'}
+                    className={(hoverRating || ratingValue) >= star ? 'text-yellow-400 drop-shadow-sm' : 'text-gray-300'}
+                  />
+                </button>
+              ))}
             </div>
 
-            <div>
-              <label className="label">Comment (optional)</label>
+            {/* Label under stars */}
+            <p className={`text-sm font-semibold h-5 transition-all ${hoverRating ? 'text-maroon-700' : 'text-gray-400'}`}>
+              {hoverRating ? `${RATING_EMOJI[hoverRating]} ${RATING_LABELS[hoverRating]}` : 'Poor · Fair · Good · Very Good · Excellent'}
+            </p>
+
+            {/* Optional comment — shows after hovering */}
+            <div className="mt-5 max-w-md mx-auto">
               <textarea
-                value={ratingForm.message}
-                onChange={e => setRatingForm(f => ({ ...f, message: e.target.value }))}
-                rows={3}
-                placeholder="Share your experience with our support team..."
-                className="input-field resize-none"
+                value={ratingComment}
+                onChange={e => setRatingComment(e.target.value)}
+                rows={2}
+                maxLength={200}
+                placeholder="Add a comment (optional)..."
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 resize-none focus:outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-200 bg-gray-50"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={ratingSubmitting}
-              className="btn-primary w-full py-3 flex items-center justify-center gap-2"
-            >
-              {ratingSubmitting ? (
-                <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Submitting...</>
-              ) : (
-                <><Star size={16} /> Submit Rating</>
-              )}
-            </button>
-          </form>
+            {user && (
+              <p className="text-xs text-gray-400 mt-2">
+                Submitting as <span className="font-medium text-gray-600">{user.full_name}</span>
+              </p>
+            )}
+          </div>
         )}
       </div>
 
