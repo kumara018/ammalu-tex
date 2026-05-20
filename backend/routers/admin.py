@@ -421,20 +421,32 @@ def create_delhivery_shipment(
 
     result = dl.create_shipment(order, user)
     if not result:
-        raise HTTPException(502, "Delhivery API call failed. Check DELHIVERY_API_TOKEN and pickup location name.")
+        raise HTTPException(502, "Delhivery API call failed. Check Render logs for details.")
 
-    # Extract AWB from Delhivery response
-    # Response: { "packages": [{ "waybill": "...", "refnum": "...", "sort_code": "..." }], "success": true }
+    print(f"[Delhivery] Full response: {result}")   # visible in Render logs
+
+    # Response format: { "packages": [{ "waybill": "...", "refnum": "...", "sort_code": "..." }], "success": true/false }
     packages = result.get("packages", [])
     success  = result.get("success", False)
 
-    if not success or not packages:
-        upload_msg = result.get("rmk") or result.get("error") or str(result)
-        raise HTTPException(502, f"Delhivery shipment failed: {upload_msg}")
+    # Check top-level failure
+    if not success and not packages:
+        err_msg = result.get("rmk") or result.get("error") or str(result)
+        raise HTTPException(502, f"Delhivery shipment failed: {err_msg}")
+
+    # Check package-level errors (Delhivery sometimes returns success=true but error inside package)
+    if packages:
+        pkg_err = packages[0].get("error") or packages[0].get("remarks") or ""
+        awb     = packages[0].get("waybill", "")
+        if pkg_err and not awb:
+            raise HTTPException(502, f"Delhivery shipment failed: {pkg_err}")
+    else:
+        top_err = result.get("rmk") or result.get("error") or str(result)
+        raise HTTPException(502, f"Delhivery shipment failed: {top_err}")
 
     awb = packages[0].get("waybill", "")
     if not awb:
-        raise HTTPException(502, "Delhivery did not return a waybill (AWB). Check pickup location setup.")
+        raise HTTPException(502, f"Delhivery did not return an AWB. Full response: {result}")
 
     # Save to order
     order.awb_code     = awb
