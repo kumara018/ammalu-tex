@@ -26,8 +26,7 @@ export const STORE = {
   weekend:     'Sat – Sun: 10:00 AM – 9:30 PM',
 
   // ── Shipping ──────────────────────────────────────
-  freeShippingAbove: 999,
-  shippingFee:       49,
+  shippingFee: 49,
 
   // ── Social Media ─────────────────────────────────
   facebook:    'https://facebook.com/kumara018',

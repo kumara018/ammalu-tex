@@ -205,7 +205,7 @@ export default function ProductDetailPage() {
             )}
             {discount && <span className="text-green-600 font-semibold text-sm">{discount}% off</span>}
           </div>
-          <p className="text-xs text-gray-500 mb-5">Inclusive of all taxes. {product.price >= 1499 ? '✓ Free shipping' : `Add ₹${(1499 - product.price).toFixed(0)} more for free shipping`}</p>
+          <p className="text-xs text-gray-500 mb-5">Inclusive of all taxes. ✓ Delivered to your doorstep</p>
 
           <hr className="border-orange-100 mb-5" />
 
@@ -302,7 +302,7 @@ export default function ProductDetailPage() {
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
-              { icon: Truck, text: 'Free Shipping above ₹999' },
+              { icon: Truck, text: 'Fast Delivery' },
               {
                 icon: product.is_returnable === false ? XCircle : RotateCcw,
                 text: product.is_returnable === false ? 'Non-Returnable' : '7-day Easy Returns',

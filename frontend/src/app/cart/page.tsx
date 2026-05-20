@@ -19,7 +19,7 @@ export default function CartPage() {
 
   if (authLoading || !user) return null;
 
-  const shipping = total >= 1499 ? 0 : 49;
+  const shipping = 49;
   const grandTotal = total + shipping;
 
   const handleUpdate = async (itemId: number, qty: number) => {
@@ -176,15 +176,8 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between text-gray-700">
                 <span>Shipping</span>
-                <span className={shipping === 0 ? 'text-green-600 font-medium' : 'font-medium'}>
-                  {shipping === 0 ? 'FREE' : `₹${shipping}`}
-                </span>
+                <span className="font-medium">₹{shipping}</span>
               </div>
-              {shipping > 0 && (
-                <p className="text-xs text-gold-700 bg-gold-50 rounded-lg p-2.5">
-                  Add ₹{(1499 - total).toFixed(0)} more to get <b>FREE shipping!</b>
-                </p>
-              )}
               <div className="border-t border-orange-100 pt-3 flex justify-between font-bold text-lg">
                 <span className="text-maroon-900">Total</span>
                 <span className="text-maroon-900">₹{grandTotal.toLocaleString()}</span>

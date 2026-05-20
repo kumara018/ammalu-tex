@@ -7,7 +7,7 @@ import { STORE } from '@/lib/config';
 
 export const metadata = {
   title: 'Shipping Policy — Ammalu Tex',
-  description: 'Free shipping on orders above ₹1,499. Standard delivery 5–7 days across India.',
+  description: 'Standard delivery 5–7 business days across India. Shipping charged based on order weight via Delhivery.',
 };
 
 export default function ShippingPage() {
@@ -24,23 +24,23 @@ export default function ShippingPage() {
       {/* Header */}
       <div className="text-center mb-10">
         <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <Truck size={15} /> Free Shipping Available
+          <Truck size={15} /> Fast Delivery across India
         </div>
         <h1 className="text-3xl font-display font-bold text-maroon-900 mb-3">Shipping Policy</h1>
         <p className="text-gray-500 max-w-xl mx-auto text-sm">
-          We deliver across India with care. Here's everything you need to know about
+          We deliver across India with care. Here&apos;s everything you need to know about
           our shipping timelines, fees, and tracking.
         </p>
       </div>
 
-      {/* Free shipping banner */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+      {/* Shipping info banner */}
+      <div className="bg-gradient-to-r from-maroon-800 to-maroon-900 text-white rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
         <div className="text-5xl">🚚</div>
         <div>
-          <p className="text-xl font-bold mb-1">FREE Shipping on orders above ₹1,499</p>
-          <p className="text-green-100 text-sm">
-            Add ₹1,499 or more to your cart and enjoy completely free delivery anywhere in India.
-            For orders below ₹1,499, a flat ₹{STORE.shippingFee} shipping fee applies.
+          <p className="text-xl font-bold mb-1">Reliable Shipping via Delhivery</p>
+          <p className="text-maroon-200 text-sm">
+            A flat ₹{STORE.shippingFee} shipping fee applies to all orders. Final shipping cost
+            is calculated based on parcel weight and will be shown at checkout.
           </p>
         </div>
       </div>
@@ -52,8 +52,8 @@ export default function ShippingPage() {
           {
             icon: '🚚', title: 'Standard Delivery',
             time: '5–7 Business Days',
-            fee: `Free above ₹1,499 / ₹${STORE.shippingFee} below`,
-            note: 'Available pan-India including remote areas.',
+            fee: `Flat ₹${STORE.shippingFee} shipping`,
+            note: 'Available pan-India including remote areas via Delhivery.',
           },
           {
             icon: '⚡', title: 'Express Delivery',
@@ -81,7 +81,7 @@ export default function ShippingPage() {
           {[
             { step: '1', icon: '🛒', label: 'Place Order',   desc: 'Add items to cart & checkout' },
             { step: '2', icon: '✅', label: 'Confirmed',      desc: 'We confirm & process within 24h' },
-            { step: '3', icon: '📦', label: 'Dispatched',     desc: 'Packed & handed to courier' },
+            { step: '3', icon: '📦', label: 'Dispatched',     desc: 'Packed & handed to Delhivery' },
             { step: '4', icon: '🏠', label: 'Delivered',      desc: 'Delivered to your doorstep' },
           ].map(({ step, icon, label, desc }) => (
             <div key={step} className="flex flex-col items-center">
@@ -121,7 +121,7 @@ export default function ShippingPage() {
           <ul className="space-y-2 text-sm text-gray-600">
             {[
               'Tracking number sent via SMS & email',
-              'Real-time updates from our courier partner',
+              'Real-time updates from Delhivery',
               'Check status in My Orders anytime',
               'Delivery agent contact shared on the day',
             ].map(i => (

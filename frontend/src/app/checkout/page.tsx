@@ -142,7 +142,7 @@ export default function CheckoutPage() {
     );
   };
 
-  const shipping   = total >= 1499 ? 0 : 49;
+  const shipping   = 49;
   const grandTotal = total + shipping;
 
   const setA = (f: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -576,20 +576,13 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-gray-700">
                 <span>Shipping</span>
-                <span className={`font-medium ${shipping === 0 ? 'text-green-600' : ''}`}>
-                  {shipping === 0 ? 'FREE' : `₹${shipping}`}
-                </span>
+                <span className="font-medium">₹{shipping}</span>
               </div>
               <div className="border-t-2 border-maroon-100 pt-2.5 flex justify-between font-bold text-base">
                 <span className="text-maroon-900">Total</span>
                 <span className="text-maroon-900">₹{grandTotal.toLocaleString()}</span>
               </div>
             </div>
-            {shipping > 0 && (
-              <p className="mt-3 text-xs text-gold-700 bg-gold-50 rounded-lg p-2.5">
-                💡 Add ₹{(1499 - total).toFixed(0)} more for FREE shipping!
-              </p>
-            )}
             <div className="mt-4 pt-4 border-t border-orange-100 space-y-1.5">
               <p className="text-xs text-gray-500 flex items-center gap-1.5"><Lock size={11} className="text-green-500" /> SSL Secured Checkout</p>
               <p className="text-xs text-gray-500">↩️ 7-day easy returns</p>

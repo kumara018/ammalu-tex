@@ -63,7 +63,7 @@ def place_order(
             "is_returnable": getattr(product, "is_returnable", True),
         })
 
-    shipping_fee = 0.0 if subtotal >= 1499 else 49.0
+    shipping_fee = 49.0
     total = subtotal + shipping_fee
 
     order_number = generate_order_number()

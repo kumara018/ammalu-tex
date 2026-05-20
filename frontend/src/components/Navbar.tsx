@@ -103,7 +103,7 @@ export default function Navbar() {
           </a>
         </div>
         <a href="/shipping" className="text-gold-400 font-medium hover:text-gold-300 transition-colors">
-          Free shipping on orders above ₹1,499
+          Fast delivery across India 🚚
         </a>
       </div>
 
