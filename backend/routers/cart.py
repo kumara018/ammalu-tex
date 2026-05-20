@@ -57,6 +57,31 @@ def add_to_cart(
         existing.quantity = new_qty
         db.commit()
         db.refresh(existing)
+
+        # Notify for quantity update as well
+        all_items = db.query(models.CartItem).filter(
+            models.CartItem.user_id == current_user.id
+        ).all()
+        cart_snapshot = [
+            {
+                "name":     ci.product.name,
+                "category": ci.product.category,
+                "price":    ci.product.price,
+                "quantity": ci.quantity,
+                "size":     ci.size or "",
+                "color":    ci.color or "",
+            }
+            for ci in all_items
+        ]
+        notifications.send_cart_add_email(
+            current_user.email, current_user.full_name,
+            product.name, product.category,
+            payload.quantity, payload.size or "", payload.color or "",
+            cart_snapshot,
+        )
+        notifications.send_cart_add_sms(
+            current_user.phone, product.name, payload.quantity, cart_snapshot,
+        )
         return existing
 
     item = models.CartItem(
@@ -70,15 +95,31 @@ def add_to_cart(
     db.commit()
     db.refresh(item)
 
-    # Send cart reminder email (fire-and-forget, don't block response)
-    cat = product.category
-    emoji_map = {
-        "Lehenga": "👗", "Chudithar": "👘", "Party Wears": "✨",
-        "Crop Tops": "🎽", "Tops": "👕", "Half Saree": "🥻",
-    }
-    notifications.send_cart_reminder_email(
+    # Build full cart snapshot for email/SMS
+    all_items = db.query(models.CartItem).filter(
+        models.CartItem.user_id == current_user.id
+    ).all()
+    cart_snapshot = [
+        {
+            "name":     ci.product.name,
+            "category": ci.product.category,
+            "price":    ci.product.price,
+            "quantity": ci.quantity,
+            "size":     ci.size or "",
+            "color":    ci.color or "",
+        }
+        for ci in all_items
+    ]
+
+    # Email + SMS — fire-and-forget
+    notifications.send_cart_add_email(
         current_user.email, current_user.full_name,
-        product.name, emoji_map.get(cat, "🛍️"),
+        product.name, product.category,
+        payload.quantity, payload.size or "", payload.color or "",
+        cart_snapshot,
+    )
+    notifications.send_cart_add_sms(
+        current_user.phone, product.name, payload.quantity, cart_snapshot,
     )
     return item
 
@@ -124,8 +165,38 @@ def remove_from_cart(
     ).first()
     if not item:
         raise HTTPException(status_code=404, detail="Cart item not found")
+
+    # Capture product info before deletion
+    removed_name     = item.product.name
+    removed_category = item.product.category
+
     db.delete(item)
     db.commit()
+
+    # Build remaining cart for notification
+    remaining_items = db.query(models.CartItem).filter(
+        models.CartItem.user_id == current_user.id
+    ).all()
+    cart_snapshot = [
+        {
+            "name":     ci.product.name,
+            "category": ci.product.category,
+            "price":    ci.product.price,
+            "quantity": ci.quantity,
+            "size":     ci.size or "",
+            "color":    ci.color or "",
+        }
+        for ci in remaining_items
+    ]
+
+    # Email + SMS — fire-and-forget
+    notifications.send_cart_remove_email(
+        current_user.email, current_user.full_name,
+        removed_name, removed_category, cart_snapshot,
+    )
+    notifications.send_cart_remove_sms(
+        current_user.phone, removed_name, cart_snapshot,
+    )
 
 
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)

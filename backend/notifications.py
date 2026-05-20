@@ -450,31 +450,163 @@ def send_password_reset_otp_email(email: str, name: str, otp: str):
     _bg(email, f"Reset your Ammalu Tex password", html)
 
 
-# ── 11. Cart reminder email ───────────────────────────────────────────────────
-def send_cart_reminder_email(email: str, name: str, product_name: str, product_image_emoji: str = "🛍️"):
+# ── helpers ───────────────────────────────────────────────────────────────────
+_EMOJI_MAP = {
+    "Lehenga": "👗", "Chudithar": "👘", "Half Saree": "🥻",
+    "Crop Tops": "🎽", "Tops": "👕", "Party Wears": "✨",
+}
+
+def _cart_summary_html(cart_items: list) -> str:
+    """Build an HTML table of all items currently in the cart."""
+    if not cart_items:
+        return "<p style='color:#888;font-size:13px;text-align:center;'>Your cart is now empty.</p>"
+    rows = ""
+    total_qty   = 0
+    total_price = 0.0
+    for item in cart_items:
+        emoji    = _EMOJI_MAP.get(item.get("category", ""), "🛍️")
+        name     = item.get("name", "")
+        qty      = item.get("quantity", 1)
+        price    = item.get("price", 0)
+        subtotal = price * qty
+        size_color = ""
+        if item.get("size"):  size_color += f"Size: {item['size']}"
+        if item.get("color"): size_color += (" · " if size_color else "") + f"Colour: {item['color']}"
+        total_qty   += qty
+        total_price += subtotal
+        rows += f"""
+        <tr>
+          <td style="padding:10px 8px;border-bottom:1px solid #f0ebe5;font-size:14px;">
+            <span style="font-size:18px;">{emoji}</span>
+            <span style="margin-left:8px;font-weight:600;color:#1e293b;">{name}</span>
+            {f'<br><span style="font-size:11px;color:#888;margin-left:26px;">{size_color}</span>' if size_color else ''}
+          </td>
+          <td style="padding:10px 8px;border-bottom:1px solid #f0ebe5;text-align:center;color:#555;font-size:14px;">×{qty}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #f0ebe5;text-align:right;font-weight:bold;color:#7c1d2e;font-size:14px;">₹{subtotal:,.0f}</td>
+        </tr>"""
+    return f"""
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <thead>
+        <tr style="background:#fff9f2;">
+          <th style="text-align:left;padding:10px 8px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Product</th>
+          <th style="text-align:center;padding:10px 8px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Qty</th>
+          <th style="text-align:right;padding:10px 8px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Price</th>
+        </tr>
+      </thead>
+      <tbody>{rows}</tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" style="padding:12px 8px;font-weight:bold;color:#444;font-size:14px;">
+            {total_qty} item{"s" if total_qty != 1 else ""} in cart
+          </td>
+          <td style="padding:12px 8px;text-align:right;font-weight:bold;color:#7c1d2e;font-size:16px;">
+            ₹{total_price:,.0f}
+          </td>
+        </tr>
+      </tfoot>
+    </table>"""
+
+def _cart_sms(cart_items: list) -> str:
+    """One-line SMS summary of the cart."""
+    if not cart_items:
+        return "Your cart is now empty."
+    parts = [f"{item.get('name','Item')} x{item.get('quantity',1)}" for item in cart_items[:3]]
+    suffix = f" +{len(cart_items)-3} more" if len(cart_items) > 3 else ""
+    total  = sum(item.get("price", 0) * item.get("quantity", 1) for item in cart_items)
+    return f"Cart ({len(cart_items)} item{'s' if len(cart_items)!=1 else ''}): {', '.join(parts)}{suffix}. Total ₹{total:,.0f}"
+
+
+# ── 11a. Cart — item ADDED ────────────────────────────────────────────────────
+def send_cart_add_email(email: str, name: str, product_name: str,
+                        product_category: str, quantity: int,
+                        size: str, color: str, cart_items: list):
     first = name.split()[0]
+    emoji   = _EMOJI_MAP.get(product_category, "🛍️")
+    details = []
+    if size:  details.append(f"Size: <strong>{size}</strong>")
+    if color: details.append(f"Colour: <strong>{color}</strong>")
+    details_line = " &nbsp;·&nbsp; ".join(details)
+    summary_html = _cart_summary_html(cart_items)
     html = _wrap(f"""
-      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">🛒 Item added to your cart!</h2>
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">🛒 Added to your cart!</h2>
       <p style="color:#444;font-size:14px;line-height:1.6;">
-        Hi {first}, great choice! <strong>{product_name}</strong> is waiting in your cart.
+        Hi {first}, <strong>{product_name}</strong> (×{quantity}) has been added to your cart.
       </p>
-      <div style="background:#fff9f2;border:2px solid #f97316;border-radius:12px;padding:24px;margin:20px 0;text-align:center;">
-        <div style="font-size:60px;margin-bottom:12px;">{product_image_emoji}</div>
-        <p style="margin:0;font-size:16px;font-weight:bold;color:#7c1d2e;">{product_name}</p>
-        <p style="margin:8px 0 0;color:#888;font-size:13px;">Saved in your cart — stock is limited!</p>
+
+      <!-- Added product highlight -->
+      <div style="background:#fff9f2;border:2px solid #f97316;border-radius:12px;padding:20px;margin:20px 0;display:flex;align-items:center;gap:16px;">
+        <div style="font-size:52px;flex-shrink:0;">{emoji}</div>
+        <div>
+          <p style="margin:0;font-size:16px;font-weight:bold;color:#7c1d2e;">{product_name}</p>
+          <p style="margin:4px 0 0;color:#888;font-size:13px;">Quantity: {quantity}</p>
+          {f'<p style="margin:4px 0 0;color:#888;font-size:12px;">{details_line}</p>' if details_line else ''}
+        </div>
       </div>
+
+      <!-- Full cart summary -->
+      <p style="color:#7c1d2e;font-weight:bold;font-size:15px;margin-bottom:4px;">🧺 Your Cart Summary</p>
+      {summary_html}
+
+      <!-- Urgency nudge -->
       <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:14px;margin:20px 0;">
         <p style="margin:0;color:#92400e;font-size:13px;line-height:1.6;">
-          ⚡ <strong>Don't wait too long!</strong> Popular items sell out quickly.
-          Complete your order to secure your purchase.
+          ⚡ <strong>Stock is limited!</strong> Complete your order before someone else grabs it.
         </p>
       </div>
-      {_btn("Complete Your Order →", f"{STORE_URL}/cart", "#f97316")}
-      <p style="color:#888;font-size:12px;text-align:center;margin-top:8px;">
-        Or <a href="{STORE_URL}/products" style="color:#7c1d2e;">continue browsing</a> our collection.
-      </p>
+      {_btn("Go to Cart & Order →", f"{STORE_URL}/cart", "#f97316")}
     """)
-    _bg(email, f"You left something behind — {product_name} | {STORE_NAME}", html)
+    _bg(email, f"Added to cart: {product_name} | {STORE_NAME}", html)
+
+
+# ── 11b. Cart — item REMOVED ──────────────────────────────────────────────────
+def send_cart_remove_email(email: str, name: str, product_name: str,
+                           product_category: str, cart_items: list):
+    first     = name.split()[0]
+    emoji     = _EMOJI_MAP.get(product_category, "🛍️")
+    summary_html = _cart_summary_html(cart_items)
+    remaining = len(cart_items)
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">🗑️ Item removed from cart</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, <strong>{product_name}</strong> has been removed from your cart.
+      </p>
+
+      <!-- Removed product -->
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;margin:20px 0;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:40px;flex-shrink:0;opacity:0.5;">{emoji}</div>
+        <div>
+          <p style="margin:0;font-size:14px;font-weight:bold;color:#991b1b;text-decoration:line-through;">{product_name}</p>
+          <p style="margin:4px 0 0;color:#dc2626;font-size:12px;">Removed from cart</p>
+        </div>
+      </div>
+
+      <!-- Remaining cart -->
+      {f'<p style="color:#7c1d2e;font-weight:bold;font-size:15px;margin-bottom:4px;">🧺 Remaining Cart ({remaining} item{"s" if remaining!=1 else ""})</p>' if remaining > 0 else ''}
+      {summary_html}
+
+      {_btn("Continue Shopping →", f"{STORE_URL}/products", "#7c1d2e") if remaining == 0 else _btn("View Cart & Order →", f"{STORE_URL}/cart", "#f97316")}
+    """)
+    _bg(email, f"Item removed from cart | {STORE_NAME}", html)
+
+
+# ── 11c. Cart SMS notifications ────────────────────────────────────────────────
+def send_cart_add_sms(phone: str, product_name: str, quantity: int, cart_items: list):
+    summary = _cart_sms(cart_items)
+    _send_sms(phone,
+        f"{STORE_NAME}: Added '{product_name}' x{quantity} to cart. {summary} Order: {STORE_URL}/cart"
+    )
+
+def send_cart_remove_sms(phone: str, product_name: str, cart_items: list):
+    summary = _cart_sms(cart_items)
+    _send_sms(phone,
+        f"{STORE_NAME}: Removed '{product_name}' from cart. {summary} Shop: {STORE_URL}"
+    )
+
+
+# ── 11d. Keep old function name as alias (backward compat) ────────────────────
+def send_cart_reminder_email(email: str, name: str, product_name: str, product_image_emoji: str = "🛍️"):
+    """Legacy alias — prefer send_cart_add_email for full cart summary."""
+    send_cart_add_email(email, name, product_name, "", 1, "", "", [])
 
 
 # ── 12. Delivery OTP email ─────────────────────────────────────────────────────
