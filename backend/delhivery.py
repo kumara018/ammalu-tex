@@ -18,6 +18,7 @@ import os, json
 import urllib.request as _req
 import urllib.error   as _uerr
 import urllib.parse   as _parse
+import requests as _requests
 
 
 def _base() -> str:
@@ -99,30 +100,19 @@ def create_shipment(order, user) -> dict | None:
     }
 
     try:
-        # Delhivery expects multipart/form-data with format=json and data=<json_string>
-        form_data = _parse.urlencode({
-            "format": "json",
-            "data":   json.dumps(payload),
-        }).encode()
+        data_json = json.dumps(payload)
+        print(f"[Delhivery] Sending shipment: {data_json}")
 
-        headers = {
-            "Authorization": f"Token {_token()}",
-            "Content-Type":  "application/x-www-form-urlencoded",
-        }
-        req = _req.Request(
+        # Use requests with multipart form-data — most reliable for Delhivery CMU API
+        resp = _requests.post(
             f"{_base()}/api/cmu/create.json",
-            data    = form_data,
-            headers = headers,
-            method  = "POST",
+            data    = {"format": "json", "data": data_json},
+            headers = {"Authorization": f"Token {_token()}"},
+            timeout = 20,
         )
-        with _req.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read())
-            print(f"[Delhivery] Create shipment response: {result}")
-            return result
-    except _uerr.HTTPError as e:
-        body = e.read().decode(errors="ignore")
-        print(f"[Delhivery] Create shipment HTTP {e.code}: {body}")
-        return None
+        result = resp.json()
+        print(f"[Delhivery] Response ({resp.status_code}): {result}")
+        return result
     except Exception as e:
         print(f"[Delhivery] Create shipment error: {e}")
         return None
