@@ -625,16 +625,16 @@ export default function AdminPage() {
                             {initiatingRefund === o.id ? '⏳...' : '💸 Initiate Refund'}
                           </button>
                         )}
-                        {/* Refund Initiated badge — waiting for Razorpay to credit */}
+                        {/* Refund Initiated badge — Razorpay processing, waiting 5-7 days */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refund_initiated' && (
-                          <span className="text-[10px] bg-orange-50 border border-orange-200 text-orange-600 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund is processing — customer will be notified when credited">
-                            🔄 Refund Processing
+                          <span className="text-[10px] bg-orange-50 border border-orange-200 text-orange-600 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund initiated — Razorpay will process in 5-7 days and auto-update">
+                            🔄 Refund Initiated
                           </span>
                         )}
-                        {/* Refunded badge — webhook confirmed, amount credited */}
+                        {/* Refund Processed badge — Razorpay webhook confirmed, on its way to bank */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refunded' && (
-                          <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund credited to customer's account">
-                            ✅ Refunded
+                          <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund processed by Razorpay — will appear in customer's bank in 1-3 days">
+                            ✅ Refund Processed
                           </span>
                         )}
                       </div>

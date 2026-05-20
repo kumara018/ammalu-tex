@@ -110,8 +110,25 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     event = payload.get("event", "")
     print(f"[Webhook] Razorpay event received: {event}")
 
-    # Handle refund.processed — amount has actually been credited to customer
-    if event == "refund.processed":
+    # Handle refund.created — Razorpay acknowledged the refund request
+    if event == "refund.created":
+        entity     = payload.get("payload", {}).get("refund", {}).get("entity", {})
+        payment_id = entity.get("payment_id", "")
+        refund_id  = entity.get("id", "")
+        print(f"[Webhook] Refund CREATED: {refund_id} for payment {payment_id}")
+
+        if payment_id:
+            order = db.query(models.Order).filter(
+                models.Order.payment_transaction_id == payment_id
+            ).first()
+            if order and order.payment_status == "paid":
+                # Only update to refund_initiated if still "paid" (not already further along)
+                order.payment_status = "refund_initiated"
+                db.commit()
+                print(f"[Webhook] ✅ Order {order.order_number} — refund_initiated (Razorpay confirmed)")
+
+    # Handle refund.processed — Razorpay fully processed it, heading to customer's bank
+    elif event == "refund.processed":
         entity     = payload.get("payload", {}).get("refund", {}).get("entity", {})
         payment_id = entity.get("payment_id", "")
         refund_id  = entity.get("id", "")
@@ -126,9 +143,9 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
             if order and order.payment_status != "refunded":
                 order.payment_status = "refunded"
                 db.commit()
-                print(f"[Webhook] ✅ Order {order.order_number} — refund credited to customer")
+                print(f"[Webhook] ✅ Order {order.order_number} — refund processed, on way to customer's bank")
 
-                # Notify customer: refund has been CREDITED (not just initiated)
+                # Notify customer: refund processed by Razorpay, bank will credit soon
                 user = db.query(models.User).filter(models.User.id == order.user_id).first()
                 if user:
                     try:
@@ -141,14 +158,10 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
                     except Exception as e:
                         print(f"[Webhook] Notification error: {e}")
             else:
-                print(f"[Webhook] Order already refunded or not found for payment {payment_id}")
+                print(f"[Webhook] Order already at refunded status or not found for payment {payment_id}")
 
-    # Handle refund.created — refund has been created but not yet credited (optional)
-    elif event in ("refund.created", "refund.speed_changed"):
-        entity     = payload.get("payload", {}).get("refund", {}).get("entity", {})
-        payment_id = entity.get("payment_id", "")
-        refund_id  = entity.get("id", "")
-        print(f"[Webhook] Refund created/updated: {refund_id} for payment {payment_id} — waiting for refund.processed")
+    elif event == "refund.speed_changed":
+        print(f"[Webhook] Refund speed changed — no action needed")
 
     return {"status": "ok"}
 

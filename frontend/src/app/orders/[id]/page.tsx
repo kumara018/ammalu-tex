@@ -417,8 +417,8 @@ function OrderDetailContent() {
                 <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                   <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-green-800">Refund Credited ✅</p>
-                    <p className="text-xs text-green-600 mt-0.5">₹{order.total.toLocaleString()} has been credited to your original payment method.</p>
+                    <p className="text-sm font-bold text-green-800">Refund Processed ✅</p>
+                    <p className="text-xs text-green-600 mt-0.5">₹{order.total.toLocaleString()} refund has been processed by Razorpay. It will appear in your account within 1–3 business days depending on your bank.</p>
                   </div>
                 </div>
               ) : order.payment_status === 'refund_initiated' ? (
@@ -426,12 +426,12 @@ function OrderDetailContent() {
                   <RotateCcw size={18} className="text-orange-600 flex-shrink-0 animate-spin" style={{animationDuration:'3s'}} />
                   <div>
                     <p className="text-sm font-bold text-orange-800">Refund Initiated 🔄</p>
-                    <p className="text-xs text-orange-600 mt-0.5">₹{order.total.toLocaleString()} will be credited within 5–7 business days to your original payment method.</p>
+                    <p className="text-xs text-orange-600 mt-0.5">Your refund of ₹{order.total.toLocaleString()} has been initiated with Razorpay and is being processed. Will be credited to your original payment method within <b>5–7 business days</b>.</p>
                   </div>
                 </div>
               ) : order.payment_method !== 'cod' && (
                 <p className="text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-xl px-4 py-2.5">
-                  💰 Refund will be processed within 5–7 business days to your original payment method.
+                  💰 Refund will be initiated within 24 hours and credited within 5–7 business days.
                 </p>
               )}
             </div>
@@ -507,9 +507,9 @@ function OrderDetailContent() {
                     order.payment_status === 'refund_initiated' ? 'text-orange-700 bg-orange-50 border-orange-300'  :
                     order.payment_status === 'refunded'         ? 'text-purple-700 bg-purple-50 border-purple-300'  :
                     'text-amber-700 bg-amber-50 border-amber-300'}`}>
-                  {order.payment_status === 'paid'             ? '✅ PAID'              :
-                   order.payment_status === 'refund_initiated' ? '🔄 REFUND INITIATED'  :
-                   order.payment_status === 'refunded'         ? '✅ REFUNDED'          : '⏳ PENDING'}
+                  {order.payment_status === 'paid'             ? '✅ PAID'                 :
+                   order.payment_status === 'refund_initiated' ? '🔄 REFUND INITIATED'     :
+                   order.payment_status === 'refunded'         ? '✅ REFUND PROCESSED'     : '⏳ PENDING'}
                 </span>
               </p>
               {order.payment_status === 'refund_initiated' && (
@@ -519,7 +519,7 @@ function OrderDetailContent() {
               )}
               {order.payment_status === 'refunded' && (
                 <p className="text-[10px] text-green-600 bg-green-50 border border-green-100 rounded-lg px-2 py-1.5 mt-1">
-                  💳 Refund has been credited to your original payment method.
+                  ✅ Refund processed by Razorpay — will appear in your bank account within <b>1–3 business days</b>.
                 </p>
               )}
               {order.payment_transaction_id && order.payment_method !== 'cod' && (

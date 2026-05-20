@@ -1102,8 +1102,8 @@ def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""
         <div style="text-align:center;margin-bottom:24px">
           <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px">✅</div>
         </div>
-        <h2 style="color:#111;margin-top:0;text-align:center">Refund Credited to Your Account!</h2>
-        <p style="color:#555;text-align:center">Hi {first}, great news! Your refund has been successfully credited to your original payment method.</p>
+        <h2 style="color:#111;margin-top:0;text-align:center">Refund Processed Successfully!</h2>
+        <p style="color:#555;text-align:center">Hi {first}, great news! Your refund has been processed by Razorpay and is on its way to your account.</p>
 
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px;margin:20px 0">
           <table width="100%" style="border-collapse:collapse;font-size:14px">
@@ -1116,7 +1116,7 @@ def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""
         </div>
 
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin:16px 0">
-          <p style="margin:0;color:#14532d;font-size:14px">💳 The amount has been returned to your <b>original payment method</b>. Please check your bank account or card statement.</p>
+          <p style="margin:0;color:#14532d;font-size:14px">💳 The refund has been processed by Razorpay and will appear in your <b>original payment method within 1–3 business days</b> depending on your bank.</p>
         </div>
 
         <div style="text-align:center;margin:24px 0">
@@ -1129,7 +1129,7 @@ def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""
         <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
       </div>
     </div>"""
-    _send_email(email, f"✅ Refund Credited — ₹{order.total:,.0f} · {order.order_number}", html)
+    _send_email(email, f"✅ Refund Processed — ₹{order.total:,.0f} · {order.order_number}", html)
 
 
 def send_refund_credited_whatsapp(phone: str, name: str, order, refund_id: str = ""):
@@ -1140,12 +1140,12 @@ def send_refund_credited_whatsapp(phone: str, name: str, order, refund_id: str =
     txn_line    = f"\n🔖 *Txn ID:* `{txn}`"        if txn                              else ""
     refund_line = f"\n📋 *Refund ID:* `{refund_id}`" if refund_id and refund_id != "manual" else ""
     _send_whatsapp(phone,
-        f"✅ *Refund Credited — {order.order_number}*\n\n"
-        f"Hi {first}! Great news — your refund has been *successfully credited* to your account! 🎉\n\n"
+        f"✅ *Refund Processed — {order.order_number}*\n\n"
+        f"Hi {first}! Great news — your refund has been *processed by Razorpay* and is on its way! 🎉\n\n"
         f"💸 *Amount:* ₹{order.total:,.0f}\n"
         f"💳 *Mode:* {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}"
         f"{txn_line}{refund_line}\n\n"
-        f"💳 Please check your bank account or card statement.\n\n"
+        f"🏦 Amount will appear in your bank account within *1–3 business days* depending on your bank.\n\n"
         f"📦 View orders: {STORE_URL}/orders"
     )
 
