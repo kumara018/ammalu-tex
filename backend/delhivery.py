@@ -51,33 +51,40 @@ def create_shipment(order, user) -> dict | None:
     """
     addr = order.shipping_address or {}
 
-    # Build items description
+    # Build items description — ASCII only (strip non-ASCII to avoid encoding issues)
     items = order.items_snapshot or []
     products_desc = ", ".join(
         f"{i.get('name', 'Product')} x{i.get('quantity', 1)}" for i in items
     ) or "Textile Products"
+    products_desc = products_desc.encode("ascii", errors="ignore").decode("ascii")
 
-    # Log the raw payment_method to diagnose issues
     pm = (order.payment_method or "").strip().lower()
     print(f"[Delhivery] order.payment_method={order.payment_method!r}  normalised={pm!r}")
 
-    is_cod    = (pm == "cod")
-    payment   = "COD" if is_cod else "Prepaid"
+    is_cod     = (pm == "cod")
+    # Delhivery CMU API valid values: "COD" or "Pre-paid"
+    payment    = "COD" if is_cod else "Pre-paid"
     cod_amount = str(round(order.total, 2)) if is_cod else "0"
 
+    def _ascii(s: str) -> str:
+        """Strip non-ASCII characters so the JSON stays pure ASCII."""
+        return (s or "").encode("ascii", errors="ignore").decode("ascii").strip()
+
     shipment = {
-        "name":           addr.get("full_name") or (user.full_name if user else "Customer"),
-        "add":            " ".join(filter(None, [
+        "name":           _ascii(addr.get("full_name") or (user.full_name if user else "Customer")),
+        "add":            _ascii(" ".join(filter(None, [
                               addr.get("address_line1", ""),
                               addr.get("address_line2", ""),
-                          ])),
+                          ]))),
         "pin":            str(addr.get("pincode", "")),
-        "city":           addr.get("city", ""),
-        "state":          addr.get("state", "Tamil Nadu"),
+        "city":           _ascii(addr.get("city", "")),
+        "state":          _ascii(addr.get("state", "Tamil Nadu")),
         "country":        "India",
         "phone":          str(addr.get("phone") or (user.phone if user else "")),
         "order":          order.order_number,
-        "payment":        payment,          # "COD" or "Pre-paid"
+        # Send under BOTH field names — different Delhivery API versions differ
+        "payment_mode":   payment,
+        "payment":        payment,
         "return_pin":     os.getenv("DELHIVERY_RETURN_PIN",     "638001"),
         "return_city":    os.getenv("DELHIVERY_RETURN_CITY",    "Gangapuram"),
         "return_state":   os.getenv("DELHIVERY_RETURN_STATE",   "Tamil Nadu"),
@@ -93,9 +100,9 @@ def create_shipment(order, user) -> dict | None:
         "shipment_width":  20,
         "shipment_height": 5,
         "shipment_length": 25,
-        "weight":          0.5,     # kg (Delhivery expects kg, not grams)
+        "weight":          0.5,
         "quantity":        len(items) or 1,
-        "waybill":         "",      # leave empty → Delhivery auto-assigns
+        "waybill":         "",
         "seller_tin":      "",
         "seller_gst_tin":  "",
     }
@@ -107,32 +114,25 @@ def create_shipment(order, user) -> dict | None:
     }
 
     try:
-        # Use separators=(',',':') → compact JSON with NO spaces
-        # Spaces encoded as '+' by URL-encoder break Delhivery's JSON parser
-        data_json = json.dumps(payload, ensure_ascii=False, separators=(',', ':'))
+        # ensure_ascii=True → all chars are pure ASCII (\uXXXX for any non-ASCII)
+        # This prevents UTF-8 byte sequences inside the URL-encoded body that
+        # some versions of Delhivery's PHP parser cannot handle correctly.
+        data_json = json.dumps(payload, ensure_ascii=True, separators=(',', ':'))
+
         print(f"[Delhivery] pickup_name={pickup_name!r}  payment={payment!r}")
-        print(f"[Delhivery] Sending payload: {data_json}")
+        print(f"[Delhivery] JSON being sent: {data_json}")
 
-        # Delhivery CMU API requires application/x-www-form-urlencoded
-        # Use urllib to manually percent-encode (%20 not +) to avoid parser issues
-        body = _parse.urlencode(
-            {"format": "json", "data": data_json},
-            quote_via=_parse.quote,   # %20 instead of + for spaces
-        ).encode("utf-8")
-
-        req = _req.Request(
+        # Use the `requests` library — it handles Content-Type and encoding reliably.
+        # Passes data as application/x-www-form-urlencoded form fields.
+        resp = _requests.post(
             f"{_base()}/api/cmu/create.json",
-            data    = body,
-            headers = {
-                "Authorization": f"Token {_token()}",
-                "Content-Type":  "application/x-www-form-urlencoded",
-            },
-            method  = "POST",
+            data    = {"format": "json", "data": data_json},
+            headers = {"Authorization": f"Token {_token()}"},
+            timeout = 20,
         )
-        with _req.urlopen(req, timeout=20) as resp:
-            raw    = resp.read()
-            result = json.loads(raw)
-        print(f"[Delhivery] Response: {result}")
+        print(f"[Delhivery] HTTP {resp.status_code}  body={resp.text[:500]}")
+        result = resp.json()
+        print(f"[Delhivery] Parsed response: {result}")
         return result
     except Exception as e:
         print(f"[Delhivery] Create shipment error: {e}")
