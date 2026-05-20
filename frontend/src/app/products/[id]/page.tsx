@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ShoppingCart, Star, Truck, RotateCcw, Shield,
+  ShoppingCart, Star, Truck, RotateCcw, Shield, XCircle,
   ArrowLeft, AlertCircle, CheckCircle, ChevronRight, Send,
 } from 'lucide-react';
 import { productsAPI } from '@/lib/api';
@@ -288,16 +288,31 @@ export default function ProductDetailPage() {
             </button>
           </div>
 
+          {/* Non-returnable warning banner */}
+          {product.is_returnable === false && (
+            <div className="flex items-start gap-2.5 p-3.5 mb-4 bg-red-50 border border-red-200 rounded-xl">
+              <XCircle size={18} className="text-red-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-red-700">Non-Returnable Product</p>
+                <p className="text-xs text-red-600 mt-0.5">This item is not eligible for return, exchange, or replacement once delivered.</p>
+              </div>
+            </div>
+          )}
+
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
               { icon: Truck, text: 'Free Shipping above ₹999' },
-              { icon: RotateCcw, text: '7-day Easy Returns' },
+              {
+                icon: product.is_returnable === false ? XCircle : RotateCcw,
+                text: product.is_returnable === false ? 'Non-Returnable' : '7-day Easy Returns',
+                red: product.is_returnable === false,
+              },
               { icon: Shield, text: '100% Authentic' },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} className="flex flex-col items-center gap-1.5 p-3 bg-orange-50 rounded-xl text-center">
-                <Icon size={18} className="text-maroon-700" />
-                <span className="text-xs text-gray-600 leading-tight">{text}</span>
+            ].map(({ icon: Icon, text, red }) => (
+              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-center ${red ? 'bg-red-50' : 'bg-orange-50'}`}>
+                <Icon size={18} className={red ? 'text-red-500' : 'text-maroon-700'} />
+                <span className={`text-xs leading-tight ${red ? 'text-red-600 font-medium' : 'text-gray-600'}`}>{text}</span>
               </div>
             ))}
           </div>

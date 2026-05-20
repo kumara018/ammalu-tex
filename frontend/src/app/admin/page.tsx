@@ -20,7 +20,7 @@ const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree'
 const emptyProduct = {
   name:'', description:'', price:'', compare_price:'', category:'',
   fabric:'', size_options:[] as string[], colors:[] as string[],
-  images:[] as string[], stock:'', is_featured:false, is_new_arrival:false,
+  images:[] as string[], stock:'', is_featured:false, is_new_arrival:false, is_returnable:true,
 };
 
 export default function AdminPage() {
@@ -158,6 +158,7 @@ export default function AdminPage() {
       size_options: p.size_options || [], colors: p.colors || [],
       images: p.images || [], stock: String(p.stock),
       is_featured: p.is_featured, is_new_arrival: p.is_new_arrival || false,
+      is_returnable: p.is_returnable !== false,
     });
     setFormErrors({});
     setColorInput('');
@@ -181,6 +182,7 @@ export default function AdminPage() {
         stock: Number(form.stock),
         is_featured: form.is_featured,
         is_new_arrival: form.is_new_arrival,
+        is_returnable: form.is_returnable,
       };
       if (editing) {
         await adminAPI.updateProduct(editing.id, data);
@@ -477,6 +479,7 @@ export default function AdminPage() {
                             {p.is_featured    && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Featured</span>}
                             {p.is_new_arrival && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">New Arrival</span>}
                             {!p.is_active     && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">Inactive</span>}
+                            {p.is_returnable === false && <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-medium">Non-Returnable</span>}
                           </div>
                         </div>
                       </div>
@@ -1016,6 +1019,13 @@ export default function AdminPage() {
                 <div>
                   <p className="font-medium text-sm text-gray-800">Mark as New Arrival</p>
                   <p className="text-xs text-gray-500">Shows a "New Arrival" badge on the product card</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-red-200 rounded-xl hover:bg-red-50 bg-red-50/40">
+                <input type="checkbox" checked={!form.is_returnable} onChange={e => setForm(f => ({ ...f, is_returnable: !e.target.checked }))} className="w-4 h-4 accent-red-600" />
+                <div>
+                  <p className="font-medium text-sm text-red-700">Mark as Non-Returnable</p>
+                  <p className="text-xs text-red-500">Customers cannot request a return, exchange, or replacement for this product</p>
                 </div>
               </label>
             </div>

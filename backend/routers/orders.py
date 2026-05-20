@@ -60,6 +60,7 @@ def place_order(
             "color": item.color,
             "image": product.images[0] if product.images else None,
             "subtotal": item_total,
+            "is_returnable": getattr(product, "is_returnable", True),
         })
 
     shipping_fee = 0.0 if subtotal >= 1499 else 49.0

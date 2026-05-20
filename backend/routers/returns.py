@@ -35,6 +35,17 @@ def create_return_request(
     if order.status != "delivered":
         raise HTTPException(400, "Return requests can only be made for delivered orders")
 
+    # Check if any item in the order is non-returnable
+    items = order.items_snapshot or []
+    product_ids = [item.get("product_id") for item in items if item.get("product_id")]
+    if product_ids:
+        non_returnable = db.query(models.Product).filter(
+            models.Product.id.in_(product_ids),
+            models.Product.is_returnable == False,
+        ).first()
+        if non_returnable:
+            raise HTTPException(400, f'"{non_returnable.name}" is a non-returnable product. Returns are not accepted for this item.')
+
     # Check if return request already exists
     existing = db.query(models.ReturnRequest).filter(
         models.ReturnRequest.order_id == payload.order_id,

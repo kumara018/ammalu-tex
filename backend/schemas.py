@@ -219,6 +219,7 @@ class ProductCreate(BaseModel):
     sku:           Optional[str] = None
     is_featured:   bool = False
     is_new_arrival: bool = False
+    is_returnable:  bool = True
 
     @field_validator("name")
     @classmethod
@@ -263,6 +264,7 @@ class ProductUpdate(BaseModel):
     is_active:      Optional[bool]  = None
     is_featured:    Optional[bool]  = None
     is_new_arrival: Optional[bool]  = None
+    is_returnable:  Optional[bool]  = None
 
 
 class ProductOut(BaseModel):
@@ -281,6 +283,7 @@ class ProductOut(BaseModel):
     is_active:      bool
     is_featured:    bool
     is_new_arrival: bool = False
+    is_returnable:  bool = True
     rating_avg:    float
     rating_count:  int
     created_at:    datetime

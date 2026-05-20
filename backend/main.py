@@ -157,6 +157,10 @@ def _migrate_db():
                 conn.execute(text("ALTER TABLE products ADD COLUMN is_new_arrival BOOLEAN NOT NULL DEFAULT FALSE"))
                 conn.commit()
                 print("[Startup] Migrated: added is_new_arrival to products")
+            if "is_returnable" not in products_cols:
+                conn.execute(text("ALTER TABLE products ADD COLUMN is_returnable BOOLEAN NOT NULL DEFAULT TRUE"))
+                conn.commit()
+                print("[Startup] Migrated: added is_returnable to products")
         except Exception as e:
             print(f"[Startup] Products migration note: {e}")
 

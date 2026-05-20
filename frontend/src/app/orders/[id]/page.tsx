@@ -192,6 +192,10 @@ function OrderDetailContent() {
   const canCancel = ['pending', 'confirmed', 'processing', 'shipped'].includes(order.status);
   const currentStep = STATUS_STEPS.indexOf(order.status);
   const addr = order.shipping_address as any;
+  // Check if any item in the order is non-returnable
+  const hasNonReturnableItem = (order.items_snapshot as any[]).some(
+    (item: any) => item.is_returnable === false
+  );
 
   // Delhivery tracking events (parsed clean list)
   const trackingEvents: any[] = tracking?.tracking_events || [];
@@ -525,7 +529,15 @@ function OrderDetailContent() {
               <h3 className="font-bold text-maroon-900 mb-2 flex items-center gap-2">
                 <RotateCcw size={16} /> Return / Exchange
               </h3>
-              {existingReturn ? (
+              {hasNonReturnableItem ? (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <XCircle size={16} className="text-red-500 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-red-700">Non-Returnable Order</p>
+                    <p className="text-xs text-red-600 mt-0.5">This order contains a non-returnable item and is not eligible for return or exchange.</p>
+                  </div>
+                </div>
+              ) : existingReturn ? (
                 <div>
                   <p className="text-xs text-gray-500 mb-2">You have a {existingReturn.request_type === 'return' ? 'Return & Refund' : existingReturn.request_type === 'exchange' ? 'Exchange' : 'Replacement'} request</p>
                   <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border mb-3 ${RETURN_STATUS_LABEL[existingReturn.status]?.color || 'bg-gray-100 text-gray-600 border-gray-300'}`}>
