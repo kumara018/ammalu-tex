@@ -237,8 +237,8 @@ export default function RegisterPage() {
           <span className="font-semibold text-white">Login</span>
         </Link>
 
-        {/* Back to existing account — only when adding another account */}
-        {isAddMode && user && (
+        {/* Back to existing account — whenever a user is already logged in */}
+        {user && (
           <>
             <span className="text-white/30 text-lg">|</span>
             <Link
@@ -261,7 +261,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Spacer to keep logo centered */}
-        <div className={isAddMode && user ? 'w-48' : 'w-20'} />
+        <div className={user ? 'w-48' : 'w-20'} />
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
