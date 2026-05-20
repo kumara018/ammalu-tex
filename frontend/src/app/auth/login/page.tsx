@@ -182,17 +182,20 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col bg-[#fff9f2]">
 
       {/* Standalone header */}
-      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md">
-        {isAddMode && (
-          <button
-            onClick={() => router.back()}
-            className="flex flex-col items-start text-sm text-white/80 hover:text-white mr-4 transition-colors leading-tight"
-          >
-            <span className="text-xs">← Back to</span>
-            <span className="font-semibold text-white truncate max-w-[120px]">
-              {user?.full_name?.split(' ')[0] || 'Account'}
-            </span>
-          </button>
+      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md gap-3">
+        {/* Back to existing account — only when already logged in */}
+        {isAddMode && user && (
+          <>
+            <Link
+              href="/"
+              className="flex flex-col items-start text-sm text-white/80 hover:text-white transition-colors leading-tight flex-shrink-0"
+            >
+              <span className="text-xs">← Back to</span>
+              <span className="font-semibold text-white truncate max-w-[110px]">
+                {user.full_name?.split(' ')[0] || 'Account'}
+              </span>
+            </Link>
+          </>
         )}
         <div className="flex-1 flex flex-col items-center leading-tight">
           <Link href="/" className="flex flex-col items-center leading-tight">
@@ -200,7 +203,7 @@ export default function LoginPage() {
             <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
           </Link>
         </div>
-        {isAddMode && <div className="w-24" />}
+        {isAddMode && user && <div className="w-28" />}
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
