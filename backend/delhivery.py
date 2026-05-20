@@ -107,19 +107,32 @@ def create_shipment(order, user) -> dict | None:
     }
 
     try:
-        data_json = json.dumps(payload, ensure_ascii=False)
+        # Use separators=(',',':') → compact JSON with NO spaces
+        # Spaces encoded as '+' by URL-encoder break Delhivery's JSON parser
+        data_json = json.dumps(payload, ensure_ascii=False, separators=(',', ':'))
         print(f"[Delhivery] pickup_name={pickup_name!r}  payment={payment!r}")
         print(f"[Delhivery] Sending payload: {data_json}")
 
-        # Send as multipart/form-data (files=) — most reliable for Delhivery CMU API
-        resp = _requests.post(
+        # Delhivery CMU API requires application/x-www-form-urlencoded
+        # Use urllib to manually percent-encode (%20 not +) to avoid parser issues
+        body = _parse.urlencode(
+            {"format": "json", "data": data_json},
+            quote_via=_parse.quote,   # %20 instead of + for spaces
+        ).encode("utf-8")
+
+        req = _req.Request(
             f"{_base()}/api/cmu/create.json",
-            files   = {"format": (None, "json"), "data": (None, data_json)},
-            headers = {"Authorization": f"Token {_token()}"},
-            timeout = 20,
+            data    = body,
+            headers = {
+                "Authorization": f"Token {_token()}",
+                "Content-Type":  "application/x-www-form-urlencoded",
+            },
+            method  = "POST",
         )
-        print(f"[Delhivery] HTTP {resp.status_code}  raw: {resp.text[:500]}")
-        result = resp.json()
+        with _req.urlopen(req, timeout=20) as resp:
+            raw    = resp.read()
+            result = json.loads(raw)
+        print(f"[Delhivery] Response: {result}")
         return result
     except Exception as e:
         print(f"[Delhivery] Create shipment error: {e}")
