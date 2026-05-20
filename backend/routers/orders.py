@@ -203,11 +203,15 @@ def cancel_order(
         and order.payment_transaction_id
         and order.payment_transaction_id.startswith("pay_")
     ):
-        try:
-            import razorpay as _rp, os as _os
-            key_id     = _os.getenv("RAZORPAY_KEY_ID", "")
-            key_secret = _os.getenv("RAZORPAY_KEY_SECRET", "")
-            if key_id and key_secret:
+        import razorpay as _rp, os as _os
+        key_id     = _os.getenv("RAZORPAY_KEY_ID", "")
+        key_secret = _os.getenv("RAZORPAY_KEY_SECRET", "")
+        if not key_id or not key_secret:
+            print(f"[Razorpay] ⚠️  REFUND SKIPPED — RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set in env vars. "
+                  f"Order {order.order_number} txn {order.payment_transaction_id} "
+                  f"₹{order.total} must be refunded MANUALLY from Razorpay Dashboard.")
+        else:
+            try:
                 client = _rp.Client(auth=(key_id, key_secret))
                 refund = client.payment.refund(
                     order.payment_transaction_id,
@@ -222,9 +226,9 @@ def cancel_order(
                 )
                 order.payment_status = "refunded"
                 refund_status = refund.get("id", "initiated")
-                print(f"[Razorpay] Refund {refund_status} for {order.order_number}")
-        except Exception as e:
-            print(f"[Razorpay refund error] {e}")
+                print(f"[Razorpay] ✅ Refund {refund_status} initiated for {order.order_number} ₹{order.total}")
+            except Exception as e:
+                print(f"[Razorpay] ❌ Refund FAILED for {order.order_number} txn {order.payment_transaction_id}: {e}")
 
     db.commit()
     db.refresh(order)
