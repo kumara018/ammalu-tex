@@ -96,7 +96,7 @@ export default function CartPage() {
                 <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-orange-50 to-pink-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {item.product.images?.[0] && !item.product.images[0].includes('placeholder') ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_API_URL}${item.product.images[0]}`}
+                      src={item.product.images[0].startsWith('http') ? item.product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}${item.product.images[0]}`}
                       alt={item.product.name}
                       className="w-full h-full object-cover"
                     />
