@@ -108,3 +108,17 @@ export interface Review {
 }
 
 export type Category = 'Chudithar' | 'Tops' | 'Lehenga' | 'Crop Tops' | 'Party Wears';
+
+export interface ReturnRequest {
+  id: number;
+  order_id: number;
+  user_id: number;
+  request_type: 'return' | 'exchange' | 'replace';
+  reason: string;
+  description?: string;
+  images: string[];
+  status: string;
+  admin_notes?: string;
+  refund_id?: string;
+  created_at: string;
+}

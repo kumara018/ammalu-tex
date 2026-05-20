@@ -5,7 +5,7 @@ import {
   Package, ShoppingBag, Users, TrendingUp, Plus, Pencil,
   Trash2, X, AlertCircle, CheckCircle, Star, Upload, ImagePlus,
 } from 'lucide-react';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, adminReturnsAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -26,13 +26,13 @@ const emptyProduct = {
 export default function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  type TabKey = 'dash'|'products'|'orders'|'users'|'ratings';
+  type TabKey = 'dash'|'products'|'orders'|'users'|'ratings'|'returns';
   const [tab, setTab] = useState<TabKey>('dash');
 
   // Restore last-used tab from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
     const saved = localStorage.getItem('admin_tab') as TabKey | null;
-    const valid: TabKey[] = ['dash','products','orders','users','ratings'];
+    const valid: TabKey[] = ['dash','products','orders','users','ratings','returns'];
     if (saved && valid.includes(saved)) setTab(saved);
   }, []);
   const [dash, setDash] = useState<DashData | null>(null);
@@ -40,6 +40,10 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [supportRatings, setSupportRatings] = useState<any[]>([]);
+  const [returns, setReturns] = useState<any[]>([]);
+  const [expandedReturn, setExpandedReturn] = useState<number | null>(null);
+  const [returnUpdateForm, setReturnUpdateForm] = useState<Record<number, { status: string; admin_notes: string }>>({});
+  const [savingReturn, setSavingReturn] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -97,6 +101,12 @@ export default function AdminPage() {
     catch {} finally { setLoading(false); }
   };
 
+  const loadReturns = async () => {
+    setLoading(true);
+    try { const res = await adminReturnsAPI.getAll(); setReturns(res.data); }
+    catch {} finally { setLoading(false); }
+  };
+
   const handleToggleFeatured = async (p: any) => {
     try {
       await adminAPI.updateProduct(p.id, { is_featured: !p.is_featured });
@@ -113,6 +123,7 @@ export default function AdminPage() {
     if (tab === 'orders') loadOrders();
     if (tab === 'users') loadUsers();
     if (tab === 'ratings') loadSupportRatings();
+    if (tab === 'returns') loadReturns();
   }, [tab]);
 
   const validateForm = () => {
@@ -306,12 +317,27 @@ export default function AdminPage() {
 
   if (!user?.is_admin) return null;
 
+  const handleReturnStatusUpdate = async (returnId: number) => {
+    const form = returnUpdateForm[returnId];
+    if (!form?.status) { toast.error('Select a status'); return; }
+    setSavingReturn(returnId);
+    try {
+      await adminReturnsAPI.updateStatus(returnId, { status: form.status, admin_notes: form.admin_notes || undefined });
+      toast.success('Return request updated — customer notified');
+      loadReturns();
+      setExpandedReturn(null);
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to update return status');
+    } finally { setSavingReturn(null); }
+  };
+
   const TABS = [
     { key: 'dash',     label: 'Dashboard'        },
     { key: 'products', label: 'Products'          },
     { key: 'orders',   label: 'Orders'            },
     { key: 'users',    label: 'Customers'         },
     { key: 'ratings',  label: 'Support Ratings'   },
+    { key: 'returns',  label: 'Returns'           },
   ] as const;
 
   return (
@@ -692,6 +718,163 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Returns */}
+      {tab === 'returns' && (
+        <div>
+          <div className="mb-4 flex items-center gap-3">
+            <h2 className="font-bold text-gray-800 text-lg">Return / Exchange / Replace Requests</h2>
+            {returns.length > 0 && (
+              <span className="ml-auto text-sm text-gray-500">{returns.length} total</span>
+            )}
+          </div>
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-maroon-50">
+                  <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
+                    <th className="px-4 py-3">ID</th>
+                    <th className="px-4 py-3">Order #</th>
+                    <th className="px-4 py-3">Customer</th>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3">Reason</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-orange-50">
+                  {loading ? Array(5).fill(0).map((_, i) => (
+                    <tr key={i}><td colSpan={8} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                  )) : returns.length === 0 ? (
+                    <tr><td colSpan={8} className="px-4 py-10 text-center text-gray-400">No return requests yet</td></tr>
+                  ) : returns.map((r) => {
+                    const typeBadge: Record<string,string> = {
+                      return:   'bg-red-100 text-red-700 border-red-200',
+                      exchange: 'bg-blue-100 text-blue-700 border-blue-200',
+                      replace:  'bg-green-100 text-green-700 border-green-200',
+                    };
+                    const statusBadge: Record<string,string> = {
+                      pending:             'bg-yellow-100 text-yellow-700',
+                      under_review:        'bg-blue-100 text-blue-700',
+                      approved:            'bg-green-100 text-green-700',
+                      rejected:            'bg-red-100 text-red-700',
+                      pickup_scheduled:    'bg-purple-100 text-purple-700',
+                      picked_up:           'bg-cyan-100 text-cyan-700',
+                      processing:          'bg-indigo-100 text-indigo-700',
+                      refund_initiated:    'bg-green-100 text-green-700',
+                      replacement_shipped: 'bg-purple-100 text-purple-700',
+                      completed:           'bg-gray-100 text-gray-700',
+                    };
+                    const typeLabel: Record<string,string> = { return:'Return & Refund', exchange:'Exchange', replace:'Replacement' };
+                    const isExpanded = expandedReturn === r.id;
+                    return (
+                      <>
+                        <tr key={r.id} className="hover:bg-orange-50 cursor-pointer" onClick={() => {
+                          setExpandedReturn(isExpanded ? null : r.id);
+                          if (!returnUpdateForm[r.id]) {
+                            setReturnUpdateForm(prev => ({ ...prev, [r.id]: { status: r.status, admin_notes: r.admin_notes || '' } }));
+                          }
+                        }}>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-400">#{r.id}</td>
+                          <td className="px-4 py-3 font-mono font-medium text-maroon-800 text-xs">{r.order_id}</td>
+                          <td className="px-4 py-3 text-gray-700 text-xs">{r.user_id}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${typeBadge[r.request_type] || 'bg-gray-100 text-gray-600'}`}>
+                              {typeLabel[r.request_type] || r.request_type}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600 text-xs max-w-[120px] truncate">{r.reason}</td>
+                          <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString('en-IN')}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadge[r.status] || 'bg-gray-100 text-gray-600'}`}>
+                              {r.status.replace(/_/g,' ').replace(/\b\w/g,(c:string)=>c.toUpperCase())}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <button className="text-xs text-maroon-700 hover:text-maroon-900 font-medium">
+                              {isExpanded ? 'Collapse' : 'Manage'}
+                            </button>
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr key={`${r.id}-expand`}>
+                            <td colSpan={8} className="px-4 py-4 bg-orange-50 border-b border-orange-100">
+                              <div className="max-w-2xl space-y-4">
+                                {/* Photos */}
+                                {r.images && r.images.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Customer Photos</p>
+                                    <div className="flex gap-2 flex-wrap">
+                                      {r.images.map((url: string, i: number) => (
+                                        <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                                          <img src={url} alt={`Return photo ${i+1}`} className="w-16 h-16 object-cover rounded-lg border-2 border-orange-200 hover:border-maroon-400 transition-colors" />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Description */}
+                                {r.description && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Customer Description</p>
+                                    <p className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg px-3 py-2">{r.description}</p>
+                                  </div>
+                                )}
+
+                                {/* Current admin notes */}
+                                {r.admin_notes && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Previous Admin Note</p>
+                                    <p className="text-sm text-gray-700 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">{r.admin_notes}</p>
+                                  </div>
+                                )}
+
+                                {/* Update form */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                  <div>
+                                    <label className="label">Update Status</label>
+                                    <select
+                                      value={returnUpdateForm[r.id]?.status || r.status}
+                                      onChange={e => setReturnUpdateForm(prev => ({ ...prev, [r.id]: { ...prev[r.id], status: e.target.value } }))}
+                                      className="input-field text-sm"
+                                    >
+                                      {['pending','under_review','approved','rejected','pickup_scheduled','picked_up','processing','refund_initiated','replacement_shipped','completed'].map(s => (
+                                        <option key={s} value={s}>{s.replace(/_/g,' ').replace(/\b\w/g,(c:string)=>c.toUpperCase())}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="label">Admin Notes (shown to customer)</label>
+                                    <input
+                                      value={returnUpdateForm[r.id]?.admin_notes || ''}
+                                      onChange={e => setReturnUpdateForm(prev => ({ ...prev, [r.id]: { ...prev[r.id], admin_notes: e.target.value } }))}
+                                      placeholder="Optional note for the customer..."
+                                      className="input-field text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleReturnStatusUpdate(r.id)}
+                                  disabled={savingReturn === r.id}
+                                  className="btn-primary px-6 py-2.5 text-sm flex items-center gap-2 disabled:opacity-60"
+                                >
+                                  {savingReturn === r.id ? <><span className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" /> Saving...</> : 'Update Status & Notify Customer'}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

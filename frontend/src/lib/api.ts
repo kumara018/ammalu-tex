@@ -140,4 +140,16 @@ export const supportAPI = {
   getRatingSummary: ()             => api.get('/api/support/rating/summary'),
 };
 
+export const returnsAPI = {
+  create:      (data: object)    => api.post('/api/returns/', data),
+  getAll:      ()                => api.get('/api/returns/'),
+  getOne:      (id: number)      => api.get(`/api/returns/${id}`),
+  uploadImage: (form: FormData)  => api.post('/api/returns/upload-image', form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+};
+
+export const adminReturnsAPI = {
+  getAll:       ()                          => api.get('/api/admin/returns'),
+  updateStatus: (id: number, data: object) => api.put(`/api/admin/returns/${id}/status`, data),
+};
+
 export default api;

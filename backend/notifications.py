@@ -1089,6 +1089,100 @@ def send_refund_initiated_whatsapp(phone: str, name: str, order, refund_id: str 
 
 # ── Invoice email ──────────────────────────────────────────────────────────────
 
+# ── Return / Exchange / Replace notifications ─────────────────────────────────
+
+_RETURN_TYPE_LABEL = {
+    "return":   "Return & Refund",
+    "exchange": "Exchange",
+    "replace":  "Replacement",
+}
+
+_RETURN_STATUS_INFO = {
+    "pending":              ("Pending Review",              "#f59e0b", "We've received your request and will review it within 24 hours."),
+    "under_review":         ("Under Review",               "#3b82f6", "Our team is reviewing your request and photos."),
+    "approved":             ("Request Approved",            "#16a34a", "Your return/exchange request has been approved. We'll schedule a pickup soon."),
+    "rejected":             ("Request Rejected",            "#dc2626", "Unfortunately your request could not be approved. See reason below."),
+    "pickup_scheduled":     ("Pickup Scheduled",            "#7c3aed", "Our courier will pick up the item from your address."),
+    "picked_up":            ("Item Picked Up",              "#0891b2", "We've received your returned item and are inspecting it."),
+    "processing":           ("Processing",                  "#6366f1", "Your item is being inspected by our quality team."),
+    "refund_initiated":     ("Refund Initiated",            "#16a34a", "Your refund has been processed and will reach you in 5-7 business days."),
+    "replacement_shipped":  ("Replacement Shipped",         "#7c3aed", "Your replacement item is on its way!"),
+    "completed":            ("Request Completed",           "#16a34a", "Your return/exchange process is complete. Thank you for shopping with us!"),
+}
+
+def send_return_request_email(email: str, name: str, order, rr):
+    first = name.split()[0]
+    type_label = _RETURN_TYPE_LABEL.get(rr.request_type, rr.request_type.title())
+    html = _wrap(f"""
+      <h2 style="color:#7c1d2e;margin-top:0;font-size:22px;">{type_label} Request Received</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, we've received your <strong>{type_label}</strong> request for order <strong>{order.order_number}</strong>.
+        Our team will review it within <strong>24 hours</strong>.
+      </p>
+      <div style="background:#f8f4f0;border-left:4px solid #7c1d2e;border-radius:4px;padding:16px;margin:20px 0;">
+        <p style="margin:0 0 6px;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Request Details</p>
+        <p style="margin:4px 0;font-size:14px;color:#444;"><strong>Type:</strong> {type_label}</p>
+        <p style="margin:4px 0;font-size:14px;color:#444;"><strong>Reason:</strong> {rr.reason}</p>
+        {f'<p style="margin:4px 0;font-size:14px;color:#444;"><strong>Details:</strong> {rr.description}</p>' if rr.description else ''}
+        <p style="margin:4px 0;font-size:14px;color:#444;"><strong>Status:</strong> <span style="color:#f59e0b;font-weight:bold;">Pending Review</span></p>
+      </div>
+      <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:14px;margin:16px 0;">
+        <p style="margin:0;font-size:13px;color:#92400e;">
+          If you uploaded photos, our team will review them during the inspection.
+          Please ensure the item is unused (for size issues) and securely packed for pickup.
+        </p>
+      </div>
+      {_btn("View Request Status", f"{STORE_URL}/orders/{order.id}")}
+    """)
+    _bg(email, f"{type_label} Request — {order.order_number} | {STORE_NAME}", html)
+
+def send_return_request_whatsapp(phone: str, name: str, order, rr):
+    first = name.split()[0]
+    type_label = _RETURN_TYPE_LABEL.get(rr.request_type, rr.request_type.title())
+    _send_whatsapp(phone,
+        f"*{type_label} Request Received — {order.order_number}*\n\n"
+        f"Hi {first},\n\n"
+        f"We've received your {type_label} request.\n\n"
+        f"*Reason:* {rr.reason}\n"
+        f"*Status:* Pending Review\n\n"
+        f"Our team will review within 24 hours and contact you.\n\n"
+        f"Track status: {STORE_URL}/orders/{order.id}"
+    )
+
+def send_return_status_email(email: str, name: str, order, rr):
+    first = name.split()[0]
+    type_label = _RETURN_TYPE_LABEL.get(rr.request_type, rr.request_type.title())
+    title, color, msg = _RETURN_STATUS_INFO.get(rr.status, (f"Update: {rr.status}", "#7c1d2e", ""))
+    admin_note = (f'<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:14px;margin:16px 0;">'
+                  f'<p style="margin:0;font-size:13px;color:#92400e;"><strong>Note from our team:</strong> {rr.admin_notes}</p></div>'
+                  if rr.admin_notes else "")
+    html = _wrap(f"""
+      <h2 style="color:{color};margin-top:0;font-size:22px;">{title}</h2>
+      <p style="color:#444;font-size:14px;line-height:1.6;">
+        Hi {first}, here's an update on your <strong>{type_label}</strong> request for order <strong>{order.order_number}</strong>.
+      </p>
+      <div style="background:#f8f4f0;border-left:4px solid {color};border-radius:4px;padding:16px;margin:20px 0;">
+        <p style="margin:0;color:{color};font-weight:bold;font-size:14px;">{msg}</p>
+      </div>
+      {admin_note}
+      {_btn("View Full Status", f"{STORE_URL}/orders/{order.id}")}
+    """)
+    _bg(email, f"{title} — {order.order_number} | {STORE_NAME}", html)
+
+def send_return_status_whatsapp(phone: str, name: str, order, rr):
+    first = name.split()[0]
+    type_label = _RETURN_TYPE_LABEL.get(rr.request_type, rr.request_type.title())
+    title, color, msg = _RETURN_STATUS_INFO.get(rr.status, (f"Update: {rr.status}", "#7c1d2e", ""))
+    note = f"\n\n*Note:* {rr.admin_notes}" if rr.admin_notes else ""
+    _send_whatsapp(phone,
+        f"*{type_label} Update — {order.order_number}*\n\n"
+        f"Hi {first},\n\n"
+        f"*{title}*\n\n"
+        f"{msg}{note}\n\n"
+        f"View details: {STORE_URL}/orders/{order.id}"
+    )
+
+
 def send_invoice_email(email: str, name: str, order, user_email: str = ""):
     first = name.split()[0]
     addr  = order.shipping_address or {}

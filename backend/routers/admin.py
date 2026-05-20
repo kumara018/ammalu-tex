@@ -500,6 +500,74 @@ def check_serviceability(
     }
 
 
+@router.get("/returns", response_model=List[schemas.ReturnRequestOut])
+def get_all_returns(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    return db.query(models.ReturnRequest).order_by(models.ReturnRequest.created_at.desc()).all()
+
+
+@router.put("/returns/{return_id}/status")
+def update_return_status(
+    return_id: int,
+    payload: schemas.ReturnStatusUpdate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    VALID_STATUSES = [
+        "pending", "under_review", "approved", "rejected",
+        "pickup_scheduled", "picked_up", "processing",
+        "refund_initiated", "replacement_shipped", "completed",
+    ]
+    if payload.status not in VALID_STATUSES:
+        raise HTTPException(400, f"Invalid status")
+
+    rr = db.query(models.ReturnRequest).filter(models.ReturnRequest.id == return_id).first()
+    if not rr:
+        raise HTTPException(404, "Return request not found")
+
+    rr.status = payload.status
+    if payload.admin_notes:
+        rr.admin_notes = payload.admin_notes
+
+    # If refund_initiated for a return type — trigger Razorpay refund
+    if payload.status == "refund_initiated" and rr.request_type == "return":
+        order = db.query(models.Order).filter(models.Order.id == rr.order_id).first()
+        if order and order.payment_method != "cod" and order.payment_transaction_id and order.payment_transaction_id.startswith("pay_"):
+            import razorpay as _rp, os as _os
+            key_id     = _os.getenv("RAZORPAY_KEY_ID", "")
+            key_secret = _os.getenv("RAZORPAY_KEY_SECRET", "")
+            if key_id and key_secret:
+                try:
+                    client = _rp.Client(auth=(key_id, key_secret))
+                    refund = client.payment.refund(
+                        order.payment_transaction_id,
+                        {"amount": int(order.total * 100), "speed": "normal",
+                         "notes": {"order_number": order.order_number, "reason": rr.reason}},
+                    )
+                    rr.refund_id = refund.get("id", "")
+                    order.payment_status = "refunded"
+                    print(f"[Returns] Razorpay refund {rr.refund_id} for return {return_id}")
+                except Exception as e:
+                    print(f"[Returns] Razorpay refund error: {e}")
+
+    db.commit()
+    db.refresh(rr)
+
+    # Notify customer
+    user = db.query(models.User).filter(models.User.id == rr.user_id).first()
+    order = db.query(models.Order).filter(models.Order.id == rr.order_id).first()
+    if user and order:
+        try:
+            notifications.send_return_status_email(user.email, user.full_name, order, rr)
+            notifications.send_return_status_whatsapp(user.phone, user.full_name, order, rr)
+        except Exception as e:
+            print(f"[Returns] Notification error: {e}")
+
+    return {"message": f"Return request updated to {payload.status}", "return_id": return_id}
+
+
 @router.get("/support-ratings")
 def get_support_ratings(
     db: Session = Depends(get_db),

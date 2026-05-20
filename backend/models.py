@@ -187,3 +187,22 @@ class SupportRating(Base):
     message    = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", foreign_keys=[user_id])
+
+
+class ReturnRequest(Base):
+    __tablename__ = "return_requests"
+    id            = Column(Integer, primary_key=True, index=True)
+    order_id      = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+    user_id       = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    request_type  = Column(String(20), nullable=False)   # "return" | "exchange" | "replace"
+    reason        = Column(String(100), nullable=False)  # reason category
+    description   = Column(Text, nullable=True)
+    images        = Column(JSON, default=list)            # Cloudinary image URLs (up to 3)
+    status        = Column(String(50), default="pending")
+    # pending → under_review → approved / rejected → pickup_scheduled → picked_up → processing → refund_initiated / replacement_shipped → completed
+    admin_notes   = Column(Text, nullable=True)
+    refund_id     = Column(String(100), nullable=True)
+    created_at    = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at    = Column(DateTime(timezone=True), onupdate=func.now())
+    order = relationship("Order")
+    user  = relationship("User")

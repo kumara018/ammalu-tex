@@ -476,3 +476,38 @@ class ReviewOut(BaseModel):
     user:       UserOut
 
     model_config = {"from_attributes": True}
+
+
+# ─── RETURN / EXCHANGE / REPLACE SCHEMAS ─────────────────────────────────────
+
+class ReturnRequestCreate(BaseModel):
+    order_id:     int
+    request_type: str   # return | exchange | replace
+    reason:       str
+    description:  Optional[str] = None
+    images:       List[str] = []
+
+    @field_validator("request_type")
+    @classmethod
+    def type_valid(cls, v):
+        if v not in ["return", "exchange", "replace"]:
+            raise ValueError("request_type must be return, exchange, or replace")
+        return v
+
+class ReturnStatusUpdate(BaseModel):
+    status:      str
+    admin_notes: Optional[str] = None
+
+class ReturnRequestOut(BaseModel):
+    id:           int
+    order_id:     int
+    user_id:      int
+    request_type: str
+    reason:       str
+    description:  Optional[str] = None
+    images:       List[str] = []
+    status:       str
+    admin_notes:  Optional[str] = None
+    refund_id:    Optional[str] = None
+    created_at:   datetime
+    model_config = {"from_attributes": True}

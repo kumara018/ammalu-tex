@@ -9,7 +9,7 @@ load_dotenv()
 
 from database import engine, Base, SessionLocal
 import models
-from routers import auth, products, cart, orders, admin, payments, addresses, support
+from routers import auth, products, cart, orders, admin, payments, addresses, support, returns
 
 
 os.makedirs(os.getenv("UPLOAD_DIR", "uploads/products"), exist_ok=True)
@@ -193,6 +193,25 @@ def _migrate_db():
                 """))
                 conn.commit()
                 print("[Startup] Migrated: created reviews table")
+            if "return_requests" not in existing_tables:
+                conn.execute(text("""
+                    CREATE TABLE return_requests (
+                        id SERIAL PRIMARY KEY,
+                        order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        request_type VARCHAR(20) NOT NULL,
+                        reason VARCHAR(100) NOT NULL,
+                        description TEXT,
+                        images JSON DEFAULT '[]',
+                        status VARCHAR(50) DEFAULT 'pending',
+                        admin_notes TEXT,
+                        refund_id VARCHAR(100),
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE
+                    )
+                """))
+                conn.commit()
+                print("[Startup] Migrated: created return_requests table")
         except Exception as e:
             print(f"[Startup] New table migration note: {e}")
 
@@ -318,6 +337,7 @@ app.include_router(admin.router)
 app.include_router(payments.router)
 app.include_router(addresses.router)
 app.include_router(support.router)
+app.include_router(returns.router)
 # Tracking is wired into orders router (/api/orders/{id}/track)
 
 

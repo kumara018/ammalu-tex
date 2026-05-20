@@ -1,15 +1,15 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Package, Truck, CheckCircle, Clock, XCircle,
   MapPin, CreditCard, ArrowLeft, Sparkles, Phone, ShieldCheck,
   PackageOpen, Navigation, ExternalLink, AlertTriangle, RefreshCw,
-  FileText, RotateCcw,
+  FileText, RotateCcw, ImagePlus, X, ChevronRight,
 } from 'lucide-react';
-import { ordersAPI } from '@/lib/api';
-import { Order } from '@/types';
+import { ordersAPI, returnsAPI } from '@/lib/api';
+import { Order, ReturnRequest } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -34,6 +34,34 @@ const CANCEL_REASONS = [
   'Other',
 ];
 
+const RETURN_REASONS = [
+  "Size doesn't fit",
+  "Damaged product",
+  "Stitching / quality issue",
+  "Wrong item received",
+  "Colour different from photo",
+  "Other",
+];
+
+const RETURN_TYPE_INFO = {
+  return:   { label: 'Return & Refund',  desc: 'Return the item and get a full refund to your original payment method.',  color: 'border-red-300 bg-red-50',    badge: 'bg-red-100 text-red-700'    },
+  exchange: { label: 'Exchange',         desc: 'Exchange for a different size or colour of the same product.',             color: 'border-blue-300 bg-blue-50',  badge: 'bg-blue-100 text-blue-700'  },
+  replace:  { label: 'Replacement',      desc: 'Get a replacement for a damaged or defective product.',                   color: 'border-green-300 bg-green-50',badge: 'bg-green-100 text-green-700'},
+} as const;
+
+const RETURN_STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  pending:             { label: 'Pending Review',       color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  under_review:        { label: 'Under Review',         color: 'bg-blue-100 text-blue-700 border-blue-300'       },
+  approved:            { label: 'Approved',             color: 'bg-green-100 text-green-700 border-green-300'    },
+  rejected:            { label: 'Rejected',             color: 'bg-red-100 text-red-700 border-red-300'          },
+  pickup_scheduled:    { label: 'Pickup Scheduled',     color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  picked_up:           { label: 'Picked Up',            color: 'bg-cyan-100 text-cyan-700 border-cyan-300'       },
+  processing:          { label: 'Processing',           color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
+  refund_initiated:    { label: 'Refund Initiated',     color: 'bg-green-100 text-green-700 border-green-300'    },
+  replacement_shipped: { label: 'Replacement Shipped',  color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  completed:           { label: 'Completed',            color: 'bg-green-100 text-green-700 border-green-300'    },
+};
+
 function OrderDetailContent() {
   const { id } = useParams();
   const searchParams = useSearchParams();
@@ -50,12 +78,30 @@ function OrderDetailContent() {
   const [customReason, setCustomReason]       = useState('');
   const [cancelling, setCancelling]           = useState(false);
 
+  // Return modal state
+  const [existingReturn, setExistingReturn]   = useState<ReturnRequest | null>(null);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnStep, setReturnStep]           = useState(1);
+  const [returnType, setReturnType]           = useState<'return'|'exchange'|'replace'|''>('');
+  const [returnReason, setReturnReason]       = useState('');
+  const [returnDesc, setReturnDesc]           = useState('');
+  const [returnImages, setReturnImages]       = useState<string[]>([]);
+  const [uploadingReturnImg, setUploadingReturnImg] = useState(false);
+  const [submittingReturn, setSubmittingReturn]     = useState(false);
+  const returnImgRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (authLoading || !user) return;
     const load = async () => {
       try {
         const res = await ordersAPI.getOne(Number(id));
         setOrder(res.data);
+        // Check for existing return request
+        try {
+          const rr = await returnsAPI.getAll();
+          const found = rr.data.find((r: ReturnRequest) => r.order_id === Number(id));
+          if (found) setExistingReturn(found);
+        } catch {}
       } catch { router.push('/orders'); } finally { setLoading(false); }
     };
     load();
@@ -81,6 +127,54 @@ function OrderDetailContent() {
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Could not cancel order');
     } finally { setCancelling(false); }
+  };
+
+  const handleReturnImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (returnImages.length >= 3) { toast.error('Maximum 3 photos allowed'); return; }
+    const formData = new FormData();
+    formData.append('file', file);
+    setUploadingReturnImg(true);
+    try {
+      const res = await returnsAPI.uploadImage(formData);
+      setReturnImages(prev => [...prev, res.data.url]);
+      toast.success('Photo uploaded!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Upload failed');
+    } finally {
+      setUploadingReturnImg(false);
+      if (returnImgRef.current) returnImgRef.current.value = '';
+    }
+  };
+
+  const handleReturnSubmit = async () => {
+    if (!returnType) { toast.error('Please select a request type'); return; }
+    if (!returnReason) { toast.error('Please select a reason'); return; }
+    setSubmittingReturn(true);
+    try {
+      const res = await returnsAPI.create({
+        order_id: Number(id),
+        request_type: returnType,
+        reason: returnReason,
+        description: returnDesc.trim() || undefined,
+        images: returnImages,
+      });
+      setExistingReturn(res.data);
+      setShowReturnModal(false);
+      toast.success('Return request submitted! We will review within 24 hours.');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Could not submit return request');
+    } finally { setSubmittingReturn(false); }
+  };
+
+  const resetReturnModal = () => {
+    setReturnStep(1);
+    setReturnType('');
+    setReturnReason('');
+    setReturnDesc('');
+    setReturnImages([]);
+    setShowReturnModal(false);
   };
 
   if (loading) return (
@@ -425,6 +519,41 @@ function OrderDetailContent() {
             </Link>
           </div>
 
+          {/* Return / Exchange / Replace */}
+          {isDelivered && (
+            <div className="card p-5">
+              <h3 className="font-bold text-maroon-900 mb-2 flex items-center gap-2">
+                <RotateCcw size={16} /> Return / Exchange
+              </h3>
+              {existingReturn ? (
+                <div>
+                  <p className="text-xs text-gray-500 mb-2">You have a {existingReturn.request_type === 'return' ? 'Return & Refund' : existingReturn.request_type === 'exchange' ? 'Exchange' : 'Replacement'} request</p>
+                  <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border mb-3 ${RETURN_STATUS_LABEL[existingReturn.status]?.color || 'bg-gray-100 text-gray-600 border-gray-300'}`}>
+                    {RETURN_STATUS_LABEL[existingReturn.status]?.label || existingReturn.status}
+                  </div>
+                  {existingReturn.admin_notes && (
+                    <p className="text-xs text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-3">
+                      Note: {existingReturn.admin_notes}
+                    </p>
+                  )}
+                  <Link href={`/returns/${existingReturn.id}`}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 border border-maroon-300 text-maroon-700 hover:bg-maroon-50 text-sm font-medium rounded-xl transition-colors">
+                    View Request Details <ChevronRight size={14} />
+                  </Link>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs text-gray-500 mb-3">Not satisfied? Raise a return, exchange or replacement request within 7 days of delivery.</p>
+                  <button
+                    onClick={() => setShowReturnModal(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 border border-maroon-300 text-maroon-700 hover:bg-maroon-50 text-sm font-medium rounded-xl transition-colors">
+                    <RotateCcw size={15} /> Request Return / Exchange
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Delivery address */}
           <div className="card p-5">
             <h3 className="font-bold text-maroon-900 mb-3 flex items-center gap-2"><MapPin size={16} /> Delivery Address</h3>
@@ -449,6 +578,143 @@ function OrderDetailContent() {
           </Link>
         </div>
       </div>
+
+      {/* ── Return / Exchange / Replace Modal ── */}
+      {showReturnModal && (
+        <div className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4" onClick={resetReturnModal}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-orange-100">
+              <div>
+                <h3 className="font-bold text-maroon-900 text-lg">Return / Exchange Request</h3>
+                <p className="text-xs text-gray-500">{order.order_number} · Step {returnStep} of 3</p>
+              </div>
+              <button onClick={resetReturnModal} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+            </div>
+
+            {/* Step indicator */}
+            <div className="flex gap-0 px-5 pt-4">
+              {[1,2,3].map(s => (
+                <div key={s} className={`flex-1 h-1.5 rounded-full mx-0.5 transition-all ${returnStep >= s ? 'bg-maroon-800' : 'bg-gray-200'}`} />
+              ))}
+            </div>
+
+            <div className="p-5">
+              {/* Step 1: Choose type */}
+              {returnStep === 1 && (
+                <div>
+                  <p className="font-semibold text-gray-800 mb-4">What would you like to do?</p>
+                  <div className="space-y-3">
+                    {(Object.entries(RETURN_TYPE_INFO) as [keyof typeof RETURN_TYPE_INFO, typeof RETURN_TYPE_INFO[keyof typeof RETURN_TYPE_INFO]][]).map(([type, info]) => (
+                      <button key={type} onClick={() => setReturnType(type)}
+                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${returnType === type ? info.color + ' border-opacity-100' : 'border-gray-200 hover:border-maroon-300 bg-white'}`}>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-gray-800 text-sm">{info.label}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">{info.desc}</p>
+                          </div>
+                          <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center ml-3 ${returnType === type ? 'border-maroon-700 bg-maroon-700' : 'border-gray-300'}`}>
+                            {returnType === type && <div className="w-2 h-2 rounded-full bg-white" />}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={() => { if (!returnType) { toast.error('Please choose a request type'); return; } setReturnStep(2); }}
+                    className="mt-5 w-full btn-primary py-3 flex items-center justify-center gap-2">
+                    Continue <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+
+              {/* Step 2: Reason */}
+              {returnStep === 2 && (
+                <div>
+                  <p className="font-semibold text-gray-800 mb-1">Why are you raising this request?</p>
+                  <p className="text-xs text-gray-500 mb-4">Select the most appropriate reason</p>
+                  <div className="space-y-2 mb-4">
+                    {RETURN_REASONS.map(r => (
+                      <label key={r} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${returnReason === r ? 'border-maroon-500 bg-orange-50' : 'border-gray-200 hover:border-maroon-300'}`}>
+                        <input type="radio" name="return_reason" value={r} checked={returnReason === r}
+                          onChange={() => setReturnReason(r)} className="accent-maroon-700" />
+                        <span className="text-sm text-gray-700">{r}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div>
+                    <label className="label">Additional Details (optional)</label>
+                    <textarea value={returnDesc} onChange={e => setReturnDesc(e.target.value)}
+                      placeholder="Describe the issue in more detail..."
+                      rows={3}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-maroon-400 resize-none" />
+                  </div>
+                  <div className="flex gap-3 mt-5">
+                    <button onClick={() => setReturnStep(1)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => { if (!returnReason) { toast.error('Please select a reason'); return; } setReturnStep(3); }}
+                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2">
+                      Continue <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Upload photos */}
+              {returnStep === 3 && (
+                <div>
+                  <p className="font-semibold text-gray-800 mb-1">Upload Photos</p>
+                  <p className="text-xs text-gray-500 mb-4">
+                    {returnReason === "Damaged product" || returnReason === "Stitching / quality issue" || returnReason === "Wrong item received"
+                      ? "Please upload photos of the issue — this helps us process your request faster."
+                      : "Upload photos of the item (optional but recommended)."}
+                    {' '}Max 3 photos.
+                  </p>
+
+                  {/* Summary */}
+                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4">
+                    <p className="text-xs text-gray-600">
+                      <span className="font-semibold">Type:</span> {returnType ? RETURN_TYPE_INFO[returnType].label : ''} &nbsp;·&nbsp;
+                      <span className="font-semibold">Reason:</span> {returnReason}
+                    </p>
+                  </div>
+
+                  {/* Image grid */}
+                  <div className="flex flex-wrap gap-3 mb-3">
+                    {returnImages.map((url, idx) => (
+                      <div key={idx} className="relative group">
+                        <img src={url} alt={`Return photo ${idx+1}`} className="w-20 h-20 object-cover rounded-xl border-2 border-orange-200" />
+                        <button onClick={() => setReturnImages(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                    {returnImages.length < 3 && (
+                      <button onClick={() => returnImgRef.current?.click()} disabled={uploadingReturnImg}
+                        className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-maroon-400 hover:text-maroon-500 transition-colors disabled:opacity-50">
+                        {uploadingReturnImg ? (
+                          <RefreshCw size={18} className="animate-spin" />
+                        ) : (
+                          <><ImagePlus size={20} /><span className="text-[9px] mt-1">Add Photo</span></>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <input ref={returnImgRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleReturnImageUpload} />
+                  <p className="text-xs text-gray-400 mb-5">JPEG, PNG or WebP · Max 10MB each</p>
+
+                  <div className="flex gap-3">
+                    <button onClick={() => setReturnStep(2)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={handleReturnSubmit} disabled={submittingReturn}
+                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2">
+                      {submittingReturn ? <><RefreshCw size={14} className="animate-spin" /> Submitting...</> : 'Submit Request'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Cancel Confirmation Modal ── */}
       {showCancelModal && (
