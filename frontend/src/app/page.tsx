@@ -1,10 +1,73 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Star, Truck, Shield, RotateCcw, Headphones, Sparkles } from 'lucide-react';
+import { ArrowRight, Star, Truck, Shield, RotateCcw, Headphones, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productsAPI } from '@/lib/api';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
+
+const OFFERS = [
+  {
+    emoji: '👗',
+    tag: 'Festival Special',
+    title: 'Lehenga Collection',
+    desc: 'Up to 40% off on bridal & festive Lehengasfor every occasion.',
+    btn: 'Shop Lehenga',
+    href: '/products?category=Lehenga',
+    bg: 'from-maroon-900 via-maroon-800 to-rose-900',
+    accent: '💃',
+  },
+  {
+    emoji: '👘',
+    tag: 'New Arrival',
+    title: 'Chudithar Sets',
+    desc: 'Fresh styles in cotton & silk Chudithars — traditional comfort, modern look.',
+    btn: 'Shop Chudithar',
+    href: '/products?category=Chudithar',
+    bg: 'from-purple-900 via-maroon-800 to-purple-900',
+    accent: '🌸',
+  },
+  {
+    emoji: '👕',
+    tag: 'Trending Now',
+    title: 'Tops Collection',
+    desc: 'Stylish & trendy tops for every day — casual, formal & everything in between.',
+    btn: 'Shop Tops',
+    href: '/products?category=Tops',
+    bg: 'from-maroon-900 via-rose-900 to-maroon-900',
+    accent: '⭐',
+  },
+  {
+    emoji: '🥻',
+    tag: 'Traditional Pick',
+    title: 'Half Saree',
+    desc: 'Elegant Half Sarees for weddings, functions & festivals — timeless beauty.',
+    btn: 'Shop Half Saree',
+    href: '/products?category=Half+Saree',
+    bg: 'from-teal-900 via-maroon-800 to-teal-900',
+    accent: '🌺',
+  },
+  {
+    emoji: '🎽',
+    tag: 'Casual Vibes',
+    title: 'Crop Tops',
+    desc: 'Modern & trendy Crop Tops — perfect for college, outings & casual wear.',
+    btn: 'Shop Crop Tops',
+    href: '/products?category=Crop+Tops',
+    bg: 'from-sky-900 via-maroon-800 to-sky-900',
+    accent: '✨',
+  },
+  {
+    emoji: '✨',
+    tag: 'Party Ready',
+    title: 'Party Wears',
+    desc: 'Glamorous Party Wear collections — shine bright at every celebration.',
+    btn: 'Shop Party Wear',
+    href: '/products?category=Party+Wears',
+    bg: 'from-amber-900 via-maroon-800 to-amber-900',
+    accent: '🎉',
+  },
+];
 
 const CATEGORIES = [
   { name: 'Chudithar',   emoji: '👘', desc: 'Traditional & Casual',   gradient: 'from-rose-100 to-pink-200',    border: 'border-rose-300'   },
@@ -29,6 +92,27 @@ export default function HomePage() {
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [reviews,     setReviews]     = useState<any[]>([]);
   const [loading,     setLoading]     = useState(true);
+  const [offerIdx,    setOfferIdx]    = useState(0);
+  const offerTimer = useRef<any>(null);
+
+  // Auto-rotate offers every 3 seconds
+  useEffect(() => {
+    offerTimer.current = setInterval(() => {
+      setOfferIdx(i => (i + 1) % OFFERS.length);
+    }, 3000);
+    return () => clearInterval(offerTimer.current);
+  }, []);
+
+  const prevOffer = () => {
+    clearInterval(offerTimer.current);
+    setOfferIdx(i => (i - 1 + OFFERS.length) % OFFERS.length);
+    offerTimer.current = setInterval(() => setOfferIdx(i => (i + 1) % OFFERS.length), 3000);
+  };
+  const nextOffer = () => {
+    clearInterval(offerTimer.current);
+    setOfferIdx(i => (i + 1) % OFFERS.length);
+    offerTimer.current = setInterval(() => setOfferIdx(i => (i + 1) % OFFERS.length), 3000);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -164,22 +248,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Banner */}
+      {/* Rotating Offer Banner */}
       <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="bg-brand-gradient rounded-2xl p-8 md:p-12 text-white text-center relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-2xl md:text-3xl font-display font-bold mb-3">
-              🎉 Special Festival Offer
+        <div className={`bg-gradient-to-r ${OFFERS[offerIdx].bg} rounded-2xl p-8 md:p-12 text-white text-center relative overflow-hidden transition-all duration-700`}>
+          {/* Big background emoji */}
+          <div className="absolute inset-0 opacity-[0.06] text-[180px] flex items-center justify-center select-none pointer-events-none">
+            {OFFERS[offerIdx].accent}
+          </div>
+
+          {/* Prev / Next arrows */}
+          <button
+            onClick={prevOffer}
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={nextOffer}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10"
+          >
+            <ChevronRight size={20} />
+          </button>
+
+          {/* Content */}
+          <div className="relative z-10 transition-all duration-500">
+            <span className="inline-block bg-gold-500/20 border border-gold-400/30 text-gold-300 text-xs font-semibold px-3 py-1 rounded-full mb-3 uppercase tracking-widest">
+              {OFFERS[offerIdx].tag}
+            </span>
+            <h2 className="text-2xl md:text-4xl font-display font-bold mb-3">
+              {OFFERS[offerIdx].emoji} {OFFERS[offerIdx].title}
             </h2>
-            <p className="text-maroon-200 mb-6 max-w-xl mx-auto">
-              Get up to 40% off on selected Lehenga and Party Wear collections.
-              Limited time offer — don&apos;t miss out!
+            <p className="text-maroon-200 mb-6 max-w-xl mx-auto text-sm md:text-base">
+              {OFFERS[offerIdx].desc}
             </p>
-            <Link href="/products?category=Lehenga" className="btn-gold inline-flex items-center gap-2">
-              Shop Lehenga <ArrowRight size={18} />
+            <Link href={OFFERS[offerIdx].href} className="btn-gold inline-flex items-center gap-2">
+              {OFFERS[offerIdx].btn} <ArrowRight size={18} />
             </Link>
           </div>
-          <div className="absolute inset-0 opacity-5 text-[200px] flex items-center justify-center">✨</div>
+
+          {/* Dot indicators */}
+          <div className="flex justify-center gap-2 mt-6 relative z-10">
+            {OFFERS.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { clearInterval(offerTimer.current); setOfferIdx(i); offerTimer.current = setInterval(() => setOfferIdx(j => (j + 1) % OFFERS.length), 3000); }}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === offerIdx ? 'w-6 bg-gold-400' : 'w-1.5 bg-white/30'}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
