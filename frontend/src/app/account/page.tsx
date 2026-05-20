@@ -334,7 +334,7 @@ export default function AccountPage() {
             onClick={() => { logout(); window.location.href = '/auth/login'; }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors"
           >
-            <RefreshCw size={15} /> Switch Account
+            <RefreshCw size={15} /> Add Another Account
           </button>
           <button onClick={performLogout}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors">

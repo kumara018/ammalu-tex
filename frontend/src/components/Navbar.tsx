@@ -304,7 +304,7 @@ export default function Navbar() {
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 text-sm text-gray-600"
                       >
                         <UserPlus size={15} className="text-gray-500" />
-                        Switch Account
+                        Add Another Account
                       </Link>
 
                       <hr className="border-orange-100 my-1" />
@@ -493,7 +493,7 @@ export default function Navbar() {
                     href="/auth/login?add=1"
                     onClick={() => setMobileOpen(false)}
                     className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2">
-                    <UserPlus size={15} /> Switch Account
+                    <UserPlus size={15} /> Add Another Account
                   </Link>
                   <Link href="/account/delete" onClick={() => setMobileOpen(false)}
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
