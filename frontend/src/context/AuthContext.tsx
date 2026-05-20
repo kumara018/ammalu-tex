@@ -119,20 +119,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // ── Full sign-out (removes current account from saved sessions) ───────────
+  // ── Sign out current account only ────────────────────────────────────────
+  // If other saved sessions exist → auto-switch to the next one (like Amazon/Google).
+  // If no other sessions → fully log out.
   const logout = () => {
     const currentId = user?.id;
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    _clearCookie();
-    setToken(null);
-    setUser(null);
+    const remaining = sessions.filter(s => s.user.id !== currentId);
 
-    setSessions(prev => {
-      const updated = prev.filter(s => s.user.id !== currentId);
-      localStorage.setItem('sessions', JSON.stringify(updated));
-      return updated;
-    });
+    // Always update sessions list (remove signed-out account)
+    setSessions(remaining);
+    localStorage.setItem('sessions', JSON.stringify(remaining));
+
+    if (remaining.length > 0) {
+      // Switch to the next saved account seamlessly
+      const next = remaining[0];
+      localStorage.setItem('token', next.token);
+      localStorage.setItem('user', JSON.stringify(next.user));
+      _setCookie(next.token);
+      setToken(next.token);
+      setUser(next.user);
+    } else {
+      // No other saved accounts — full sign-out
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      _clearCookie();
+      setToken(null);
+      setUser(null);
+    }
   };
 
   // ── Refresh current user from API ─────────────────────────────────────────

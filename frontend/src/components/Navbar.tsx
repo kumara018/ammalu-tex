@@ -22,12 +22,13 @@ export default function Navbar() {
   const { count } = useCart();
   const router = useRouter();
 
-  const [search, setSearch]               = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showDrop, setShowDrop]           = useState(false);
-  const [mobileOpen, setMobileOpen]       = useState(false);
-  const [userMenuOpen, setUserMenuOpen]   = useState(false);
-  const [catMenuOpen, setCatMenuOpen]     = useState(false);
+  const [search, setSearch]                     = useState('');
+  const [searchResults, setSearchResults]       = useState<any[]>([]);
+  const [showDrop, setShowDrop]                 = useState(false);
+  const [mobileOpen, setMobileOpen]             = useState(false);
+  const [userMenuOpen, setUserMenuOpen]         = useState(false);
+  const [catMenuOpen, setCatMenuOpen]           = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const userMenuRef  = useRef<HTMLDivElement>(null);
   const catMenuRef   = useRef<HTMLDivElement>(null);
   const searchBoxRef = useRef<HTMLDivElement>(null);
@@ -74,6 +75,19 @@ export default function Navbar() {
     router.push(`/products/${id}`);
     setSearch(''); setShowDrop(false);
   }, [router]);
+
+  // ── Sign-out with confirmation ────────────────────────────────────────────
+  const handleSignOut = () => {
+    setUserMenuOpen(false);
+    setMobileOpen(false);
+    setShowSignOutConfirm(true);
+  };
+
+  const handleConfirmSignOut = () => {
+    setShowSignOutConfirm(false);
+    logout();           // auto-switches to next account if one exists
+    window.location.href = '/';
+  };
 
   return (
     <header className="sticky top-0 z-50 shadow-md">
@@ -250,24 +264,33 @@ export default function Navbar() {
                       {/* ── Switch Account ── */}
                       <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Switch Account</p>
                       {sessions.filter(s => s.user.id !== user.id).map(session => (
-                        <button
-                          key={session.user.id}
-                          onClick={() => {
-                            setUserMenuOpen(false);
-                            switchAccount(session);
-                            window.location.href = session.user.is_admin ? '/admin' : '/';
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 transition-colors text-left"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-maroon-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                            {session.user.full_name.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-800 truncate">{session.user.full_name}</p>
-                            <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
-                          </div>
-                          <ChevronRight size={14} className="text-gray-400 flex-shrink-0" />
-                        </button>
+                        <div key={session.user.id} className="flex items-center gap-1 px-2 hover:bg-orange-50 transition-colors group">
+                          <button
+                            onClick={() => {
+                              setUserMenuOpen(false);
+                              switchAccount(session);
+                              window.location.href = session.user.is_admin ? '/admin' : '/';
+                            }}
+                            className="flex items-center gap-3 flex-1 py-2.5 text-left"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-maroon-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                              {session.user.full_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-800 truncate">{session.user.full_name}</p>
+                              <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
+                            </div>
+                            <ChevronRight size={14} className="text-gray-400 flex-shrink-0" />
+                          </button>
+                          {/* Remove this saved session */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeSession(session.user.id); }}
+                            title="Remove account"
+                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all flex-shrink-0"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
                       ))}
                       <Link
                         href="/auth/login?add=1"
@@ -280,11 +303,8 @@ export default function Navbar() {
 
                       <hr className="border-orange-100 my-1" />
 
-                      <button onClick={() => {
-                          setUserMenuOpen(false);
-                          logout();
-                          window.location.href = '/';
-                        }}
+                      <button
+                        onClick={handleSignOut}
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 w-full">
                         <LogOut size={16} /> Sign Out
                       </button>
@@ -437,23 +457,31 @@ export default function Navbar() {
                   {/* Switch Account — mobile */}
                   <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-maroon-400 uppercase tracking-widest">Switch Account</p>
                   {sessions.filter(s => s.user.id !== user.id).map(session => (
-                    <button
-                      key={session.user.id}
-                      onClick={() => {
-                        setMobileOpen(false);
-                        switchAccount(session);
-                        window.location.href = session.user.is_admin ? '/admin' : '/';
-                      }}
-                      className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 w-full text-left"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-maroon-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {session.user.full_name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="truncate">{session.user.full_name.split(' ')[0]}</p>
-                        <p className="text-xs text-maroon-300 truncate">{session.user.email}</p>
-                      </div>
-                    </button>
+                    <div key={session.user.id} className="flex items-center gap-1 group">
+                      <button
+                        onClick={() => {
+                          setMobileOpen(false);
+                          switchAccount(session);
+                          window.location.href = session.user.is_admin ? '/admin' : '/';
+                        }}
+                        className="flex-1 px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 text-left"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-maroon-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                          {session.user.full_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate">{session.user.full_name.split(' ')[0]}</p>
+                          <p className="text-xs text-maroon-300 truncate">{session.user.email}</p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => removeSession(session.user.id)}
+                        className="p-2 rounded-lg hover:bg-red-900 text-maroon-400 hover:text-red-300 flex-shrink-0"
+                        title="Remove account"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   ))}
                   <Link
                     href="/auth/login?add=1"
@@ -465,11 +493,8 @@ export default function Navbar() {
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
                     <UserX size={15} /> Delete Account
                   </Link>
-                  <button onClick={() => {
-                      setMobileOpen(false);
-                      logout();
-                      window.location.href = '/';
-                    }}
+                  <button
+                    onClick={handleSignOut}
                     className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2 w-full text-left">
                     <LogOut size={15} /> Sign Out
                   </button>
@@ -494,6 +519,58 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+
+      {/* ── Sign-Out Confirmation Modal ── */}
+      {showSignOutConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setShowSignOutConfirm(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <LogOut size={20} className="text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">Sign Out</h3>
+                <p className="text-sm text-gray-500">Are you sure you want to sign out?</p>
+              </div>
+            </div>
+
+            {/* Current user card */}
+            <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 mb-5 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-maroon-700 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                {user?.full_name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-maroon-900 text-sm truncate">{user?.full_name}</p>
+                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              </div>
+            </div>
+
+            {/* If other sessions exist, show a note */}
+            {sessions.filter(s => s.user.id !== user?.id).length > 0 && (
+              <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-4">
+                💡 You will be switched to your other saved account.
+              </p>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSignOutConfirm(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSignOut}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-semibold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <LogOut size={15} /> Yes, Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
