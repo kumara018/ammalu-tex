@@ -99,11 +99,20 @@ def create_shipment(order, user) -> dict | None:
     }
 
     try:
-        data = json.dumps(payload).encode()
-        req  = _req.Request(
+        # Delhivery expects multipart/form-data with format=json and data=<json_string>
+        form_data = _parse.urlencode({
+            "format": "json",
+            "data":   json.dumps(payload),
+        }).encode()
+
+        headers = {
+            "Authorization": f"Token {_token()}",
+            "Content-Type":  "application/x-www-form-urlencoded",
+        }
+        req = _req.Request(
             f"{_base()}/api/cmu/create.json",
-            data    = data,
-            headers = _headers(),
+            data    = form_data,
+            headers = headers,
             method  = "POST",
         )
         with _req.urlopen(req, timeout=15) as resp:
