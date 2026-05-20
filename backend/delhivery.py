@@ -62,7 +62,7 @@ def create_shipment(order, user) -> dict | None:
     print(f"[Delhivery] order.payment_method={order.payment_method!r}  normalised={pm!r}")
 
     is_cod    = (pm == "cod")
-    payment   = "COD" if is_cod else "Pre-paid"
+    payment   = "COD" if is_cod else "Prepaid"
     cod_amount = str(round(order.total, 2)) if is_cod else "0"
 
     shipment = {
