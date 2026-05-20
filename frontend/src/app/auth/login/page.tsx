@@ -186,9 +186,12 @@ export default function LoginPage() {
         {isAddMode && (
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-sm text-white/80 hover:text-white mr-4 transition-colors"
+            className="flex flex-col items-start text-sm text-white/80 hover:text-white mr-4 transition-colors leading-tight"
           >
-            ← Go Back
+            <span className="text-xs">← Back to</span>
+            <span className="font-semibold text-white truncate max-w-[120px]">
+              {user?.full_name?.split(' ')[0] || 'Account'}
+            </span>
           </button>
         )}
         <div className="flex-1 flex flex-col items-center leading-tight">
@@ -197,7 +200,7 @@ export default function LoginPage() {
             <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
           </Link>
         </div>
-        {isAddMode && <div className="w-20" />}{/* balance the back button */}
+        {isAddMode && <div className="w-24" />}
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
@@ -206,12 +209,12 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">
             {step === 'credentials'
-              ? (isAddMode ? 'Add another account' : 'Sign in to your account')
+              ? (isAddMode ? 'Switch Account' : 'Sign in to your account')
               : 'Verify your identity'}
           </h2>
           <p className="text-gray-500 text-sm mt-1">
             {step === 'credentials'
-              ? (isAddMode ? 'Sign in with a different account' : 'Enter your email or mobile number')
+              ? (isAddMode ? 'Sign in with a different account or create a new one' : 'Enter your email or mobile number')
               : `OTP sent to ${emailHint}`}
           </p>
         </div>
@@ -353,16 +356,17 @@ export default function LoginPage() {
             </form>
           )}
 
-          {!isAddMode && (
-            <div className="mt-6 pt-5 border-t border-orange-100 text-center">
-              <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{' '}
-                <Link href="/auth/register" className="text-maroon-800 font-semibold hover:underline">
-                  Create Account
-                </Link>
-              </p>
-            </div>
-          )}
+          <div className="mt-6 pt-5 border-t border-orange-100 text-center">
+            <p className="text-sm text-gray-600">
+              Don&apos;t have an account?{' '}
+              <Link
+                href={isAddMode ? '/auth/register?add=1' : '/auth/register'}
+                className="text-maroon-800 font-semibold hover:underline"
+              >
+                Create Account
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
       </div>
