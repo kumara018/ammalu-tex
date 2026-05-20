@@ -39,6 +39,11 @@ export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
+  // Declare state first so useEffect hooks below can reference them
+  const [step,    setStep]    = useState<1 | 2 | 3>(1);
+  const [placing, setPlacing] = useState(false);
+  const [openBox, setOpenBox] = useState(false);
+
   useEffect(() => {
     if (authLoading || !user) return;
     if (items.length === 0) { router.push('/cart'); return; }
@@ -64,10 +69,6 @@ export default function CheckoutPage() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [items.length, placing]);
-
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [placing, setPlacing] = useState(false);
-  const [openBox, setOpenBox] = useState(false);
 
   // Saved addresses
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
