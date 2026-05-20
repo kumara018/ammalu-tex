@@ -33,13 +33,15 @@ function ProductsContent() {
     sort:     'created_at:desc',
   });
 
-  // Sync filters when URL params change (e.g. clicking category from navbar/footer)
+  // Sync ALL filters when URL params change (also restores on refresh)
   useEffect(() => {
     setFilters(f => ({
-      ...f,
-      category: searchParams.get('category') || '',
-      search:   searchParams.get('search')   || '',
-      featured: searchParams.get('featured') || '',
+      category: searchParams.get('category')  || '',
+      search:   searchParams.get('search')    || '',
+      minPrice: searchParams.get('min_price') || '',
+      maxPrice: searchParams.get('max_price') || '',
+      featured: searchParams.get('featured')  || '',
+      sort:     searchParams.get('sort')      || f.sort,
     }));
   }, [searchParams]);
 
@@ -72,11 +74,26 @@ function ProductsContent() {
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
-  const setF = (key: string, val: string) => setFilters(f => ({ ...f, [key]: val }));
+  // Update a single filter in both state AND the URL (so refresh restores it)
+  const setF = (key: string, val: string) => {
+    const newFilters = { ...filters, [key]: val };
+    setFilters(newFilters);
 
-  const clearFilters = () => setFilters({
-    category: '', search: '', minPrice: '', maxPrice: '', featured: '', sort: 'created_at:desc',
-  });
+    const params = new URLSearchParams();
+    if (newFilters.category) params.set('category', newFilters.category);
+    if (newFilters.search)   params.set('search',   newFilters.search);
+    if (newFilters.minPrice) params.set('min_price', newFilters.minPrice);
+    if (newFilters.maxPrice) params.set('max_price', newFilters.maxPrice);
+    if (newFilters.featured) params.set('featured',  newFilters.featured);
+    if (newFilters.sort && newFilters.sort !== 'created_at:desc') params.set('sort', newFilters.sort);
+    const qs = params.toString();
+    router.replace(`/products${qs ? '?' + qs : ''}`, { scroll: false });
+  };
+
+  const clearFilters = () => {
+    setFilters({ category: '', search: '', minPrice: '', maxPrice: '', featured: '', sort: 'created_at:desc' });
+    router.replace('/products', { scroll: false });
+  };
 
   const hasFilters = filters.category || filters.search || filters.minPrice || filters.maxPrice || filters.featured;
 
