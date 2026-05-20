@@ -57,7 +57,13 @@ def create_shipment(order, user) -> dict | None:
         f"{i.get('name', 'Product')} x{i.get('quantity', 1)}" for i in items
     ) or "Textile Products"
 
-    cod_amount = str(round(order.total, 2)) if order.payment_method == "cod" else "0"
+    # Log the raw payment_method to diagnose issues
+    pm = (order.payment_method or "").strip().lower()
+    print(f"[Delhivery] order.payment_method={order.payment_method!r}  normalised={pm!r}")
+
+    is_cod    = (pm == "cod")
+    payment   = "COD" if is_cod else "Pre-paid"
+    cod_amount = str(round(order.total, 2)) if is_cod else "0"
 
     shipment = {
         "name":           addr.get("full_name") or (user.full_name if user else "Customer"),
@@ -71,7 +77,7 @@ def create_shipment(order, user) -> dict | None:
         "country":        "India",
         "phone":          str(addr.get("phone") or (user.phone if user else "")),
         "order":          order.order_number,
-        "payment":        "COD" if order.payment_method == "cod" else "Prepaid",
+        "payment":        payment,          # "COD" or "Pre-paid"
         "return_pin":     os.getenv("DELHIVERY_RETURN_PIN",     "638001"),
         "return_city":    os.getenv("DELHIVERY_RETURN_CITY",    "Gangapuram"),
         "return_state":   os.getenv("DELHIVERY_RETURN_STATE",   "Tamil Nadu"),
@@ -87,31 +93,33 @@ def create_shipment(order, user) -> dict | None:
         "shipment_width":  20,
         "shipment_height": 5,
         "shipment_length": 25,
-        "weight":          500,     # grams — adjust if needed
+        "weight":          0.5,     # kg (Delhivery expects kg, not grams)
         "quantity":        len(items) or 1,
         "waybill":         "",      # leave empty → Delhivery auto-assigns
         "seller_tin":      "",
         "seller_gst_tin":  "",
     }
 
+    pickup_name = os.getenv("DELHIVERY_PICKUP_NAME", "Primary")
     payload = {
         "shipments":       [shipment],
-        "pickup_location": {"name": os.getenv("DELHIVERY_PICKUP_NAME", "Primary")},
+        "pickup_location": {"name": pickup_name},
     }
 
     try:
-        data_json = json.dumps(payload)
-        print(f"[Delhivery] Sending shipment: {data_json}")
+        data_json = json.dumps(payload, ensure_ascii=False)
+        print(f"[Delhivery] pickup_name={pickup_name!r}  payment={payment!r}")
+        print(f"[Delhivery] Sending payload: {data_json}")
 
-        # Use requests with multipart form-data — most reliable for Delhivery CMU API
+        # Send as multipart/form-data (files=) — most reliable for Delhivery CMU API
         resp = _requests.post(
             f"{_base()}/api/cmu/create.json",
-            data    = {"format": "json", "data": data_json},
+            files   = {"format": (None, "json"), "data": (None, data_json)},
             headers = {"Authorization": f"Token {_token()}"},
             timeout = 20,
         )
+        print(f"[Delhivery] HTTP {resp.status_code}  raw: {resp.text[:500]}")
         result = resp.json()
-        print(f"[Delhivery] Response ({resp.status_code}): {result}")
         return result
     except Exception as e:
         print(f"[Delhivery] Create shipment error: {e}")
