@@ -49,6 +49,7 @@ export default function AdminPage() {
     delivery_person_name: '', delivery_person_phone: '',
   });
   const [shipSaving, setShipSaving] = useState(false);
+  const [creatingDelhivery, setCreatingDelhivery] = useState<number | null>(null);
 
   useEffect(() => {
     if (authLoading) return;            // wait for localStorage restore
@@ -200,6 +201,18 @@ export default function AdminPage() {
       delivery_person_phone:order.delivery_person_phone || '',
     });
     setShipModal(order);
+  };
+
+  const handleCreateDelhivery = async (orderId: number, orderNum: string) => {
+    if (!confirm(`Create Delhivery shipment for ${orderNum}? This will generate an AWB and notify the customer.`)) return;
+    setCreatingDelhivery(orderId);
+    try {
+      const res = await adminAPI.createDelhiveryShipment(orderId);
+      toast.success(`✅ Delhivery AWB: ${res.data.awb_code} — Customer notified!`, { duration: 8000 });
+      loadOrders();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Delhivery shipment failed — check API token & pickup location');
+    } finally { setCreatingDelhivery(null); }
   };
 
   const handleShipSave = async () => {
@@ -488,6 +501,25 @@ export default function AdminPage() {
                         >
                           📦 Ship Details
                         </button>
+                        {!o.awb_code && o.status !== 'cancelled' && o.status !== 'delivered' && (
+                          <button
+                            onClick={() => handleCreateDelhivery(o.id, o.order_number)}
+                            disabled={creatingDelhivery === o.id}
+                            className="text-xs bg-green-50 border border-green-300 text-green-700 hover:bg-green-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
+                            title="Auto-create shipment on Delhivery"
+                          >
+                            {creatingDelhivery === o.id ? '⏳...' : '🚚 Delhivery'}
+                          </button>
+                        )}
+                        {o.awb_code && (
+                          <a href={o.tracking_url || `https://www.delhivery.com/track/package/${o.awb_code}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="text-xs bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap"
+                            title={`Track AWB: ${o.awb_code}`}
+                          >
+                            📍 Track
+                          </a>
+                        )}
                       </div>
                     </td>
                   </tr>

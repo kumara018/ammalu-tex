@@ -177,13 +177,19 @@ def cancel_order(
         if product:
             product.stock += item["quantity"]
 
-    # Also cancel on Shiprocket if shipment was created
-    if order.shiprocket_order_id:
+    # Cancel on Delhivery if AWB exists
+    if order.awb_code:
+        courier = (order.courier_name or "").lower()
         try:
-            from shiprocket import shiprocket as sr
-            sr.cancel_order([int(order.shiprocket_order_id)])
+            if "delhivery" in courier or not courier:
+                import delhivery as dl
+                dl.cancel_shipment(order.awb_code)
+                print(f"[Delhivery] Cancelled AWB {order.awb_code}")
+            elif order.shiprocket_order_id:
+                from shiprocket import shiprocket as sr
+                sr.cancel_order([int(order.shiprocket_order_id)])
         except Exception as e:
-            print(f"[Shiprocket cancel error] {e}")
+            print(f"[Courier cancel error] {e}")
 
     db.commit()
     db.refresh(order)
@@ -228,10 +234,27 @@ def track_order(
 
     if order.awb_code:
         try:
-            from shiprocket import shiprocket as sr
-            data = sr.track_awb(order.awb_code)
-            if data:
-                result["shiprocket_data"] = data
+            # Use Delhivery if courier is Delhivery (or no courier set), else Shiprocket
+            courier = (order.courier_name or "").lower()
+            if "delhivery" in courier or not courier:
+                import delhivery as dl
+                raw = dl.track_awb(order.awb_code)
+                if raw:
+                    result["tracking_events"]   = dl.parse_tracking_events(raw)
+                    current                     = dl.parse_current_status(raw)
+                    result["current_status"]    = current
+                    # Auto-update estimated delivery if Delhivery provides it
+                    if current.get("expected_delivery"):
+                        result["estimated_delivery"] = current["expected_delivery"]
+                    # Auto-update current location from Delhivery
+                    if current.get("location"):
+                        result["status_location"] = current["location"]
+                    result["raw_data"] = raw
+            else:
+                from shiprocket import shiprocket as sr
+                data = sr.track_awb(order.awb_code)
+                if data:
+                    result["raw_data"] = data
         except Exception as e:
             print(f"[Track fetch error] {e}")
 

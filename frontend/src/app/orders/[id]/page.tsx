@@ -98,9 +98,12 @@ function OrderDetailContent() {
   const currentStep = STATUS_STEPS.indexOf(order.status);
   const addr = order.shipping_address as any;
 
-  // Shiprocket tracking events
-  const srEvents: any[] = tracking?.shiprocket_data?.tracking_data?.shipment_track_activities || [];
-  const currentLocation = tracking?.status_location || order.status_location;
+  // Delhivery tracking events (parsed clean list)
+  const trackingEvents: any[] = tracking?.tracking_events || [];
+  // Fallback: Shiprocket format
+  const srEvents: any[] = tracking?.raw_data?.tracking_data?.shipment_track_activities || [];
+  const allEvents = trackingEvents.length > 0 ? trackingEvents : srEvents;
+  const currentLocation = tracking?.status_location || tracking?.current_status?.location || order.status_location;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -224,16 +227,17 @@ function OrderDetailContent() {
             </div>
           )}
 
-          {/* ── Shiprocket Live Tracking Events ── */}
-          {srEvents.length > 0 && (
+          {/* ── Live Tracking History (Delhivery / Shiprocket) ── */}
+          {allEvents.length > 0 && (
             <div className="card p-6">
               <h3 className="font-bold text-maroon-900 mb-4 flex items-center gap-2">
                 <Navigation size={18} /> Live Tracking History
+                {order.courier_name && <span className="text-xs font-normal text-gray-400 ml-1">via {order.courier_name}</span>}
               </h3>
               <div className="space-y-0">
-                {srEvents.slice(0, 10).map((ev: any, i: number) => (
+                {allEvents.slice(0, 12).map((ev: any, i: number) => (
                   <div key={i} className="flex gap-3 relative">
-                    {i < srEvents.length - 1 && (
+                    {i < allEvents.length - 1 && (
                       <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-orange-100 z-0" />
                     )}
                     <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-white border-orange-300 text-orange-500'}`}>
@@ -249,7 +253,7 @@ function OrderDetailContent() {
                         </p>
                       )}
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {ev.date ? new Date(ev.date).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
+                        {ev.datetime ? new Date(ev.datetime).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
                       </p>
                     </div>
                   </div>

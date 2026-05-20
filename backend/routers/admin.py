@@ -337,6 +337,102 @@ def create_shiprocket_shipment(
     }
 
 
+@router.post("/orders/{order_id}/create-delhivery-shipment")
+def create_delhivery_shipment(
+    order_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    """
+    Create a shipment on Delhivery Direct for this order.
+    Requires DELHIVERY_API_TOKEN in Render env vars.
+    Also requires a pickup location named 'Primary' (or set DELHIVERY_PICKUP_NAME)
+    set up in your Delhivery dashboard.
+    """
+    import delhivery as dl
+
+    if not dl.is_configured():
+        raise HTTPException(400, "Delhivery not configured. Add DELHIVERY_API_TOKEN to Render env vars.")
+
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(404, "Order not found")
+    if order.status == "cancelled":
+        raise HTTPException(400, "Cannot create shipment for a cancelled order")
+    if order.awb_code:
+        raise HTTPException(400, f"Shipment already created. AWB: {order.awb_code}")
+
+    user = db.query(models.User).filter(models.User.id == order.user_id).first()
+
+    result = dl.create_shipment(order, user)
+    if not result:
+        raise HTTPException(502, "Delhivery API call failed. Check DELHIVERY_API_TOKEN and pickup location name.")
+
+    # Extract AWB from Delhivery response
+    # Response: { "packages": [{ "waybill": "...", "refnum": "...", "sort_code": "..." }], "success": true }
+    packages = result.get("packages", [])
+    success  = result.get("success", False)
+
+    if not success or not packages:
+        upload_msg = result.get("rmk") or result.get("error") or str(result)
+        raise HTTPException(502, f"Delhivery shipment failed: {upload_msg}")
+
+    awb = packages[0].get("waybill", "")
+    if not awb:
+        raise HTTPException(502, "Delhivery did not return a waybill (AWB). Check pickup location setup.")
+
+    # Save to order
+    order.awb_code     = awb
+    order.courier_name = "Delhivery"
+    order.tracking_url = f"https://www.delhivery.com/track/package/{awb}"
+    if order.status in ["pending", "confirmed"]:
+        order.status = "processing"
+
+    db.commit()
+    db.refresh(order)
+
+    # Notify customer that order is being shipped
+    customer = db.query(models.User).filter(models.User.id == order.user_id).first()
+    if customer:
+        notifications.send_order_status_email(customer.email, customer.full_name, order, order.status)
+        notifications.send_order_status_whatsapp(customer.phone, customer.full_name, order, order.status)
+
+    return {
+        "message":      "Shipment created on Delhivery ✅",
+        "awb_code":     awb,
+        "courier":      "Delhivery",
+        "tracking_url": f"https://www.delhivery.com/track/package/{awb}",
+        "packages":     packages,
+        "raw_response": result,
+    }
+
+
+@router.get("/orders/{order_id}/check-serviceability")
+def check_serviceability(
+    order_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    """Check if the customer's pincode is serviceable by Delhivery."""
+    import delhivery as dl
+
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(404, "Order not found")
+
+    addr      = order.shipping_address or {}
+    dest_pin  = str(addr.get("pincode", ""))
+    origin_pin= os.getenv("DELHIVERY_RETURN_PIN", "638001")
+
+    result = dl.check_serviceability(origin_pin, dest_pin)
+    return {
+        "dest_pincode":  dest_pin,
+        "origin_pincode":origin_pin,
+        "serviceable":   bool(result and not result.get("error")),
+        "details":       result,
+    }
+
+
 @router.get("/support-ratings")
 def get_support_ratings(
     db: Session = Depends(get_db),

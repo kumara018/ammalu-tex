@@ -124,11 +124,13 @@ export const adminAPI = {
   updateProduct:      (id: number, data: object)   => api.put(`/api/admin/products/${id}`, data),
   deleteProduct:      (id: number)                 => api.delete(`/api/admin/products/${id}`),
   uploadImage:        (form: FormData)             => api.post('/api/admin/products/upload-image', form, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  getOrders:          (status?: string)            => api.get('/api/admin/orders', { params: status ? { status } : {} }),
-  updateOrderStatus:  (id: number, data: object)   => api.put(`/api/admin/orders/${id}/status`, data),
-  getUsers:           ()                           => api.get('/api/admin/users'),
-  updateSettings:     (data: object)               => api.put('/api/admin/settings', data),
-  getSupportRatings:  ()                           => api.get('/api/admin/support-ratings'),
+  getOrders:               (status?: string)            => api.get('/api/admin/orders', { params: status ? { status } : {} }),
+  updateOrderStatus:       (id: number, data: object)   => api.put(`/api/admin/orders/${id}/status`, data),
+  createDelhiveryShipment: (id: number)                 => api.post(`/api/admin/orders/${id}/create-delhivery-shipment`),
+  checkServiceability:     (id: number)                 => api.get(`/api/admin/orders/${id}/check-serviceability`),
+  getUsers:                ()                           => api.get('/api/admin/users'),
+  updateSettings:          (data: object)               => api.put('/api/admin/settings', data),
+  getSupportRatings:       ()                           => api.get('/api/admin/support-ratings'),
 };
 
 export const supportAPI = {
