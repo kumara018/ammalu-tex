@@ -18,7 +18,7 @@ interface DashData { total_products: number; active_products: number; total_user
 const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
 
 const emptyProduct = {
-  name:'', description:'', price:'', compare_price:'', category:'Chudithar',
+  name:'', description:'', price:'', compare_price:'', category:'',
   fabric:'', size_options:[] as string[], colors:[] as string[],
   images:[] as string[], stock:'', is_featured:false, is_new_arrival:false,
 };
@@ -577,8 +577,10 @@ export default function AdminPage() {
                 <div>
                   <label className="label">Category *</label>
                   <select value={form.category} onChange={F('category')} className={`input-field ${formErrors.category ? 'input-error' : ''}`}>
+                    <option value="" disabled>-- Select Category --</option>
                     {CATEGORIES_WITH_HALF_SAREE.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
+                  {formErrors.category && <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>}
                 </div>
                 <div>
                   <label className="label">Fabric</label>
