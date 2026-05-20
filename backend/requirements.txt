@@ -13,3 +13,4 @@ alembic==1.13.1
 razorpay==1.4.2
 psycopg2-binary==2.9.9
 cloudinary==1.40.0
+twilio==8.13.0

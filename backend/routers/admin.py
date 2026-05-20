@@ -203,7 +203,12 @@ def update_order_status(
                 agent_name=order.delivery_person_name or "",
                 agent_phone=order.delivery_person_phone or "",
             )
-            # Also SMS the OTP
+            notifications.send_delivery_otp_whatsapp(
+                user.phone, user.full_name, order.delivery_otp,
+                order.order_number,
+                agent_name=order.delivery_person_name or "",
+                agent_phone=order.delivery_person_phone or "",
+            )
             notifications.send_otp_sms(
                 user.phone,
                 f"Delivery OTP for order {order.order_number}: {order.delivery_otp}. Share with delivery agent only.",
@@ -211,10 +216,12 @@ def update_order_status(
             )
         else:
             notifications.send_order_status_email(user.email, user.full_name, order, payload.status)
+            notifications.send_order_status_whatsapp(user.phone, user.full_name, order, payload.status)
 
         # After delivered, ask for a review
         if payload.status == "delivered":
             notifications.send_review_request_email(user.email, user.full_name, order)
+            notifications.send_review_request_whatsapp(user.phone, user.full_name, order.order_number)
 
     return {
         "message": f"Order {order.order_number} updated to {payload.status}",

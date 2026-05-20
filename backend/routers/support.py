@@ -37,12 +37,14 @@ def submit_support_rating(
     db.commit()
     db.refresh(rating)
 
-    # Send confirmation email to user + notify admin
+    # Send confirmation email to user + notify admin + WhatsApp if phone provided
     notifications.send_support_rating_confirmation(payload.email, payload.name, payload.rating)
     notifications.send_support_rating_admin_notify(
         payload.name, payload.email, payload.rating,
         payload.category or "", payload.message or ""
     )
+    if payload.phone:
+        notifications.send_support_rating_whatsapp(payload.phone, payload.name, payload.rating)
 
     return {"message": "Thank you for your feedback! It helps us serve you better."}
 

@@ -701,27 +701,248 @@ def send_support_rating_admin_notify(name: str, email: str, rating: int, categor
     _bg(admin_email, f"New {rating}★ Support Rating from {name} — {STORE_NAME}", html)
 
 
-# ── 15. Optional SMS via Twilio ─────────────────────────────────────────────────
-def _send_sms(to_phone: str, message: str):
-    if not to_phone.startswith("+"):
-        to_phone = "+91" + to_phone
-    sid   = os.getenv("TWILIO_ACCOUNT_SID", "")
-    token = os.getenv("TWILIO_AUTH_TOKEN",  "")
-    frm   = os.getenv("TWILIO_PHONE",       "")
-    if not all([sid, token, frm]):
-        print(f"[SMS] {to_phone}: {message}")
-        return
+# ══════════════════════════════════════════════════════════════════════════════
+# ── 15. SMS & WhatsApp via Twilio ──────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _normalize_phone(phone: str) -> str:
+    """Ensure phone has +91 prefix for Indian numbers."""
+    phone = phone.strip().replace(" ", "").replace("-", "")
+    if not phone.startswith("+"):
+        phone = "+91" + phone
+    return phone
+
+
+def _twilio_client():
+    """Return (client, sms_from, wa_from) or None if not configured."""
+    sid   = os.getenv("TWILIO_ACCOUNT_SID", "").strip()
+    token = os.getenv("TWILIO_AUTH_TOKEN",  "").strip()
+    if not sid or not token:
+        return None, "", ""
     try:
         from twilio.rest import Client
-        Client(sid, token).messages.create(body=message, from_=frm, to=to_phone)
+        client   = Client(sid, token)
+        sms_from = os.getenv("TWILIO_PHONE", "").strip()
+        wa_from  = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886").strip()
+        return client, sms_from, wa_from
     except Exception as e:
-        print(f"[SMS Error] {e}")
+        print(f"[Twilio init error] {e}")
+        return None, "", ""
 
+
+def _send_sms(to_phone: str, message: str):
+    """Send SMS. Logs to console if Twilio not configured."""
+    to_phone = _normalize_phone(to_phone)
+    client, sms_from, _ = _twilio_client()
+    if not client or not sms_from:
+        print(f"[SMS not configured] {to_phone}: {message}")
+        return
+    try:
+        msg = client.messages.create(body=message, from_=sms_from, to=to_phone)
+        print(f"[SMS SENT ✓ {msg.sid}] → {to_phone}")
+    except Exception as e:
+        print(f"[SMS ERROR] {type(e).__name__}: {e}")
+
+
+def _send_whatsapp(to_phone: str, message: str):
+    """Send WhatsApp message via Twilio. Runs in a daemon thread."""
+    def _do():
+        to = "whatsapp:" + _normalize_phone(to_phone)
+        client, _, wa_from = _twilio_client()
+        if not client or not wa_from:
+            print(f"[WhatsApp not configured] {to}: {message[:80]}")
+            return
+        try:
+            msg = client.messages.create(body=message, from_=wa_from, to=to)
+            print(f"[WhatsApp SENT ✓ {msg.sid}] → {to}")
+        except Exception as e:
+            print(f"[WhatsApp ERROR] {type(e).__name__}: {e}")
+    threading.Thread(target=_do, daemon=True).start()
+
+
+def _bg_sms(to_phone: str, message: str):
+    """Fire-and-forget SMS in a daemon thread."""
+    threading.Thread(target=_send_sms, args=(to_phone, message), daemon=True).start()
+
+
+# ── Cart text summary (for SMS/WhatsApp) ──────────────────────────────────────
+def _cart_text(cart_items: list) -> str:
+    if not cart_items:
+        return "Your cart is empty."
+    lines = []
+    total = 0.0
+    for item in cart_items:
+        qty      = item.get("quantity", 1)
+        price    = item.get("price", 0)
+        subtotal = price * qty
+        total   += subtotal
+        size_color = ""
+        if item.get("size"):  size_color += f" [{item['size']}"
+        if item.get("color"): size_color += ("|" if item.get("size") else " [") + item["color"]
+        if size_color:        size_color += "]"
+        lines.append(f"  • {item.get('name','Item')}{size_color} ×{qty} — ₹{subtotal:,.0f}")
+    lines.append(f"\n  *Total: ₹{total:,.0f} ({len(cart_items)} item{'s' if len(cart_items)!=1 else ''})*")
+    return "\n".join(lines)
+
+
+# ── 15a. Welcome ──────────────────────────────────────────────────────────────
 def send_welcome_sms(phone: str, name: str):
-    _send_sms(phone, f"Welcome to {STORE_NAME}, {name.split()[0]}! Shop at {STORE_URL}")
+    first = name.split()[0]
+    _bg_sms(phone,
+        f"🎉 Welcome to {STORE_NAME}, {first}!\n"
+        f"Your account is ready. Start shopping at:\n{STORE_URL}"
+    )
+    _send_whatsapp(phone,
+        f"🎉 *Welcome to {STORE_NAME}, {first}!*\n\n"
+        f"Thank you for creating your account. Discover our exclusive collection of "
+        f"Chudithar, Lehenga, Half Sarees, Tops & Party Wears.\n\n"
+        f"🛍️ Shop now: {STORE_URL}\n"
+        f"📞 Support: {SUPPORT_EMAIL}"
+    )
 
-def send_order_sms(phone: str, order_number: str, total: float):
-    _send_sms(phone, f"{STORE_NAME}: Order {order_number} confirmed! Total ₹{total:,.0f}. Track: {STORE_URL}/orders")
 
+# ── 15b. OTP ──────────────────────────────────────────────────────────────────
 def send_otp_sms(phone: str, otp: str, purpose: str = "Login"):
-    _send_sms(phone, f"{STORE_NAME} {purpose} OTP: {otp}. Valid 10 min. Do not share.")
+    _bg_sms(phone,
+        f"{STORE_NAME} {purpose} OTP: *{otp}*\nValid 10 min. Do NOT share with anyone."
+    )
+    _send_whatsapp(phone,
+        f"🔐 *{STORE_NAME} — {purpose} OTP*\n\n"
+        f"Your one-time password is:\n\n"
+        f"*{otp}*\n\n"
+        f"⏱️ Valid for 10 minutes only.\n"
+        f"🛡️ Never share this OTP with anyone. {STORE_NAME} staff will never ask for it."
+    )
+
+
+# ── 15c. Order confirmed ──────────────────────────────────────────────────────
+def send_order_sms(phone: str, order_number: str, total: float):
+    _bg_sms(phone,
+        f"✅ {STORE_NAME}: Order {order_number} confirmed! "
+        f"Total ₹{total:,.0f}. Track: {STORE_URL}/orders"
+    )
+
+def send_order_whatsapp(phone: str, name: str, order, items_snapshot: list):
+    first = name.split()[0]
+    rows  = "\n".join(
+        f"  • {i.get('name','')} ×{i.get('quantity',1)} — ₹{i.get('price',0)*i.get('quantity',1):,.0f}"
+        for i in items_snapshot
+    )
+    addr = order.shipping_address or {}
+    _send_whatsapp(phone,
+        f"✅ *Order Confirmed — {order.order_number}*\n\n"
+        f"Hi {first}, your order has been placed successfully!\n\n"
+        f"📦 *Items Ordered:*\n{rows}\n\n"
+        f"💰 *Total: ₹{order.total:,.0f}*\n"
+        f"🚚 Shipping: {'FREE' if order.shipping_fee == 0 else f'₹{order.shipping_fee:,.0f}'}\n"
+        f"💳 Payment: {order.payment_method.upper()}\n\n"
+        f"📍 *Delivering to:*\n"
+        f"  {addr.get('full_name','')}\n"
+        f"  {addr.get('address_line1','')}, {addr.get('city','')}\n"
+        f"  {addr.get('state','')} — {addr.get('pincode','')}\n\n"
+        f"📲 Track your order: {STORE_URL}/orders\n"
+        f"Expected delivery: 3–7 business days"
+    )
+
+
+# ── 15d. Order status update ──────────────────────────────────────────────────
+_WA_STATUS = {
+    "processing":       "🔄 Your order is being prepared by our team.",
+    "shipped":          "📦 Your order has been shipped and is on its way!",
+    "out_for_delivery": "🚚 Your order is out for delivery today — stay home!",
+    "delivered":        "✅ Your order has been delivered. We hope you love it!\n\n⭐ Please review your purchase at the website.",
+    "cancelled":        "❌ Your order has been cancelled. Any payment will be refunded in 5–7 days.",
+}
+
+def send_order_status_whatsapp(phone: str, name: str, order, new_status: str):
+    first   = name.split()[0]
+    message = _WA_STATUS.get(new_status, f"📋 Your order status: *{new_status}*")
+    tracking = f"\n🔍 Tracking: *{order.tracking_number}*" if getattr(order, "tracking_number", None) else ""
+    _send_whatsapp(phone,
+        f"📬 *Order Update — {order.order_number}*\n\n"
+        f"Hi {first},\n\n"
+        f"{message}{tracking}\n\n"
+        f"📲 Track your order: {STORE_URL}/orders"
+    )
+
+
+# ── 15e. Delivery OTP ─────────────────────────────────────────────────────────
+def send_delivery_otp_whatsapp(phone: str, name: str, otp: str, order_number: str,
+                                agent_name: str = "", agent_phone: str = ""):
+    first      = name.split()[0]
+    agent_info = ""
+    if agent_name or agent_phone:
+        agent_info = f"\n\n👤 *Delivery Agent:* {agent_name or '—'}"
+        if agent_phone:
+            agent_info += f"\n📞 {agent_phone}"
+    _send_whatsapp(phone,
+        f"🚚 *Your Order is Out for Delivery!*\n\n"
+        f"Hi {first}, order *{order_number}* is on its way.{agent_info}\n\n"
+        f"🔐 *Your Delivery OTP:*\n\n"
+        f"*{otp}*\n\n"
+        f"📌 Share this OTP only with the delivery person at your door.\n"
+        f"⚠️ Never share via call or message.\n\n"
+        f"📲 Track order: {STORE_URL}/orders"
+    )
+
+
+# ── 15f. Cart — add ───────────────────────────────────────────────────────────
+def send_cart_add_sms(phone: str, product_name: str, quantity: int, cart_items: list):
+    total = sum(i.get("price", 0) * i.get("quantity", 1) for i in cart_items)
+    count = len(cart_items)
+    _bg_sms(phone,
+        f"🛒 {STORE_NAME}: Added '{product_name}' ×{quantity} to cart. "
+        f"{count} item{'s' if count!=1 else ''} | ₹{total:,.0f}. "
+        f"Order: {STORE_URL}/cart"
+    )
+    summary = _cart_text(cart_items)
+    _send_whatsapp(phone,
+        f"🛒 *Added to Cart!*\n\n"
+        f"*{product_name}* ×{quantity} added.\n\n"
+        f"🧺 *Your Cart:*\n{summary}\n\n"
+        f"⚡ Stock is limited — place your order now!\n"
+        f"👉 {STORE_URL}/cart"
+    )
+
+
+# ── 15g. Cart — remove ────────────────────────────────────────────────────────
+def send_cart_remove_sms(phone: str, product_name: str, cart_items: list):
+    total = sum(i.get("price", 0) * i.get("quantity", 1) for i in cart_items)
+    count = len(cart_items)
+    _bg_sms(phone,
+        f"🗑️ {STORE_NAME}: Removed '{product_name}' from cart. "
+        f"{'Cart empty.' if count == 0 else f'{count} item(s) | ₹{total:,.0f}.'} "
+        f"{STORE_URL}"
+    )
+    summary = _cart_text(cart_items)
+    _send_whatsapp(phone,
+        f"🗑️ *Item Removed from Cart*\n\n"
+        f"*{product_name}* has been removed.\n\n"
+        + (f"🧺 *Remaining Cart:*\n{summary}\n\n👉 {STORE_URL}/cart"
+           if cart_items else
+           f"Your cart is now empty.\n\n🛍️ Continue shopping: {STORE_URL}/products")
+    )
+
+
+# ── 15h. Support rating ───────────────────────────────────────────────────────
+def send_support_rating_whatsapp(phone: str, name: str, rating: int):
+    first = name.split()[0]
+    stars = "⭐" * rating + "☆" * (5 - rating)
+    _send_whatsapp(phone,
+        f"🙏 *Thank you for your feedback, {first}!*\n\n"
+        f"You rated our support: {stars} ({rating}/5)\n\n"
+        f"Your feedback helps us serve you better.\n"
+        f"Visit us again: {STORE_URL}"
+    )
+
+
+# ── 15i. Review request ───────────────────────────────────────────────────────
+def send_review_request_whatsapp(phone: str, name: str, order_number: str):
+    first = name.split()[0]
+    _send_whatsapp(phone,
+        f"⭐ *How was your order, {first}?*\n\n"
+        f"Your order *{order_number}* has been delivered!\n\n"
+        f"We'd love to hear your thoughts. Your review helps other shoppers "
+        f"and takes less than 2 minutes.\n\n"
+        f"✍️ Write a review: {STORE_URL}/orders"
+    )

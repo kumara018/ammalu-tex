@@ -105,9 +105,10 @@ def place_order(
     db.commit()
     db.refresh(order)
 
-    # Send order confirmation email + SMS
+    # Send order confirmation email + SMS + WhatsApp
     notifications.send_order_confirmation_email(current_user.email, current_user.full_name, order)
     notifications.send_order_sms(current_user.phone, order.order_number, order.total)
+    notifications.send_order_whatsapp(current_user.phone, current_user.full_name, order, items_snapshot)
     if order.payment_method != "cod":
         notifications.send_payment_success_email(current_user.email, current_user.full_name, order)
 
