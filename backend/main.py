@@ -149,6 +149,10 @@ def _migrate_db():
         # ── products columns ───────────────────────────────────────────────
         try:
             products_cols = [c["name"] for c in inspector.get_columns("products")]
+            if "is_featured" not in products_cols:
+                conn.execute(text("ALTER TABLE products ADD COLUMN is_featured BOOLEAN NOT NULL DEFAULT FALSE"))
+                conn.commit()
+                print("[Startup] Migrated: added is_featured to products")
             if "is_new_arrival" not in products_cols:
                 conn.execute(text("ALTER TABLE products ADD COLUMN is_new_arrival BOOLEAN NOT NULL DEFAULT FALSE"))
                 conn.commit()

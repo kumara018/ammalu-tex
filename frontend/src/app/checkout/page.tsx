@@ -50,6 +50,21 @@ export default function CheckoutPage() {
     return () => { document.body.removeChild(script); };
   }, [user, items, authLoading]);
 
+  // Warn user before refresh / tab close while on checkout or during payment
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (items.length === 0) return; // cart already empty — order placed, no need to warn
+      const msg = placing
+        ? '⚠️ Your payment is being processed! Leaving now may cause issues.'
+        : 'You are in the middle of checkout. Your order has not been placed yet.';
+      e.preventDefault();
+      e.returnValue = msg;
+      return msg;
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [items.length, placing]);
+
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [placing, setPlacing] = useState(false);
   const [openBox, setOpenBox] = useState(false);

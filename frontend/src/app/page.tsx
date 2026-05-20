@@ -243,7 +243,14 @@ export default function HomePage() {
               {featured.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-12">No featured products yet.</p>
+            <div className="text-center py-14">
+              <p className="text-4xl mb-3">⭐</p>
+              <p className="text-gray-500 font-medium">No featured products yet.</p>
+              <p className="text-gray-400 text-sm mt-1">Check back soon — we&apos;re hand-picking the best for you!</p>
+              <Link href="/products" className="inline-flex items-center gap-1 mt-4 text-maroon-700 hover:text-maroon-900 font-semibold text-sm">
+                Browse all products <ArrowRight size={14} />
+              </Link>
+            </div>
           )}
         </div>
       </section>

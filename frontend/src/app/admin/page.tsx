@@ -26,7 +26,15 @@ const emptyProduct = {
 export default function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [tab, setTab] = useState<'dash'|'products'|'orders'|'users'|'ratings'>('dash');
+  type TabKey = 'dash'|'products'|'orders'|'users'|'ratings';
+  const [tab, setTab] = useState<TabKey>('dash');
+
+  // Restore last-used tab from localStorage after mount (avoids SSR mismatch)
+  useEffect(() => {
+    const saved = localStorage.getItem('admin_tab') as TabKey | null;
+    const valid: TabKey[] = ['dash','products','orders','users','ratings'];
+    if (saved && valid.includes(saved)) setTab(saved);
+  }, []);
   const [dash, setDash] = useState<DashData | null>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -87,6 +95,16 @@ export default function AdminPage() {
     setLoading(true);
     try { const res = await adminAPI.getSupportRatings(); setSupportRatings(res.data); }
     catch {} finally { setLoading(false); }
+  };
+
+  const handleToggleFeatured = async (p: any) => {
+    try {
+      await adminAPI.updateProduct(p.id, { is_featured: !p.is_featured });
+      setProducts(prev => prev.map(x => x.id === p.id ? { ...x, is_featured: !x.is_featured } : x));
+      toast.success(p.is_featured ? `Removed "${p.name}" from Featured` : `"${p.name}" is now Featured ⭐`);
+    } catch {
+      toast.error('Failed to update featured status');
+    }
   };
 
   useEffect(() => {
@@ -300,7 +318,7 @@ export default function AdminPage() {
         {TABS.map(({ key, label }) => (
           <button
             key={key}
-            onClick={() => setTab(key)}
+            onClick={() => { setTab(key); localStorage.setItem('admin_tab', key); }}
             className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${tab === key ? 'border-maroon-800 text-maroon-800 bg-maroon-50' : 'border-transparent text-gray-500 hover:text-maroon-700'}`}
           >
             {label}
@@ -435,6 +453,13 @@ export default function AdminPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleToggleFeatured(p)}
+                          className={`p-1.5 rounded-lg transition-colors ${p.is_featured ? 'text-amber-500 hover:bg-amber-100' : 'text-gray-300 hover:bg-gray-100 hover:text-amber-400'}`}
+                          title={p.is_featured ? 'Remove from Featured' : 'Mark as Featured'}
+                        >
+                          <Star size={15} fill={p.is_featured ? 'currentColor' : 'none'} />
+                        </button>
                         <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-maroon-100 rounded-lg text-maroon-700 transition-colors" title={`Edit #${p.id}`}>
                           <Pencil size={15} />
                         </button>
@@ -537,6 +562,7 @@ export default function AdminPage() {
             <table className="w-full text-sm">
               <thead className="bg-maroon-50">
                 <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
+                  <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3">Phone</th>
@@ -547,6 +573,9 @@ export default function AdminPage() {
               <tbody className="divide-y divide-orange-50">
                 {loading ? null : users.map((u) => (
                   <tr key={u.id} className="hover:bg-orange-50">
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">#{u.id}</span>
+                    </td>
                     <td className="px-4 py-3 font-medium text-gray-800">{u.full_name}</td>
                     <td className="px-4 py-3 text-gray-600">{u.email}</td>
                     <td className="px-4 py-3 text-gray-600">{u.phone}</td>
