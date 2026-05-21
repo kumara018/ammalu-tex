@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SlidersHorizontal, Search, X, ChevronDown } from 'lucide-react';
 import Fuse from 'fuse.js';
@@ -9,107 +9,135 @@ import ProductCard from '@/components/ProductCard';
 
 const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
 const SORT_OPTIONS = [
-  { label: 'Newest First',   value: 'created_at:desc' },
+  { label: 'Newest First',    value: 'created_at:desc' },
   { label: 'Price: Low–High', value: 'price:asc' },
   { label: 'Price: High–Low', value: 'price:desc' },
-  { label: 'Top Rated',      value: 'rating_avg:desc' },
-  { label: 'Name A–Z',       value: 'name:asc' },
+  { label: 'Top Rated',       value: 'rating_avg:desc' },
+  { label: 'Name A–Z',        value: 'name:asc' },
 ];
 
 function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [products, setProducts]         = useState<Product[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [total, setTotal]               = useState(0);
-  const [filtersOpen, setFiltersOpen]   = useState(false);
-  const [fuzzyMatch, setFuzzyMatch]     = useState<string>(''); // corrected term shown in banner
+  const [products, setProducts]       = useState<Product[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [total, setTotal]             = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [fuzzyMatch, setFuzzyMatch]   = useState<string>('');
 
-  const [filters, setFilters] = useState({
-    category: searchParams.get('category') || '',
-    search:   searchParams.get('search') || '',
+  // Single source of truth — derived directly from URL on every render
+  const filters = {
+    category: searchParams.get('category')  || '',
+    search:   searchParams.get('search')    || '',
     minPrice: searchParams.get('min_price') || '',
     maxPrice: searchParams.get('max_price') || '',
-    featured: searchParams.get('featured') || '',
-    sort:     'created_at:desc',
-  });
+    featured: searchParams.get('featured')  || '',
+    sort:     searchParams.get('sort')      || 'created_at:desc',
+  };
 
-  // Sync ALL filters when URL params change (also restores on refresh)
+  // All fetch logic lives here with a cancellation flag — no useCallback needed
   useEffect(() => {
-    setFilters(f => ({
-      category: searchParams.get('category')  || '',
-      search:   searchParams.get('search')    || '',
-      minPrice: searchParams.get('min_price') || '',
-      maxPrice: searchParams.get('max_price') || '',
-      featured: searchParams.get('featured')  || '',
-      sort:     searchParams.get('sort')      || f.sort,
-    }));
-  }, [searchParams]);
+    let cancelled = false;
 
-  const fetchProducts = useCallback(async (attempt = 1) => {
-    setLoading(true);
-    const [sortBy, sortOrder] = filters.sort.split(':');
-    const params: any = { sort_by: sortBy, sort_order: sortOrder, limit: 40 };
-    if (filters.category) params.category = filters.category;
-    if (filters.search)   params.search   = filters.search;
-    if (filters.minPrice) params.min_price = Number(filters.minPrice);
-    if (filters.maxPrice) params.max_price = Number(filters.maxPrice);
-    if (filters.featured) params.featured  = true;
+    const doFetch = async (attempt = 1) => {
+      setLoading(true);
 
-    try {
-      const res = await productsAPI.getAll(params);
-      const data = Array.isArray(res.data) ? res.data : [];
+      const [sortBy, sortOrder] = filters.sort.split(':');
+      const params: any = { sort_by: sortBy, sort_order: sortOrder, limit: 40 };
+      if (filters.category) params.category  = filters.category;
+      if (filters.search)   params.search    = filters.search;
+      if (filters.minPrice) params.min_price = Number(filters.minPrice);
+      if (filters.maxPrice) params.max_price = Number(filters.maxPrice);
+      if (filters.featured) params.featured  = true;
 
-      if (data.length === 0 && filters.search) {
-        // API returned nothing for this search — try fuzzy fallback
-        const allRes = await productsAPI.getAll({ limit: 500 });
-        const raw = allRes.data;
-        const allData: Product[] = Array.isArray(raw) ? raw : (raw?.products ?? raw?.items ?? []);
-        const fuse = new Fuse(allData, {
-          keys: [{ name: 'name', weight: 0.7 }, { name: 'category', weight: 0.3 }],
-          threshold: 0.45,
-          minMatchCharLength: 2,
-          ignoreLocation: true,
-          includeScore: true,
-        });
-        const fuzzy = fuse.search(filters.search, { limit: 40 });
-        if (fuzzy.length > 0) {
-          const matched = fuzzy.map(r => r.item);
-          // Find the best matching product name/category to show in banner
-          const bestMatch = fuzzy[0].item.category || fuzzy[0].item.name;
-          setFuzzyMatch(bestMatch);
-          setProducts(matched);
-          setTotal(matched.length);
+      try {
+        const res = await productsAPI.getAll(params);
+        if (cancelled) return;
+
+        // Normalise — backend may return array directly or wrapped object
+        const raw = res.data;
+        const data: Product[] = Array.isArray(raw)
+          ? raw
+          : (raw?.products ?? raw?.items ?? raw?.data ?? []);
+
+        if (data.length === 0 && filters.search) {
+          // ── Fuzzy fallback ───────────────────────────────────────────
+          const allRes = await productsAPI.getAll({ limit: 500 });
+          if (cancelled) return;
+
+          const allRaw = allRes.data;
+          const allData: Product[] = Array.isArray(allRaw)
+            ? allRaw
+            : (allRaw?.products ?? allRaw?.items ?? allRaw?.data ?? []);
+
+          if (allData.length === 0) {
+            // Can't do fuzzy if we have no products at all
+            setFuzzyMatch('');
+            setProducts([]);
+            setTotal(0);
+            setLoading(false);
+            return;
+          }
+
+          const fuse = new Fuse(allData, {
+            keys: [{ name: 'name', weight: 0.7 }, { name: 'category', weight: 0.3 }],
+            threshold: 0.45,
+            minMatchCharLength: 2,
+            ignoreLocation: true,
+            includeScore: true,
+          });
+
+          const fuzzy = fuse.search(filters.search, { limit: 40 });
+          if (cancelled) return;
+
+          if (fuzzy.length > 0) {
+            const matched = fuzzy.map(r => r.item);
+            const bestMatch = fuzzy[0].item.category || fuzzy[0].item.name;
+            setFuzzyMatch(bestMatch);
+            setProducts(matched);
+            setTotal(matched.length);
+          } else {
+            setFuzzyMatch('');
+            setProducts([]);
+            setTotal(0);
+          }
+        } else {
+          // ── Exact / filtered results ──────────────────────────────────
+          setFuzzyMatch('');
+          setProducts(data);
+          setTotal(data.length);
+        }
+
+        setLoading(false);
+      } catch (err: any) {
+        if (cancelled) return;
+        if (!err.response && attempt === 1) {
+          // Network error — retry once after 10 s
+          setTimeout(() => { if (!cancelled) doFetch(2); }, 10000);
         } else {
           setFuzzyMatch('');
           setProducts([]);
           setTotal(0);
+          setLoading(false);
         }
-      } else {
-        setFuzzyMatch('');
-        setProducts(data);
-        setTotal(data.length);
       }
-      setLoading(false);
-    } catch (err: any) {
-      if (!err.response && attempt === 1) {
-        setTimeout(() => fetchProducts(2), 10000);
-      } else {
-        setProducts([]);
-        setLoading(false);
-      }
-    }
-  }, [filters]);
+    };
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+    doFetch();
+    return () => { cancelled = true; }; // cancel on unmount or re-run
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filters.category,
+    filters.search,
+    filters.minPrice,
+    filters.maxPrice,
+    filters.featured,
+    filters.sort,
+  ]);
 
-  // Update a filter: write to URL (searchParams is always fresh — no stale closure)
+  // Update a filter: write to URL only (effect above reads from URL)
   const setF = (key: string, val: string) => {
-    // Optimistic local update so UI responds instantly
-    setFilters(f => ({ ...f, [key]: val }));
-
-    // Build new URL from current searchParams (avoids stale-closure bugs)
     const urlKeyMap: Record<string, string> = { minPrice: 'min_price', maxPrice: 'max_price' };
     const urlKey = urlKeyMap[key] ?? key;
     const params = new URLSearchParams(searchParams.toString());
@@ -119,7 +147,6 @@ function ProductsContent() {
   };
 
   const clearFilters = () => {
-    setFilters({ category: '', search: '', minPrice: '', maxPrice: '', featured: '', sort: 'created_at:desc' });
     router.replace('/products', { scroll: false });
   };
 
@@ -171,8 +198,10 @@ function ProductsContent() {
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                value={filters.search}
-                onChange={(e) => setF('search', e.target.value)}
+                defaultValue={filters.search}
+                key={filters.search} // re-mount when URL changes
+                onBlur={(e) => setF('search', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setF('search', (e.target as HTMLInputElement).value); }}
                 placeholder="Search products..."
                 className="input-field pl-9 py-2.5 text-sm"
               />
@@ -192,11 +221,29 @@ function ProductsContent() {
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <label className="label text-xs">Min Price (₹)</label>
-              <input type="number" value={filters.minPrice} onChange={(e) => setF('minPrice', e.target.value)} placeholder="0" className="input-field py-2.5 text-sm" min="0" />
+              <input
+                type="number"
+                defaultValue={filters.minPrice}
+                key={`min-${filters.minPrice}`}
+                onBlur={(e) => setF('minPrice', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setF('minPrice', (e.target as HTMLInputElement).value); }}
+                placeholder="0"
+                className="input-field py-2.5 text-sm"
+                min="0"
+              />
             </div>
             <div className="flex-1">
               <label className="label text-xs">Max Price (₹)</label>
-              <input type="number" value={filters.maxPrice} onChange={(e) => setF('maxPrice', e.target.value)} placeholder="99999" className="input-field py-2.5 text-sm" min="0" />
+              <input
+                type="number"
+                defaultValue={filters.maxPrice}
+                key={`max-${filters.maxPrice}`}
+                onBlur={(e) => setF('maxPrice', e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setF('maxPrice', (e.target as HTMLInputElement).value); }}
+                placeholder="99999"
+                className="input-field py-2.5 text-sm"
+                min="0"
+              />
             </div>
           </div>
 
@@ -240,12 +287,7 @@ function ProductsContent() {
           <Search size={15} className="text-orange-500 flex-shrink-0" />
           <span className="text-gray-600">
             No exact results for <strong>&ldquo;{filters.search}&rdquo;</strong>. Showing results for{' '}
-            <button
-              onClick={() => { setFuzzyMatch(''); setProducts([]); }}
-              className="font-bold text-maroon-700 underline underline-offset-2"
-            >
-              &ldquo;{fuzzyMatch}&rdquo;
-            </button>{' '}instead.
+            <span className="font-bold text-maroon-700">&ldquo;{fuzzyMatch}&rdquo;</span> instead.
           </span>
         </div>
       )}
