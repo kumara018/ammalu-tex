@@ -27,7 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   sessions: [],
   login: () => {},
   logout: () => {},
-  switchAccount: () => {},
+  switchAccount: async () => {},
   removeSession: () => {},
   refresh: async () => {},
 });
