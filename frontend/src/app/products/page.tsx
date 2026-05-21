@@ -64,7 +64,8 @@ function ProductsContent() {
       if (data.length === 0 && filters.search) {
         // API returned nothing for this search — try fuzzy fallback
         const allRes = await productsAPI.getAll({ limit: 500 });
-        const allData: Product[] = Array.isArray(allRes.data) ? allRes.data : [];
+        const raw = allRes.data;
+        const allData: Product[] = Array.isArray(raw) ? raw : (raw?.products ?? raw?.items ?? []);
         const fuse = new Fuse(allData, {
           keys: [{ name: 'name', weight: 0.7 }, { name: 'category', weight: 0.3 }],
           threshold: 0.45,
