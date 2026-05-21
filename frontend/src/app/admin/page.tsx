@@ -857,11 +857,33 @@ export default function AdminPage() {
                             {initiatingRefund === o.id ? '⏳...' : '💸 Initiate Refund'}
                           </button>
                         )}
-                        {/* Refund Initiated badge — Razorpay processing, waiting 5-7 days */}
+                        {/* Refund Initiated badge — with manual fallback if webhook never fires */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refund_initiated' && (
-                          <span className="text-[10px] bg-orange-50 border border-orange-200 text-orange-600 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund initiated — Razorpay will process in 5-7 days and auto-update">
-                            🔄 Refund Initiated
-                          </span>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] bg-orange-50 border border-orange-200 text-orange-600 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Razorpay refund in progress. Auto-updates to 'Refunded' via webhook when Razorpay confirms (5-7 days)">
+                              🔄 Refund Initiated
+                            </span>
+                            <button
+                              onClick={async () => {
+                                if (!confirm(
+                                  `Mark ${o.order_number} as Refunded?\n\n` +
+                                  `Only do this AFTER you have confirmed in Razorpay Dashboard that the refund was actually processed.\n\n` +
+                                  `This will also send the customer a "Refund Credited" email + WhatsApp.`
+                                )) return;
+                                try {
+                                  await adminAPI.markRefunded(o.id);
+                                  toast.success(`✅ ${o.order_number} marked as Refunded — customer notified!`);
+                                  loadOrders();
+                                } catch (err: any) {
+                                  toast.error(err.response?.data?.detail || 'Failed to mark refunded');
+                                }
+                              }}
+                              className="text-[9px] text-green-600 hover:text-green-800 hover:underline text-left whitespace-nowrap"
+                              title="Use only after confirming refund in Razorpay Dashboard (webhook fallback)"
+                            >
+                              ✓ Mark as Refunded (manual)
+                            </button>
+                          </div>
                         )}
                         {/* Refunded badge — with reset option in case status was set prematurely */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refunded' && (
