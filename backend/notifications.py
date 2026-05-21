@@ -119,18 +119,18 @@ _HEADER_HTML = """\
     <table width="100%" cellpadding="0" cellspacing="0" border="0"
            style="border-collapse:collapse;background:linear-gradient(135deg,#6b1728 0%,#7c1d2e 55%,#9b2135 100%);">
       <tr>
-        <td align="center" valign="middle" style="padding:20px 24px 16px;">
-          <p style="margin:0 0 6px 0;padding:0;font-size:42px;line-height:1;
+        <td align="center" valign="middle" style="padding:24px 24px 20px;">
+          <p style="margin:0 0 10px 0;padding:0;font-size:52px;line-height:1;
                     mso-line-height-rule:exactly;">&#x1F451;</p>
-          <p style="margin:0 0 5px 0;padding:0;
+          <p style="margin:0 0 7px 0;padding:0;
                     font-family:Georgia,'Times New Roman',serif;
-                    font-size:28px;font-weight:bold;color:#f5c518;
-                    letter-spacing:4px;line-height:1.2;mso-line-height-rule:exactly;">AMMALU TEX</p>
+                    font-size:32px;font-weight:bold;color:#f5c518;
+                    letter-spacing:2px;line-height:1.2;mso-line-height-rule:exactly;">Ammalu Tex</p>
           <p style="margin:0;padding:0;
                     font-family:Arial,Helvetica,sans-serif;
-                    font-size:11px;color:#e8c96a;letter-spacing:2px;
-                    line-height:1.6;mso-line-height-rule:exactly;">
-            PREMIUM WOMEN&#8217;S TEXTILES &nbsp;&middot;&nbsp; TEXVALLEY GANGAPURAM
+                    font-size:11px;color:#e8c96a;letter-spacing:3px;
+                    text-transform:uppercase;line-height:1.6;mso-line-height-rule:exactly;">
+            Premium Women&#8217;s Textiles &nbsp;&middot;&nbsp; Texvalley Gangapuram
           </p>
         </td>
       </tr>

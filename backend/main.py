@@ -417,6 +417,59 @@ def reset_admin():
     return {"status": "Admin reset successfully", "email": admin_email}
 
 
+@app.get("/test-notification")
+def test_notification(to: str = "", type: str = "welcome"):
+    """
+    Instantly send a real notification email to verify the template.
+    Usage: GET /test-notification?to=your@email.com&type=welcome
+    Types: welcome | order | payment | admin | deletion | retrieved | deleted
+    """
+    import notifications as _n
+    target = to.strip() or os.getenv("SMTP_EMAIL", "kumaraguru27102@gmail.com")
+
+    class _FakeOrder:
+        order_number = "AMT-TEST-001"
+        id = 1
+        total = 1499.00
+        subtotal = 1499.00
+        shipping_fee = 0
+        discount = 0
+        status = "confirmed"
+        payment_status = "paid"
+        payment_method = "razorpay"
+        payment_transaction_id = "pay_TEST123"
+        tracking_number = None
+        items_snapshot = [{"name": "Silk Chudithar", "quantity": 1,
+                           "price": 1499, "subtotal": 1499,
+                           "product_id": 1, "size": "L", "color": "Maroon"}]
+        shipping_address = {"full_name": "Test Customer", "phone": "9876543210",
+                            "address_line1": "123 Test Street", "city": "Coimbatore",
+                            "state": "Tamil Nadu", "pincode": "641001"}
+        created_at = __import__("datetime").datetime.now()
+
+    t = type.lower()
+    name = "Kumaraguru"
+    if t == "admin":
+        _n.send_admin_access_email(target, name)
+    elif t == "order":
+        _n.send_order_confirmation_email(target, name, _FakeOrder())
+    elif t == "payment":
+        _n.send_payment_success_email(target, name, _FakeOrder())
+    elif t == "deletion":
+        import datetime as _dt
+        _n.send_deletion_scheduled_email(target, name,
+            _dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(hours=4))
+    elif t == "retrieved":
+        _n.send_account_retrieved_email(target, name)
+    elif t == "deleted":
+        _n.send_account_permanently_deleted_email(target, name)
+    else:  # welcome
+        _n.send_welcome_email(target, name)
+
+    return {"status": "sent", "to": target, "type": t,
+            "note": "Check your inbox (and spam folder). Email sent in background."}
+
+
 @app.get("/test-email")
 def test_email(to: str = ""):
     """
