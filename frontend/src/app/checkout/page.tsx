@@ -252,20 +252,8 @@ export default function CheckoutPage() {
         modal: { ondismiss: () => { setPlacing(false); toast.error('Payment cancelled'); } },
       };
 
-      // For EMI: show all methods but with EMI block highlighted first
-      // (Don't hide other blocks — EMI may not be available for all cards/amounts)
-      if (isEmi) {
-        options.config = {
-          display: {
-            blocks: {
-              emi: { name: 'Pay in Easy EMI', instruments: [{ method: 'emi' }] },
-              other: { name: 'Other Payment Methods', instruments: [{ method: 'card' }, { method: 'upi' }, { method: 'netbanking' }] },
-            },
-            sequence: ['block.emi', 'block.other'],
-            preferences: { show_default_blocks: true },
-          },
-        };
-      }
+      // For EMI: open standard Razorpay modal (EMI tab appears automatically inside)
+      // No custom config — Razorpay shows EMI for eligible credit cards automatically
 
       const rzp = new window.Razorpay(options);
       rzp.open();
