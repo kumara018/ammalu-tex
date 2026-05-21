@@ -1289,7 +1289,7 @@ def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""
           Your Refund of ₹{order.total:,.0f} Has Been Processed!
         </h2>
         <p style="color:#555;font-size:15px;margin:0;">
-          Hi {first}, Razorpay has successfully processed your refund. Please check your bank account or card statement.
+          Hi {first}, Razorpay has successfully processed your refund. The amount will be credited to your bank account or card within <strong>3–5 business days</strong>. Please check your bank account or card statement.
         </p>
       </div>
 
@@ -1380,7 +1380,8 @@ def send_refund_credited_whatsapp(phone: str, name: str, order, refund_id: str =
         f"💸 *Refund Amount:* ₹{order.total:,.0f}\n"
         f"💳 *Payment Method:* {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}"
         f"{txn_line}{refund_line}\n\n"
-        f"👉 *Please check your bank account or card statement.* The amount should reflect shortly depending on your bank.\n\n"
+        f"👉 *Please check your bank account or card statement.*\n"
+        f"   The amount will be credited within *3–5 business days* (maximum).\n\n"
         f"─────────────────\n"
         f"🆘 *Need Help?*\n\n"
         f"💳 *Razorpay Support* (for payment/refund queries):\n"
