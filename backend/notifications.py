@@ -115,23 +115,41 @@ def _bg(to: str, subject: str, html: str):
 
 # ── HTML helpers ───────────────────────────────────────────────────────────────
 # Shared brand header — pure HTML, no PNG image, renders perfectly in all clients
+# Exact navbar colors from tailwind.config:
+#   bg-brand-gradient = linear-gradient(135deg, #8b1538 0%, #5c0f25 100%)
+#   text-white        = #ffffff   (Ammalu Tex brand name)
+#   text-gold-300     = #fde047   (tagline — same as navbar tagline)
+#   font-display      = Georgia   (same as Tailwind fontFamily.display)
 _HEADER_HTML = """\
     <table width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="border-collapse:collapse;background:linear-gradient(135deg,#6b1728 0%,#7c1d2e 55%,#9b2135 100%);">
+           style="border-collapse:collapse;
+                  background:linear-gradient(135deg,#8b1538 0%,#5c0f25 100%);">
       <tr>
-        <td align="center" valign="middle" style="padding:24px 24px 20px;">
-          <p style="margin:0 0 10px 0;padding:0;font-size:52px;line-height:1;
-                    mso-line-height-rule:exactly;">&#x1F451;</p>
-          <p style="margin:0 0 7px 0;padding:0;
-                    font-family:Georgia,'Times New Roman',serif;
-                    font-size:32px;font-weight:bold;color:#f5c518;
-                    letter-spacing:2px;line-height:1.2;mso-line-height-rule:exactly;">Ammalu Tex</p>
-          <p style="margin:0;padding:0;
-                    font-family:Arial,Helvetica,sans-serif;
-                    font-size:11px;color:#e8c96a;letter-spacing:3px;
-                    text-transform:uppercase;line-height:1.6;mso-line-height-rule:exactly;">
-            Premium Women&#8217;s Textiles &nbsp;&middot;&nbsp; Texvalley Gangapuram
-          </p>
+        <td align="center" style="padding:16px 24px 14px;">
+          <!-- Same layout as Navbar: crown left · brand text right -->
+          <table cellpadding="0" cellspacing="0" border="0"
+                 style="border-collapse:collapse;">
+            <tr>
+              <td valign="middle" style="padding-right:12px;font-size:0;line-height:0;">
+                <p style="margin:0;padding:0;font-size:40px;line-height:1;
+                          mso-line-height-rule:exactly;">&#x1F451;</p>
+              </td>
+              <td valign="middle" style="text-align:left;">
+                <p style="margin:0 0 3px 0;padding:0;
+                          font-family:Georgia,'Times New Roman',serif;
+                          font-size:22px;font-weight:bold;color:#ffffff;
+                          letter-spacing:1px;line-height:1.15;
+                          mso-line-height-rule:exactly;">Ammalu Tex</p>
+                <p style="margin:0;padding:0;
+                          font-family:Arial,Helvetica,sans-serif;
+                          font-size:10px;color:#fde047;letter-spacing:3px;
+                          text-transform:uppercase;line-height:1.4;
+                          mso-line-height-rule:exactly;">
+                  Premium Women&#8217;s Textiles
+                </p>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>"""
@@ -1452,21 +1470,8 @@ def send_invoice_email(email: str, name: str, order, user_email: str = ""):
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
 
-      <!-- Header — pure HTML, no image -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="border-collapse:collapse;background:linear-gradient(135deg,#6b1728 0%,#7c1d2e 55%,#9b2135 100%);">
-        <tr>
-          <td align="center" valign="middle" style="padding:20px 24px 14px;">
-            <p style="margin:0 0 6px 0;padding:0;font-size:42px;line-height:1;">&#x1F451;</p>
-            <p style="margin:0 0 5px 0;padding:0;font-family:Georgia,'Times New Roman',serif;
-                      font-size:28px;font-weight:bold;color:#f5c518;letter-spacing:4px;line-height:1.2;">AMMALU TEX</p>
-            <p style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;
-                      font-size:11px;color:#e8c96a;letter-spacing:2px;line-height:1.6;">
-              PREMIUM WOMEN&#8217;S TEXTILES &nbsp;&middot;&nbsp; TEXVALLEY GANGAPURAM
-            </p>
-          </td>
-        </tr>
-      </table>
+      <!-- Header — exact navbar style -->
+      {_HEADER_HTML}
       <!-- TAX INVOICE badge -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
              style="border-collapse:collapse;background:#7c1d2e;">
