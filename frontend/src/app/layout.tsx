@@ -11,13 +11,34 @@ import { Toaster } from 'react-hot-toast';
 import { STORE } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: `${STORE.name} — ${STORE.tagline} | ${STORE.area}`,
-  description: STORE.description,
-  keywords: `${STORE.name}, textile, chudithar, tops, lehenga, crop top, party wear, Texvalley, Gangapuram, women fashion`,
+  title: `${STORE.name} — Premium Women's Textiles | Texvalley Erode`,
+  description: 'Shop premium Chudithar, Tops, Lehenga, Crop Tops & Party Wears at Ammalu Tex. Located at Texvalley Gangapuram, Erode. Fast delivery across India. 100% authentic products.',
+  keywords: 'Ammalu Tex, ammalu tex, ammalutex, textile shop Erode, Texvalley Gangapuram, chudithar, lehenga, tops, crop tops, party wear, women fashion, Erode textile, buy chudithar online, women clothing India',
+  authors: [{ name: 'Ammalu Tex' }],
+  creator: 'Ammalu Tex',
+  publisher: 'Ammalu Tex',
+  metadataBase: new URL('https://ammalutex.com'),
+  alternates: { canonical: 'https://ammalutex.com' },
+  openGraph: {
+    title: 'Ammalu Tex — Premium Women\'s Textiles',
+    description: 'Shop Chudithar, Tops, Lehenga, Crop Tops & Party Wears at Ammalu Tex, Texvalley Gangapuram, Erode.',
+    url: 'https://ammalutex.com',
+    siteName: 'Ammalu Tex',
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Ammalu Tex — Premium Women\'s Textiles',
+    description: 'Shop Chudithar, Tops, Lehenga & more at Ammalu Tex, Texvalley Erode.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
     shortcut: '/favicon.svg',
     apple: '/favicon.svg',
   },
