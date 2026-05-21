@@ -1268,80 +1268,98 @@ def send_refund_initiated_whatsapp(phone: str, name: str, order, refund_id: str 
 
 
 def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""):
-    """Sent when Razorpay webhook confirms refund.processed — money is in customer's account."""
+    """Sent when Razorpay webhook confirms refund.processed — money is credited to customer's bank."""
     first = name.split()[0]
     pm    = (getattr(order, "payment_method", "") or "").lower()
     txn   = getattr(order, "payment_transaction_id", "") or ""
-    html  = f"""
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
-      {_HEADER_HTML}
+    html  = _wrap(f"""
+      <!-- Green sub-banner -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
              style="border-collapse:collapse;background:#16a34a;">
         <tr><td align="center" style="padding:8px 24px 12px;">
           <p style="margin:0;color:#bbf7d0;font-size:12px;font-family:Arial,sans-serif;
-                    letter-spacing:2px;text-transform:uppercase;">REFUND CREDITED ✅</p>
+                    letter-spacing:2px;text-transform:uppercase;">💰 Amount Credited to Your Bank Account</p>
         </td></tr>
       </table>
-      <div style="padding:32px">
-        <div style="text-align:center;margin-bottom:24px">
-          <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px">✅</div>
-        </div>
-        <h2 style="color:#111;margin-top:0;text-align:center">Refund Processed Successfully!</h2>
-        <p style="color:#555;text-align:center">Hi {first}, great news! Your refund has been processed by Razorpay and is on its way to your account.</p>
 
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px;margin:20px 0">
-          <table width="100%" style="border-collapse:collapse;font-size:14px">
-            <tr><td style="color:#555;padding:5px 0">Order Number</td><td style="text-align:right;font-weight:bold;color:#111">{order.order_number}</td></tr>
-            <tr><td style="color:#555;padding:5px 0">Refund Amount</td><td style="text-align:right;font-weight:bold;color:#16a34a;font-size:18px">₹{order.total:,.0f}</td></tr>
-            <tr><td style="color:#555;padding:5px 0">Payment Method</td><td style="text-align:right;font-weight:bold;color:#111">{'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}</td></tr>
-            {f"<tr><td style='color:#555;padding:5px 0'>Transaction ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px'>{txn}</td></tr>" if txn else ""}
-            {f"<tr><td style='color:#555;padding:5px 0'>Refund ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px'>{refund_id}</td></tr>" if refund_id and refund_id != 'manual' else ""}
-          </table>
-        </div>
-
-        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin:16px 0">
-          <p style="margin:0;color:#14532d;font-size:14px">💳 The refund has been processed by Razorpay and will appear in your <b>original payment method within 1–3 business days</b> depending on your bank.</p>
-        </div>
-
-        <div style="text-align:center;margin:24px 0">
-          <a href="{STORE_URL}/orders" style="background:#16a34a;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px">View My Orders</a>
-        </div>
-
-        <p style="color:#888;font-size:13px;text-align:center">Questions? <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e">{SUPPORT_EMAIL}</a></p>
+      <div style="text-align:center;margin:28px 0 16px;">
+        <div style="width:72px;height:72px;background:#dcfce7;border-radius:50%;
+                    display:inline-block;line-height:72px;font-size:34px;">✅</div>
+        <h2 style="color:#111;margin:16px 0 6px;font-size:22px;">
+          Your Refund of ₹{order.total:,.0f} Has Been Credited!
+        </h2>
+        <p style="color:#555;font-size:15px;margin:0;">
+          Hi {first}, your refund has been successfully credited to your bank account by Razorpay.
+        </p>
       </div>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="border-collapse:collapse;background:#f8f4f0;border-top:1px solid #ede8e3;">
-        <tr><td align="center" style="padding:16px 24px;">
-          <p style="margin:0 0 5px;color:#888;font-size:12px;font-family:Arial,sans-serif;">{STORE_ADDR}</p>
-          <p style="margin:0 0 5px;font-size:12px;font-family:Arial,sans-serif;">
-            <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
-            &nbsp;&middot;&nbsp;
-            <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
-          </p>
-          <p style="margin:0;color:#bbb;font-size:11px;font-family:Arial,sans-serif;">
-            &copy; {YEAR} {STORE_NAME}. All rights reserved.
-          </p>
-        </td></tr>
-      </table>
-    </div>"""
-    _send_email(email, f"✅ Refund Processed — ₹{order.total:,.0f} · {order.order_number}", html)
+
+      <!-- Refund details box -->
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;
+                  padding:20px 24px;margin:20px 0;">
+        <p style="margin:0 0 14px;font-size:13px;font-weight:bold;color:#14532d;
+                  text-transform:uppercase;letter-spacing:1px;">Refund Details</p>
+        <table width="100%" style="border-collapse:collapse;font-size:14px;">
+          <tr>
+            <td style="color:#555;padding:6px 0;border-bottom:1px solid #d1fae5;">Order Number</td>
+            <td style="text-align:right;font-weight:bold;color:#111;
+                       border-bottom:1px solid #d1fae5;">{order.order_number}</td>
+          </tr>
+          <tr>
+            <td style="color:#555;padding:6px 0;border-bottom:1px solid #d1fae5;">Amount Credited</td>
+            <td style="text-align:right;font-weight:bold;color:#16a34a;font-size:20px;
+                       border-bottom:1px solid #d1fae5;">₹{order.total:,.0f}</td>
+          </tr>
+          <tr>
+            <td style="color:#555;padding:6px 0;border-bottom:1px solid #d1fae5;">Payment Method</td>
+            <td style="text-align:right;font-weight:bold;color:#111;
+                       border-bottom:1px solid #d1fae5;">
+              {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}
+            </td>
+          </tr>
+          {f"<tr><td style='color:#555;padding:6px 0;border-bottom:1px solid #d1fae5;'>Transaction ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px;border-bottom:1px solid #d1fae5;'>{txn}</td></tr>" if txn else ""}
+          {f"<tr><td style='color:#555;padding:6px 0;'>Refund ID</td><td style='text-align:right;font-family:monospace;color:#666;font-size:12px;'>{refund_id}</td></tr>" if refund_id and refund_id != 'manual' else ""}
+        </table>
+      </div>
+
+      <!-- Bank info -->
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:10px;
+                  padding:14px 18px;margin:16px 0;">
+        <p style="margin:0;color:#78350f;font-size:13px;line-height:1.6;">
+          🏦 The refunded amount will reflect in your bank account or card statement
+          within <strong>1–3 business days</strong> depending on your bank's processing time.
+          If you have not received it after 5 business days, please contact your bank.
+        </p>
+      </div>
+
+      {_btn("View My Orders →", f"{STORE_URL}/orders", bg="#16a34a")}
+
+      <p style="color:#888;font-size:13px;text-align:center;margin-top:16px;">
+        Need help? Contact us at
+        <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>
+      </p>
+    """)
+    _send_email(email, f"✅ ₹{order.total:,.0f} Refunded to Your Bank Account — {order.order_number}", html)
 
 
 def send_refund_credited_whatsapp(phone: str, name: str, order, refund_id: str = ""):
-    """Sent when Razorpay webhook confirms refund.processed — money is in customer's account."""
+    """Sent when Razorpay webhook confirms refund.processed — money is credited to customer's bank."""
     first = name.split()[0]
     pm    = (getattr(order, "payment_method", "") or "").lower()
     txn   = getattr(order, "payment_transaction_id", "") or ""
-    txn_line    = f"\n🔖 *Txn ID:* `{txn}`"        if txn                              else ""
-    refund_line = f"\n📋 *Refund ID:* `{refund_id}`" if refund_id and refund_id != "manual" else ""
+    txn_line    = f"\n🔖 *Transaction ID:* `{txn}`"   if txn                              else ""
+    refund_line = f"\n📋 *Refund ID:* `{refund_id}`"  if refund_id and refund_id != "manual" else ""
     _send_whatsapp(phone,
-        f"✅ *Refund Processed — {order.order_number}*\n\n"
-        f"Hi {first}! Great news — your refund has been *processed by Razorpay* and is on its way! 🎉\n\n"
-        f"💸 *Amount:* ₹{order.total:,.0f}\n"
-        f"💳 *Mode:* {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}"
+        f"💰 *₹{order.total:,.0f} Refunded to Your Bank Account!*\n\n"
+        f"Hi {first}! Great news — your refund has been *successfully credited* to your bank account. 🎉\n\n"
+        f"📦 *Order:* {order.order_number}\n"
+        f"💸 *Amount Credited:* ₹{order.total:,.0f}\n"
+        f"💳 *Payment Method:* {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}"
         f"{txn_line}{refund_line}\n\n"
-        f"🏦 Amount will appear in your bank account within *1–3 business days* depending on your bank.\n\n"
-        f"📦 View orders: {STORE_URL}/orders"
+        f"🏦 The amount will reflect in your bank account or card statement within *1–3 business days* "
+        f"depending on your bank's processing time.\n\n"
+        f"If you haven't received it after 5 business days, please contact your bank with the refund details above.\n\n"
+        f"Need help? Contact us: {SUPPORT_EMAIL}\n"
+        f"📦 View your orders: {STORE_URL}/orders"
     )
 
 
