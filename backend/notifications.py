@@ -1323,9 +1323,44 @@ def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""
 
       {_btn("View My Orders →", f"{STORE_URL}/orders", bg="#16a34a")}
 
-      <p style="color:#888;font-size:13px;text-align:center;margin-top:16px;">
-        Need help? Contact us at
-        <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>
+      <!-- Support section -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
+                  padding:18px 24px;margin:24px 0 8px;">
+        <p style="margin:0 0 12px;font-size:13px;font-weight:bold;color:#1e293b;
+                  text-transform:uppercase;letter-spacing:1px;">Need Help?</p>
+        <p style="margin:0 0 10px;color:#475569;font-size:13px;line-height:1.6;">
+          If the refund amount does not appear in your bank account or card statement within
+          the expected timeframe, you can reach out to:
+        </p>
+        <table width="100%" style="border-collapse:collapse;font-size:13px;">
+          <tr>
+            <td style="padding:8px 0;border-bottom:1px solid #e2e8f0;vertical-align:top;width:40%;">
+              <strong style="color:#1e293b;">💳 Razorpay Support</strong><br>
+              <span style="color:#64748b;font-size:12px;">For payment / refund queries</span>
+            </td>
+            <td style="padding:8px 0;border-bottom:1px solid #e2e8f0;text-align:right;vertical-align:top;">
+              <a href="https://razorpay.com/support/" style="color:#1a56db;text-decoration:none;font-weight:bold;">
+                razorpay.com/support
+              </a><br>
+              <span style="color:#64748b;font-size:12px;">Raise a support ticket online</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;">
+              <strong style="color:#1e293b;">🏪 Ammalu Tex Support</strong><br>
+              <span style="color:#64748b;font-size:12px;">For order / product queries</span>
+            </td>
+            <td style="padding:8px 0;text-align:right;vertical-align:top;">
+              <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;font-weight:bold;">
+                {SUPPORT_EMAIL}
+              </a>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <p style="color:#64748b;font-size:13px;text-align:center;margin-top:12px;font-style:italic;">
+        Your satisfaction is our top priority. We're always here to help. 💛
       </p>
     """)
     _send_email(email, f"✅ Refund of ₹{order.total:,.0f} Processed — {order.order_number}", html)
@@ -1340,12 +1375,20 @@ def send_refund_credited_whatsapp(phone: str, name: str, order, refund_id: str =
     refund_line = f"\n📋 *Refund ID:* `{refund_id}`"  if refund_id and refund_id != "manual" else ""
     _send_whatsapp(phone,
         f"✅ *Refund of ₹{order.total:,.0f} Processed!*\n\n"
-        f"Hi {first}! Razorpay has processed your refund. Please check your bank account or card statement. 🎉\n\n"
+        f"Hi {first}! Razorpay has successfully processed your refund. 🎉\n\n"
         f"📦 *Order:* {order.order_number}\n"
         f"💸 *Refund Amount:* ₹{order.total:,.0f}\n"
         f"💳 *Payment Method:* {'Razorpay (Online)' if pm == 'razorpay' else pm.upper()}"
         f"{txn_line}{refund_line}\n\n"
-        f"Need help? Contact us: {SUPPORT_EMAIL}\n"
+        f"👉 *Please check your bank account or card statement.* The amount should reflect shortly depending on your bank.\n\n"
+        f"─────────────────\n"
+        f"🆘 *Need Help?*\n\n"
+        f"💳 *Razorpay Support* (for payment/refund queries):\n"
+        f"   🌐 https://razorpay.com/support/\n"
+        f"   (Raise a ticket — they respond quickly)\n\n"
+        f"🏪 *Ammalu Tex Support* (for order queries):\n"
+        f"   📧 {SUPPORT_EMAIL}\n\n"
+        f"Your satisfaction is our top priority. We're always here for you! 💛\n\n"
         f"📦 View your orders: {STORE_URL}/orders"
     )
 
