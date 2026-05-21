@@ -342,6 +342,10 @@ def grant_admin_access(
         raise HTTPException(400, "This user already has admin access")
     user.is_admin = True
     db.commit()
+    # Notify the new admin by email and WhatsApp
+    notifications.send_admin_access_email(user.email, user.full_name)
+    if user.phone:
+        notifications.send_admin_access_whatsapp(user.phone, user.full_name)
     return {"message": f"✅ Admin access granted to {user.full_name} ({email})", "user_id": user.id}
 
 

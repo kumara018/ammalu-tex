@@ -1417,3 +1417,109 @@ def send_support_rating_request_whatsapp(phone: str, customer_name: str, cs_name
         f"👉 {rating_url}\n\n"
         f"_(This link is unique to you and works only once)_"
     )
+
+
+# ── Admin Access Granted ───────────────────────────────────────────────────────
+
+def send_admin_access_email(email: str, name: str):
+    first = name.split()[0]
+    admin_url = f"{STORE_URL}/admin"
+    html = _wrap(f"""
+      <!-- Alert badge -->
+      <div style="display:inline-block;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 20px;margin-bottom:20px;">
+        <span style="color:#15803d;font-weight:bold;font-size:14px;">✅ Admin Access Granted</span>
+      </div>
+
+      <h2 style="color:#1e293b;margin-top:0;font-size:22px;">Hi {first}, you now have Admin Access! 🎉</h2>
+
+      <p style="color:#444;line-height:1.7;font-size:15px;">
+        You have been granted <strong>Admin privileges</strong> on <strong>{STORE_NAME}</strong>.
+        You can now manage the entire store from the Admin Dashboard.
+      </p>
+
+      <!-- What you can do -->
+      <div style="background:#fff9f2;border-radius:12px;padding:20px 24px;margin:20px 0;">
+        <p style="margin:0 0 14px;font-size:13px;font-weight:bold;color:#7c1d2e;text-transform:uppercase;letter-spacing:1px;">What you can do</p>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;width:36px;font-size:20px;">📦</td>
+            <td style="padding:8px 0;">
+              <span style="font-weight:bold;color:#1e293b;font-size:14px;">Manage Products</span><br>
+              <span style="color:#666;font-size:13px;">Add, edit, delete products and upload images</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;font-size:20px;">🛒</td>
+            <td style="padding:8px 0;">
+              <span style="font-weight:bold;color:#1e293b;font-size:14px;">Manage Orders</span><br>
+              <span style="color:#666;font-size:13px;">View, update order status, track shipments and initiate refunds</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;font-size:20px;">👥</td>
+            <td style="padding:8px 0;">
+              <span style="font-weight:bold;color:#1e293b;font-size:14px;">Manage Customers</span><br>
+              <span style="color:#666;font-size:13px;">View customer accounts and grant admin access</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;font-size:20px;">💳</td>
+            <td style="padding:8px 0;">
+              <span style="font-weight:bold;color:#1e293b;font-size:14px;">Payments & Refunds</span><br>
+              <span style="color:#666;font-size:13px;">View payment status and initiate Razorpay refunds</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;font-size:20px;">↩️</td>
+            <td style="padding:8px 0;">
+              <span style="font-weight:bold;color:#1e293b;font-size:14px;">Returns & Exchanges</span><br>
+              <span style="color:#666;font-size:13px;">Review and process return, exchange and replacement requests</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;vertical-align:top;font-size:20px;">⭐</td>
+            <td style="padding:8px 0;">
+              <span style="font-weight:bold;color:#1e293b;font-size:14px;">Support & Ratings</span><br>
+              <span style="color:#666;font-size:13px;">Track customer support interactions and satisfaction ratings</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- How to access -->
+      <div style="background:#fdf2f4;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+        <p style="margin:0 0 6px;font-size:13px;font-weight:bold;color:#7c1d2e;">How to access the Admin Dashboard</p>
+        <p style="margin:0;font-size:13px;color:#555;line-height:1.6;">
+          Log in to <a href="{STORE_URL}" style="color:#7c1d2e;">{STORE_URL}</a> with your account.
+          You will see an <strong>Admin Dashboard</strong> link in your profile menu at the top right.
+        </p>
+      </div>
+
+      {_btn("Go to Admin Dashboard →", admin_url)}
+
+      <hr style="border:none;border-top:1px solid #ede8e3;margin:24px 0;">
+      <p style="color:#888;font-size:12px;line-height:1.6;margin:0;">
+        This access was granted by the store owner. If you believe this was a mistake, please contact
+        <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>.
+      </p>
+    """)
+    _bg(email, f"🔐 You now have Admin Access — {STORE_NAME}", html)
+
+
+def send_admin_access_whatsapp(phone: str, name: str):
+    first = name.split()[0]
+    admin_url = f"{STORE_URL}/admin"
+    _send_whatsapp(phone,
+        f"🎉 *Congratulations {first}! You now have Admin Access.*\n\n"
+        f"You have been granted *Admin privileges* on *{STORE_NAME}*.\n\n"
+        f"*Here's what you can manage:*\n"
+        f"📦 Products — Add, edit & delete products\n"
+        f"🛒 Orders — View & update order status, track shipments\n"
+        f"👥 Customers — View customer accounts\n"
+        f"💳 Payments & Refunds — Razorpay refund management\n"
+        f"↩️ Returns & Exchanges — Process return requests\n"
+        f"⭐ Support Ratings — Customer satisfaction tracking\n\n"
+        f"*How to access:*\n"
+        f"Log in to {STORE_URL} → tap your profile → *Admin Dashboard*\n\n"
+        f"👉 Go directly: {admin_url}"
+    )
