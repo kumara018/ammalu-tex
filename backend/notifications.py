@@ -374,29 +374,128 @@ def send_deletion_otp_email(email: str, name: str, otp: str):
     _bg(email, f"Confirm account deletion — {STORE_NAME}", html)
 
 
-# ── 8. Deletion confirmed ──────────────────────────────────────────────────────
+# ── 8. Deletion scheduled (4-hour countdown) ──────────────────────────────────
+DELETE_HOURS = 4   # single source of truth — change here to adjust the window
+
 def send_deletion_scheduled_email(email: str, name: str, delete_at):
     first = name.split()[0]
-    delete_str = delete_at.strftime("%d %B %Y at %I:%M %p UTC")
+    # Format in IST (UTC+5:30)
+    from datetime import timezone, timedelta as _td
+    ist = timezone(_td(hours=5, minutes=30))
+    delete_str = delete_at.astimezone(ist).strftime("%d %B %Y at %I:%M %p IST")
+    retrieve_url = f"{STORE_URL}/auth/login"
     html = _wrap(f"""
-      <h2 style="color:#dc2626;margin-top:0;font-size:22px;">Account Scheduled for Deletion</h2>
-      <p style="color:#444;font-size:14px;line-height:1.6;">
-        Hi {first}, your account deletion request has been confirmed.
+      <!-- Warning badge -->
+      <div style="display:inline-block;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;margin-bottom:20px;">
+        <span style="color:#dc2626;font-weight:bold;font-size:14px;">⚠️ Account Deletion Initiated</span>
+      </div>
+
+      <h2 style="color:#1e293b;margin-top:0;font-size:22px;">Hi {first}, your account deletion is scheduled</h2>
+
+      <p style="color:#444;font-size:14px;line-height:1.7;">
+        We've received your request to permanently delete your <strong>{STORE_NAME}</strong> account.
+        Your account will be <strong style="color:#dc2626;">permanently deleted in {DELETE_HOURS} hours</strong>.
       </p>
-      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:20px;margin:20px 0;text-align:center;">
-        <p style="margin:0;color:#dc2626;font-weight:bold;font-size:14px;">Permanent deletion scheduled for:</p>
-        <p style="margin:10px 0 0;color:#991b1b;font-size:18px;font-weight:bold;">{delete_str}</p>
+
+      <!-- Countdown box -->
+      <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;padding:24px;margin:20px 0;text-align:center;">
+        <p style="margin:0;color:#888;font-size:11px;text-transform:uppercase;letter-spacing:2px;">Account will be permanently deleted at</p>
+        <p style="margin:12px 0 4px;font-size:22px;font-weight:bold;color:#dc2626;">{delete_str}</p>
+        <p style="margin:8px 0 0;color:#991b1b;font-size:13px;">All your orders, addresses and data will be erased</p>
       </div>
-      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:20px 0;text-align:center;">
-        <p style="margin:0;color:#15803d;font-size:14px;">
-          Changed your mind? <strong>Simply log in within 24 hours</strong> to cancel.
+
+      <!-- Retrieve CTA (prominent green box) -->
+      <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
+        <p style="margin:0;color:#15803d;font-weight:bold;font-size:15px;">🛡️ Changed your mind?</p>
+        <p style="margin:8px 0 16px;color:#166534;font-size:13px;line-height:1.6;">
+          Simply <strong>log in to your account</strong> within the next {DELETE_HOURS} hours.<br>
+          Your account will be instantly restored — no action needed.
         </p>
+        {_btn("🔓 Retrieve My Account →", retrieve_url, "#16a34a")}
       </div>
-      <p style="color:#888;font-size:13px;">
-        Questions? Contact <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>.
+
+      <hr style="border:none;border-top:1px solid #ede8e3;margin:24px 0;">
+      <p style="color:#888;font-size:12px;line-height:1.6;margin:0;">
+        If you did NOT request this, your account may be at risk. Please
+        <a href="{retrieve_url}" style="color:#7c1d2e;">log in immediately</a> to secure it,
+        or contact <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>.
       </p>
     """)
-    _bg(email, f"Account Deletion Scheduled — {STORE_NAME}", html)
+    _bg(email, f"⚠️ Your {STORE_NAME} account will be deleted in {DELETE_HOURS} hours", html)
+
+
+# ── 8b. Account permanently deleted ───────────────────────────────────────────
+def send_account_permanently_deleted_email(email: str, name: str):
+    first = name.split()[0]
+    html = _wrap(f"""
+      <div style="display:inline-block;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;margin-bottom:20px;">
+        <span style="color:#dc2626;font-weight:bold;font-size:14px;">❌ Account Permanently Deleted</span>
+      </div>
+
+      <h2 style="color:#1e293b;margin-top:0;font-size:22px;">Hi {first}, your account has been deleted</h2>
+
+      <p style="color:#444;font-size:14px;line-height:1.7;">
+        Your <strong>{STORE_NAME}</strong> account and all associated data have been
+        <strong style="color:#dc2626;">permanently deleted</strong> as requested.
+      </p>
+
+      <div style="background:#fef2f2;border-left:4px solid #dc2626;border-radius:4px;padding:16px;margin:20px 0;">
+        <p style="margin:0;color:#991b1b;font-size:14px;line-height:1.8;">
+          The following data has been removed:<br>
+          • Your profile, email and phone number<br>
+          • All saved addresses<br>
+          • Order history and invoices<br>
+          • Cart and wishlist items
+        </p>
+      </div>
+
+      <div style="background:#f8f4f0;border-radius:10px;padding:16px;margin:20px 0;text-align:center;">
+        <p style="margin:0;color:#555;font-size:14px;">
+          You can always create a new account at
+          <a href="{STORE_URL}" style="color:#7c1d2e;font-weight:bold;">{STORE_URL}</a>
+        </p>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #ede8e3;margin:24px 0;">
+      <p style="color:#888;font-size:12px;line-height:1.6;margin:0;">
+        If you believe this was a mistake, contact us immediately at
+        <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>.
+        We may be able to assist within 24 hours of deletion.
+      </p>
+    """)
+    _bg(email, f"Your {STORE_NAME} account has been permanently deleted", html)
+
+
+# ── 8c. Account retrieved / deletion cancelled ─────────────────────────────────
+def send_account_retrieved_email(email: str, name: str):
+    first = name.split()[0]
+    html = _wrap(f"""
+      <div style="display:inline-block;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 20px;margin-bottom:20px;">
+        <span style="color:#15803d;font-weight:bold;font-size:14px;">✅ Account Successfully Restored</span>
+      </div>
+
+      <h2 style="color:#1e293b;margin-top:0;font-size:22px;">Welcome back, {first}! 🎉 Your account is safe</h2>
+
+      <p style="color:#444;font-size:14px;line-height:1.7;">
+        Your <strong>{STORE_NAME}</strong> account deletion has been <strong style="color:#15803d;">cancelled</strong>.
+        Everything is exactly as you left it — your orders, addresses and data are safe.
+      </p>
+
+      <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
+        <p style="margin:0;font-size:28px;">🛡️</p>
+        <p style="margin:10px 0 4px;color:#15803d;font-weight:bold;font-size:16px;">Your Account is Active</p>
+        <p style="margin:0;color:#166534;font-size:13px;">No data has been removed. All your information is intact.</p>
+      </div>
+
+      {_btn("Continue Shopping →", STORE_URL)}
+
+      <hr style="border:none;border-top:1px solid #ede8e3;margin:24px 0;">
+      <p style="color:#888;font-size:12px;line-height:1.6;margin:0;">
+        If you did not cancel this deletion yourself, please change your password immediately
+        or contact <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>.
+      </p>
+    """)
+    _bg(email, f"✅ Your {STORE_NAME} account has been restored", html)
 
 
 # ── 9. Login OTP email ────────────────────────────────────────────────────────

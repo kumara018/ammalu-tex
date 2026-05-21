@@ -306,8 +306,11 @@ def _migrate_db():
 
 
 def _cleanup_deleted_accounts():
-    """Permanently remove accounts whose 24-hour deletion window has passed."""
+    """Permanently remove accounts whose deletion window has passed.
+    Sends a 'permanently deleted' email to each user before wiping their data.
+    """
     from datetime import datetime, timezone
+    import notifications as _notif
     db = SessionLocal()
     try:
         now = datetime.now(timezone.utc)
@@ -316,6 +319,12 @@ def _cleanup_deleted_accounts():
             models.User.scheduled_delete_at <= now,
         ).all()
         for u in expired:
+            # ── Send final goodbye email BEFORE deleting (while we still have the address) ──
+            try:
+                _notif.send_account_permanently_deleted_email(u.email, u.full_name)
+                print(f"[Cleanup] Sent deletion-confirmed email → {u.email}")
+            except Exception as e:
+                print(f"[Cleanup] Could not send deletion email to {u.email}: {e}")
             db.delete(u)
         if expired:
             db.commit()
@@ -330,7 +339,7 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     # Migrate new columns without data loss
     _migrate_db()
-    # Delete accounts whose 24h deletion window expired
+    # Delete accounts whose 4-hour deletion window expired + send goodbye email
     _cleanup_deleted_accounts()
     # Always ensure admin + products exist
     _ensure_admin()

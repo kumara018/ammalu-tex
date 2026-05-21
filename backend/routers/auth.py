@@ -264,9 +264,10 @@ def verify_login_otp(payload: schemas.LoginOTPVerify, db: Session = Depends(get_
             sda = sda.replace(tzinfo=timezone.utc)
         if now > sda:
             raise HTTPException(401, "This account has been permanently deleted.")
-        # Logged in within window → auto-cancel deletion
+        # Logged in within window → auto-cancel deletion + notify
         user.scheduled_delete_at = None
         db.commit()
+        notifications.send_account_retrieved_email(user.email, user.full_name)
 
     if not _verify_otp(db, user.email, payload.otp_code, otp_type="login"):
         raise HTTPException(400, "Invalid or expired OTP. Please request a new one.")
@@ -302,17 +303,19 @@ def confirm_delete_account(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user),
 ):
-    """Verify OTP → schedule permanent deletion in 24 hours."""
+    """Verify OTP → schedule permanent deletion in 4 hours."""
     if not _verify_otp(db, current_user.email, payload.otp_code, otp_type="delete"):
         raise HTTPException(400, "Invalid or expired OTP.")
-    delete_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    hours = notifications.DELETE_HOURS
+    delete_at = datetime.now(timezone.utc) + timedelta(hours=hours)
     current_user.scheduled_delete_at = delete_at
     db.commit()
     notifications.send_deletion_scheduled_email(current_user.email, current_user.full_name, delete_at)
     return {
-        "message": "Account scheduled for permanent deletion in 24 hours.",
+        "message": f"Account scheduled for permanent deletion in {hours} hours.",
         "delete_at": delete_at.isoformat(),
-        "cancel_info": "Log in within 24 hours to cancel.",
+        "cancel_info": f"Log in within {hours} hours to cancel deletion.",
+        "hours": hours,
     }
 
 
@@ -323,11 +326,14 @@ def cancel_delete_account(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user),
 ):
-    """Cancel a pending deletion."""
+    """Cancel a pending deletion — sends account-retrieved confirmation email."""
+    had_pending = bool(current_user.scheduled_delete_at)
     current_user.scheduled_delete_at = None
     current_user.is_deactivated      = False
     current_user.deactivated_at      = None
     db.commit()
+    if had_pending:
+        notifications.send_account_retrieved_email(current_user.email, current_user.full_name)
     return {"message": "Account deletion cancelled. Your account is safe! ✅"}
 
 
