@@ -355,18 +355,31 @@ def revoke_admin_access(
     db: Session = Depends(get_db),
     current_admin: models.User = Depends(auth_utils.get_current_admin),
 ):
-    """Revoke admin access from a secondary admin account."""
+    """Revoke admin access from a secondary admin account. Only the primary admin can do this."""
+    primary = os.getenv("ADMIN_EMAIL", "kumaraguru27102@gmail.com")
+
+    # Only the primary admin can remove other admins
+    if current_admin.email != primary:
+        raise HTTPException(403, "Only the primary admin can remove admin access")
+
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(404, "User not found")
-    primary = os.getenv("ADMIN_EMAIL", "kumaraguru27102@gmail.com")
     if user.email == primary:
         raise HTTPException(400, "Cannot revoke the primary admin account")
     if user.id == current_admin.id:
         raise HTTPException(400, "You cannot revoke your own admin access")
+
     user.is_admin = False
     db.commit()
-    return {"message": f"Admin access revoked from {user.email}"}
+
+    # Notify the revoked admin by email
+    try:
+        notifications.send_admin_revoked_email(user.email, user.full_name)
+    except Exception as e:
+        print(f"[Admin] Could not send revoke email to {user.email}: {e}")
+
+    return {"message": f"Admin access removed from {user.full_name} ({user.email})"}
 
 
 @router.post("/orders/{order_id}/create-shipment")

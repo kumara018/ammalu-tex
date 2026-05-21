@@ -1751,3 +1751,56 @@ def send_admin_access_whatsapp(phone: str, name: str):
         f"Log in to {STORE_URL} → tap your profile → *Admin Dashboard*\n\n"
         f"👉 Go directly: {admin_url}"
     )
+
+
+# ── Admin Access Revoked ────────────────────────────────────────────────────────
+
+def send_admin_revoked_email(email: str, name: str):
+    first = name.split()[0]
+    html = _wrap(f"""
+      <!-- Alert badge -->
+      <div style="display:inline-block;background:#fff1f2;border:1px solid #fecaca;border-radius:8px;padding:10px 20px;margin-bottom:20px;">
+        <span style="color:#b91c1c;font-weight:bold;font-size:14px;">🔒 Admin Access Removed</span>
+      </div>
+
+      <h2 style="color:#1e293b;margin-top:0;font-size:22px;">Hi {first}, your Admin Access has been removed.</h2>
+
+      <p style="color:#444;line-height:1.7;font-size:15px;">
+        Your <strong>Admin privileges</strong> on <strong>{STORE_NAME}</strong> have been revoked by the store owner.
+        Your account remains active as a regular customer — you can still browse and shop as usual.
+      </p>
+
+      <div style="background:#fff9f2;border-radius:12px;padding:20px 24px;margin:20px 0;">
+        <p style="margin:0 0 10px;font-size:13px;font-weight:bold;color:#7c1d2e;text-transform:uppercase;letter-spacing:1px;">What this means</p>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:7px 0;vertical-align:top;width:32px;font-size:18px;">❌</td>
+            <td style="padding:7px 0;font-size:14px;color:#555;">You no longer have access to the Admin Dashboard</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 0;vertical-align:top;font-size:18px;">✅</td>
+            <td style="padding:7px 0;font-size:14px;color:#555;">Your customer account is still active and fully functional</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 0;vertical-align:top;font-size:18px;">🛍️</td>
+            <td style="padding:7px 0;font-size:14px;color:#555;">You can continue to browse, shop, and track your orders</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="background:#fdf2f4;border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+        <p style="margin:0;font-size:13px;color:#666;line-height:1.6;">
+          If you believe this was done in error, please contact us at
+          <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;font-weight:bold;">{SUPPORT_EMAIL}</a>.
+        </p>
+      </div>
+
+      {_btn("Visit Ammalu Tex →", STORE_URL)}
+
+      <hr style="border:none;border-top:1px solid #ede8e3;margin:24px 0;">
+      <p style="color:#888;font-size:12px;line-height:1.6;margin:0;">
+        This action was performed by the store owner. For queries, reach us at
+        <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;">{SUPPORT_EMAIL}</a>.
+      </p>
+    """)
+    _bg(email, f"🔒 Your Admin Access Has Been Removed — {STORE_NAME}", html)

@@ -319,14 +319,14 @@ export default function AdminPage() {
   };
 
   const revokeAdmin = async (userId: number, email: string) => {
-    if (!confirm(`Revoke admin access from ${email}?`)) return;
+    if (!confirm(`Remove admin access from ${email}?\n\nThey will receive an email notification and be downgraded to a regular customer account.`)) return;
     setAdminActionLoading(true);
     try {
       await api.patch(`/api/admin/users/${userId}/revoke-admin`);
-      toast.success(`Admin access revoked from ${email}`);
+      toast.success(`✅ Admin access removed from ${email} — notification email sent`);
       loadAdmins();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'Failed to revoke admin access');
+      toast.error(err?.response?.data?.detail || 'Failed to remove admin access');
     } finally { setAdminActionLoading(false); }
   };
 
@@ -846,10 +846,10 @@ export default function AdminPage() {
                             🔄 Refund Initiated
                           </span>
                         )}
-                        {/* Refund Processed badge — Razorpay webhook confirmed, on its way to bank */}
+                        {/* Refunded badge — Razorpay webhook confirmed, credited to customer's bank */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refunded' && (
-                          <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refund processed by Razorpay — will appear in customer's bank in 1-3 days">
-                            ✅ Refund Processed
+                          <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refunded by Razorpay — credited to customer's bank account">
+                            ✅ Refunded
                           </span>
                         )}
                       </div>
@@ -1141,15 +1141,17 @@ export default function AdminPage() {
                       <td className="px-5 py-4">
                         {a.is_primary
                           ? <span className="text-xs text-gray-400">Protected</span>
-                          : (
+                          : user?.email === 'kumaraguru27102@gmail.com'
+                          ? (
                             <button
                               onClick={() => revokeAdmin(a.id, a.email)}
                               disabled={adminActionLoading}
-                              className="text-xs text-red-600 hover:text-red-800 font-medium hover:underline disabled:opacity-50"
+                              className="text-xs bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:text-red-800 font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                             >
-                              Revoke Access
+                              🗑️ Remove Admin
                             </button>
                           )
+                          : <span className="text-xs text-gray-400">—</span>
                         }
                       </td>
                     </tr>
