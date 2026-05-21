@@ -254,9 +254,12 @@ export default function RegisterPage() {
         )}
 
         <div className="flex-1 flex flex-col items-center leading-tight">
-          <Link href="/" className="flex flex-col items-center leading-tight">
-            <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
-            <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
+          <Link href="/" className="flex items-center gap-2.5 leading-tight">
+            <img src="/crown.svg" alt="Ammalu Tex" className="w-9 h-7 drop-shadow-sm flex-shrink-0" />
+            <div className="flex flex-col">
+              <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
+              <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women's Textiles</span>
+            </div>
           </Link>
         </div>
 

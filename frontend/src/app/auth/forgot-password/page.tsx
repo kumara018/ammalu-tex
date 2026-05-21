@@ -54,7 +54,8 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fff9f2]">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-4">
+          <Link href="/" className="inline-flex items-center gap-3 mb-4">
+            <img src="/crown.svg" alt="Ammalu Tex" className="w-10 h-8 drop-shadow-sm" />
             <h1 className="text-3xl font-display font-bold text-maroon-900">Ammalu Tex</h1>
           </Link>
           <h2 className="text-2xl font-bold text-gray-900">
