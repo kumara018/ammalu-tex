@@ -241,6 +241,37 @@ def admin_initiate_refund(
     }
 
 
+# ── Admin: Reset payment status back to refund_initiated (fix premature "refunded") ──
+@router.post("/admin/orders/{order_id}/reset-to-refund-initiated")
+def admin_reset_to_refund_initiated(
+    order_id: int,
+    db:    Session     = Depends(get_db),
+    _:     models.User = Depends(auth_utils.get_current_admin),
+):
+    """
+    Corrects an order that was incorrectly set to 'refunded' before Razorpay confirmed it.
+    Resets payment_status back to 'refund_initiated' so the refund.processed webhook
+    can fire correctly and notify the customer when the money actually arrives.
+    """
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(404, "Order not found")
+    if order.payment_method == "cod":
+        raise HTTPException(400, "COD orders don't have a digital refund")
+    if order.payment_status not in ("refunded", "refund_initiated"):
+        raise HTTPException(400, f"Cannot reset — current payment status is '{order.payment_status}'")
+
+    order.payment_status = "refund_initiated"
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "message":        f"Order {order.order_number} reset to refund_initiated ✅ — Razorpay webhook will update it to 'refunded' when the refund is confirmed",
+        "order_id":       order_id,
+        "payment_status": "refund_initiated",
+    }
+
+
 # ── Admin: Mark refunded manually (fallback — when webhook never fires) ────────
 @router.post("/admin/orders/{order_id}/mark-refunded")
 def admin_mark_refunded(

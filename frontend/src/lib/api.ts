@@ -133,6 +133,7 @@ export const adminAPI = {
   checkServiceability:     (id: number)                 => api.get(`/api/admin/orders/${id}/check-serviceability`),
   initiateRefund:          (id: number)                 => api.post(`/api/payments/admin/orders/${id}/initiate-refund`),
   markRefunded:            (id: number)                 => api.post(`/api/payments/admin/orders/${id}/mark-refunded`),
+  resetToRefundInitiated:  (id: number)                 => api.post(`/api/payments/admin/orders/${id}/reset-to-refund-initiated`),
   getUsers:                ()                           => api.get('/api/admin/users'),
   updateSettings:          (data: object)               => api.put('/api/admin/settings', data),
   getSupportRatings:       ()                           => api.get('/api/admin/support-ratings'),

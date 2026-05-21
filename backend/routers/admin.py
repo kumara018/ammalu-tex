@@ -627,8 +627,8 @@ def update_return_status(
                          "notes": {"order_number": order.order_number, "reason": rr.reason}},
                     )
                     rr.refund_id = refund.get("id", "")
-                    order.payment_status = "refunded"
-                    print(f"[Returns] Razorpay refund {rr.refund_id} for return {return_id}")
+                    order.payment_status = "refund_initiated"   # webhook fires refund.processed → "refunded"
+                    print(f"[Returns] Razorpay refund {rr.refund_id} initiated for return {return_id}")
                 except Exception as e:
                     print(f"[Returns] Razorpay refund error: {e}")
 

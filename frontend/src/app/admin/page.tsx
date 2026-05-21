@@ -449,7 +449,8 @@ export default function AdminPage() {
   };
 
 
-  const [initiatingRefund, setInitiatingRefund] = useState<number | null>(null);
+  const [initiatingRefund, setInitiatingRefund]   = useState<number | null>(null);
+  const [resettingRefund,  setResettingRefund]    = useState<number | null>(null);
 
   const handleInitiateRefund = async (orderId: number, orderNum: string, total: number) => {
     if (!confirm(`Initiate Razorpay refund for order ${orderNum}?\n\n₹${total} will be refunded to the customer's original payment method.\n\nThe customer will receive an email + WhatsApp: "Refund Initiated".\nOnce Razorpay processes it (5–7 days), they will receive a "Refund Credited" notification automatically.`)) return;
@@ -461,6 +462,22 @@ export default function AdminPage() {
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to initiate refund');
     } finally { setInitiatingRefund(null); }
+  };
+
+  const handleResetToRefundInitiated = async (orderId: number, orderNum: string) => {
+    if (!confirm(
+      `Reset ${orderNum} back to "Refund Initiated"?\n\n` +
+      `Use this only if the status was incorrectly set to "Refunded" before Razorpay confirmed it.\n` +
+      `The Razorpay webhook will automatically move it back to "Refunded" once payment is confirmed.`
+    )) return;
+    setResettingRefund(orderId);
+    try {
+      await adminAPI.resetToRefundInitiated(orderId);
+      toast.success(`✅ ${orderNum} reset to "Refund Initiated" — webhook will update when Razorpay confirms`);
+      loadOrders();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to reset refund status');
+    } finally { setResettingRefund(null); }
   };
 
   const handleCreateDelhivery = async (orderId: number, orderNum: string) => {
@@ -846,11 +863,21 @@ export default function AdminPage() {
                             🔄 Refund Initiated
                           </span>
                         )}
-                        {/* Refunded badge — Razorpay webhook confirmed, credited to customer's bank */}
+                        {/* Refunded badge — with reset option in case status was set prematurely */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refunded' && (
-                          <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Refunded by Razorpay — credited to customer's bank account">
-                            ✅ Refunded
-                          </span>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Razorpay has confirmed this refund. Customer's bank will credit within 1–5 business days.">
+                              ✅ Refunded
+                            </span>
+                            <button
+                              onClick={() => handleResetToRefundInitiated(o.id, o.order_number)}
+                              disabled={resettingRefund === o.id}
+                              className="text-[9px] text-orange-500 hover:text-orange-700 hover:underline text-left disabled:opacity-50 whitespace-nowrap"
+                              title="If this was set prematurely — reset it so the Razorpay webhook can fire correctly"
+                            >
+                              {resettingRefund === o.id ? '⏳ Resetting...' : '↺ Set to Refund Initiated'}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>
