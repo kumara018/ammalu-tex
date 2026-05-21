@@ -114,6 +114,29 @@ def _bg(to: str, subject: str, html: str):
 
 
 # ── HTML helpers ───────────────────────────────────────────────────────────────
+# Shared brand header — pure HTML, no PNG image, renders perfectly in all clients
+_HEADER_HTML = """\
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="border-collapse:collapse;background:linear-gradient(135deg,#6b1728 0%,#7c1d2e 55%,#9b2135 100%);">
+      <tr>
+        <td align="center" valign="middle" style="padding:20px 24px 16px;">
+          <p style="margin:0 0 6px 0;padding:0;font-size:42px;line-height:1;
+                    mso-line-height-rule:exactly;">&#x1F451;</p>
+          <p style="margin:0 0 5px 0;padding:0;
+                    font-family:Georgia,'Times New Roman',serif;
+                    font-size:28px;font-weight:bold;color:#f5c518;
+                    letter-spacing:4px;line-height:1.2;mso-line-height-rule:exactly;">AMMALU TEX</p>
+          <p style="margin:0;padding:0;
+                    font-family:Arial,Helvetica,sans-serif;
+                    font-size:11px;color:#e8c96a;letter-spacing:2px;
+                    line-height:1.6;mso-line-height-rule:exactly;">
+            PREMIUM WOMEN&#8217;S TEXTILES &nbsp;&middot;&nbsp; TEXVALLEY GANGAPURAM
+          </p>
+        </td>
+      </tr>
+    </table>"""
+
+
 def _wrap(body: str) -> str:
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -122,29 +145,34 @@ def _wrap(body: str) -> str:
   <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body style="margin:0;padding:24px 16px;background:#fff9f2;font-family:Arial,Helvetica,sans-serif;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;
+              overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
 
-    <!-- Header -->
-    <div style="line-height:0;font-size:0;">
-      <img src="{STORE_URL}/email-header.png" alt="Ammalu Tex — Premium Women's Textiles"
-           width="600" style="width:100%;max-width:600px;display:block;border:0;" />
-    </div>
+{_HEADER_HTML}
 
     <!-- Body -->
     <div style="padding:32px;">{body}</div>
 
     <!-- Footer -->
-    <div style="background:#f8f4f0;padding:20px 32px;border-top:1px solid #ede8e3;text-align:center;">
-      <p style="margin:0 0 8px;color:#888;font-size:12px;">{STORE_ADDR}</p>
-      <p style="margin:0;color:#888;font-size:12px;">
-        <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
-        &nbsp;·&nbsp;
-        <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
-        &nbsp;·&nbsp;
-        <a href="{STORE_URL}/orders" style="color:#7c1d2e;text-decoration:none;">My Orders</a>
-      </p>
-      <p style="margin:10px 0 0;color:#bbb;font-size:11px;">© {YEAR} {STORE_NAME}. All rights reserved.</p>
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="border-collapse:collapse;background:#f8f4f0;border-top:1px solid #ede8e3;">
+      <tr>
+        <td align="center" style="padding:18px 24px;">
+          <p style="margin:0 0 6px;color:#888;font-size:12px;
+                    font-family:Arial,sans-serif;">{STORE_ADDR}</p>
+          <p style="margin:0 0 6px;font-size:12px;font-family:Arial,sans-serif;">
+            <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}/orders" style="color:#7c1d2e;text-decoration:none;">My Orders</a>
+          </p>
+          <p style="margin:0;color:#bbb;font-size:11px;font-family:Arial,sans-serif;">
+            &copy; {YEAR} {STORE_NAME}. All rights reserved.
+          </p>
+        </td>
+      </tr>
+    </table>
   </div>
 </body>
 </html>"""
@@ -1063,10 +1091,15 @@ def send_order_cancelled_email(email: str, name: str, order):
     )
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
-      <div style="background:#b91c1c;padding:28px 32px;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:22px">{STORE_NAME}</h1>
-        <p style="color:#fca5a5;margin:6px 0 0;font-size:14px">Order Cancellation Confirmed</p>
-      </div>
+      {_HEADER_HTML}
+      <!-- Order Cancellation sub-banner -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#b91c1c;">
+        <tr><td align="center" style="padding:10px 24px 14px;">
+          <p style="margin:0;color:#fca5a5;font-size:13px;font-family:Arial,sans-serif;
+                    letter-spacing:1px;">ORDER CANCELLATION CONFIRMED</p>
+        </td></tr>
+      </table>
       <div style="padding:32px">
         <h2 style="color:#111;margin-top:0">Order Cancelled ❌</h2>
         <p style="color:#555">Hi {first}, your order has been successfully cancelled.</p>
@@ -1087,9 +1120,20 @@ def send_order_cancelled_email(email: str, name: str, order):
         <p style="color:#555;font-size:14px">Changed your mind? You can always <a href="{STORE_URL}/products" style="color:#7c1d2e">shop again</a>.</p>
         <p style="color:#888;font-size:13px">Questions? Email us at <a href="mailto:{SUPPORT_EMAIL}">{SUPPORT_EMAIL}</a></p>
       </div>
-      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
-        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#f8f4f0;border-top:1px solid #ede8e3;">
+        <tr><td align="center" style="padding:16px 24px;">
+          <p style="margin:0 0 5px;color:#888;font-size:12px;font-family:Arial,sans-serif;">{STORE_ADDR}</p>
+          <p style="margin:0 0 5px;font-size:12px;font-family:Arial,sans-serif;">
+            <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
+          </p>
+          <p style="margin:0;color:#bbb;font-size:11px;font-family:Arial,sans-serif;">
+            &copy; {YEAR} {STORE_NAME}. All rights reserved.
+          </p>
+        </td></tr>
+      </table>
     </div>"""
     _send_email(email, f"Order Cancelled — {order.order_number}", html)
 
@@ -1125,10 +1169,14 @@ def send_refund_initiated_email(email: str, name: str, order, refund_id: str = "
     txn   = getattr(order, "payment_transaction_id", "") or ""
     html  = f"""
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
-      <div style="background:linear-gradient(135deg,#7c1d2e,#b91c1c);padding:28px 32px;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:22px;font-weight:bold">{STORE_NAME}</h1>
-        <p style="color:#fca5a5;margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Refund Initiated</p>
-      </div>
+      {_HEADER_HTML}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#7c1d2e;">
+        <tr><td align="center" style="padding:8px 24px 12px;">
+          <p style="margin:0;color:#fca5a5;font-size:12px;font-family:Arial,sans-serif;
+                    letter-spacing:2px;text-transform:uppercase;">REFUND INITIATED</p>
+        </td></tr>
+      </table>
       <div style="padding:32px">
         <div style="text-align:center;margin-bottom:24px">
           <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px">💰</div>
@@ -1156,9 +1204,20 @@ def send_refund_initiated_email(email: str, name: str, order, refund_id: str = "
 
         <p style="color:#888;font-size:13px;text-align:center">Questions? <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e">{SUPPORT_EMAIL}</a></p>
       </div>
-      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
-        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#f8f4f0;border-top:1px solid #ede8e3;">
+        <tr><td align="center" style="padding:16px 24px;">
+          <p style="margin:0 0 5px;color:#888;font-size:12px;font-family:Arial,sans-serif;">{STORE_ADDR}</p>
+          <p style="margin:0 0 5px;font-size:12px;font-family:Arial,sans-serif;">
+            <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
+          </p>
+          <p style="margin:0;color:#bbb;font-size:11px;font-family:Arial,sans-serif;">
+            &copy; {YEAR} {STORE_NAME}. All rights reserved.
+          </p>
+        </td></tr>
+      </table>
     </div>"""
     _send_email(email, f"💰 Refund Initiated — ₹{order.total:,.0f} · {order.order_number}", html)
 
@@ -1194,10 +1253,14 @@ def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""
     txn   = getattr(order, "payment_transaction_id", "") or ""
     html  = f"""
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
-      <div style="background:linear-gradient(135deg,#14532d,#16a34a);padding:28px 32px;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:22px;font-weight:bold">{STORE_NAME}</h1>
-        <p style="color:#bbf7d0;margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Refund Credited ✅</p>
-      </div>
+      {_HEADER_HTML}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#16a34a;">
+        <tr><td align="center" style="padding:8px 24px 12px;">
+          <p style="margin:0;color:#bbf7d0;font-size:12px;font-family:Arial,sans-serif;
+                    letter-spacing:2px;text-transform:uppercase;">REFUND CREDITED ✅</p>
+        </td></tr>
+      </table>
       <div style="padding:32px">
         <div style="text-align:center;margin-bottom:24px">
           <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px">✅</div>
@@ -1225,9 +1288,20 @@ def send_refund_credited_email(email: str, name: str, order, refund_id: str = ""
 
         <p style="color:#888;font-size:13px;text-align:center">Questions? <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e">{SUPPORT_EMAIL}</a></p>
       </div>
-      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
-        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#f8f4f0;border-top:1px solid #ede8e3;">
+        <tr><td align="center" style="padding:16px 24px;">
+          <p style="margin:0 0 5px;color:#888;font-size:12px;font-family:Arial,sans-serif;">{STORE_ADDR}</p>
+          <p style="margin:0 0 5px;font-size:12px;font-family:Arial,sans-serif;">
+            <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
+          </p>
+          <p style="margin:0;color:#bbb;font-size:11px;font-family:Arial,sans-serif;">
+            &copy; {YEAR} {STORE_NAME}. All rights reserved.
+          </p>
+        </td></tr>
+      </table>
     </div>"""
     _send_email(email, f"✅ Refund Processed — ₹{order.total:,.0f} · {order.order_number}", html)
 
@@ -1378,16 +1452,37 @@ def send_invoice_email(email: str, name: str, order, user_email: str = ""):
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
 
-      <!-- Header -->
-      <div style="line-height:0;font-size:0;">
-        <img src="{STORE_URL}/email-header.png" alt="Ammalu Tex — Premium Women's Textiles"
-             width="650" style="width:100%;max-width:650px;display:block;border:0;" />
-      </div>
-      <div style="background:#7c1d2e;padding:8px 32px 16px;text-align:center">
-        <div style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:8px;padding:6px 20px">
-          <p style="color:#fff;margin:0;font-size:13px;font-weight:bold">TAX INVOICE</p>
-        </div>
-      </div>
+      <!-- Header — pure HTML, no image -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:linear-gradient(135deg,#6b1728 0%,#7c1d2e 55%,#9b2135 100%);">
+        <tr>
+          <td align="center" valign="middle" style="padding:20px 24px 14px;">
+            <p style="margin:0 0 6px 0;padding:0;font-size:42px;line-height:1;">&#x1F451;</p>
+            <p style="margin:0 0 5px 0;padding:0;font-family:Georgia,'Times New Roman',serif;
+                      font-size:28px;font-weight:bold;color:#f5c518;letter-spacing:4px;line-height:1.2;">AMMALU TEX</p>
+            <p style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;
+                      font-size:11px;color:#e8c96a;letter-spacing:2px;line-height:1.6;">
+              PREMIUM WOMEN&#8217;S TEXTILES &nbsp;&middot;&nbsp; TEXVALLEY GANGAPURAM
+            </p>
+          </td>
+        </tr>
+      </table>
+      <!-- TAX INVOICE badge -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#7c1d2e;">
+        <tr>
+          <td align="center" style="padding:8px 32px 14px;">
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="background:rgba(255,255,255,0.15);border-radius:8px;padding:7px 24px;">
+                  <p style="margin:0;color:#fff;font-size:13px;font-weight:bold;
+                             font-family:Arial,sans-serif;letter-spacing:1px;">TAX INVOICE</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
 
       <div style="padding:28px 32px">
 
@@ -1460,11 +1555,22 @@ def send_invoice_email(email: str, name: str, order, user_email: str = ""):
       </div>
 
       <!-- Footer -->
-      <div style="background:#7c1d2e;padding:20px 32px;text-align:center">
-        <p style="color:#f9a8d4;margin:0 0 4px;font-size:13px;font-weight:bold">{STORE_NAME}</p>
-        <p style="color:#fecdd3;margin:0;font-size:11px">{STORE_ADDR}</p>
-        <p style="color:#fecdd3;margin:4px 0 0;font-size:11px">© {YEAR} All rights reserved</p>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#f8f4f0;border-top:1px solid #ede8e3;">
+        <tr><td align="center" style="padding:16px 24px;">
+          <p style="margin:0 0 5px;color:#888;font-size:12px;font-family:Arial,sans-serif;">{STORE_ADDR}</p>
+          <p style="margin:0 0 5px;font-size:12px;font-family:Arial,sans-serif;">
+            <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}/orders" style="color:#7c1d2e;text-decoration:none;">My Orders</a>
+          </p>
+          <p style="margin:0;color:#bbb;font-size:11px;font-family:Arial,sans-serif;">
+            &copy; {YEAR} {STORE_NAME}. All rights reserved.
+          </p>
+        </td></tr>
+      </table>
     </div>"""
     _send_email(email, f"📄 Invoice — {order.order_number} · {STORE_NAME}", html)
 
@@ -1477,10 +1583,14 @@ def send_support_rating_request_email(email: str, customer_name: str, cs_name: s
     issue_row = f"<tr><td style='color:#555;padding:5px 0'>Topic</td><td style='text-align:right;color:#111'>{issue}</td></tr>" if issue else ""
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
-      <div style="background:linear-gradient(135deg,#7c1d2e,#b91c1c);padding:28px 32px;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:22px;font-weight:bold">{STORE_NAME}</h1>
-        <p style="color:#fca5a5;margin:6px 0 0;font-size:13px;letter-spacing:2px;text-transform:uppercase">Support Experience</p>
-      </div>
+      {_HEADER_HTML}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#7c1d2e;">
+        <tr><td align="center" style="padding:8px 24px 12px;">
+          <p style="margin:0;color:#fca5a5;font-size:12px;font-family:Arial,sans-serif;
+                    letter-spacing:2px;text-transform:uppercase;">SUPPORT EXPERIENCE</p>
+        </td></tr>
+      </table>
       <div style="padding:32px">
         <div style="text-align:center;margin-bottom:20px">
           <div style="width:64px;height:64px;background:#fff7ed;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:32px">⭐</div>
@@ -1499,9 +1609,20 @@ def send_support_rating_request_email(email: str, customer_name: str, cs_name: s
         </div>
         <p style="color:#aaa;font-size:12px;text-align:center">This link is unique to you and can only be used once.</p>
       </div>
-      <div style="background:#fdf2f4;padding:16px 32px;text-align:center;border-top:1px solid #f8d7da">
-        <p style="color:#aaa;font-size:12px;margin:0">© {YEAR} {STORE_NAME} · {STORE_ADDR}</p>
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="border-collapse:collapse;background:#f8f4f0;border-top:1px solid #ede8e3;">
+        <tr><td align="center" style="padding:16px 24px;">
+          <p style="margin:0 0 5px;color:#888;font-size:12px;font-family:Arial,sans-serif;">{STORE_ADDR}</p>
+          <p style="margin:0 0 5px;font-size:12px;font-family:Arial,sans-serif;">
+            <a href="mailto:{SUPPORT_EMAIL}" style="color:#7c1d2e;text-decoration:none;">Contact Support</a>
+            &nbsp;&middot;&nbsp;
+            <a href="{STORE_URL}" style="color:#7c1d2e;text-decoration:none;">Visit Store</a>
+          </p>
+          <p style="margin:0;color:#bbb;font-size:11px;font-family:Arial,sans-serif;">
+            &copy; {YEAR} {STORE_NAME}. All rights reserved.
+          </p>
+        </td></tr>
+      </table>
     </div>"""
     _send_email(email, f"⭐ How was your support experience? | {STORE_NAME}", html)
 
