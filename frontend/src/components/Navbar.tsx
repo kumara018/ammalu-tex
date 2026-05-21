@@ -225,19 +225,31 @@ export default function Navbar() {
 
               {/* Search history dropdown (shown when focused with empty input) */}
               {showHistory && !search.trim() && searchHistory.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-gray-100 z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-gray-50">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Recent Searches</span>
-                    <button onClick={clearHistory} className="text-xs text-red-400 hover:text-red-600 font-medium">Clear all</button>
+                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-gray-200 z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recent Searches</span>
+                    <button
+                      onClick={clearHistory}
+                      className="text-xs text-maroon-600 hover:text-maroon-900 font-semibold hover:underline"
+                    >
+                      Clear all
+                    </button>
                   </div>
                   {searchHistory.map((term) => (
-                    <div key={term} className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 border-b border-gray-50 last:border-0 group">
+                    <div key={term} className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 border-b border-gray-50 last:border-0 cursor-pointer group">
                       <Search size={14} className="text-gray-400 flex-shrink-0" />
-                      <button className="flex-1 text-left text-sm text-gray-700 font-medium" onClick={() => runSearch(term)}>
+                      <button
+                        className="flex-1 text-left text-sm text-gray-800 font-medium group-hover:text-maroon-800"
+                        onClick={() => runSearch(term)}
+                      >
                         {term}
                       </button>
-                      <button onClick={() => removeHistory(term)} className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-gray-500 transition-opacity">
-                        <X size={14} />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeHistory(term); }}
+                        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
+                        title="Remove"
+                      >
+                        <X size={13} />
                       </button>
                     </div>
                   ))}

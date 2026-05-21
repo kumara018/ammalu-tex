@@ -30,7 +30,7 @@ def get_products(
     sort_by:    str = Query("created_at", pattern="^(price|rating_avg|created_at|name)$"),
     sort_order: str = Query("desc",       pattern="^(asc|desc)$"),
     skip:       int = Query(0,  ge=0),
-    limit:      int = Query(40, ge=1, le=100),
+    limit:      int = Query(40, ge=1, le=500),
     db: Session = Depends(get_db),
 ):
     query = db.query(models.Product).filter(models.Product.is_active == True)
