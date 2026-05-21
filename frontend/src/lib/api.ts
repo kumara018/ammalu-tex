@@ -59,6 +59,8 @@ api.interceptors.response.use(
           // Token is truly invalid — clear everything and redirect
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          localStorage.removeItem('sessions');
+          document.cookie = 'auth_token=; path=/; max-age=0';
           window.location.href = '/auth/login';
         }
       }

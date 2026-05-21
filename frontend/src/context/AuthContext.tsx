@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedToken && storedUser) {
       setToken(storedToken);
       try { setUser(JSON.parse(storedUser)); } catch {}
-      document.cookie = `auth_token=${storedToken}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `auth_token=${storedToken}; path=/; max-age=2592000; SameSite=Lax`;
     }
     if (storedSessions) {
       try { setSessions(JSON.parse(storedSessions)); } catch {}
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const _setCookie = (t: string) => {
-    document.cookie = `auth_token=${t}; path=/; max-age=86400; SameSite=Lax`;
+    document.cookie = `auth_token=${t}; path=/; max-age=2592000; SameSite=Lax`;
   };
   const _clearCookie = () => {
     document.cookie = 'auth_token=; path=/; max-age=0';
