@@ -1,10 +1,12 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { ShoppingCart, Star, Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLoginPrompt } from '@/context/LoginPromptContext';
+import { useWishlist } from '@/context/WishlistContext';
 import toast from 'react-hot-toast';
 
 interface Props { product: Product; }
@@ -13,10 +15,22 @@ export default function ProductCard({ product }: Props) {
   const { addItem } = useCart();
   const { user } = useAuth();
   const { promptLogin } = useLoginPrompt();
+  const { wishlistIds, toggle } = useWishlist();
+  const isWishlisted = wishlistIds.includes(product.id);
+  const [toggling, setToggling] = useState(false);
 
   const discount = product.compare_price
     ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
     : null;
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) { promptLogin('Sign in to save items to your wishlist.'); return; }
+    if (toggling) return;
+    setToggling(true);
+    await toggle(product.id);
+    setToggling(false);
+  };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -81,8 +95,16 @@ export default function ProductCard({ product }: Props) {
             )}
           </div>
 
-          <button className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
-            <Heart size={15} className="text-maroon-800" />
+          <button
+            onClick={handleWishlist}
+            className={`absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 ${isWishlisted ? 'opacity-100' : ''}`}
+            title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart
+              size={15}
+              className={isWishlisted ? 'text-red-500' : 'text-maroon-800'}
+              fill={isWishlisted ? '#ef4444' : 'none'}
+            />
           </button>
         </div>
 

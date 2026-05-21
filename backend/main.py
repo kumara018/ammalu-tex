@@ -9,7 +9,7 @@ load_dotenv()
 
 from database import engine, Base, SessionLocal
 import models
-from routers import auth, products, cart, orders, admin, payments, addresses, support, returns
+from routers import auth, products, cart, orders, admin, payments, addresses, support, returns, wishlist
 
 
 os.makedirs(os.getenv("UPLOAD_DIR", "uploads/products"), exist_ok=True)
@@ -237,6 +237,18 @@ def _migrate_db():
                 """))
                 conn.commit()
                 print("[Startup] Migrated: created return_requests table")
+            if "wishlist_items" not in existing_tables:
+                conn.execute(text("""
+                    CREATE TABLE wishlist_items (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        UNIQUE(user_id, product_id)
+                    )
+                """))
+                conn.commit()
+                print("[Startup] Migrated: created wishlist_items table")
         except Exception as e:
             print(f"[Startup] New table migration note: {e}")
 
@@ -363,6 +375,7 @@ app.include_router(payments.router)
 app.include_router(addresses.router)
 app.include_router(support.router)
 app.include_router(returns.router)
+app.include_router(wishlist.router)
 # Tracking is wired into orders router (/api/orders/{id}/track)
 
 

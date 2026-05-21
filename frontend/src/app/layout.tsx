@@ -3,6 +3,7 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { LoginPromptProvider } from '@/context/LoginPromptContext';
+import { WishlistProvider } from '@/context/WishlistContext';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import FooterWrapper from '@/components/FooterWrapper';
 import LoginPromptModal from '@/components/LoginPromptModal';
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-[#fff9f2] min-h-screen flex flex-col">
         <AuthProvider>
           <CartProvider>
+            <WishlistProvider>
             <LoginPromptProvider>
               <NavbarWrapper />
               <main className="flex-1"><PageTransition>{children}</PageTransition></main>
@@ -86,6 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 }}
               />
             </LoginPromptProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

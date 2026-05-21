@@ -215,6 +215,18 @@ class SupportInteraction(Base):
     customer_user    = relationship("User", foreign_keys=[customer_user_id])
 
 
+class WishlistItem(Base):
+    __tablename__ = "wishlist_items"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    user_id    = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user    = relationship("User")
+    product = relationship("Product")
+
+
 class ReturnRequest(Base):
     __tablename__ = "return_requests"
     id            = Column(Integer, primary_key=True, index=True)

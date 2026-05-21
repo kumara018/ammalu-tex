@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import {
   ShoppingCart, Search, User, Menu, X, ChevronDown,
   LogOut, Package, Settings, MapPin, Phone, LayoutDashboard,
-  Home, HelpCircle, UserCog, UserX, RefreshCw, UserPlus, Check, ChevronRight,
+  Home, HelpCircle, UserCog, UserX, RefreshCw, UserPlus, Check, ChevronRight, Heart,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { STORE, SHORT_ADDRESS } from '@/lib/config';
 import { performLogout } from '@/lib/auth';
 import { productsAPI } from '@/lib/api';
@@ -20,6 +21,7 @@ const CATEGORIES = [
 export default function Navbar() {
   const { user, logout, sessions, switchAccount, removeSession } = useAuth();
   const { count } = useCart();
+  const { count: wishCount } = useWishlist();
   const router = useRouter();
 
   const [search, setSearch]                     = useState('');
@@ -319,6 +321,24 @@ export default function Navbar() {
                 </div>
               )}
 
+
+              {/* Wishlist */}
+              {user && (
+                <Link
+                  href="/wishlist"
+                  className="relative flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-lg transition-colors"
+                >
+                  <div className="relative">
+                    <Heart size={20} fill={wishCount > 0 ? '#ef4444' : 'none'} className={wishCount > 0 ? 'text-red-400' : ''} />
+                    {wishCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                        {wishCount > 99 ? '99+' : wishCount}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] mt-0.5 hidden sm:block">Wishlist</span>
+                </Link>
+              )}
 
               {/* Cart */}
               <Link

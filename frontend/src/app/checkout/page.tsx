@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   CreditCard, Smartphone, Truck, AlertCircle, CheckCircle,
-  Lock, Package, ArrowLeft, MapPin, Navigation, Plus, Star,
+  Lock, Package, ArrowLeft, MapPin, Navigation, Plus, Star, CalendarDays,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -22,7 +22,7 @@ const INDIA_STATES = [
   'Delhi','Jammu & Kashmir','Ladakh','Lakshadweep','Puducherry',
 ];
 
-type PayMethod = 'razorpay' | 'upi' | 'cod';
+type PayMethod = 'razorpay' | 'upi' | 'cod' | 'emi';
 interface Errors { [k: string]: string; }
 
 function FieldErr({ msg }: { msg?: string }) {
@@ -213,15 +213,15 @@ export default function CheckoutPage() {
     } finally { setPlacing(false); }
   };
 
-  // ── Razorpay flow ──
-  const handleRazorpay = async () => {
+  // ── Razorpay flow (card / net banking / UPI via Razorpay modal) ──
+  const openRazorpay = async (isEmi = false) => {
     if (!validateAddr()) { toast.error('Please fill all address fields'); return; }
     setPlacing(true);
     try {
       const orderRes = await api.post('/api/payments/create-order', { amount: grandTotal });
       const { order_id, key_id } = orderRes.data;
 
-      const options = {
+      const options: any = {
         key:         key_id,
         amount:      grandTotal * 100,
         currency:    'INR',
@@ -241,7 +241,7 @@ export default function CheckoutPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature:  response.razorpay_signature,
             });
-            await placeDirectOrder('razorpay', {
+            await placeDirectOrder(isEmi ? 'emi' : 'razorpay', {
               razorpay_payment_id: response.razorpay_payment_id,
             });
           } catch {
@@ -252,19 +252,34 @@ export default function CheckoutPage() {
         modal: { ondismiss: () => { setPlacing(false); toast.error('Payment cancelled'); } },
       };
 
+      // For EMI: open Razorpay with EMI block shown first
+      if (isEmi) {
+        options.config = {
+          display: {
+            blocks: {
+              emi: { name: 'EMI — Pay in instalments', instruments: [{ method: 'emi' }] },
+            },
+            sequence: ['block.emi'],
+            preferences: { show_default_blocks: false },
+          },
+        };
+      }
+
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch {
-      // Razorpay not configured — fall back to mock card payment
-      await placeDirectOrder('card');
+      await placeDirectOrder(isEmi ? 'emi' : 'card');
     }
   };
+
+  const handleRazorpay = async () => openRazorpay(false);
 
   const handlePlaceOrder = async () => {
     if (!validateAddr() || !validatePayment()) {
       toast.error('Please complete all required fields'); return;
     }
     if (payMethod === 'razorpay') { await handleRazorpay(); return; }
+    if (payMethod === 'emi') { await openRazorpay(true); return; }
     await placeDirectOrder(payMethod === 'upi' ? 'upi' : 'cod');
   };
 
@@ -410,11 +425,12 @@ export default function CheckoutPage() {
                 <span className="ml-auto text-xs text-green-600 flex items-center gap-1"><Lock size={11} /> 100% Secure</span>
               </h2>
 
-              <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                 {([
-                  { val: 'razorpay', icon: CreditCard, label: 'Card / Net Banking', sub: 'Visa • Master • UPI' },
-                  { val: 'upi',      icon: Smartphone, label: 'UPI Direct',          sub: 'PhonePe • GPay • Paytm' },
-                  { val: 'cod',      icon: Truck,       label: 'Cash on Delivery',    sub: 'Pay when delivered' },
+                  { val: 'razorpay', icon: CreditCard,    label: 'Card / Net Banking', sub: 'Visa • Master • UPI' },
+                  { val: 'emi',      icon: CalendarDays,  label: 'Pay in EMI',         sub: 'No-cost EMI available' },
+                  { val: 'upi',      icon: Smartphone,    label: 'UPI Direct',         sub: 'PhonePe • GPay • Paytm' },
+                  { val: 'cod',      icon: Truck,         label: 'Cash on Delivery',   sub: 'Pay when delivered' },
                 ] as const).map(({ val, icon: Icon, label, sub }) => (
                   <button key={val} onClick={() => { setPayMethod(val); setPayErrors({}); }}
                     className={`flex flex-col items-center gap-1.5 p-4 rounded-xl border-2 text-sm font-medium transition-all ${payMethod === val ? 'border-maroon-800 bg-maroon-50 text-maroon-800' : 'border-gray-200 text-gray-600 hover:border-maroon-300'}`}>
@@ -436,6 +452,23 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                   <p className="text-xs text-blue-500 flex items-center gap-1"><Lock size={11} /> Your card details are handled by Razorpay — never stored on our servers.</p>
+                </div>
+              )}
+
+              {/* EMI info */}
+              {payMethod === 'emi' && (
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-2">
+                  <p className="font-semibold text-purple-800 flex items-center gap-2"><CalendarDays size={16} /> EMI — Pay in Easy Instalments</p>
+                  <p className="text-sm text-purple-700">Split your payment into monthly instalments. Available on most credit cards.</p>
+                  <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                    {['3 months', '6 months', '9 months', '12 months', 'No-cost EMI'].map(m => (
+                      <span key={m} className="bg-white border border-purple-200 px-2.5 py-1 rounded-full text-purple-700">{m}</span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-purple-500 flex items-center gap-1"><Lock size={11} /> EMI options are shown in the next step. Powered by Razorpay.</p>
+                  {grandTotal < 1000 && (
+                    <p className="text-xs text-orange-600 font-medium">⚠️ EMI is typically available for orders above ₹1,000.</p>
+                  )}
                 </div>
               )}
 
@@ -507,6 +540,7 @@ export default function CheckoutPage() {
                     <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">Payment</p>
                     <p className="font-semibold text-gray-800 flex items-center gap-2">
                       {payMethod === 'razorpay' && <><CreditCard size={16} /> Razorpay (Card / Net Banking / UPI)</>}
+                      {payMethod === 'emi'      && <><CalendarDays size={16} /> EMI — Pay in Instalments</>}
                       {payMethod === 'upi'      && <><Smartphone size={16} /> UPI: {upiId}</>}
                       {payMethod === 'cod'      && <><Truck size={16} /> Cash on Delivery</>}
                     </p>
@@ -551,7 +585,7 @@ export default function CheckoutPage() {
                   className="btn-gold flex-1 py-3.5 flex items-center justify-center gap-2 text-base font-bold rounded-xl">
                   {placing
                     ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Processing...</>
-                    : <><Lock size={18} /> {payMethod === 'razorpay' ? 'Pay with Razorpay' : 'Place Order'} · ₹{grandTotal.toLocaleString()}</>
+                    : <><Lock size={18} /> {payMethod === 'razorpay' ? 'Pay with Razorpay' : payMethod === 'emi' ? 'Choose EMI Plan' : 'Place Order'} · ₹{grandTotal.toLocaleString()}</>
                   }
                 </button>
               </div>

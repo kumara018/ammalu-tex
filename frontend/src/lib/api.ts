@@ -155,6 +155,13 @@ export const returnsAPI = {
   uploadImage: (form: FormData)  => api.post('/api/returns/upload-image', form, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
+export const wishlistAPI = {
+  getAll:  ()                => api.get('/api/wishlist/'),
+  getIds:  ()                => api.get('/api/wishlist/ids'),
+  add:     (product_id: number) => api.post('/api/wishlist/', { product_id }),
+  remove:  (product_id: number) => api.delete(`/api/wishlist/${product_id}`),
+};
+
 export const adminReturnsAPI = {
   getAll:       ()                          => api.get('/api/admin/returns'),
   updateStatus: (id: number, data: object) => api.put(`/api/admin/returns/${id}/status`, data),
