@@ -1,5 +1,5 @@
 """
-Ammalu Tex — Email & SMS Notifications
+Ammalu Tex — Email, SMS & WhatsApp Notifications
 Sends all transactional emails (welcome, order, payment, status, OTPs)
 and optional SMS via Twilio.
 
