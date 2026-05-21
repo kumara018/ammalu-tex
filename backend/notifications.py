@@ -120,19 +120,22 @@ def _bg(to: str, subject: str, html: str):
 #   text-white        = #ffffff   (Ammalu Tex brand name)
 #   text-gold-300     = #fde047   (tagline — same as navbar tagline)
 #   font-display      = Georgia   (same as Tailwind fontFamily.display)
-_HEADER_HTML = """\
+#   crown image       = crown-email.png (PNG of crown.svg, transparent bg)
+_HEADER_HTML = f"""\
     <table width="100%" cellpadding="0" cellspacing="0" border="0"
            style="border-collapse:collapse;
                   background:linear-gradient(135deg,#8b1538 0%,#5c0f25 100%);">
       <tr>
         <td align="center" style="padding:16px 24px 14px;">
-          <!-- Same layout as Navbar: crown left · brand text right -->
+          <!-- Navbar layout: crown LEFT · brand name + tagline RIGHT -->
           <table cellpadding="0" cellspacing="0" border="0"
                  style="border-collapse:collapse;">
             <tr>
-              <td valign="middle" style="padding-right:12px;font-size:0;line-height:0;">
-                <p style="margin:0;padding:0;font-size:40px;line-height:1;
-                          mso-line-height-rule:exactly;">&#x1F451;</p>
+              <td valign="middle" style="padding-right:14px;font-size:0;line-height:0;">
+                <img src="{STORE_URL}/crown-email.png"
+                     width="54" height="42"
+                     alt="Ammalu Tex Crown"
+                     style="display:block;border:0;width:54px;height:42px;" />
               </td>
               <td valign="middle" style="text-align:left;">
                 <p style="margin:0 0 3px 0;padding:0;
