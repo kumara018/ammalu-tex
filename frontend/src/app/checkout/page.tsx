@@ -252,15 +252,17 @@ export default function CheckoutPage() {
         modal: { ondismiss: () => { setPlacing(false); toast.error('Payment cancelled'); } },
       };
 
-      // For EMI: open Razorpay with EMI block shown first
+      // For EMI: show all methods but with EMI block highlighted first
+      // (Don't hide other blocks — EMI may not be available for all cards/amounts)
       if (isEmi) {
         options.config = {
           display: {
             blocks: {
-              emi: { name: 'EMI — Pay in instalments', instruments: [{ method: 'emi' }] },
+              emi: { name: 'Pay in Easy EMI', instruments: [{ method: 'emi' }] },
+              other: { name: 'Other Payment Methods', instruments: [{ method: 'card' }, { method: 'upi' }, { method: 'netbanking' }] },
             },
-            sequence: ['block.emi'],
-            preferences: { show_default_blocks: false },
+            sequence: ['block.emi', 'block.other'],
+            preferences: { show_default_blocks: true },
           },
         };
       }
@@ -459,15 +461,19 @@ export default function CheckoutPage() {
               {payMethod === 'emi' && (
                 <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-2">
                   <p className="font-semibold text-purple-800 flex items-center gap-2"><CalendarDays size={16} /> EMI — Pay in Easy Instalments</p>
-                  <p className="text-sm text-purple-700">Split your payment into monthly instalments. Available on most credit cards.</p>
+                  <p className="text-sm text-purple-700">Split your payment into monthly instalments. Available on Credit Cards.</p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
                     {['3 months', '6 months', '9 months', '12 months', 'No-cost EMI'].map(m => (
                       <span key={m} className="bg-white border border-purple-200 px-2.5 py-1 rounded-full text-purple-700">{m}</span>
                     ))}
                   </div>
-                  <p className="text-xs text-purple-500 flex items-center gap-1"><Lock size={11} /> EMI options are shown in the next step. Powered by Razorpay.</p>
-                  {grandTotal < 1000 && (
-                    <p className="text-xs text-orange-600 font-medium">⚠️ EMI is typically available for orders above ₹1,000.</p>
+                  {grandTotal < 1000 ? (
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                      <p className="text-xs text-orange-700 font-semibold">⚠️ Your order total is ₹{grandTotal}. EMI requires a minimum order of ₹1,000.</p>
+                      <p className="text-xs text-orange-600 mt-1">You can still pay via Card, UPI or COD below.</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-purple-500 flex items-center gap-1"><Lock size={11} /> EMI options will appear in the payment screen. Requires a Credit Card.</p>
                   )}
                 </div>
               )}
