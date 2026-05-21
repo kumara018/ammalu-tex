@@ -7,6 +7,7 @@ import {
   LogOut, Package, Settings, MapPin, Phone, LayoutDashboard,
   Home, HelpCircle, UserCog, UserX, RefreshCw, UserPlus, Check, ChevronRight, Heart,
 } from 'lucide-react';
+import Fuse from 'fuse.js';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -34,6 +35,7 @@ export default function Navbar() {
   const userMenuRef  = useRef<HTMLDivElement>(null);
   const catMenuRef   = useRef<HTMLDivElement>(null);
   const searchBoxRef = useRef<HTMLDivElement>(null);
+  const fuseRef      = useRef<Fuse<any> | null>(null);
 
   /* Close menus on outside click */
   useEffect(() => {
@@ -49,18 +51,52 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  /* Live search — debounced 300 ms */
+  /* Pre-load product index for fuzzy search (runs once on mount) */
+  useEffect(() => {
+    productsAPI.getAll({ limit: 500 })
+      .then(res => {
+        const data = res.data;
+        const products: any[] = Array.isArray(data) ? data : (data.products ?? data.items ?? []);
+        fuseRef.current = new Fuse(products, {
+          keys: [
+            { name: 'name',     weight: 0.7 },
+            { name: 'category', weight: 0.3 },
+          ],
+          threshold: 0.45,       // 0 = exact, 1 = match anything; 0.45 catches typos like legenga→lehenga
+          minMatchCharLength: 2,
+          includeScore: true,
+          ignoreLocation: true,  // match anywhere in string, not just start
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  /* Live search — fuzzy first (instant), then API (debounced 300ms) */
   useEffect(() => {
     const q = search.trim();
     if (q.length < 2) { setSearchResults([]); setShowDrop(false); return; }
+
+    // 1. Instant fuzzy results from pre-loaded index
+    if (fuseRef.current) {
+      const fuzzy = fuseRef.current.search(q, { limit: 6 }).map(r => r.item);
+      if (fuzzy.length > 0) {
+        setSearchResults(fuzzy);
+        setShowDrop(true);
+      }
+    }
+
+    // 2. API search (debounced) — replaces fuzzy results if backend finds exact matches
     const t = setTimeout(async () => {
       try {
         const res = await productsAPI.getAll({ search: q, limit: 6 });
         const data = res.data;
         const items: any[] = Array.isArray(data) ? data : (data.products ?? data.items ?? []);
-        setSearchResults(items);
-        setShowDrop(items.length > 0);
-      } catch { setSearchResults([]); }
+        if (items.length > 0) {
+          setSearchResults(items);
+          setShowDrop(true);
+        }
+        // If API returns nothing, fuzzy results stay visible
+      } catch { /* keep fuzzy results */ }
     }, 300);
     return () => clearTimeout(t);
   }, [search]);
