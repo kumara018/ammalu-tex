@@ -15,7 +15,7 @@ interface AuthContextType {
   sessions: SavedSession[];
   login: (token: string, user: User) => void;
   logout: () => void;
-  switchAccount: (session: SavedSession) => void;
+  switchAccount: (session: SavedSession) => Promise<void>;
   removeSession: (userId: number) => void;
   refresh: () => Promise<void>;
 }
@@ -38,20 +38,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [sessions, setSessions] = useState<SavedSession[]>([]);
   const [loading,  setLoading]  = useState(true);
 
-  // ── Restore state on mount ────────────────────────────────────────────────
+  // ── Restore state on mount + always refresh from API ─────────────────────
   useEffect(() => {
     const storedToken    = localStorage.getItem('token');
     const storedUser     = localStorage.getItem('user');
     const storedSessions = localStorage.getItem('sessions');
 
+    let parsedSessions: SavedSession[] = [];
+    if (storedSessions) {
+      try { parsedSessions = JSON.parse(storedSessions); } catch {}
+    }
+
     if (storedToken && storedUser) {
+      // Apply cached data immediately so UI doesn't flicker
       setToken(storedToken);
       try { setUser(JSON.parse(storedUser)); } catch {}
+      setSessions(parsedSessions);
       document.cookie = `auth_token=${storedToken}; path=/; max-age=2592000; SameSite=Lax`;
+
+      // Always fetch fresh user data from server to pick up role changes (e.g. is_admin)
+      const API = process.env.NEXT_PUBLIC_API_URL || 'https://ammalu-tex.onrender.com';
+      fetch(`${API}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${storedToken}` },
+      })
+        .then(res => (res.ok ? res.json() : null))
+        .then(fresh => {
+          if (!fresh) return;
+          setUser(fresh);
+          localStorage.setItem('user', JSON.stringify(fresh));
+          // Keep all sessions in sync — update current user's entry
+          setSessions(prev => {
+            const updated = prev.map(s =>
+              s.user.id === fresh.id ? { ...s, user: fresh } : s
+            );
+            localStorage.setItem('sessions', JSON.stringify(updated));
+            return updated;
+          });
+        })
+        .catch(() => {});
+    } else {
+      setSessions(parsedSessions);
     }
-    if (storedSessions) {
-      try { setSessions(JSON.parse(storedSessions)); } catch {}
-    }
+
     setLoading(false);
   }, []);
 
