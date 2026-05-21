@@ -80,8 +80,9 @@ export default function Footer() {
               <li><Link href="/support#size-guide"  className="hover:text-gold-400 transition-colors">Size Guide</Link></li>
               <li><Link href="/support#shipping"    className="hover:text-gold-400 transition-colors">Shipping Policy</Link></li>
               <li><Link href="/support#returns"     className="hover:text-gold-400 transition-colors">Return & Refund Policy</Link></li>
-              <li><Link href="/support#terms"       className="hover:text-gold-400 transition-colors">Terms & Conditions</Link></li>
-              <li><Link href="/support#privacy"     className="hover:text-gold-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/cancellation"         className="hover:text-gold-400 transition-colors">Cancellation Policy</Link></li>
+              <li><Link href="/terms"               className="hover:text-gold-400 transition-colors">Terms & Conditions</Link></li>
+              <li><Link href="/privacy"             className="hover:text-gold-400 transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
@@ -136,8 +137,9 @@ export default function Footer() {
         <div className="border-t border-maroon-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-maroon-400">
           <p>&copy; {new Date().getFullYear()} Ammalu Tex. All rights reserved.</p>
           <div className="flex gap-4">
-            <Link href="/support#privacy" className="hover:text-gold-400 transition-colors">Privacy Policy</Link>
-            <Link href="/support#terms"   className="hover:text-gold-400 transition-colors">Terms of Service</Link>
+            <Link href="/privacy"      className="hover:text-gold-400 transition-colors">Privacy Policy</Link>
+            <Link href="/terms"        className="hover:text-gold-400 transition-colors">Terms of Service</Link>
+            <Link href="/cancellation" className="hover:text-gold-400 transition-colors">Cancellation Policy</Link>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-maroon-500">Secure payments:</span>
