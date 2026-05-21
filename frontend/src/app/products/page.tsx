@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SlidersHorizontal, Search, X, ChevronDown } from 'lucide-react';
+import Fuse from 'fuse.js';
 import { productsAPI } from '@/lib/api';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
@@ -19,10 +20,11 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [products, setProducts]         = useState<Product[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [total, setTotal]               = useState(0);
+  const [filtersOpen, setFiltersOpen]   = useState(false);
+  const [fuzzyMatch, setFuzzyMatch]     = useState<string>(''); // corrected term shown in banner
 
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
@@ -58,12 +60,39 @@ function ProductsContent() {
     try {
       const res = await productsAPI.getAll(params);
       const data = Array.isArray(res.data) ? res.data : [];
-      setProducts(data);
-      setTotal(data.length);
+
+      if (data.length === 0 && filters.search) {
+        // API returned nothing for this search — try fuzzy fallback
+        const allRes = await productsAPI.getAll({ limit: 500 });
+        const allData: Product[] = Array.isArray(allRes.data) ? allRes.data : [];
+        const fuse = new Fuse(allData, {
+          keys: [{ name: 'name', weight: 0.7 }, { name: 'category', weight: 0.3 }],
+          threshold: 0.45,
+          minMatchCharLength: 2,
+          ignoreLocation: true,
+          includeScore: true,
+        });
+        const fuzzy = fuse.search(filters.search, { limit: 40 });
+        if (fuzzy.length > 0) {
+          const matched = fuzzy.map(r => r.item);
+          // Find the best matching product name/category to show in banner
+          const bestMatch = fuzzy[0].item.category || fuzzy[0].item.name;
+          setFuzzyMatch(bestMatch);
+          setProducts(matched);
+          setTotal(matched.length);
+        } else {
+          setFuzzyMatch('');
+          setProducts([]);
+          setTotal(0);
+        }
+      } else {
+        setFuzzyMatch('');
+        setProducts(data);
+        setTotal(data.length);
+      }
       setLoading(false);
     } catch (err: any) {
       if (!err.response && attempt === 1) {
-        // Backend is waking up — retry once after 10 seconds, keep spinner
         setTimeout(() => fetchProducts(2), 10000);
       } else {
         setProducts([]);
@@ -203,6 +232,22 @@ function ProductsContent() {
           </button>
         ))}
       </div>
+
+      {/* Fuzzy match banner */}
+      {!loading && fuzzyMatch && filters.search && (
+        <div className="mb-4 flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 text-sm">
+          <Search size={15} className="text-orange-500 flex-shrink-0" />
+          <span className="text-gray-600">
+            No exact results for <strong>&ldquo;{filters.search}&rdquo;</strong>. Showing results for{' '}
+            <button
+              onClick={() => { setFuzzyMatch(''); setProducts([]); }}
+              className="font-bold text-maroon-700 underline underline-offset-2"
+            >
+              &ldquo;{fuzzyMatch}&rdquo;
+            </button>{' '}instead.
+          </span>
+        </div>
+      )}
 
       {/* Products grid */}
       {loading ? (

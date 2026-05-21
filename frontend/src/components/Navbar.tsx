@@ -28,6 +28,8 @@ export default function Navbar() {
   const [search, setSearch]                     = useState('');
   const [searchResults, setSearchResults]       = useState<any[]>([]);
   const [showDrop, setShowDrop]                 = useState(false);
+  const [showHistory, setShowHistory]           = useState(false);
+  const [searchHistory, setSearchHistory]       = useState<string[]>([]);
   const [mobileOpen, setMobileOpen]             = useState(false);
   const [userMenuOpen, setUserMenuOpen]         = useState(false);
   const [catMenuOpen, setCatMenuOpen]           = useState(false);
@@ -44,11 +46,29 @@ export default function Navbar() {
         setUserMenuOpen(false);
       if (catMenuRef.current && !catMenuRef.current.contains(e.target as Node))
         setCatMenuOpen(false);
-      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node))
-        setShowDrop(false);
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setShowDrop(false); setShowHistory(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  /* Load search history from localStorage */
+  useEffect(() => {
+    try {
+      const h = JSON.parse(localStorage.getItem('ammalu_search_history') || '[]');
+      setSearchHistory(Array.isArray(h) ? h : []);
+    } catch { setSearchHistory([]); }
+  }, []);
+
+  /* Pre-fill search bar from URL on mount / route change */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('search');
+      if (q) setSearch(q);
+    }
   }, []);
 
   /* Pre-load product index for fuzzy search (runs once on mount) */
@@ -62,10 +82,10 @@ export default function Navbar() {
             { name: 'name',     weight: 0.7 },
             { name: 'category', weight: 0.3 },
           ],
-          threshold: 0.45,       // 0 = exact, 1 = match anything; 0.45 catches typos like legenga→lehenga
+          threshold: 0.45,
           minMatchCharLength: 2,
           includeScore: true,
-          ignoreLocation: true,  // match anywhere in string, not just start
+          ignoreLocation: true,
         });
       })
       .catch(() => {});
@@ -75,38 +95,61 @@ export default function Navbar() {
   useEffect(() => {
     const q = search.trim();
     if (q.length < 2) { setSearchResults([]); setShowDrop(false); return; }
+    setShowHistory(false);
 
-    // 1. Instant fuzzy results from pre-loaded index
+    // 1. Instant fuzzy results
     if (fuseRef.current) {
       const fuzzy = fuseRef.current.search(q, { limit: 6 }).map(r => r.item);
-      if (fuzzy.length > 0) {
-        setSearchResults(fuzzy);
-        setShowDrop(true);
-      }
+      if (fuzzy.length > 0) { setSearchResults(fuzzy); setShowDrop(true); }
     }
 
-    // 2. API search (debounced) — replaces fuzzy results if backend finds exact matches
+    // 2. API search (debounced)
     const t = setTimeout(async () => {
       try {
         const res = await productsAPI.getAll({ search: q, limit: 6 });
         const data = res.data;
         const items: any[] = Array.isArray(data) ? data : (data.products ?? data.items ?? []);
-        if (items.length > 0) {
-          setSearchResults(items);
-          setShowDrop(true);
-        }
-        // If API returns nothing, fuzzy results stay visible
+        if (items.length > 0) { setSearchResults(items); setShowDrop(true); }
       } catch { /* keep fuzzy results */ }
     }, 300);
     return () => clearTimeout(t);
   }, [search]);
 
+  /* Save a search term to history */
+  const saveHistory = (q: string) => {
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    const updated = [trimmed, ...searchHistory.filter(h => h.toLowerCase() !== trimmed.toLowerCase())].slice(0, 8);
+    setSearchHistory(updated);
+    try { localStorage.setItem('ammalu_search_history', JSON.stringify(updated)); } catch {}
+  };
+
+  const removeHistory = (term: string) => {
+    const updated = searchHistory.filter(h => h !== term);
+    setSearchHistory(updated);
+    try { localStorage.setItem('ammalu_search_history', JSON.stringify(updated)); } catch {}
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    try { localStorage.removeItem('ammalu_search_history'); } catch {}
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (search.trim()) {
-      router.push(`/products?search=${encodeURIComponent(search.trim())}`);
-      setSearch(''); setShowDrop(false); setMobileOpen(false);
+    const q = search.trim();
+    if (q) {
+      saveHistory(q);
+      router.push(`/products?search=${encodeURIComponent(q)}`);
+      setShowDrop(false); setShowHistory(false); setMobileOpen(false);
     }
+  };
+
+  const runSearch = (q: string) => {
+    setSearch(q);
+    saveHistory(q);
+    router.push(`/products?search=${encodeURIComponent(q)}`);
+    setShowDrop(false); setShowHistory(false); setMobileOpen(false);
   };
 
   const goToProduct = useCallback((id: number) => {
@@ -166,7 +209,10 @@ export default function Navbar() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    onFocus={() => searchResults.length > 0 && setShowDrop(true)}
+                    onFocus={() => {
+                      if (search.trim().length >= 2 && searchResults.length > 0) { setShowDrop(true); }
+                      else if (!search.trim() && searchHistory.length > 0) { setShowHistory(true); }
+                    }}
                     placeholder="Search chudithar, tops, lehenga, half saree..."
                     className="flex-1 px-4 py-2.5 text-gray-900 text-sm outline-none"
                     autoComplete="off"
@@ -176,6 +222,27 @@ export default function Navbar() {
                   </button>
                 </div>
               </form>
+
+              {/* Search history dropdown (shown when focused with empty input) */}
+              {showHistory && !search.trim() && searchHistory.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-gray-100 z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2 border-b border-gray-50">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Recent Searches</span>
+                    <button onClick={clearHistory} className="text-xs text-red-400 hover:text-red-600 font-medium">Clear all</button>
+                  </div>
+                  {searchHistory.map((term) => (
+                    <div key={term} className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 border-b border-gray-50 last:border-0 group">
+                      <Search size={14} className="text-gray-400 flex-shrink-0" />
+                      <button className="flex-1 text-left text-sm text-gray-700 font-medium" onClick={() => runSearch(term)}>
+                        {term}
+                      </button>
+                      <button onClick={() => removeHistory(term)} className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-gray-500 transition-opacity">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Live search dropdown */}
               {showDrop && searchResults.length > 0 && (
