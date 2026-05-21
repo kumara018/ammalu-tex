@@ -302,6 +302,69 @@ def get_all_users(
     return db.query(models.User).filter(models.User.is_admin == False).all()
 
 
+# ── Admin Account Management ───────────────────────────────────────────────────
+
+@router.get("/admins")
+def get_all_admins(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    """List all admin accounts."""
+    admins = db.query(models.User).filter(models.User.is_admin == True).all()
+    return [
+        {
+            "id": u.id,
+            "full_name": u.full_name,
+            "email": u.email,
+            "phone": u.phone,
+            "is_admin": u.is_admin,
+            "created_at": str(u.created_at),
+            "is_primary": u.email == os.getenv("ADMIN_EMAIL", "kumaraguru27102@gmail.com"),
+        }
+        for u in admins
+    ]
+
+
+@router.post("/users/grant-admin")
+def grant_admin_access(
+    payload: dict,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(auth_utils.get_current_admin),
+):
+    """Grant admin access to an existing user by email."""
+    email = (payload.get("email") or "").strip().lower()
+    if not email:
+        raise HTTPException(400, "Email is required")
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(404, f"No registered user found with email: {email}. The person must sign up first.")
+    if user.is_admin:
+        raise HTTPException(400, "This user already has admin access")
+    user.is_admin = True
+    db.commit()
+    return {"message": f"✅ Admin access granted to {user.full_name} ({email})", "user_id": user.id}
+
+
+@router.patch("/users/{user_id}/revoke-admin")
+def revoke_admin_access(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: models.User = Depends(auth_utils.get_current_admin),
+):
+    """Revoke admin access from a secondary admin account."""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(404, "User not found")
+    primary = os.getenv("ADMIN_EMAIL", "kumaraguru27102@gmail.com")
+    if user.email == primary:
+        raise HTTPException(400, "Cannot revoke the primary admin account")
+    if user.id == current_admin.id:
+        raise HTTPException(400, "You cannot revoke your own admin access")
+    user.is_admin = False
+    db.commit()
+    return {"message": f"Admin access revoked from {user.email}"}
+
+
 @router.post("/orders/{order_id}/create-shipment")
 def create_shiprocket_shipment(
     order_id: int,

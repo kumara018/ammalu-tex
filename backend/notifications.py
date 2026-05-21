@@ -125,9 +125,9 @@ def _wrap(body: str) -> str:
   <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
 
     <!-- Header -->
-    <div style="background:linear-gradient(135deg,#7c1d2e 0%,#9b2335 100%);padding:24px 32px;">
-      <h1 style="margin:0;color:#ffffff;font-size:26px;font-family:Georgia,serif;letter-spacing:0.5px;">{STORE_NAME}</h1>
-      <p style="margin:6px 0 0;color:#f5c842;font-size:11px;letter-spacing:3px;text-transform:uppercase;">Premium Textiles · Texvalley Gangapuram</p>
+    <div style="line-height:0;font-size:0;">
+      <img src="{STORE_URL}/email-header.png" alt="Ammalu Tex — Premium Women's Textiles"
+           width="600" style="width:100%;max-width:600px;display:block;border:0;" />
     </div>
 
     <!-- Body -->
@@ -747,6 +747,7 @@ def _send_sms(to_phone: str, message: str):
 
 def _send_whatsapp(to_phone: str, message: str):
     """Send WhatsApp message via Twilio. Runs in a daemon thread."""
+    _brand = f"\n\n━━━━━━━━━━━━━━━\n👑 *Ammalu Tex* — Premium Women's Textiles\n🌐 {STORE_URL}"
     def _do():
         to = "whatsapp:" + _normalize_phone(to_phone)
         client, _, wa_from = _twilio_client()
@@ -754,7 +755,7 @@ def _send_whatsapp(to_phone: str, message: str):
             print(f"[WhatsApp not configured] {to}: {message[:80]}")
             return
         try:
-            msg = client.messages.create(body=message, from_=wa_from, to=to)
+            msg = client.messages.create(body=message + _brand, from_=wa_from, to=to)
             print(f"[WhatsApp SENT ✓ {msg.sid}] → {to}")
         except Exception as e:
             print(f"[WhatsApp ERROR] {type(e).__name__}: {e}")
@@ -1279,10 +1280,12 @@ def send_invoice_email(email: str, name: str, order, user_email: str = ""):
     <div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee">
 
       <!-- Header -->
-      <div style="background:linear-gradient(135deg,#7c1d2e 0%,#b91c1c 100%);padding:32px;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:26px;font-weight:900;letter-spacing:1px">{STORE_NAME}</h1>
-        <p style="color:#f9a8d4;margin:4px 0 0;font-size:11px;letter-spacing:3px;text-transform:uppercase">Premium Women's Textiles</p>
-        <div style="margin-top:16px;display:inline-block;background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 20px">
+      <div style="line-height:0;font-size:0;">
+        <img src="{STORE_URL}/email-header.png" alt="Ammalu Tex — Premium Women's Textiles"
+             width="650" style="width:100%;max-width:650px;display:block;border:0;" />
+      </div>
+      <div style="background:#7c1d2e;padding:8px 32px 16px;text-align:center">
+        <div style="display:inline-block;background:rgba(255,255,255,0.15);border-radius:8px;padding:6px 20px">
           <p style="color:#fff;margin:0;font-size:13px;font-weight:bold">TAX INVOICE</p>
         </div>
       </div>

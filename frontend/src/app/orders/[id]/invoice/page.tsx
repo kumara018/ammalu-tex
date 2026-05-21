@@ -106,7 +106,7 @@ function InvoiceContent() {
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl font-bold text-white">A</div>
+                <img src="/crown.svg" alt="Ammalu Tex" className="h-14 w-auto drop-shadow-md" />
                 <div>
                   <h1 className="text-2xl font-bold text-white tracking-wide">Ammalu Tex</h1>
                   <p className="text-gold-300 text-xs tracking-widest uppercase font-medium">Premium Women's Textiles</p>
@@ -280,10 +280,13 @@ function InvoiceContent() {
         {/* ── Footer ── */}
         <div className="bg-gradient-to-r from-maroon-900 to-maroon-800 px-8 py-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <p className="text-white font-bold">Ammalu Tex</p>
-              <p className="text-white/60 text-xs">Shop Ground Floor No 129, Texvalley Gangapuram</p>
-              <p className="text-white/60 text-xs">ammalutex.com · support@ammalutex.com</p>
+            <div className="flex items-center gap-3">
+              <img src="/crown.svg" alt="Ammalu Tex" className="h-9 w-auto opacity-90" />
+              <div>
+                <p className="text-white font-bold tracking-wide">Ammalu Tex</p>
+                <p className="text-white/60 text-xs">Shop Ground Floor No 129, Texvalley Gangapuram</p>
+                <p className="text-white/60 text-xs">ammalutex.com · support@ammalutex.com</p>
+              </div>
             </div>
             <div className="text-right">
               <p className="text-white/50 text-xs">Thank you for shopping with us! 🛍️</p>

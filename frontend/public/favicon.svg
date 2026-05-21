@@ -34,23 +34,12 @@
   <circle cx="132" cy="64" r="4.5" fill="url(#g3)"/>
   <circle cx="132" cy="64" r="2"   fill="#6B0000"/>
 
-  <!-- "AT" monogram below crown -->
+  <!-- AMMALU TEX text below crown -->
   <text x="100" y="148"
         text-anchor="middle"
         font-family="Palatino Linotype, Palatino, Georgia, serif"
-        font-size="42"
+        font-size="15"
         font-weight="bold"
-        fill="#FFFFFF"
-        letter-spacing="4">AT</text>
-
-  <!-- Gold divider under AT -->
-  <line x1="60" y1="158" x2="140" y2="158" stroke="url(#g3)" stroke-width="1"/>
-
-  <!-- Tiny "AMMALU TEX" text at bottom -->
-  <text x="100" y="175"
-        text-anchor="middle"
-        font-family="Georgia, serif"
-        font-size="10"
         fill="#E2B83C"
-        letter-spacing="2">AMMALU TEX</text>
+        letter-spacing="2.5">AMMALU TEX</text>
 </svg>

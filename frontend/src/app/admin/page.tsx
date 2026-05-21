@@ -5,7 +5,7 @@ import {
   Package, ShoppingBag, Users, TrendingUp, Plus, Pencil,
   Trash2, X, AlertCircle, CheckCircle, Star, Upload, ImagePlus,
 } from 'lucide-react';
-import { adminAPI, adminReturnsAPI, supportAPI } from '@/lib/api';
+import api, { adminAPI, adminReturnsAPI, supportAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -204,13 +204,13 @@ const emptyProduct = {
 export default function AdminPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  type TabKey = 'dash'|'products'|'orders'|'users'|'ratings'|'returns';
+  type TabKey = 'dash'|'products'|'orders'|'users'|'ratings'|'returns'|'admins';
   const [tab, setTab] = useState<TabKey>('dash');
 
   // Restore last-used tab from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
     const saved = localStorage.getItem('admin_tab') as TabKey | null;
-    const valid: TabKey[] = ['dash','products','orders','users','ratings','returns'];
+    const valid: TabKey[] = ['dash','products','orders','users','ratings','returns','admins'];
     if (saved && valid.includes(saved)) setTab(saved);
   }, []);
   const [dash, setDash] = useState<DashData | null>(null);
@@ -219,6 +219,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [supportRatings, setSupportRatings] = useState<any[]>([]);
   const [returns, setReturns] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<any[]>([]);
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [expandedReturn, setExpandedReturn] = useState<number | null>(null);
   const [returnUpdateForm, setReturnUpdateForm] = useState<Record<number, { status: string; admin_notes: string }>>({});
   const [savingReturn, setSavingReturn] = useState<number | null>(null);
@@ -295,6 +298,38 @@ export default function AdminPage() {
     }
   };
 
+  const loadAdmins = async () => {
+    try {
+      const res = await api.get('/api/admin/admins');
+      setAdmins(res.data);
+    } catch { toast.error('Failed to load admin accounts'); }
+  };
+
+  const grantAdmin = async () => {
+    if (!newAdminEmail.trim()) return toast.error('Enter an email address');
+    setAdminActionLoading(true);
+    try {
+      const res = await api.post('/api/admin/users/grant-admin', { email: newAdminEmail.trim().toLowerCase() });
+      toast.success(res.data.message);
+      setNewAdminEmail('');
+      loadAdmins();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to grant admin access');
+    } finally { setAdminActionLoading(false); }
+  };
+
+  const revokeAdmin = async (userId: number, email: string) => {
+    if (!confirm(`Revoke admin access from ${email}?`)) return;
+    setAdminActionLoading(true);
+    try {
+      await api.patch(`/api/admin/users/${userId}/revoke-admin`);
+      toast.success(`Admin access revoked from ${email}`);
+      loadAdmins();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Failed to revoke admin access');
+    } finally { setAdminActionLoading(false); }
+  };
+
   useEffect(() => {
     if (tab === 'dash') loadDash();
     if (tab === 'products') loadProducts();
@@ -302,6 +337,7 @@ export default function AdminPage() {
     if (tab === 'users') loadUsers();
     if (tab === 'ratings') loadSupportRatings();
     if (tab === 'returns') loadReturns();
+    if (tab === 'admins') loadAdmins();
   }, [tab]);
 
   const validateForm = () => {
@@ -518,6 +554,7 @@ export default function AdminPage() {
     { key: 'users',    label: 'Customers'         },
     { key: 'ratings',  label: 'Support Ratings'   },
     { key: 'returns',  label: 'Returns'           },
+    { key: 'admins',   label: '🔐 Admin Accounts' },
   ] as const;
 
   return (
@@ -838,6 +875,7 @@ export default function AdminPage() {
                   <th className="px-4 py-3">Phone</th>
                   <th className="px-4 py-3">Joined</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Admin Access</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-orange-50">
@@ -852,6 +890,23 @@ export default function AdminPage() {
                     <td className="px-4 py-3 text-gray-500 text-xs">{new Date(u.created_at).toLocaleDateString('en-IN')}</td>
                     <td className="px-4 py-3">
                       <span className={u.is_active ? 'badge-success' : 'badge-danger'}>{u.is_active ? 'Active' : 'Blocked'}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Grant admin access to ${u.full_name} (${u.email})?`)) return;
+                          try {
+                            const res = await api.post('/api/admin/users/grant-admin', { email: u.email });
+                            toast.success(res.data.message);
+                            loadUsers();
+                          } catch (err: any) {
+                            toast.error(err?.response?.data?.detail || 'Failed to grant admin access');
+                          }
+                        }}
+                        className="text-xs bg-maroon-100 hover:bg-maroon-200 text-maroon-800 font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        🔐 Make Admin
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -1019,6 +1074,100 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Accounts Tab */}
+      {tab === 'admins' && (
+        <div className="space-y-6">
+          {/* Grant Admin Access */}
+          <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6">
+            <h2 className="text-lg font-bold text-maroon-900 mb-1">Grant Admin Access</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              The person must already have a registered account on ammalutex.com. Enter their email to promote them to admin.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              <input
+                type="email"
+                value={newAdminEmail}
+                onChange={e => setNewAdminEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && grantAdmin()}
+                placeholder="Enter registered email address..."
+                className="input-field flex-1 min-w-[260px]"
+              />
+              <button
+                onClick={grantAdmin}
+                disabled={adminActionLoading}
+                className="btn-primary px-6 disabled:opacity-60"
+              >
+                {adminActionLoading ? 'Adding...' : '+ Grant Admin Access'}
+              </button>
+            </div>
+          </div>
+
+          {/* Current Admins List */}
+          <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-orange-50 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-maroon-900">Current Admin Accounts ({admins.length})</h2>
+              <button onClick={loadAdmins} className="text-xs text-maroon-600 hover:underline">Refresh</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-maroon-50 text-maroon-800 text-xs uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left">Name</th>
+                    <th className="px-5 py-3 text-left">Email</th>
+                    <th className="px-5 py-3 text-left">Phone</th>
+                    <th className="px-5 py-3 text-left">Role</th>
+                    <th className="px-5 py-3 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {admins.length === 0 && (
+                    <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-400">No admin accounts found</td></tr>
+                  )}
+                  {admins.map((a: any) => (
+                    <tr key={a.id} className="border-t border-gray-50 hover:bg-orange-50/30">
+                      <td className="px-5 py-4 font-semibold text-gray-900">{a.full_name}</td>
+                      <td className="px-5 py-4 text-gray-600">{a.email}</td>
+                      <td className="px-5 py-4 text-gray-600">{a.phone}</td>
+                      <td className="px-5 py-4">
+                        {a.is_primary
+                          ? <span className="px-2 py-1 bg-maroon-100 text-maroon-800 rounded-full text-xs font-bold">👑 Primary Admin</span>
+                          : <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">🔐 Admin</span>
+                        }
+                      </td>
+                      <td className="px-5 py-4">
+                        {a.is_primary
+                          ? <span className="text-xs text-gray-400">Protected</span>
+                          : (
+                            <button
+                              onClick={() => revokeAdmin(a.id, a.email)}
+                              disabled={adminActionLoading}
+                              className="text-xs text-red-600 hover:text-red-800 font-medium hover:underline disabled:opacity-50"
+                            >
+                              Revoke Access
+                            </button>
+                          )
+                        }
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Info box */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+            <p className="font-semibold mb-1">ℹ️ How it works</p>
+            <ul className="list-disc list-inside space-y-1 text-amber-700">
+              <li>All admin accounts have full dashboard access — same as the primary admin</li>
+              <li>The person must first register on ammalutex.com before you can grant access</li>
+              <li>The primary admin account (<strong>kumaraguru27102@gmail.com</strong>) cannot be revoked</li>
+              <li>Revoked accounts return to regular customer accounts automatically</li>
+            </ul>
           </div>
         </div>
       )}
