@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin', '/api/', '/account', '/orders', '/cart', '/checkout'],
     },
-    sitemap: 'https://ammalutex.com/sitemap.xml',
+    sitemap: ['https://ammalutex.com/sitemap.xml', 'https://www.ammalutex.com/sitemap.xml'],
   };
 }
