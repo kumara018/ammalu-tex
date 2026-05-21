@@ -63,7 +63,7 @@ function ProductsContent() {
 
         if (data.length === 0 && filters.search) {
           // ── Fuzzy fallback ───────────────────────────────────────────
-          const allRes = await productsAPI.getAll({ limit: 500 });
+          const allRes = await productsAPI.getAll({ limit: 100 });
           if (cancelled) return;
 
           const allRaw = allRes.data;

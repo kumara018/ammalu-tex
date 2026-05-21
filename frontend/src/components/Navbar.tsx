@@ -73,10 +73,10 @@ export default function Navbar() {
 
   /* Pre-load product index for fuzzy search (runs once on mount) */
   useEffect(() => {
-    productsAPI.getAll({ limit: 500 })
+    productsAPI.getAll({ limit: 100 })
       .then(res => {
         const data = res.data;
-        const products: any[] = Array.isArray(data) ? data : (data.products ?? data.items ?? []);
+        const products: any[] = Array.isArray(data) ? data : (data.products ?? data.items ?? data.data ?? []);
         fuseRef.current = new Fuse(products, {
           keys: [
             { name: 'name',     weight: 0.7 },
