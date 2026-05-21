@@ -24,8 +24,14 @@ export default function Footer() {
 
           {/* Brand + Social */}
           <div>
-            <h3 className="text-xl font-display font-bold text-white mb-1">{STORE.name}</h3>
-            <p className="text-gold-400 text-xs font-medium tracking-widest uppercase mb-4">{STORE.tagline}</p>
+            {/* Logo image in footer */}
+            <Link href="/">
+              <img
+                src="/logo-dark.svg"
+                alt="Ammalu Tex"
+                className="h-20 w-auto mb-4 opacity-95 hover:opacity-100 transition-opacity"
+              />
+            </Link>
             <p className="text-sm text-maroon-300 leading-relaxed mb-5">
               Your trusted destination for premium quality women&apos;s ethnic and contemporary wear at Texvalley Gangapuram.
             </p>

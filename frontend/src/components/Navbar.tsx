@@ -195,9 +195,12 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
-              <div className="flex flex-col leading-tight">
-                <span className="text-xl font-display font-bold text-white tracking-wide">{STORE.name}</span>
-                <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">{STORE.tagline}</span>
+              <div className="flex items-center gap-2.5">
+                <img src="/crown.svg" alt="Ammalu Tex Crown" className="w-9 h-7 drop-shadow-sm" />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-xl font-display font-bold text-white tracking-wide">{STORE.name}</span>
+                  <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">{STORE.tagline}</span>
+                </div>
               </div>
             </Link>
 
