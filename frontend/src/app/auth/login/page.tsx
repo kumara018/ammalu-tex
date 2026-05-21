@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 type Step = 'credentials' | 'otp';
 
 export default function LoginPage() {
-  const { login, user, loading: authLoading } = useAuth();
+  const { login, user, sessions, switchAccount, loading: authLoading } = useAuth();
   const router = useRouter();
 
   // Redirect if already logged in — but NOT when adding another account (?add=1)
@@ -85,6 +85,20 @@ export default function LoginPage() {
     }
     if (!identifier.trim()) { setError('Email or mobile number is required'); return; }
     if (!password)           { setError('Password is required');               return; }
+
+    // ── Check if account is already signed in ────────────────────────────────
+    const id = identifier.trim().toLowerCase();
+    const alreadySaved = sessions.find(s =>
+      s.user.email?.toLowerCase() === id ||
+      s.user.phone?.replace(/\D/g, '').slice(-10) === id.replace(/\D/g, '').slice(-10)
+    );
+    if (alreadySaved) {
+      toast.error(
+        `"${alreadySaved.user.full_name}" is already signed in. Switch from the account menu.`,
+        { duration: 4000, icon: '⚠️' }
+      );
+      return;
+    }
 
     setLoading(true);
     setError('');
