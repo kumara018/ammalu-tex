@@ -6,6 +6,7 @@ import { LoginPromptProvider } from '@/context/LoginPromptContext';
 import NavbarWrapper from '@/components/NavbarWrapper';
 import FooterWrapper from '@/components/FooterWrapper';
 import LoginPromptModal from '@/components/LoginPromptModal';
+import PageTransition from '@/components/PageTransition';
 import { Toaster } from 'react-hot-toast';
 import { STORE } from '@/lib/config';
 
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CartProvider>
             <LoginPromptProvider>
               <NavbarWrapper />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1"><PageTransition>{children}</PageTransition></main>
               <FooterWrapper />
               <LoginPromptModal />
               <Toaster
