@@ -392,10 +392,12 @@ export default function Navbar() {
                       {sessions.filter(s => s.user.id !== user.id).map(session => (
                         <div key={session.user.id} className="flex items-center gap-1 px-2 hover:bg-orange-50 transition-colors group">
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               setUserMenuOpen(false);
-                              switchAccount(session);
-                              window.location.href = session.user.is_admin ? '/admin' : '/';
+                              await switchAccount(session);
+                              // Use fresh user from localStorage (updated by switchAccount)
+                              const fresh = JSON.parse(localStorage.getItem('user') || '{}');
+                              window.location.href = fresh.is_admin ? '/admin' : '/';
                             }}
                             className="flex items-center gap-3 flex-1 py-2.5 text-left"
                           >
@@ -603,10 +605,11 @@ export default function Navbar() {
                   {sessions.filter(s => s.user.id !== user.id).map(session => (
                     <div key={session.user.id} className="flex items-center gap-1 group">
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           setMobileOpen(false);
-                          switchAccount(session);
-                          window.location.href = session.user.is_admin ? '/admin' : '/';
+                          await switchAccount(session);
+                          const fresh = JSON.parse(localStorage.getItem('user') || '{}');
+                          window.location.href = fresh.is_admin ? '/admin' : '/';
                         }}
                         className="flex-1 px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 text-left"
                       >

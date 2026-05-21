@@ -93,18 +93,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // ── Instant account switch — no OTP, no page reload ──────────────────────
-  const switchAccount = (session: SavedSession) => {
+  // ── Instant account switch — fetches fresh user data to pick up role changes ─
+  const switchAccount = async (session: SavedSession) => {
+    // Apply the token immediately so API calls use the right account
     localStorage.setItem('token', session.token);
-    localStorage.setItem('user', JSON.stringify(session.user));
     _setCookie(session.token);
     setToken(session.token);
-    setUser(session.user);
 
-    // Bring switched account to front of list
+    // Fetch fresh user data (picks up is_admin changes made after last login)
+    let freshUser: User = session.user;
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || 'https://ammalu-tex.onrender.com';
+      const res = await fetch(`${API}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${session.token}` },
+      });
+      if (res.ok) freshUser = await res.json();
+    } catch {}
+
+    localStorage.setItem('user', JSON.stringify(freshUser));
+    setUser(freshUser);
+
+    // Bring switched account to front of list with fresh data
     setSessions(prev => {
       const others  = prev.filter(s => s.user.id !== session.user.id);
-      const updated = [session, ...others];
+      const updated = [{ token: session.token, user: freshUser }, ...others];
       localStorage.setItem('sessions', JSON.stringify(updated));
       return updated;
     });
