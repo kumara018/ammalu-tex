@@ -32,14 +32,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto-logout on 401 — but NEVER on auth endpoints or page-load API calls.
-// Only redirect to login if /api/auth/me ALSO fails (token truly invalid).
+// Auto-logout ONLY when token is confirmed invalid (401 on /api/auth/me).
+// Never logout on network errors, timeouts, 5xx, or server cold-starts.
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const url    = err.config?.url || '';
     const status = err.response?.status;
 
+    // Skip all auth-related endpoints — they handle their own errors
     const isAuthEndpoint =
       url.includes('/api/auth/login')             ||
       url.includes('/api/auth/register')          ||
@@ -49,20 +50,24 @@ api.interceptors.response.use(
       url.includes('/api/auth/verify-login-otp')  ||
       url.includes('/api/auth/me');
 
+    // Only act on 401s from non-auth endpoints
     if (status === 401 && !isAuthEndpoint && typeof window !== 'undefined') {
-      // Verify the token is truly dead before logging out
+      // Double-check: confirm /api/auth/me ALSO returns 401
+      // (avoids logging out during a brief server restart or 401 glitch)
       try {
         await api.get('/api/auth/me');
-        // Token is still valid — just this endpoint had an issue, don't logout
-      } catch (meErr: any) {
-        if (meErr.response?.status === 401) {
-          // Token is truly invalid — clear everything and redirect
+        // /api/auth/me succeeded → token is valid, this was a one-off 401, ignore
+      } catch (meErr: unknown) {
+        const meStatus = (meErr as { response?: { status?: number } })?.response?.status;
+        // Only logout if we get a definitive 401 — not a timeout/network/5xx error
+        if (meStatus === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           localStorage.removeItem('sessions');
           document.cookie = 'auth_token=; path=/; max-age=0';
           window.location.href = '/auth/login';
         }
+        // meStatus undefined (timeout/network) or 5xx → server is down, keep user logged in
       }
     }
     return Promise.reject(err);
