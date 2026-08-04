@@ -1387,7 +1387,7 @@ export default function AdminPage() {
                       <td className="px-5 py-4">
                         {a.is_primary
                           ? <span className="text-xs text-gray-400">Protected</span>
-                          : user?.email === 'kumaraguru27102@gmail.com'
+                          : user?.email === 'admin@ammalutex.com'
                           ? (
                             <button
                               onClick={() => revokeAdmin(a.id, a.email)}
@@ -1413,7 +1413,7 @@ export default function AdminPage() {
             <ul className="list-disc list-inside space-y-1 text-amber-700">
               <li>All admin accounts have full dashboard access — same as the primary admin</li>
               <li>The person must first register on ammalutex.com before you can grant access</li>
-              <li>The primary admin account (<strong>kumaraguru27102@gmail.com</strong>) cannot be revoked</li>
+              <li>The primary admin account (<strong>admin@ammalutex.com</strong>) cannot be revoked</li>
               <li>Revoked accounts return to regular customer accounts automatically</li>
             </ul>
           </div>

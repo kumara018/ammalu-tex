@@ -9,7 +9,7 @@ export const STORE = {
   // ── Contact Details ──────────────────────────────
   phone1:      '+91 99941 68839',
   phone2:      '+91 94439 48272',
-  email:       'kumaraguru27102@gmail.com',
+  email:       'admin@ammalutex.com',
   supportEmail:'pnagaraji272@gmail.com',
   whatsapp:    '919994168839',   // country code + number, no + or spaces
 
