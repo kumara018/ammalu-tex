@@ -401,7 +401,7 @@ class PaymentDetails(BaseModel):
 
     @model_validator(mode="after")
     def validate_payment(self):
-        allowed = ["razorpay", "upi", "cod"]
+        allowed = ["razorpay", "upi", "emi"]
         if self.method not in allowed:
             raise ValueError(f"Payment method must be one of: {', '.join(allowed)}")
         if self.method == "upi" and self.upi_id:
