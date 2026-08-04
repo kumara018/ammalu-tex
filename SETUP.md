@@ -257,6 +257,38 @@ For production, change in .env:
   DATABASE_URL=postgresql://user:password@host/dbname  (use PostgreSQL)
 
 ================================================================
+DELHIVERY SHIPPING — SHARED ACCOUNT WARNING
+================================================================
+
+⚠️ Ammalu Tex and Vijey Textile use the SAME Delhivery account
+(kumaraguru27102@gmail.com). If DELHIVERY_PICKUP_NAME is left unset when
+this site is deployed, it will default to "Primary" — the exact same
+default Vijey Textile uses — so couriers could be dispatched to the wrong
+shop for one store's orders.
+
+Before deploying this site for real:
+  1. In the Delhivery dashboard, register a pickup location for THIS shop
+     (Ammalu Tex, Shop GF No 129) that is separate from Vijey Textile's
+     (Shop GF No 131) pickup location.
+  2. Set these env vars on whatever host runs this backend:
+
+     DELHIVERY_API_TOKEN     = (same Delhivery account token)
+     DELHIVERY_PICKUP_NAME   = (the pickup location name registered for
+                                Ammalu Tex — must NOT match Vijey Textile's)
+     DELHIVERY_RETURN_NAME   = Ammalu Tex
+     DELHIVERY_RETURN_ADDRESS= Shop Ground Floor No 129, Texvalley Gangapuram
+     DELHIVERY_RETURN_PIN    = 638001
+     DELHIVERY_RETURN_CITY   = Gangapuram
+     DELHIVERY_RETURN_STATE  = Tamil Nadu
+     DELHIVERY_RETURN_PHONE  = (Ammalu Tex shop phone)
+
+  3. Also double-check order numbers don't collide with Vijey Textile's —
+     this site's generate_order_number() in backend/routers/orders.py
+     still uses the "AMT-" prefix (that's fine, it's the original site
+     this prefix was named after — just don't let Vijey Textile reuse it,
+     which has already been changed to "VJT-").
+
+================================================================
 SECURITY FEATURES BUILT INTO THIS WEBSITE
 ================================================================
 
