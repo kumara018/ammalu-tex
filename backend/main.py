@@ -487,7 +487,7 @@ def test_notification(to: str = "", type: str = "welcome"):
     Types: welcome | order | payment | admin | deletion | retrieved | deleted
     """
     import notifications as _n
-    target = to.strip() or os.getenv("SMTP_EMAIL", "kumaraguru27102@gmail.com")
+    target = to.strip() or os.getenv("SMTP_EMAIL", "admin@ammalutex.com")
 
     class _FakeOrder:
         order_number = "AMT-TEST-001"
@@ -544,7 +544,7 @@ def test_email(to: str = ""):
     brevo_key  = os.getenv("BREVO_API_KEY", "")
     sg_key     = os.getenv("SENDGRID_API_KEY", "")
     smtp_email = os.getenv("SMTP_EMAIL", "")
-    target     = to.strip() if to.strip() else smtp_email or "kumaraguru27102@gmail.com"
+    target     = to.strip() if to.strip() else smtp_email or "admin@ammalutex.com"
 
     # ── Test via Brevo ───────────────────────────────────────────────────────────
     if brevo_key:

@@ -22,7 +22,7 @@ SMTP_EMAIL    = os.getenv("SMTP_EMAIL", "")
 SMTP_PASS     = os.getenv("SMTP_PASSWORD", "")
 STORE_NAME    = "Ammalu Tex"
 STORE_URL     = os.getenv("FRONTEND_URL", "https://ammalu-tex.vercel.app")
-SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", SMTP_EMAIL or "support@ammalu-tex.com")
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "admin@ammalutex.com")
 STORE_ADDR    = "Shop Ground Floor No 129, Texvalley Gangapuram"
 YEAR          = datetime.now().year
 
