@@ -3,7 +3,7 @@ import string
 import os
 import hmac
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
@@ -11,6 +11,8 @@ from database import get_db
 import models, schemas, auth as auth_utils, notifications
 
 router = APIRouter(prefix="/api/orders", tags=["Orders"])
+
+CANCEL_WINDOW_HOURS = 1  # self-service cancellation only within this long of purchase
 
 
 def _verify_razorpay_payment(payment: schemas.PaymentDetails):
@@ -186,12 +188,19 @@ def cancel_order(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    # Allow cancel up to shipped — not once out for delivery or delivered
-    cancellable = ["pending", "confirmed", "processing", "shipped"]
-    if order.status not in cancellable:
+    if order.status in ("cancelled", "delivered", "out_for_delivery"):
         raise HTTPException(
             status_code=400,
             detail=f"Order cannot be cancelled once it is '{order.status}'. Please contact support.",
+        )
+
+    created = order.created_at
+    if created.tzinfo is None:
+        created = created.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > created + timedelta(hours=CANCEL_WINDOW_HOURS):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Orders can only be cancelled within {CANCEL_WINDOW_HOURS} hour of purchase. This window has passed — please contact support.",
         )
 
     order.status       = "cancelled"
