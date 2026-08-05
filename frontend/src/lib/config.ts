@@ -30,7 +30,7 @@ export const STORE = {
 
   // ── Social Media ─────────────────────────────────
   facebook:    'https://facebook.com/kumara018',
-  instagram:   'https://instagram.com/kumara_.guru',
+  instagram:   'https://instagram.com/ammalutexpartywears',
   twitter:     'https://x.com/kumara018',
 
   // ── Google Maps ───────────────────────────────────
