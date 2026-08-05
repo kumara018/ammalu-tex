@@ -146,29 +146,30 @@ def _bg(to: str, subject: str, html: str):
 
 # ── HTML helpers ───────────────────────────────────────────────────────────────
 # Shared brand header — pure HTML, no PNG image, renders perfectly in all clients
-# Exact navbar colors from tailwind.config:
-#   bg-brand-gradient = linear-gradient(135deg, #8f5c4c 0%, #6c463b 100%)
-#   text-white        = #ffffff   (Ammalu Tex brand name)
-#   text-gold-300     = #fde047   (tagline — same as navbar tagline)
-#   font-display      = Georgia   (same as Tailwind fontFamily.display)
-#   logo mark          = text-based medallion (no external image — always renders)
+# Matches the live navbar exactly (frontend/src/components/Navbar.tsx + Logo.tsx):
+#   bg          = maroon-50  #fbf5f3   (light cream, same as navbar bg)
+#   brand text  = maroon-900 #2a1a18   (dark ink, same as navbar text)
+#   tagline     = gold-600   #8f5c4c
+#   accent/logo = gold-500   #b3735f   (outline medallion, same stroke color as Logo.tsx)
+#   font-display= Georgia    (brand name); apple-system (logo letter, matches Logo.tsx/favicon)
 _HEADER_HTML = f"""\
     <table width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="border-collapse:collapse;
-                  background:linear-gradient(135deg,#8f5c4c 0%,#6c463b 100%);">
+           style="border-collapse:collapse;background:#fbf5f3;">
       <tr>
         <td align="center" style="padding:16px 24px 14px;">
           <!-- Navbar layout: medallion LEFT · brand name + tagline RIGHT -->
           <table cellpadding="0" cellspacing="0" border="0"
                  style="border-collapse:collapse;">
             <tr>
+              <!-- Logo medallion — outline circle + letter, matches the site's Logo.tsx mark -->
               <td valign="middle" style="padding-right:16px;">
                 <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                   <tr>
-                    <td width="54" height="54" align="center" valign="middle"
-                        style="width:54px;height:54px;border-radius:50%;background:#ffffff;
-                               border:2px solid #d59d89;font-family:Georgia,'Times New Roman',serif;
-                               font-weight:bold;font-size:27px;color:#b3735f;">
+                    <td width="52" height="52" align="center" valign="middle"
+                        style="width:52px;height:52px;border-radius:50%;background:#fbf5f3;
+                               border:2px solid #b3735f;
+                               font-family:-apple-system,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;
+                               font-weight:900;font-size:25px;color:#b3735f;">
                       A
                     </td>
                   </tr>
@@ -177,12 +178,12 @@ _HEADER_HTML = f"""\
               <td valign="middle" style="text-align:left;">
                 <p style="margin:0 0 3px 0;padding:0;
                           font-family:Georgia,'Times New Roman',serif;
-                          font-size:22px;font-weight:bold;color:#ffffff;
+                          font-size:22px;font-weight:bold;color:#2a1a18;
                           letter-spacing:1px;line-height:1.15;
                           mso-line-height-rule:exactly;">Ammalu Tex</p>
                 <p style="margin:0;padding:0;
                           font-family:Arial,Helvetica,sans-serif;
-                          font-size:10px;color:#fde047;letter-spacing:3px;
+                          font-size:10px;color:#8f5c4c;letter-spacing:3px;
                           text-transform:uppercase;line-height:1.4;
                           mso-line-height-rule:exactly;">
                   Premium Women&#8217;s Textiles
@@ -191,6 +192,10 @@ _HEADER_HTML = f"""\
             </tr>
           </table>
         </td>
+      </tr>
+      <!-- Thin gold accent strip, echoes the navbar's border-b -->
+      <tr>
+        <td style="height:3px;background:linear-gradient(90deg,#f6ece9,#b3735f,#f6ece9);"></td>
       </tr>
     </table>"""
 
