@@ -29,9 +29,7 @@ export const STORE = {
   shippingFee: 49,
 
   // ── Social Media ─────────────────────────────────
-  facebook:    'https://facebook.com/kumara018',
   instagram:   'https://instagram.com/ammalutexpartywears',
-  twitter:     'https://x.com/kumara018',
 
   // ── Google Maps ───────────────────────────────────
   googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Texvalley+Gangapuram+Erode+Tamil+Nadu',
