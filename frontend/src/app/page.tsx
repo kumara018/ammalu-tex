@@ -1,10 +1,12 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Star, Truck, Shield, RotateCcw, Headphones, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Star, Truck, Shield, RotateCcw, Headphones, ChevronLeft, ChevronRight } from 'lucide-react';
 import { productsAPI } from '@/lib/api';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
+import Hero3D from '@/components/Hero3D';
 
 const OFFERS = [
   {
@@ -133,48 +135,71 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-brand-gradient text-white">
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #fff 0%, transparent 50%), radial-gradient(circle at 80% 20%, #c8860a 0%, transparent 40%)' }}
+      {/* Hero — "Editorial Runway Sweep": asymmetric diagonal split, oversized headline, cascading ribbons */}
+      <section className="relative min-h-[86vh] flex flex-col overflow-hidden border-b border-maroon-200">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(100deg, #f6ece9 0%, #f6ece9 46%, rgba(179,115,95,0.18) 46.4%, #eeddd8 100%)',
+          }}
         />
-        <div className="max-w-7xl mx-auto px-4 py-16 md:py-24 relative">
-          <div className="max-w-2xl">
-            <a href="#featured-products" className="inline-flex items-center gap-2 bg-gold-600/20 border border-gold-500/30 rounded-full px-4 py-1.5 text-gold-300 text-sm font-medium mb-6 hover:bg-gold-600/30 transition-colors cursor-pointer">
-              <Sparkles size={14} /> New Collection 2026 — Now Available
-            </a>
-            <h1 className="text-4xl md:text-6xl font-display font-bold leading-tight mb-4">
-              Discover Premium<br />
-              <span className="text-gold-400">Women&apos;s Textiles</span>
-            </h1>
-            <p className="text-maroon-200 text-lg md:text-xl mb-8 leading-relaxed">
-              Shop the finest Chudithar, Tops, Lehenga, Crop Tops & Party Wears at
-              Ammalu Tex — Texvalley Gangapuram.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/products" className="btn-gold inline-flex items-center gap-2">
-                Shop Now <ArrowRight size={18} />
-              </Link>
-              <Link href="/products?featured=true" className="inline-flex items-center gap-2 font-semibold py-2.5 px-6 rounded-lg border-2 border-white text-white hover:bg-white/15 transition-all duration-200 active:scale-95">
-                View Featured
-              </Link>
-            </div>
-          </div>
+        <div
+          className="absolute top-[-10%] bottom-[-10%] left-[45.6%] w-[2px]"
+          style={{
+            background: 'linear-gradient(180deg, transparent, #b3735f 30%, #b3735f 70%, transparent)',
+            transform: 'rotate(11deg)', transformOrigin: 'top',
+            boxShadow: '0 0 24px 1px rgba(179,115,95,0.5)',
+          }}
+        />
+
+        <div className="relative z-10 pt-24 px-6 md:px-12">
+          <p className="text-[12px] font-bold tracking-[0.16em] uppercase text-maroon-500 max-w-[220px]">
+            Chudithar · Lehenga · Half Saree · Party Wear
+          </p>
         </div>
-        {/* Decorative circles */}
-        <div className="absolute right-0 top-0 w-96 h-96 bg-gold-600/10 rounded-full translate-x-1/2 -translate-y-1/2 hidden lg:block" />
-        <div className="absolute right-24 bottom-0 w-48 h-48 bg-maroon-600/20 rounded-full translate-y-1/2 hidden lg:block" />
+
+        <div className="absolute z-[2] top-[14%] right-[6%] w-[min(40vw,420px)] h-[56vh]">
+          <Hero3D />
+        </div>
+
+        <div className="relative z-10 px-6 md:px-12 pb-20 mt-auto">
+          <motion.h1
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
+            className="font-display font-black leading-[0.95] tracking-tight text-maroon-900 max-w-3xl mb-6"
+            style={{ fontSize: 'clamp(2.4rem, 7.5vw, 5.5rem)' }}
+          >
+            Drape crafted<br />
+            <span className="text-gold-500">for the room to fall silent.</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
+            className="max-w-md text-maroon-500 font-medium mb-8 leading-relaxed"
+          >
+            From Texvalley, Erode — festive pieces built with the weight, sheen and finish of couture, priced for the everyday elite.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
+            className="flex flex-wrap gap-4"
+          >
+            <Link href="/products" className="btn-primary inline-flex items-center gap-2">
+              Shop Now <ArrowRight size={18} />
+            </Link>
+            <Link href="/products?featured=true" className="inline-flex items-center gap-2 font-semibold py-2.5 px-6 rounded-lg border-2 border-maroon-800 text-maroon-900 hover:bg-maroon-100 transition-all duration-200 active:scale-95">
+              View Featured
+            </Link>
+          </motion.div>
+        </div>
       </section>
 
       {/* Features bar — each tile is a clickable link */}
-      <section className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-y border-orange-200">
+      <section className="bg-maroon-100 border-y border-maroon-200">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-orange-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-maroon-200">
             {FEATURES.map(({ icon: Icon, title, desc, href }) => (
               <Link
                 key={title}
                 href={href}
-                className="bg-gradient-to-br from-amber-50 to-orange-50 flex items-center gap-3 px-5 py-5 hover:from-orange-100 hover:to-amber-100 transition-colors group cursor-pointer"
+                className="bg-maroon-50 flex items-center gap-3 px-5 py-5 hover:bg-maroon-100 transition-colors group cursor-pointer"
               >
                 <div className="p-2.5 bg-maroon-100 rounded-xl flex-shrink-0 group-hover:bg-maroon-200 transition-colors">
                   <Icon size={20} className="text-maroon-700" />
@@ -213,7 +238,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section id="featured-products" className="bg-orange-50/50 py-12">
+      <section id="featured-products" className="bg-maroon-50 py-12">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-6">
             <div>
@@ -361,7 +386,7 @@ export default function HomePage() {
                     &ldquo;{rev.comment}&rdquo;
                   </p>
                   {/* Reviewer + product */}
-                  <div className="border-t border-orange-100 pt-3 flex items-center justify-between">
+                  <div className="border-t border-maroon-200 pt-3 flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-maroon-800 text-sm">{rev.reviewer}</p>
                       <p className="text-xs text-green-600 font-medium">✓ Verified Buyer</p>

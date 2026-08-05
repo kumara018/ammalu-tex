@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#fff9f2] min-h-screen flex flex-col">
+      <body className="bg-maroon-100 min-h-screen flex flex-col">
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>

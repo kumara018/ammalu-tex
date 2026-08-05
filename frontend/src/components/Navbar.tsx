@@ -14,6 +14,7 @@ import { useWishlist } from '@/context/WishlistContext';
 import { STORE, SHORT_ADDRESS } from '@/lib/config';
 import { performLogout } from '@/lib/auth';
 import { productsAPI } from '@/lib/api';
+import Logo from './Logo';
 
 const CATEGORIES = [
   'Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears',
@@ -192,19 +193,13 @@ export default function Navbar() {
       </div>
 
       {/* Main navbar */}
-      <nav className="bg-brand-gradient text-white">
+      <nav className="bg-maroon-50 border-b border-maroon-100 shadow-sm text-maroon-900">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-4 h-16">
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
-              <div className="flex items-center gap-2.5">
-                <img src="/crown.svg" alt="Ammalu Tex Crown" className="w-9 h-7 drop-shadow-sm" />
-                <div className="flex flex-col leading-tight">
-                  <span className="text-xl font-display font-bold text-white tracking-wide">{STORE.name}</span>
-                  <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">{STORE.tagline}</span>
-                </div>
-              </div>
+              <Logo />
             </Link>
 
             {/* Search with live dropdown */}
@@ -304,7 +299,7 @@ export default function Navbar() {
                 <div className="hidden sm:flex items-center gap-2">
                   <Link
                     href="/auth/login"
-                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white border border-white/40 hover:bg-maroon-700 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-maroon-900 border border-maroon-300 hover:bg-maroon-100 rounded-lg transition-colors"
                   >
                     <LogIn size={15} /> Sign In
                   </Link>
