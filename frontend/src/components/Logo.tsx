@@ -5,9 +5,9 @@ export function LogoMark({ className = '', size = 32 }: { className?: string; si
         <ellipse cx="30" cy="30" rx="23" ry="27" stroke="currentColor" strokeWidth="2" />
       </g>
       <text
-        x="30" y="42"
+        x="30" y="31"
         fontFamily="-apple-system,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif"
-        fontWeight="900" fontSize="27" textAnchor="middle" fill="currentColor"
+        fontWeight="900" fontSize="27" textAnchor="middle" dominantBaseline="central" fill="currentColor"
       >
         A
       </text>
