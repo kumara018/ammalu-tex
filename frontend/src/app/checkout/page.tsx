@@ -441,7 +441,7 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                   {grandTotal < 1000 ? (
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <div className="bg-maroon-50 border border-orange-200 rounded-lg p-3">
                       <p className="text-xs text-orange-700 font-semibold">⚠️ Your order total is ₹{grandTotal}. EMI requires a minimum order of ₹1,000.</p>
                       <p className="text-xs text-orange-600 mt-1">You can still pay via Card / UPI using the option above.</p>
                     </div>
@@ -468,7 +468,7 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Address summary */}
-              <div className="bg-orange-50 rounded-xl p-4 mb-4">
+              <div className="bg-maroon-50 rounded-xl p-4 mb-4">
                 <div className="flex justify-between">
                   <div>
                     <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">Delivering to</p>
@@ -482,7 +482,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Payment summary */}
-              <div className="bg-orange-50 rounded-xl p-4 mb-4">
+              <div className="bg-maroon-50 rounded-xl p-4 mb-4">
                 <div className="flex justify-between">
                   <div>
                     <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">Payment</p>
@@ -500,7 +500,7 @@ export default function CheckoutPage() {
                 <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide">Items ({items.length})</p>
                 {items.map(item => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center text-xl flex-shrink-0">
+                    <div className="w-12 h-12 rounded-lg bg-maroon-50 flex items-center justify-center text-xl flex-shrink-0">
                       {item.product.category === 'Lehenga' ? '👗' : item.product.category === 'Chudithar' ? '👘' : '👚'}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -551,7 +551,7 @@ export default function CheckoutPage() {
                   <span className="font-medium flex-shrink-0">₹{(item.product.price * item.quantity).toLocaleString()}</span>
                 </div>
               ))}
-              <div className="border-t border-orange-100 pt-2.5 flex justify-between text-gray-700">
+              <div className="border-t border-maroon-200 pt-2.5 flex justify-between text-gray-700">
                 <span>Subtotal</span><span className="font-medium">₹{total.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-gray-700">
@@ -563,7 +563,7 @@ export default function CheckoutPage() {
                 <span className="text-maroon-900">₹{grandTotal.toLocaleString()}</span>
               </div>
             </div>
-            <div className="mt-4 pt-4 border-t border-orange-100 space-y-1.5">
+            <div className="mt-4 pt-4 border-t border-maroon-200 space-y-1.5">
               <p className="text-xs text-gray-500 flex items-center gap-1.5"><Lock size={11} className="text-green-500" /> SSL Secured Checkout</p>
               <p className="text-xs text-gray-500">↩️ 7-day easy returns</p>
               <p className="text-xs text-gray-500">✅ 100% Authentic Products</p>

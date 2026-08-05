@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Facebook, Instagram, MessageCircle, MapIcon } from 'lucide-react';
 import { STORE, WHATSAPP_URL, MAIL_URL, CALL_URL } from '@/lib/config';
+import { LogoMark } from './Logo';
 
 function XIcon({ size = 16 }: { size?: number }) {
   return (
@@ -24,13 +25,16 @@ export default function Footer() {
 
           {/* Brand + Social */}
           <div>
-            {/* Logo image in footer */}
-            <Link href="/">
-              <img
-                src="/logo-dark.svg"
-                alt="Ammalu Tex"
-                className="h-20 w-auto mb-4 opacity-95 hover:opacity-100 transition-opacity"
-              />
+            <Link href="/" className="flex items-center gap-3 mb-4">
+              <LogoMark size={40} className="text-white flex-shrink-0" />
+              <div>
+                <p className="text-white font-bold uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>
+                  Ammalu Tex
+                </p>
+                <p className="text-maroon-300 font-semibold uppercase leading-tight mt-1" style={{ fontSize: '9.5px', letterSpacing: '0.1em' }}>
+                  Premium Women&apos;s Textiles
+                </p>
+              </div>
             </Link>
             <p className="text-sm text-maroon-300 leading-relaxed mb-5">
               Your trusted destination for premium quality women&apos;s ethnic and contemporary wear at Texvalley Gangapuram.

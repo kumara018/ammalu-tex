@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowLeft, KeyRound, Send } from 'lucide-react';
 import { authAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { LogoMark } from '@/components/Logo';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -51,12 +52,12 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#fff9f2]">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-maroon-100">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-4">
-            <img src="/crown.svg" alt="Ammalu Tex" className="w-10 h-8 drop-shadow-sm" />
-            <h1 className="text-3xl font-display font-bold text-maroon-900">Ammalu Tex</h1>
+            <LogoMark size={34} className="text-gold-500 flex-shrink-0" />
+            <h1 className="text-3xl font-display font-black text-maroon-900">Ammalu Tex</h1>
           </Link>
           <h2 className="text-2xl font-bold text-gray-900">
             {step === 'request' ? 'Forgot Password?' : 'Enter OTP'}
@@ -146,7 +147,7 @@ export default function ForgotPasswordPage() {
             </form>
           )}
 
-          <div className="mt-6 pt-5 border-t border-orange-100 text-center">
+          <div className="mt-6 pt-5 border-t border-maroon-200 text-center">
             <Link href="/auth/login" className="flex items-center justify-center gap-1 text-sm text-gray-600 hover:text-maroon-800">
               <ArrowLeft size={14} /> Back to Sign In
             </Link>

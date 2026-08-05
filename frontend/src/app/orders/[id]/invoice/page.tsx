@@ -7,6 +7,7 @@ import { Order } from '@/types';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { ArrowLeft, Download, Mail, Share2, Printer } from 'lucide-react';
+import { LogoMark } from '@/components/Logo';
 
 const PAY_LABEL: Record<string, string> = {
   razorpay: 'Online Payment (Razorpay)',
@@ -102,13 +103,13 @@ function InvoiceContent() {
       <div id="invoice" className="bg-white rounded-2xl shadow-lg print:shadow-none border border-gray-100 overflow-hidden">
 
         {/* ── Header ── */}
-        <div className="bg-gradient-to-r from-maroon-900 via-maroon-800 to-red-800 px-8 py-8">
+        <div className="bg-gradient-to-r from-maroon-900 via-maroon-800 to-maroon-700 px-8 py-8">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <img src="/crown.svg" alt="Ammalu Tex" className="h-14 w-auto drop-shadow-md" />
+                <LogoMark size={46} className="text-white flex-shrink-0" />
                 <div>
-                  <h1 className="text-2xl font-bold text-white tracking-wide">Ammalu Tex</h1>
+                  <h1 className="text-2xl font-bold text-white uppercase" style={{ letterSpacing: '0.03em' }}>Ammalu Tex</h1>
                   <p className="text-gold-300 text-xs tracking-widest uppercase font-medium">Premium Women's Textiles</p>
                 </div>
               </div>
@@ -139,7 +140,7 @@ function InvoiceContent() {
               <p className="text-sm text-gray-600 mt-0.5">{user?.email}</p>
               <p className="text-sm text-gray-600">{user?.phone}</p>
             </div>
-            <div className="bg-orange-50 border border-orange-100 rounded-xl p-4">
+            <div className="bg-maroon-50 border border-maroon-200 rounded-xl p-4">
               <p className="text-xs font-bold text-orange-700 uppercase tracking-wider mb-3">Ship To</p>
               <p className="font-bold text-gray-900">{addr.full_name}</p>
               <p className="text-sm text-gray-600 mt-0.5">{addr.address_line1}</p>
@@ -167,10 +168,10 @@ function InvoiceContent() {
                     : null;
                   const emoji = item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : '👚';
                   return (
-                    <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-orange-50/40'}>
+                    <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-maroon-50/40'}>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center text-lg flex-shrink-0 overflow-hidden border border-orange-100">
+                          <div className="w-10 h-10 rounded-lg bg-maroon-50 flex items-center justify-center text-lg flex-shrink-0 overflow-hidden border border-maroon-200">
                             {imgSrc
                               ? <img src={imgSrc} alt={item.name} className="w-full h-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display='none'; }} />
                               : <span>{emoji}</span>}
@@ -281,9 +282,9 @@ function InvoiceContent() {
         <div className="bg-gradient-to-r from-maroon-900 to-maroon-800 px-8 py-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              <img src="/crown.svg" alt="Ammalu Tex" className="h-9 w-auto opacity-90" />
+              <LogoMark size={30} className="text-white flex-shrink-0" />
               <div>
-                <p className="text-white font-bold tracking-wide">Ammalu Tex</p>
+                <p className="text-white font-bold uppercase" style={{ letterSpacing: '0.03em' }}>Ammalu Tex</p>
                 <p className="text-white/60 text-xs">Shop Ground Floor No 129, Texvalley Gangapuram</p>
                 <p className="text-white/60 text-xs">ammalutex.com · support@ammalutex.com</p>
               </div>

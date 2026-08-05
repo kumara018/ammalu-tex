@@ -167,7 +167,7 @@ function ProductCarousel({ images, videoUrl, name }: { images: string[]; videoUr
 
   if (slides.length === 0) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl flex items-center justify-center text-8xl">
+      <div className="aspect-square bg-gradient-to-br from-maroon-100 to-gold-50 rounded-2xl flex items-center justify-center text-8xl">
         👗
       </div>
     );
@@ -180,7 +180,7 @@ function ProductCarousel({ images, videoUrl, name }: { images: string[]; videoUr
       {/* Main slide */}
       <div
         ref={trackRef}
-        className="relative bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl overflow-hidden mb-3 cursor-grab active:cursor-grabbing"
+        className="relative bg-gradient-to-br from-maroon-100 to-gold-50 rounded-2xl overflow-hidden mb-3 cursor-grab active:cursor-grabbing"
         style={{ aspectRatio: '1/1' }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -454,7 +454,7 @@ export default function ProductDetailPage() {
           </div>
           <p className="text-xs text-gray-500 mb-5">Inclusive of all taxes. ✓ Delivered to your doorstep</p>
 
-          <hr className="border-orange-100 mb-5" />
+          <hr className="border-maroon-200 mb-5" />
 
           {/* Fabric / Fit / Material — visual highlight badges */}
           {(product.fabric || product.fit || product.material) && (
@@ -536,7 +536,7 @@ export default function ProductDetailPage() {
               ❌ This product is currently out of stock. Check back later.
             </div>
           ) : product.stock <= 5 ? (
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4 text-orange-700 text-sm">
+            <div className="bg-maroon-50 border border-orange-200 rounded-xl p-3 mb-4 text-orange-700 text-sm">
               ⚠️ Only {product.stock} left in stock — order soon!
             </div>
           ) : null}
@@ -576,7 +576,7 @@ export default function ProductDetailPage() {
               },
               { icon: Shield, text: '100% Authentic' },
             ].map(({ icon: Icon, text, red }) => (
-              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-center ${red ? 'bg-red-50' : 'bg-orange-50'}`}>
+              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-center ${red ? 'bg-red-50' : 'bg-maroon-50'}`}>
                 <Icon size={18} className={red ? 'text-red-500' : 'text-maroon-700'} />
                 <span className={`text-xs leading-tight ${red ? 'text-red-600 font-medium' : 'text-gray-600'}`}>{text}</span>
               </div>
@@ -587,7 +587,7 @@ export default function ProductDetailPage() {
 
       {/* ── Tabs ── */}
       <div className="mt-12 card overflow-hidden">
-        <div className="flex border-b border-orange-100 overflow-x-auto">
+        <div className="flex border-b border-maroon-200 overflow-x-auto">
           {TABS.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
               className={`flex-1 min-w-[120px] py-4 text-sm font-semibold transition-colors whitespace-nowrap ${tab === t.key ? 'text-maroon-800 border-b-2 border-maroon-800 bg-maroon-50' : 'text-gray-500 hover:text-maroon-700'}`}>
@@ -603,40 +603,40 @@ export default function ProductDetailPage() {
               <p className="leading-relaxed">{product.description}</p>
               <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {product.fabric && (
-                  <div className="bg-orange-50 rounded-xl p-4">
+                  <div className="bg-maroon-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Fabric</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.fabric}</p>
                   </div>
                 )}
                 {product.material && (
-                  <div className="bg-orange-50 rounded-xl p-4">
+                  <div className="bg-maroon-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Material</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.material}</p>
                   </div>
                 )}
                 {product.fit && (
-                  <div className="bg-orange-50 rounded-xl p-4">
+                  <div className="bg-maroon-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Fit</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.fit}</p>
                   </div>
                 )}
                 {product.size_options?.length > 0 && (
-                  <div className="bg-orange-50 rounded-xl p-4">
+                  <div className="bg-maroon-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Sizes</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.size_options.join(', ')}</p>
                   </div>
                 )}
                 {product.colors?.length > 0 && (
-                  <div className="bg-orange-50 rounded-xl p-4">
+                  <div className="bg-maroon-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Colours</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.colors.join(', ')}</p>
                   </div>
                 )}
-                <div className="bg-orange-50 rounded-xl p-4">
+                <div className="bg-maroon-50 rounded-xl p-4">
                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Category</p>
                   <p className="font-semibold text-maroon-900 mt-1">{product.category}</p>
                 </div>
-                <div className="bg-orange-50 rounded-xl p-4">
+                <div className="bg-maroon-50 rounded-xl p-4">
                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Stock</p>
                   <p className={`font-semibold mt-1 ${product.stock > 0 ? 'text-maroon-900' : 'text-red-600'}`}>{product.stock > 0 ? `${product.stock} available` : 'Out of stock'}</p>
                 </div>
@@ -649,7 +649,7 @@ export default function ProductDetailPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {product.fit && (
-                  <div className="bg-orange-50 rounded-2xl p-5 border border-orange-100">
+                  <div className="bg-maroon-50 rounded-2xl p-5 border border-maroon-200">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl">👗</span>
                       <p className="font-bold text-maroon-900 text-sm uppercase tracking-wide">Fit</p>
@@ -658,7 +658,7 @@ export default function ProductDetailPage() {
                   </div>
                 )}
                 {product.fabric && (
-                  <div className="bg-orange-50 rounded-2xl p-5 border border-orange-100">
+                  <div className="bg-maroon-50 rounded-2xl p-5 border border-maroon-200">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl">🧵</span>
                       <p className="font-bold text-maroon-900 text-sm uppercase tracking-wide">Fabric</p>
@@ -667,7 +667,7 @@ export default function ProductDetailPage() {
                   </div>
                 )}
                 {product.material && (
-                  <div className="bg-orange-50 rounded-2xl p-5 border border-orange-100">
+                  <div className="bg-maroon-50 rounded-2xl p-5 border border-maroon-200">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl">🔬</span>
                       <p className="font-bold text-maroon-900 text-sm uppercase tracking-wide">Material / Composition</p>
@@ -718,7 +718,7 @@ export default function ProductDetailPage() {
           {tab === 'reviews' && (
             <div className="space-y-6">
               {!user && (
-                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
+                <div className="bg-maroon-50 border border-orange-200 rounded-xl p-4 text-center">
                   <p className="text-sm text-gray-700 mb-2">Sign in to write a review</p>
                   <Link href="/auth/login" className="btn-primary inline-flex items-center gap-2 py-2 px-5 text-sm">Sign In</Link>
                 </div>
@@ -789,7 +789,7 @@ export default function ProductDetailPage() {
               {reviews.length > 0 ? (
                 <div className="space-y-4">
                   {product && product.rating_count > 0 && (
-                    <div className="flex items-center gap-4 bg-orange-50 rounded-xl p-4 mb-6">
+                    <div className="flex items-center gap-4 bg-maroon-50 rounded-xl p-4 mb-6">
                       <div className="text-center flex-shrink-0">
                         <p className="text-4xl font-bold text-maroon-900">{product.rating_avg.toFixed(1)}</p>
                         <div className="flex gap-0.5 justify-center mt-1">

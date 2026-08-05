@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { authAPI } from '@/lib/api';
 import { redirectAfterLogin } from '@/lib/auth';
 import toast from 'react-hot-toast';
+import { LogoMark } from '@/components/Logo';
 
 type Step = 'credentials' | 'otp';
 
@@ -193,7 +194,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff9f2]">
+    <div className="min-h-screen flex flex-col bg-maroon-100">
 
       {/* Standalone header */}
       <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md gap-3">
@@ -219,10 +220,10 @@ export default function LoginPage() {
         )}
         <div className="flex-1 flex flex-col items-center leading-tight">
           <Link href="/" className="flex items-center gap-2.5 leading-tight">
-            <img src="/crown.svg" alt="Ammalu Tex" className="w-9 h-7 drop-shadow-sm flex-shrink-0" />
+            <LogoMark size={30} className="text-white flex-shrink-0" />
             <div className="flex flex-col">
-              <span className="text-xl font-display font-bold tracking-wide">Ammalu Tex</span>
-              <span className="text-gold-300 text-[10px] font-medium tracking-widest uppercase">Premium Women&apos;s Textiles</span>
+              <span className="text-white font-bold uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>Ammalu Tex</span>
+              <span className="text-gold-300 text-[9px] font-semibold tracking-widest uppercase">Premium Women&apos;s Textiles</span>
             </div>
           </Link>
         </div>
@@ -383,7 +384,7 @@ export default function LoginPage() {
             </form>
           )}
 
-          <div className="mt-6 pt-5 border-t border-orange-100 text-center">
+          <div className="mt-6 pt-5 border-t border-maroon-200 text-center">
             <p className="text-sm text-gray-600">
               Don&apos;t have an account?{' '}
               <Link
