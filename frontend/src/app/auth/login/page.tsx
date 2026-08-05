@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, ShieldCheck, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -11,24 +11,15 @@ import { LogoMark } from '@/components/Logo';
 
 type Step = 'credentials' | 'otp';
 
-export default function LoginPage() {
+function LoginPageInner() {
   const { login, user, sessions, switchAccount, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Redirect if already logged in — but NOT when adding another account (?add=1)
-  // Wait for auth to finish loading before redirecting (avoids flash on refresh)
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) return;
-    const params  = new URLSearchParams(window.location.search);
-    const addMode = params.get('add') === '1';
-    if (!addMode) router.replace(user.is_admin ? '/admin' : '/');
-  }, [user, authLoading, router]);
-
-  // Derive isAddMode for UI labels (always safe on client)
-  const isAddMode = typeof window !== 'undefined'
-    ? new URLSearchParams(window.location.search).get('add') === '1'
-    : false;
+  // Reactive — correctly reflects ?add=1 even right after client-side navigation
+  // (window.location.search can be stale on the very first render after a Link
+  // transition, which previously caused a false redirect to the dashboard)
+  const isAddMode = searchParams.get('add') === '1';
 
   // ── Step 1 fields ─────────────────────────────────────────────────────────
   const [identifier, setIdentifier] = useState('');
@@ -44,6 +35,19 @@ export default function LoginPage() {
   const [step,    setStep]    = useState<Step>('credentials');
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
+
+  // True once the visitor has typed anything — never yank them away mid-keystroke
+  // just because a background auth refresh resolved a stale/cached session.
+  const hasStartedForm = Boolean(identifier || password || otp);
+
+  // Redirect if already logged in — but NOT when adding another account (?add=1)
+  // Wait for auth to finish loading before redirecting (avoids flash on refresh)
+  useEffect(() => {
+    if (authLoading) return;
+    if (hasStartedForm) return;
+    if (!user) return;
+    if (!isAddMode) router.replace(user.is_admin ? '/admin' : '/');
+  }, [user, authLoading, router, isAddMode, hasStartedForm]);
 
   // ── Retry state (replaces the old infinite-loop setTimeout) ───────────────
   const [retryIn,   setRetryIn]   = useState(0);   // countdown seconds
@@ -399,5 +403,13 @@ export default function LoginPage() {
       </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-maroon-100"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-maroon-700" /></div>}>
+      <LoginPageInner />
+    </Suspense>
   );
 }

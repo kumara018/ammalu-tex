@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { authAPI } from '@/lib/api';
@@ -124,23 +124,16 @@ function InputRow({ label, error, required = true, children }: InputRowProps) {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
-export default function RegisterPage() {
+function RegisterPageInner() {
   const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // In switch-account mode (?add=1) allow registration even when logged in
-  const isAddMode = typeof window !== 'undefined'
-    ? new URLSearchParams(window.location.search).get('add') === '1'
-    : false;
-
-  // Redirect if already logged in (wait for auth to finish loading first)
-  // Skip redirect in add/switch mode — user wants to register a NEW account
-  useEffect(() => {
-    if (authLoading) return;
-    if (user && !isAddMode) {
-      router.replace(user.is_admin ? '/admin' : '/');
-    }
-  }, [user, authLoading, router, isAddMode]);
+  // In switch-account mode (?add=1) allow registration even when logged in.
+  // Reactive via useSearchParams — a raw window.location.search read can be
+  // stale on the very first render right after a client-side <Link>
+  // transition, bouncing admins to /admin before they can fill out the form.
+  const isAddMode = searchParams.get('add') === '1';
 
   const [fullName,    setFullName]    = useState('');
   const [email,       setEmail]       = useState('');
@@ -154,6 +147,23 @@ export default function RegisterPage() {
   const [loading,     setLoading]     = useState(false);
   const [errors,      setErrors]      = useState<Record<string, string>>({});
   const [apiError,    setApiError]    = useState('');
+
+  // True once the visitor has typed anything into the form. Once this is true
+  // we must NEVER redirect them away — an already-logged-in admin/user landing
+  // here to test/create a new account should never get yanked mid-keystroke
+  // into their own dashboard just because a background auth refresh resolved.
+  const hasStartedForm = Boolean(fullName || email || phone || password || confirm);
+
+  // Redirect if already logged in (wait for auth to finish loading first)
+  // Skip redirect in add/switch mode — user wants to register a NEW account
+  // Skip redirect once the form has any input — never abandon in-progress typing
+  useEffect(() => {
+    if (authLoading) return;
+    if (hasStartedForm) return;
+    if (user && !isAddMode) {
+      router.replace(user.is_admin ? '/admin' : '/');
+    }
+  }, [user, authLoading, router, isAddMode, hasStartedForm]);
 
   const clearErr = (key: string) =>
     setErrors(prev => ({ ...prev, [key]: '' }));
@@ -465,5 +475,13 @@ export default function RegisterPage() {
       </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-maroon-100"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-maroon-700" /></div>}>
+      <RegisterPageInner />
+    </Suspense>
   );
 }
