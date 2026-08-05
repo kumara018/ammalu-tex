@@ -76,9 +76,13 @@ api.interceptors.response.use(
 
 export const authAPI = {
   register:            (data: object) => api.post('/api/auth/register', data),
+  verifyRegisterOtp:   (data: object) => api.post('/api/auth/verify-register-otp', data),
+  resendRegisterOtp:   (data: object) => api.post('/api/auth/resend-register-otp', data),
   login:               (data: object) => api.post('/api/auth/login', data),
   sendLoginOtp:        (data: object) => api.post('/api/auth/send-login-otp', data),
   verifyLoginOtp:      (data: object) => api.post('/api/auth/verify-login-otp', data),
+  evictAndLogin:       (data: object) => api.post('/api/auth/sessions/evict-and-login', data),
+  logout:              ()             => api.post('/api/auth/logout'),
   getMe:               ()             => api.get('/api/auth/me'),
   updateProfile:       (data: object) => api.put('/api/auth/me', data),
   forgotPassword:      (data: object) => api.post('/api/auth/forgot-password', data),
@@ -88,6 +92,8 @@ export const authAPI = {
   cancelDeleteAccount:     ()             => api.post('/api/auth/cancel-delete-account'),
   requestDeactivateAccount:()             => api.post('/api/auth/request-deactivate-account'),
   confirmDeactivateAccount:(data: object) => api.post('/api/auth/confirm-deactivate-account', data),
+  getSessions:         ()             => api.get('/api/auth/sessions'),
+  revokeSession:       (id: number)   => api.delete(`/api/auth/sessions/${id}`),
 };
 
 export const productsAPI = {
