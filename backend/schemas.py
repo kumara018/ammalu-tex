@@ -216,6 +216,7 @@ class ProductCreate(BaseModel):
     colors:        List[str] = []
     images:        List[str] = []
     video_url:         Optional[str] = None
+    video_orientation: Optional[str] = None
     fit:               Optional[str] = None
     material:          Optional[str] = None
     care_instructions: Optional[str] = None
@@ -265,6 +266,7 @@ class ProductUpdate(BaseModel):
     colors:        Optional[List[str]] = None
     images:        Optional[List[str]] = None
     video_url:         Optional[str]   = None
+    video_orientation: Optional[str]   = None
     fit:               Optional[str]   = None
     material:          Optional[str]   = None
     care_instructions: Optional[str]   = None
@@ -287,6 +289,7 @@ class ProductOut(BaseModel):
     colors:        List[str] = []
     images:        List[str] = []
     video_url:         Optional[str]   = None
+    video_orientation: Optional[str]   = None
     fit:               Optional[str]   = None
     material:          Optional[str]   = None
     care_instructions: Optional[str]   = None
