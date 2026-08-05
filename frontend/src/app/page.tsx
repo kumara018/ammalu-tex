@@ -143,8 +143,9 @@ export default function HomePage() {
             background: 'linear-gradient(100deg, #f6ece9 0%, #f6ece9 46%, rgba(179,115,95,0.18) 46.4%, #eeddd8 100%)',
           }}
         />
+        {/* Diagonal divider only makes sense once the layout actually splits left/right — md+ only */}
         <div
-          className="absolute top-[-10%] bottom-[-10%] left-[45.6%] w-[2px]"
+          className="hidden md:block absolute top-[-10%] bottom-[-10%] left-[45.6%] w-[2px]"
           style={{
             background: 'linear-gradient(180deg, transparent, #b3735f 30%, #b3735f 70%, transparent)',
             transform: 'rotate(11deg)', transformOrigin: 'top',
@@ -152,20 +153,23 @@ export default function HomePage() {
           }}
         />
 
-        <div className="relative z-10 pt-24 px-6 md:px-12">
-          <p className="text-[12px] font-bold tracking-[0.16em] uppercase text-maroon-500 max-w-[220px]">
+        <div className="relative z-10 pt-16 md:pt-24 px-6 md:px-12 flex justify-center md:justify-start">
+          <p className="text-[12px] font-bold tracking-[0.16em] uppercase text-maroon-500 max-w-[220px] text-center md:text-left">
             Chudithar · Lehenga · Half Saree · Party Wear
           </p>
         </div>
 
-        <div className="absolute z-[2] top-[14%] right-[6%] w-[min(40vw,420px)] h-[56vh]">
+        {/* Real 3D hero moment — normal flow + centered on mobile (avoids overlapping the
+            copy below), absolute + right-aligned on desktop for the asymmetric split */}
+        <div className="relative md:absolute md:z-[2] md:top-[14%] md:right-[6%] w-full md:w-[min(40vw,420px)] h-[280px] md:h-[56vh] mt-6 md:mt-0 px-10 md:px-0 mx-auto md:mx-0">
           <Hero3D />
         </div>
 
-        <div className="relative z-10 px-6 md:px-12 pb-20 mt-auto">
+        <div className="relative z-10 px-6 md:px-12 pb-16 md:pb-20 mt-8 md:mt-auto flex justify-center md:justify-start">
+          <div className="max-w-3xl text-center md:text-left">
           <motion.h1
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
-            className="font-display font-black leading-[0.95] tracking-tight text-maroon-900 max-w-3xl mb-6"
+            className="font-display font-black leading-[0.95] tracking-tight text-maroon-900 mb-6"
             style={{ fontSize: 'clamp(2.4rem, 7.5vw, 5.5rem)' }}
           >
             Drape crafted<br />
@@ -173,13 +177,13 @@ export default function HomePage() {
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
-            className="max-w-md text-maroon-500 font-medium mb-8 leading-relaxed"
+            className="max-w-md mx-auto md:mx-0 text-maroon-500 font-medium mb-8 leading-relaxed"
           >
             From Texvalley, Erode — festive pieces built with the weight, sheen and finish of couture, priced for the everyday elite.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex flex-wrap gap-4"
+            className="flex flex-wrap gap-4 justify-center md:justify-start"
           >
             <Link href="/products" className="btn-primary inline-flex items-center gap-2">
               Shop Now <ArrowRight size={18} />
@@ -188,6 +192,7 @@ export default function HomePage() {
               View Featured
             </Link>
           </motion.div>
+          </div>
         </div>
       </section>
 
