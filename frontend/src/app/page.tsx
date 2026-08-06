@@ -143,12 +143,17 @@ export default function HomePage() {
             background: 'linear-gradient(100deg, #f6ece9 0%, #f6ece9 46%, rgba(179,115,95,0.18) 46.4%, #eeddd8 100%)',
           }}
         />
-        {/* Diagonal divider only makes sense once the layout actually splits left/right — md+ only */}
+        {/* Divider — anchored to the 3D box's own left edge (not a guessed
+            percentage) so it can never drift into the headline regardless of
+            viewport width. Straight, not rotated — a rotated line over this
+            height drifts tens of px per degree and cut through the text at
+            some widths. md+ only, once the layout actually splits left/right. */}
         <div
-          className="hidden md:block absolute top-[-10%] bottom-[-10%] left-[45.6%] w-[2px]"
+          className="hidden md:block absolute w-[2px]"
           style={{
+            right: 'calc(6% + min(40vw, 420px) + 40px)',
+            top: '8%', bottom: '8%',
             background: 'linear-gradient(180deg, transparent, #b3735f 30%, #b3735f 70%, transparent)',
-            transform: 'rotate(11deg)', transformOrigin: 'top',
             boxShadow: '0 0 24px 1px rgba(179,115,95,0.5)',
           }}
         />
@@ -166,7 +171,7 @@ export default function HomePage() {
         </div>
 
         <div className="relative z-10 px-6 md:px-12 pb-16 md:pb-20 mt-8 md:mt-auto flex justify-center md:justify-start">
-          <div className="max-w-3xl text-center md:text-left">
+          <div className="hero-copy text-center md:text-left">
           <motion.h1
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
             className="font-display font-black leading-[0.95] tracking-tight text-maroon-900 mb-6"
@@ -195,6 +200,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <style jsx>{`
+        .hero-copy { max-width: 48rem; }
+        @media (min-width: 768px) {
+          .hero-copy {
+            max-width: min(48rem, calc(94vw - 130px - min(40vw, 420px)));
+          }
+        }
+      `}</style>
 
       {/* Features bar — each tile is a clickable link */}
       <section className="bg-maroon-100 border-y border-maroon-200">
