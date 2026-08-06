@@ -10,7 +10,7 @@ export const STORE = {
   phone1:      '+91 99941 68839',
   phone2:      '+91 94439 48272',
   email:       'admin@ammalutex.com',
-  supportEmail:'pnagaraji272@gmail.com',
+  supportEmail:'admin@ammalutex.com',
   whatsapp:    '919994168839',   // country code + number, no + or spaces
 
   // ── Address ──────────────────────────────────────
