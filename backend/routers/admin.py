@@ -139,7 +139,14 @@ async def upload_image(
             contents,
             folder="ammalutex/products",
             resource_type="image",
-            transformation=[{"width": 900, "height": 900, "crop": "limit", "quality": "auto", "fetch_format": "auto"}],
+            # angle:"exif" bakes in the correct rotation from the phone's EXIF
+            # orientation tag server-side too — a safety net for the rare
+            # browser that can't do the client-side canvas correction the
+            # admin upload widget applies before the file even gets here.
+            transformation=[
+                {"angle": "exif"},
+                {"width": 900, "height": 900, "crop": "limit", "quality": "auto", "fetch_format": "auto"},
+            ],
         )
         return {"url": result["secure_url"], "public_id": result["public_id"]}
     except Exception as e:
