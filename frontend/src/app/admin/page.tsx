@@ -1510,7 +1510,14 @@ function AdminPageInner() {
                           <td className="px-4 py-3 text-gray-600 text-xs max-w-[120px] truncate">{reasonLabel[r.reason] || r.reason}</td>
                           <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString('en-IN')}</td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadge[r.status] || 'bg-gray-100 text-gray-600'}`}>
+                            <span
+                              className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadge[r.status] || 'bg-gray-100 text-gray-600'}`}
+                              title={
+                                r.status === 'refund_initiated' ? 'Razorpay is processing this refund. Will auto-update to Refunded and notify the customer once confirmed.'
+                                : r.status === 'refunded' ? 'Razorpay has confirmed and sent this refund. The customer\'s bank may take 1–5 more business days to show it in their account.'
+                                : undefined
+                              }
+                            >
                               {r.status.replace(/_/g,' ').replace(/\b\w/g,(c:string)=>c.toUpperCase())}
                             </span>
                           </td>
@@ -1712,9 +1719,16 @@ function AdminPageInner() {
                                       onChange={e => setReturnUpdateForm(prev => ({ ...prev, [r.id]: { ...prev[r.id], status: e.target.value } }))}
                                       className="input-field text-sm"
                                     >
+                                      {/* pickup_scheduled / refund_initiated / refunded / replacement_shipped / (exchange) completed
+                                          are deliberately excluded here — they're only ever set by a real, verified
+                                          Delhivery pickup/shipment call or the Razorpay refund.processed webhook (see
+                                          courier_sync.py / payments.py). Letting an admin pick them by hand from this
+                                          dropdown is exactly what caused a return to show "Refunded" days before the
+                                          customer's bank actually received the money — use Retry Pickup / Retry
+                                          Replacement / Sync buttons instead, which only advance on a real confirmation. */}
                                       {(r.request_type === 'return'
-                                        ? ['pending','under_review','approved','rejected','pickup_scheduled','picked_up','refund_initiated','refunded','completed']
-                                        : ['pending','under_review','approved','rejected','pickup_scheduled','picked_up','processing','replacement_shipped','completed']
+                                        ? ['pending','under_review','approved','rejected','picked_up','completed']
+                                        : ['pending','under_review','approved','rejected','picked_up','processing']
                                       ).map(s => (
                                         <option key={s} value={s}>{s.replace(/_/g,' ').replace(/\b\w/g,(c:string)=>c.toUpperCase())}</option>
                                       ))}
