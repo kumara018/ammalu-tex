@@ -8,6 +8,8 @@ import NavbarWrapper from '@/components/NavbarWrapper';
 import FooterWrapper from '@/components/FooterWrapper';
 import LoginPromptModal from '@/components/LoginPromptModal';
 import PageTransition from '@/components/PageTransition';
+import QueryProvider from '@/components/QueryProvider';
+import ThreeProvider from '@/three/ThreeProvider';
 import { Toaster } from 'react-hot-toast';
 import { STORE } from '@/lib/config';
 
@@ -57,13 +59,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/favicon.svg?v=3" />
       </head>
       <body className="bg-maroon-100 min-h-screen flex flex-col">
+        {/* The single persistent 3D canvas. Sits outside the providers and
+            outside PageTransition so a route change never remounts it — the
+            GL context, compiled shaders and uploaded textures survive
+            navigation. Fixed at z-0; all real UI renders above it. */}
+        <ThreeProvider />
+        {/* Outermost data provider: the auth, cart and wishlist contexts all
+            issue queries, so the client must exist above them. */}
+        <QueryProvider>
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
             <LoginPromptProvider>
+              {/* relative z-10: the canvas is position:fixed, which creates a
+                  stacking context and would otherwise paint over static page
+                  content. Everything a customer reads or clicks stays real
+                  HTML, above the canvas. */}
+              <div className="relative z-10 flex flex-col flex-1">
               <NavbarWrapper />
               <main className="flex-1"><PageTransition>{children}</PageTransition></main>
               <FooterWrapper />
+              </div>
               <LoginPromptModal />
               <Toaster
                 position="top-right"
@@ -85,6 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </WishlistProvider>
           </CartProvider>
         </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

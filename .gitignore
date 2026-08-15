@@ -28,3 +28,9 @@ frontend/out/
 # Misc
 .DS_Store
 *.log
+
+# Build output
+frontend/tsconfig.tsbuildinfo
+
+# Local tooling (dev-server launch config)
+.claude/

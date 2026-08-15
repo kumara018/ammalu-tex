@@ -25,7 +25,8 @@ function Accordion({
 }: {
   id?: string;
   title: string;
-  icon: React.ElementType;
+  // React 19 infers `never` for ElementType props; name what we pass instead.
+  icon: React.ComponentType<{ size?: number }>;
   children: React.ReactNode;
   defaultOpen?: boolean;
   color?: string;

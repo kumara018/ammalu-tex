@@ -1,0 +1,123 @@
+'use client';
+
+import { create } from 'zustand';
+import type { Capabilities, QualityTier, TierBudget } from '@/three/core/capabilities';
+import { TIER_BUDGETS } from '@/three/core/capabilities';
+
+/**
+ * Ammalu Tex — the Couture Atelier.
+ *
+ * The scene vocabulary is a workroom, not a facility. Where the sister site
+ * reads as instrumentation — bays, chambers, a vault — this one is a place
+ * where things are made by hand: a cutting table, a dress form, a light well.
+ * The names are deliberately domestic rather than technical, because that is
+ * the register the whole site is meant to sit in.
+ */
+export type SceneId =
+  | 'atelier'    // /             — the workroom, organza in window light
+  | 'cutting'    // /products     — pattern pieces on the cutting table
+  | 'form'       // /products/[id]— the dress form; the garment itself
+  | 'basket'     // /cart, /wishlist — folded, set aside, waiting
+  | 'ledger'     // /checkout     — restrained by design
+  | 'archive'    // /orders, /account, /returns — restrained
+  | 'threshold'  // /auth/*       — restrained
+  | 'muslin';    // policy, support, admin — canvas idles entirely
+
+export type TransitionPhase = 'idle' | 'exiting' | 'entering';
+
+interface SceneState {
+  capabilities: Capabilities | null;
+  tier: QualityTier;
+  budget: TierBudget;
+
+  scene: SceneId;
+  previousScene: SceneId | null;
+  phase: TransitionPhase;
+
+  pointer: { x: number; y: number };
+  scroll: number;
+
+  setCapabilities: (c: Capabilities) => void;
+  setTier: (t: QualityTier) => void;
+  goToScene: (s: SceneId) => void;
+  setPhase: (p: TransitionPhase) => void;
+  setPointer: (x: number, y: number) => void;
+  setScroll: (v: number) => void;
+}
+
+export const useSceneStore = create<SceneState>((set, get) => ({
+  capabilities: null,
+  tier: 'off',
+  budget: TIER_BUDGETS.off,
+
+  scene: 'muslin',
+  previousScene: null,
+  phase: 'idle',
+
+  pointer: { x: 0, y: 0 },
+  scroll: 0,
+
+  setCapabilities: (c) =>
+    set({ capabilities: c, tier: c.tier, budget: TIER_BUDGETS[c.tier] }),
+
+  setTier: (t) => set({ tier: t, budget: TIER_BUDGETS[t] }),
+
+  goToScene: (s) => {
+    const { scene } = get();
+    if (s === scene) return;
+    set({ previousScene: scene, scene: s });
+  },
+
+  setPhase: (p) => set({ phase: p }),
+
+  // Written every frame from inside useFrame. A fresh object each time is the
+  // cost of Zustand's change detection working correctly, and it is small.
+  setPointer: (x, y) => set({ pointer: { x, y } }),
+  setScroll: (v) => set({ scroll: v }),
+}));
+
+/** Route → scene. Kept beside the store so the two cannot drift. */
+export function sceneForPath(pathname: string): SceneId {
+  if (pathname === '/') return 'atelier';
+  if (pathname.startsWith('/products/')) return 'form';
+  if (pathname.startsWith('/products')) return 'cutting';
+  if (pathname.startsWith('/cart') || pathname.startsWith('/wishlist')) return 'basket';
+  if (pathname.startsWith('/checkout')) return 'ledger';
+  if (
+    pathname.startsWith('/orders') ||
+    pathname.startsWith('/account') ||
+    pathname.startsWith('/returns')
+  ) return 'archive';
+  if (pathname.startsWith('/auth')) return 'threshold';
+  return 'muslin';
+}
+
+/**
+ * Scenes where the effects budget is capped whatever the device can manage.
+ *
+ * Checkout, the order archive and the sign-in threshold are transactional:
+ * every frame of latency on a payment step costs real orders, so they never
+ * get the full stack even on hardware that could render it.
+ */
+const RESTRAINED: ReadonlySet<SceneId> = new Set<SceneId>(['ledger', 'archive', 'threshold', 'muslin']);
+
+export function isRestrained(scene: SceneId): boolean {
+  return RESTRAINED.has(scene);
+}
+
+export function effectiveBudget(tier: QualityTier, scene: SceneId): TierBudget {
+  const base = TIER_BUDGETS[tier];
+  if (!isRestrained(scene)) return base;
+  return {
+    ...base,
+    postprocessing: false,
+    bloom: false,
+    depthOfField: false,
+    ssao: false,
+    chromaticAberration: false,
+    physics: false,
+    shadows: false,
+    particles: 0,
+    geometryScale: Math.min(base.geometryScale, 0.5),
+  };
+}

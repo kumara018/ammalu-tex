@@ -1,7 +1,23 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Instagram, MessageCircle, MapIcon } from 'lucide-react';
+import { MapPin, Phone, Mail, MessageCircle, MapIcon } from 'lucide-react';
+
+// lucide-react v1 removed every brand glyph, Instagram included, for trademark
+// reasons. Inlined rather than pinned to v0 so the icon set stays current.
+function InstagramIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
 import { STORE, WHATSAPP_URL, MAIL_URL, CALL_URL } from '@/lib/config';
 import { LogoMark } from './Logo';
 
@@ -38,7 +54,7 @@ export default function Footer() {
               </a>
               <a href={STORE.instagram} target="_blank" rel="noopener noreferrer"
                 className="p-2 bg-maroon-800 hover:bg-pink-600 rounded-lg transition-colors" title="Instagram">
-                <Instagram size={16} />
+                <InstagramIcon size={16} />
               </a>
             </div>
           </div>

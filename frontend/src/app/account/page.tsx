@@ -223,7 +223,10 @@ export default function AccountPage() {
           { key: 'profile',  label: 'Profile Info',    icon: User },
           { key: 'password', label: 'Change Password', icon: Lock },
           { key: 'devices',  label: 'Linked Devices',  icon: MonitorSmartphone },
-        ] as { key: Tab; label: string; icon: React.ElementType }[]).map(({ key, label, icon: Icon }) => (
+        // React 19's ElementType resolves props to `never` for a bare
+        // component reference, so `<Icon size={18} />` no longer typechecks.
+        // Naming the props we actually pass fixes it without widening to any.
+        ] as { key: Tab; label: string; icon: React.ComponentType<{ size?: number }> }[]).map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
