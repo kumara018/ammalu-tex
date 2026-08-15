@@ -7,6 +7,7 @@ import { productsAPI } from '@/lib/api';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import Hero3D from '@/components/Hero3D';
+import HeroBackdrop from '@/components/webgl/HeroBackdrop';
 
 const OFFERS = [
   {
@@ -137,12 +138,7 @@ export default function HomePage() {
     <div>
       {/* Hero — "Editorial Runway Sweep": asymmetric diagonal split, oversized headline, cascading ribbons */}
       <section className="relative min-h-[86vh] flex flex-col overflow-hidden border-b border-maroon-200">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(100deg, #f6ece9 0%, #f6ece9 46%, rgba(179,115,95,0.18) 46.4%, #eeddd8 100%)',
-          }}
-        />
+        <HeroBackdrop />
         {/* Divider — anchored to the 3D box's own left edge (not a guessed
             percentage) so it can never drift into the headline regardless of
             viewport width. Straight, not rotated — a rotated line over this
