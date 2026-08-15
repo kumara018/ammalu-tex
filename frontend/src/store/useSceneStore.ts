@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import type { Capabilities, QualityTier, TierBudget } from '@/three/core/capabilities';
-import { TIER_BUDGETS } from '@/three/core/capabilities';
+import { TIER_BUDGETS, withoutEffects, forReducedMotion } from '@/three/core/capabilities';
 
 /**
  * Ammalu Tex — the Couture Atelier.
@@ -37,6 +37,15 @@ interface SceneState {
   pointer: { x: number; y: number };
   scroll: number;
 
+  /**
+   * Set by the frame-rate governor as its FIRST downgrade step, independently
+   * of tier. Postprocessing scales with pixel count rather than scene
+   * complexity, so on a high-DPI display it is where the frame budget goes —
+   * surrendering the grade buys far more than thinning geometry.
+   */
+  effectsSuspended: boolean;
+  suspendEffects: () => void;
+
   setCapabilities: (c: Capabilities) => void;
   setTier: (t: QualityTier) => void;
   goToScene: (s: SceneId) => void;
@@ -56,6 +65,9 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   pointer: { x: 0, y: 0 },
   scroll: 0,
+  effectsSuspended: false,
+
+  suspendEffects: () => set({ effectsSuspended: true }),
 
   setCapabilities: (c) =>
     set({ capabilities: c, tier: c.tier, budget: TIER_BUDGETS[c.tier] }),
@@ -105,19 +117,58 @@ export function isRestrained(scene: SceneId): boolean {
   return RESTRAINED.has(scene);
 }
 
-export function effectiveBudget(tier: QualityTier, scene: SceneId): TierBudget {
-  const base = TIER_BUDGETS[tier];
-  if (!isRestrained(scene)) return base;
-  return {
-    ...base,
-    postprocessing: false,
-    bloom: false,
-    depthOfField: false,
-    ssao: false,
-    chromaticAberration: false,
-    physics: false,
-    shadows: false,
-    particles: 0,
-    geometryScale: Math.min(base.geometryScale, 0.5),
-  };
+/**
+ * Scenes carrying the full cinematic chain.
+ *
+ * The atelier and the dress form are the only two places with a staged subject
+ * — cloth hung in the window light, and a garment on the stand. God rays and a
+ * shallow focus need something to shine through and focus on; on the cutting
+ * table they would be atmosphere applied to nothing, at full full-screen cost.
+ */
+const HERO: ReadonlySet<SceneId> = new Set<SceneId>(['atelier', 'form']);
+
+export function isHero(scene: SceneId): boolean {
+  return HERO.has(scene);
+}
+
+/**
+ * Effective budget for the active scene.
+ *
+ * Order matters: restraint cap, then hero gating, then the governor's
+ * suspension, then reduced motion. The governor's decision must survive
+ * everything below it — it fires only after the device has been measured
+ * failing, so no per-scene rule may re-enable what it switched off.
+ */
+export function effectiveBudget(
+  tier: QualityTier,
+  scene: SceneId,
+  opts: { effectsSuspended?: boolean; reducedMotion?: boolean } = {},
+): TierBudget {
+  let b = TIER_BUDGETS[tier];
+
+  if (isRestrained(scene)) {
+    b = {
+      ...b,
+      postprocessing: false,
+      bloom: false,
+      depthOfField: false,
+      ssao: false,
+      chromaticAberration: false,
+      godRays: false,
+      lut: false,
+      grain: false,
+      physics: false,
+      shadows: false,
+      particles: 0,
+      geometryScale: Math.min(b.geometryScale, 0.5),
+    };
+  } else if (!isHero(scene)) {
+    // The cutting table and the basket keep the grade and the grain — what
+    // makes the whole site look like one film — but lose the staging passes.
+    b = { ...b, godRays: false, depthOfField: false, ssao: false };
+  }
+
+  if (opts.effectsSuspended) b = withoutEffects(b);
+  if (opts.reducedMotion) b = forReducedMotion(b);
+  return b;
 }

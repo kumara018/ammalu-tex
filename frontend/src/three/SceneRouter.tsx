@@ -33,7 +33,9 @@ function SceneBody({
   weightRef: React.MutableRefObject<number>;
 }) {
   const tier = useSceneStore((s) => s.tier);
-  const budget = effectiveBudget(tier, scene);
+  const effectsSuspended = useSceneStore((s) => s.effectsSuspended);
+  const reducedMotion = useSceneStore((s) => s.capabilities?.reducedMotion ?? false);
+  const budget = effectiveBudget(tier, scene, { effectsSuspended, reducedMotion });
 
   if (scene === 'muslin') return null;
 
@@ -89,7 +91,9 @@ export default function SceneRouter() {
     return () => clearInterval(id);
   }, [outgoing]);
 
-  const budget = effectiveBudget(tier, scene);
+  const effectsSuspended = useSceneStore((s) => s.effectsSuspended);
+  const reducedMotion = useSceneStore((s) => s.capabilities?.reducedMotion ?? false);
+  const budget = effectiveBudget(tier, scene, { effectsSuspended, reducedMotion });
 
   if (tier === 'off') return null;
 
@@ -106,7 +110,7 @@ export default function SceneRouter() {
       <SceneBody scene={scene} weightRef={inWeight} />
       {outgoing ? <SceneBody scene={outgoing} weightRef={outWeight} /> : null}
 
-      {idle ? null : <Effects budget={budget} />}
+      {idle ? null : <Effects budget={budget} scene={scene} />}
     </>
   );
 }

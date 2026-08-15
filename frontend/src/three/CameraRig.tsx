@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SceneId } from '@/store/useSceneStore';
 import { useSceneStore } from '@/store/useSceneStore';
+import { easeScroll, approach } from './core/easing';
 
 /**
  * Orbit-and-settle camera.
@@ -20,9 +21,15 @@ import { useSceneStore } from '@/store/useSceneStore';
  * separate places; orbiting implies one object being examined from different
  * sides, which is what an atelier does.
  *
- * The second half of the language is *settling*. Nothing here arrives on a
- * constant ease. Movement starts quickly and finishes slowly with a small
- * overshoot, the way a hand places something down.
+ * The second half of the language is *weight*. Moves are shaped by a cubic
+ * bezier with a long tail, so the camera accelerates slowly and decelerates
+ * into its mark — a heavy object on a track.
+ *
+ * An earlier version used a damped spring here. That was wrong for this
+ * treatment and has been removed: a spring overshoots and settles, which is
+ * the signature of app UI responding to a tap. A film camera never overshoots
+ * its mark, and the tell is immediate even when the overshoot is small enough
+ * that you cannot consciously see it.
  */
 
 interface Station {
@@ -35,14 +42,27 @@ interface Station {
   focusY: number;
   /** How far the pointer may swing the orbit, in radians. */
   sway: number;
-  /** Settle rate. Transactional stations arrive fast and stop. */
+  /** Approach rate. Transactional stations arrive fast and stop. */
   settle: number;
+  /**
+   * Scroll-driven move, on top of the station.
+   *
+   * arc   — additional orbit around the table as the page scrolls
+   * rise  — the camera craning up or down
+   * push  — pulling in toward the work
+   *
+   * Hero stations are never locked off; the transactional ones get nothing.
+   */
+  arc: number;
+  rise: number;
+  push: number;
 }
 
 const station = (
   azimuth: number, elevation: number, distance: number,
   focusY: number, sway: number, settle: number,
-): Station => ({ azimuth, elevation, distance, focusY, sway, settle });
+  arc = 0, rise = 0, push = 0,
+): Station => ({ azimuth, elevation, distance, focusY, sway, settle, arc, rise, push });
 
 /**
  * Stations, described as places to stand around one table rather than as
@@ -51,14 +71,18 @@ const station = (
  * levels off so nothing moves in the corner of the eye while someone reads.
  */
 const STATIONS: Record<SceneId, Station> = {
-  atelier:   station(-0.32,  0.16,  8.4,  0.1,  0.16, 0.020),
-  cutting:   station( 0.10,  0.62,  7.6, -0.6,  0.12, 0.024),  // looking down at the table
-  form:      station( 0.46,  0.05,  5.4,  0.0,  0.10, 0.028),  // eye level with the garment
-  basket:    station(-0.70,  0.34,  7.0, -0.4,  0.10, 0.024),
-  ledger:    station( 0.00,  0.10, 10.2,  0.0,  0.02, 0.050),
-  archive:   station( 0.14,  0.08, 10.6,  0.0,  0.02, 0.050),
-  threshold: station(-0.18,  0.12,  9.8,  0.0,  0.03, 0.046),
-  muslin:    station( 0.00,  0.00, 12.0,  0.0,  0.00, 0.060),
+  //                                                    sway  settle  arc   rise  push
+  atelier:   station(-0.32,  0.16,  8.4,  0.1,          0.16, 0.020,  0.34, 0.20, 1.9),
+  cutting:   station( 0.10,  0.62,  7.6, -0.6,          0.12, 0.024,  0.18, 0.00, 1.2),  // looking down at the table
+  form:      station( 0.46,  0.05,  5.4,  0.0,          0.10, 0.028,  0.40, 0.12, 0.9),  // eye level with the garment
+  basket:    station(-0.70,  0.34,  7.0, -0.4,          0.10, 0.024,  0.12, 0.00, 0.7),
+  // No scroll-driven move on the transactional stations. A camera drifting
+  // behind a card-number field is precisely the treatment obstructing the
+  // thing it exists to sell.
+  ledger:    station( 0.00,  0.10, 10.2,  0.0,          0.02, 0.050,  0,    0,    0),
+  archive:   station( 0.14,  0.08, 10.6,  0.0,          0.02, 0.050,  0,    0,    0),
+  threshold: station(-0.18,  0.12,  9.8,  0.0,          0.03, 0.046,  0,    0,    0),
+  muslin:    station( 0.00,  0.00, 12.0,  0.0,          0.00, 0.060,  0,    0,    0),
 };
 
 export default function CameraRig() {
@@ -69,7 +93,6 @@ export default function CameraRig() {
   const elevation = useRef(STATIONS.muslin.elevation);
   const distance = useRef(STATIONS.muslin.distance);
   const focusY = useRef(0);
-  const velocity = useRef({ az: 0, el: 0 });
   const focus = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame((state, delta) => {
@@ -85,29 +108,36 @@ export default function CameraRig() {
     const targetEl = s.elevation + (still ? 0 : pointer.y * s.sway * 0.5);
 
     if (still) {
+      // Reduced motion: the destination, held. No orbit, no parallax, no
+      // scroll move, no idle drift. The staging still reads; it just does not
+      // move.
       azimuth.current = targetAz;
       elevation.current = targetEl;
       distance.current = s.distance;
       focusY.current = s.focusY;
     } else {
       /**
-       * Critically-damped-ish spring rather than a plain lerp. A lerp decays
-       * uniformly and always feels mechanical; a spring arrives with a trace
-       * of overshoot and settles, which is the hand-placed quality the rest of
-       * this site is built around. Damping is high enough that it never
-       * visibly bounces — it just stops less abruptly.
+       * Scroll progress shaped by a cubic bezier rather than used raw.
+       *
+       * Linear mapping is the tell of a scroll-jacked page — the camera tracks
+       * the wheel exactly, so it feels bolted to the input instead of to the
+       * room. An eased curve gives the move a lead-in and a long tail.
        */
-      const stiffness = s.settle * 26;
-      const damping = 0.82;
-      velocity.current.az = (velocity.current.az + (targetAz - azimuth.current) * stiffness * dt) * damping;
-      velocity.current.el = (velocity.current.el + (targetEl - elevation.current) * stiffness * dt) * damping;
-      azimuth.current += velocity.current.az;
-      elevation.current += velocity.current.el;
+      const p = easeScroll(Math.min(1, Math.max(0, scroll)));
 
+      // A slow idle breath so the shot is never fully locked off at rest.
+      const breath = Math.sin(state.clock.elapsedTime * 0.13);
+
+      azimuth.current = approach(
+        azimuth.current, targetAz + p * s.arc + breath * s.sway * 0.18, s.settle, dt,
+      );
+      elevation.current = approach(
+        elevation.current, targetEl + p * s.rise, s.settle, dt,
+      );
       // Scroll draws the camera in toward the table rather than pushing it
       // through the scene — closer inspection, not forward travel.
-      distance.current += ((s.distance - scroll * 1.4) - distance.current) * k;
-      focusY.current += (s.focusY - focusY.current) * k;
+      distance.current = approach(distance.current, s.distance - p * s.push, s.settle, dt);
+      focusY.current = approach(focusY.current, s.focusY, s.settle, dt);
     }
 
     const az = azimuth.current;
