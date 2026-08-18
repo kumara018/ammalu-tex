@@ -42,13 +42,13 @@ export default function SupportRatePage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-maroon-100 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-maroon-800" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-maroon-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6">
@@ -56,7 +56,7 @@ export default function SupportRatePage() {
           <p className="text-xs text-maroon-600 font-medium uppercase tracking-widest mt-1">{STORE.tagline}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-maroon-200 p-8 text-center">
+        <div className="bg-paper-bright rounded-2xl shadow-sm border border-maroon-200 p-8 text-center">
           {error ? (
             /* Error / Already rated */
             <div>
@@ -125,7 +125,7 @@ export default function SupportRatePage() {
                 rows={2}
                 maxLength={200}
                 placeholder="Any additional feedback? (optional)"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 resize-none focus:outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-200 bg-gray-50"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 resize-none focus:outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-200 bg-paper"
               />
               <p className="text-xs text-gray-400 mt-3">Tap any star to submit instantly</p>
             </div>

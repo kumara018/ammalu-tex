@@ -297,7 +297,7 @@ function ProductsContent() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array(12).fill(0).map((_, i) => (
             <div key={i} className="card animate-pulse">
-              <div className="bg-gray-200 aspect-[3/4]" />
+              <div className="bg-paper-shade aspect-[3/4]" />
               <div className="p-3 space-y-2">
                 <div className="h-3 bg-gray-200 rounded w-1/3" />
                 <div className="h-4 bg-gray-200 rounded" />
@@ -325,7 +325,7 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{Array(12).fill(0).map((_, i) => <div key={i} className="card animate-pulse"><div className="bg-gray-200 aspect-[3/4]" /><div className="p-3 space-y-2"><div className="h-4 bg-gray-200 rounded" /><div className="h-9 bg-gray-200 rounded" /></div></div>)}</div></div>}>
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{Array(12).fill(0).map((_, i) => <div key={i} className="card animate-pulse"><div className="bg-paper-shade aspect-[3/4]" /><div className="p-3 space-y-2"><div className="h-4 bg-gray-200 rounded" /><div className="h-9 bg-gray-200 rounded" /></div></div>)}</div></div>}>
       <ProductsContent />
     </Suspense>
   );

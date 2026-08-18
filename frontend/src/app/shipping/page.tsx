@@ -147,7 +147,7 @@ export default function ShippingPage() {
         <Link href="/support#returns" className="btn-outline flex items-center gap-2 justify-center text-maroon-800 border-maroon-300 hover:bg-maroon-50">
           Return Policy
         </Link>
-        <Link href="/support" className="flex items-center gap-2 justify-center px-5 py-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium">
+        <Link href="/support" className="flex items-center gap-2 justify-center px-5 py-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-paper text-sm font-medium">
           <Headphones size={15} /> Need Help?
         </Link>
       </div>

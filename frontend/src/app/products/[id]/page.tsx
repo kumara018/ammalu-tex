@@ -211,13 +211,13 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
           <>
             <button
               onClick={e => { e.stopPropagation(); prev(); }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={e => { e.stopPropagation(); next(); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
             >
               <ChevronRight size={18} />
             </button>
@@ -711,7 +711,7 @@ export default function ProductDetailPage() {
               )}
 
               {/* General care tips */}
-              <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+              <div className="bg-paper rounded-2xl p-5 border border-gray-100">
                 <p className="font-bold text-gray-700 text-sm uppercase tracking-wide mb-3">General Tips</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
                   {[
@@ -787,7 +787,7 @@ export default function ProductDetailPage() {
               )}
 
               {user && !canReview && reviewReason === 'not_purchased' && (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <div className="bg-paper border border-gray-200 rounded-xl p-4">
                   <p className="text-sm text-gray-600">
                     🛡️ <strong>Only verified buyers</strong> who have received this product can leave a review.
                     <Link href="/products" className="text-maroon-700 hover:underline ml-1">Purchase it to review.</Link>

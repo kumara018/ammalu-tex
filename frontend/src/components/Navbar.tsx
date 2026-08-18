@@ -227,7 +227,7 @@ export default function Navbar() {
               {/* Search history dropdown (shown when focused with empty input) */}
               {showHistory && !search.trim() && searchHistory.length > 0 && (
                 <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-gray-200 z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-paper border-b border-gray-100">
                     <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recent Searches</span>
                     <button
                       onClick={clearHistory}
@@ -270,7 +270,7 @@ export default function Navbar() {
                         <img
                           src={p.images[0].startsWith('http') ? p.images[0] : `https://ammalu-tex.onrender.com${p.images[0]}`}
                           alt=""
-                          className="w-10 h-10 rounded object-cover flex-shrink-0 bg-gray-100"
+                          className="w-10 h-10 rounded object-cover flex-shrink-0 bg-paper-shade"
                         />
                       )}
                       <div className="flex-1 min-w-0">
@@ -706,7 +706,7 @@ export default function Navbar() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowSignOutConfirm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-paper transition-colors"
               >
                 Cancel
               </button>

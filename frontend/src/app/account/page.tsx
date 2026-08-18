@@ -218,7 +218,7 @@ export default function AccountPage() {
       </div>
 
       {/* ── Tabs ─────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-6 bg-paper-shade p-1 rounded-xl w-fit">
         {([
           { key: 'profile',  label: 'Profile Info',    icon: User },
           { key: 'password', label: 'Change Password', icon: Lock },
@@ -232,7 +232,7 @@ export default function AccountPage() {
             onClick={() => setTab(key)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
               tab === key
-                ? 'bg-white shadow text-maroon-800'
+                ? 'bg-paper-bright shadow text-maroon-800'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -281,7 +281,7 @@ export default function AccountPage() {
                   type="email"
                   value={user.email}
                   readOnly
-                  className="input-field pl-9 bg-gray-50 text-gray-500 cursor-not-allowed"
+                  className="input-field pl-9 bg-paper text-gray-500 cursor-not-allowed"
                 />
               </div>
               <p className="text-xs text-gray-400 mt-1">Email address cannot be changed.</p>
@@ -445,7 +445,7 @@ export default function AccountPage() {
                 const Icon = deviceIcon(s.device_type);
                 return (
                   <div key={s.id} className={`flex items-center gap-3 p-4 rounded-xl border ${s.is_current ? 'border-maroon-300 bg-maroon-50' : 'border-gray-200'}`}>
-                    <div className="w-11 h-11 rounded-full bg-white border border-maroon-100 flex items-center justify-center flex-shrink-0">
+                    <div className="w-11 h-11 rounded-full bg-paper-bright border border-maroon-100 flex items-center justify-center flex-shrink-0">
                       <Icon size={19} className="text-maroon-700" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -480,12 +480,12 @@ export default function AccountPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => window.open('/auth/login?add=1', '_blank', 'noopener,noreferrer')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-paper text-sm font-medium transition-colors"
           >
             <RefreshCw size={15} /> Add Another Account
           </button>
           <button onClick={performLogout}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-paper text-sm font-medium transition-colors">
             <LogOut size={15} /> Sign Out
           </button>
           <Link href="/account/delete"

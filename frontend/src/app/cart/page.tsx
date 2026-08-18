@@ -133,7 +133,7 @@ export default function CartPage() {
                         <button
                           onClick={() => handleUpdate(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
-                          className="px-2.5 py-1.5 hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                          className="px-2.5 py-1.5 hover:bg-paper-shade disabled:opacity-40 transition-colors"
                         >
                           <Minus size={14} />
                         </button>
@@ -143,7 +143,7 @@ export default function CartPage() {
                         <button
                           onClick={() => handleUpdate(item.id, item.quantity + 1)}
                           disabled={item.quantity >= item.product.stock || item.quantity >= 10}
-                          className="px-2.5 py-1.5 hover:bg-gray-100 disabled:opacity-40 transition-colors"
+                          className="px-2.5 py-1.5 hover:bg-paper-shade disabled:opacity-40 transition-colors"
                         >
                           <Plus size={14} />
                         </button>

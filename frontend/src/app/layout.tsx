@@ -32,8 +32,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { LoginPromptProvider } from '@/context/LoginPromptContext';
 import { WishlistProvider } from '@/context/WishlistContext';
-import NavbarWrapper from '@/components/NavbarWrapper';
-import FooterWrapper from '@/components/FooterWrapper';
+import NavGate, { ChromeGate } from '@/components/nav/NavGate';
+import AtelierFooter from '@/components/nav/AtelierFooter';
 import LoginPromptModal from '@/components/LoginPromptModal';
 import PageTransition from '@/components/PageTransition';
 import QueryProvider from '@/components/QueryProvider';
@@ -105,14 +105,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   content. Everything a customer reads or clicks stays real
                   HTML, above the canvas. */}
               <div className="relative z-10 flex flex-col flex-1">
-              <NavbarWrapper />
+              <NavGate />
               <main className="flex-1"><PageTransition>{children}</PageTransition></main>
-              <FooterWrapper />
+              <AtelierFooter />
               </div>
               {/* Cinematic overlays. Both sit above the canvas and below the
                   modals, and neither takes pointer events — the path to
                   checkout is never behind them. */}
-                    <SoundToggle />
+                    <ChromeGate><SoundToggle /></ChromeGate>
               <LoginPromptModal />
               <Toaster
                 position="top-right"

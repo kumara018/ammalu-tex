@@ -45,7 +45,7 @@ function Accordion({
     <div id={id} className="card overflow-hidden mb-4">
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-4 px-5 py-4 text-left transition-colors ${open ? 'bg-maroon-50' : 'bg-white hover:bg-gray-50'}`}
+        className={`w-full flex items-center justify-between gap-4 px-5 py-4 text-left transition-colors ${open ? 'bg-maroon-50' : 'bg-white hover:bg-paper'}`}
       >
         <div className="flex items-center gap-3">
           <span className="p-2 bg-maroon-100 rounded-lg text-maroon-800">
@@ -73,7 +73,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
     <div className="border border-maroon-200 rounded-xl overflow-hidden mb-2">
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex justify-between items-start gap-4 px-4 py-3.5 text-left transition-colors ${open ? 'bg-maroon-50' : 'bg-white hover:bg-gray-50'}`}
+        className={`w-full flex justify-between items-start gap-4 px-4 py-3.5 text-left transition-colors ${open ? 'bg-maroon-50' : 'bg-white hover:bg-paper'}`}
       >
         <span className="font-semibold text-gray-800 text-sm leading-snug">{q}</span>
         {open
@@ -185,7 +185,7 @@ export default function SupportPage() {
           </p>
           <div className="overflow-x-auto rounded-xl border border-maroon-200">
             <table className="w-full text-sm">
-              <thead className="bg-maroon-50">
+              <thead className="">
                 <tr className="text-maroon-800 font-semibold text-xs uppercase tracking-wide">
                   <th className="px-4 py-3 text-left">Size</th>
                   <th className="px-4 py-3 text-left">Chest</th>
@@ -213,7 +213,7 @@ export default function SupportPage() {
           </p>
           <div className="overflow-x-auto rounded-xl border border-maroon-200">
             <table className="w-full text-sm">
-              <thead className="bg-maroon-50">
+              <thead className="">
                 <tr className="text-maroon-800 font-semibold text-xs uppercase tracking-wide">
                   <th className="px-4 py-3 text-left">Size</th>
                   <th className="px-4 py-3 text-left">Chest</th>
@@ -272,7 +272,7 @@ export default function SupportPage() {
               desc:  'Track your shipment anytime from the "My Orders" section in your account, or use the tracking link sent to your registered email/phone.',
             },
           ].map(({ title, desc }) => (
-            <div key={title} className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div key={title} className="p-4 bg-paper rounded-xl border border-gray-100">
               <p className="font-bold text-gray-800 mb-1.5">{title}</p>
               <p className="text-sm text-gray-600 leading-relaxed">{desc}</p>
             </div>

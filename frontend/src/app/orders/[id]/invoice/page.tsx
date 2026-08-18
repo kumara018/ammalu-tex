@@ -100,7 +100,7 @@ function InvoiceContent() {
       </div>
 
       {/* Invoice Card */}
-      <div id="invoice" className="bg-white rounded-2xl shadow-lg print:shadow-none border border-gray-100 overflow-hidden">
+      <div id="invoice" className="bg-paper-bright rounded-2xl shadow-lg print:shadow-none border border-gray-100 overflow-hidden">
 
         {/* ── Header ── */}
         <div className="bg-gradient-to-r from-maroon-900 via-maroon-800 to-maroon-700 px-8 py-8">
@@ -236,14 +236,14 @@ function InvoiceContent() {
               </div>
               <div>
                 <p className="text-gray-500 text-xs mb-1">Payment Status</p>
-                <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full border ${PAY_STATUS_COLOR[order.payment_status] || 'text-gray-600 bg-gray-50 border-gray-200'}`}>
+                <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full border ${PAY_STATUS_COLOR[order.payment_status] || 'text-gray-600 bg-paper border-gray-200'}`}>
                   {order.payment_status.toUpperCase()}
                 </span>
               </div>
               {!isCod && txn && (
                 <div className="sm:col-span-2">
                   <p className="text-gray-500 text-xs mb-1">Transaction ID</p>
-                  <p className="font-mono text-xs bg-white border border-blue-200 rounded-lg px-3 py-2 text-gray-700 break-all">{txn}</p>
+                  <p className="font-mono text-xs bg-paper-bright border border-blue-200 rounded-lg px-3 py-2 text-gray-700 break-all">{txn}</p>
                 </div>
               )}
               {isCod && (

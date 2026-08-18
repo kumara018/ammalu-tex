@@ -212,7 +212,7 @@ export default function OrdersPage() {
                         </div>
                       ))}
                       {items.length > 4 && (
-                        <div className="w-9 h-9 rounded-lg bg-gray-100 border border-white flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">
+                        <div className="w-9 h-9 rounded-lg bg-paper-shade border border-white flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">
                           +{items.length - 4}
                         </div>
                       )}

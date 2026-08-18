@@ -91,7 +91,7 @@ function ReturnDetailContent() {
   if (loading) return (
     <div className="max-w-2xl mx-auto px-4 py-12 animate-pulse space-y-4">
       <div className="h-8 bg-gray-200 rounded w-48" />
-      <div className="card p-6 h-40 bg-gray-100 rounded-2xl" />
+      <div className="card p-6 h-40 bg-paper-shade rounded-2xl" />
     </div>
   );
 
@@ -121,14 +121,14 @@ function ReturnDetailContent() {
           <h1 className="text-xl font-bold text-maroon-900">{typeInfo.label} Request #{rr.id}</h1>
           <p className="text-sm text-gray-500">Submitted on {new Date(rr.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         </div>
-        <div className={`ml-auto inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${STATUS_COLOR[rr.status] || 'bg-gray-100 text-gray-600 border-gray-300'}`}>
+        <div className={`ml-auto inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${STATUS_COLOR[rr.status] || 'bg-paper-shade text-gray-600 border-gray-300'}`}>
           {rr.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
         </div>
       </div>
 
       {/* Request type badge */}
       <div className={`flex items-center gap-3 rounded-2xl border p-4 mb-5 ${typeInfo.bg} ${typeInfo.border}`}>
-        <div className={`p-2 rounded-xl bg-white border ${typeInfo.border}`}>
+        <div className={`p-2 rounded-xl bg-paper-bright border ${typeInfo.border}`}>
           <Package size={20} className={typeInfo.color} />
         </div>
         <div>
@@ -188,7 +188,7 @@ function ReturnDetailContent() {
                   <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 transition-all ${
                     active  ? 'bg-maroon-800 border-maroon-800 text-white ring-4 ring-maroon-100' :
                     done    ? 'bg-maroon-700 border-maroon-700 text-white' :
-                              'bg-white border-gray-300 text-gray-400'
+                              'bg-paper-bright border-gray-300 text-gray-400'
                   }`}>
                     <Icon size={13} />
                   </div>
@@ -241,7 +241,7 @@ function ReturnDetailContent() {
             <h3 className="font-bold text-orange-900">Your Pickup OTP</h3>
           </div>
           <p className="text-sm text-gray-700 mb-4">Our courier is on the way to collect your item! Give this OTP to the pickup agent when they arrive.</p>
-          <div className="bg-white border-2 border-orange-300 rounded-xl p-4 text-center">
+          <div className="bg-paper-bright border-2 border-orange-300 rounded-xl p-4 text-center">
             <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Pickup OTP</p>
             <p className="text-5xl font-bold tracking-[0.4em] font-mono text-orange-700">{rr.pickup_otp}</p>
           </div>
@@ -307,7 +307,7 @@ function ReturnDetailContent() {
           {rr.description && (
             <div>
               <p className="text-gray-500 mb-1">Description</p>
-              <p className="text-gray-800 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">{rr.description}</p>
+              <p className="text-gray-800 bg-paper border border-gray-100 rounded-lg px-3 py-2">{rr.description}</p>
             </div>
           )}
           <div className="flex justify-between">
@@ -342,7 +342,7 @@ function ReturnDetailContent() {
           <ArrowLeft size={16} /> Back to Order
         </Link>
         <Link href="/orders"
-          className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium rounded-xl transition-colors text-sm">
+          className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 hover:bg-paper font-medium rounded-xl transition-colors text-sm">
           View All Orders
         </Link>
       </div>
@@ -355,7 +355,7 @@ export default function ReturnDetailPage() {
     <Suspense fallback={
       <div className="max-w-2xl mx-auto px-4 py-12 animate-pulse space-y-4">
         <div className="h-8 bg-gray-200 rounded w-48" />
-        <div className="card p-6 h-40 bg-gray-100 rounded-2xl" />
+        <div className="card p-6 h-40 bg-paper-shade rounded-2xl" />
       </div>
     }>
       <ReturnDetailContent />

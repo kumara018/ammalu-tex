@@ -40,7 +40,7 @@ export default function LoginPromptModal() {
         {/* Close button */}
         <button
           onClick={close}
-          className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+          className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-paper-shade rounded-full transition-colors"
         >
           <X size={18} />
         </button>

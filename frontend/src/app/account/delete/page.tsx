@@ -73,7 +73,7 @@ export default function DeleteAccountPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-maroon-100">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Please sign in to manage your account.</p>
           <Link href="/auth/login" className="btn-primary px-6 py-2">Sign In</Link>
@@ -83,7 +83,7 @@ export default function DeleteAccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-maroon-100 px-4 py-12">
+    <div className="min-h-screen px-4 py-12">
       <div className="max-w-lg mx-auto">
 
         {/* Breadcrumb */}
@@ -245,7 +245,7 @@ export default function DeleteAccountPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => { setMode('choose'); setError(''); }}
-                className="flex-1 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors"
+                className="flex-1 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-paper text-sm font-medium transition-colors"
               >
                 Cancel
               </button>

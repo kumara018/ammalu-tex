@@ -430,7 +430,7 @@ export default function CheckoutPage() {
                   <p className="text-sm text-blue-700">You will be redirected to Razorpay's secure payment page. Accepts:</p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
                     {['Credit Card','Debit Card','Net Banking','UPI','Wallets','EMI'].map(m => (
-                      <span key={m} className="bg-white border border-blue-200 px-2.5 py-1 rounded-full text-blue-700">{m}</span>
+                      <span key={m} className="bg-paper-bright border border-blue-200 px-2.5 py-1 rounded-full text-blue-700">{m}</span>
                     ))}
                   </div>
                   <p className="text-xs text-blue-500 flex items-center gap-1"><Lock size={11} /> Your card details are handled by Razorpay — never stored on our servers.</p>
@@ -444,7 +444,7 @@ export default function CheckoutPage() {
                   <p className="text-sm text-purple-700">Split your payment into monthly instalments. Available on Credit Cards.</p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
                     {['3 months', '6 months', '9 months', '12 months', 'No-cost EMI'].map(m => (
-                      <span key={m} className="bg-white border border-purple-200 px-2.5 py-1 rounded-full text-purple-700">{m}</span>
+                      <span key={m} className="bg-paper-bright border border-purple-200 px-2.5 py-1 rounded-full text-purple-700">{m}</span>
                     ))}
                   </div>
                   {grandTotal < 1000 ? (

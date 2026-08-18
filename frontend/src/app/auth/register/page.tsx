@@ -317,7 +317,7 @@ function RegisterPageInner() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-maroon-100">
+    <div className="min-h-screen flex flex-col">
 
       {/* Standalone header */}
       <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md gap-3">
@@ -628,7 +628,7 @@ function RegisterPageInner() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-maroon-100"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-maroon-700" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-maroon-700" /></div>}>
       <RegisterPageInner />
     </Suspense>
   );

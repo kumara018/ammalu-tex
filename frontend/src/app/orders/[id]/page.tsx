@@ -416,7 +416,7 @@ function OrderDetailContent() {
                             ? (s === 'out_for_delivery' ? 'bg-orange-600 border-orange-600 text-white' :
                                s === 'delivered' ? 'bg-green-600 border-green-600 text-white' :
                                'bg-maroon-800 border-maroon-800 text-white')
-                            : 'bg-white border-gray-300 text-gray-400'}
+                            : 'bg-paper-bright border-gray-300 text-gray-400'}
                           ${active ? 'ring-4 ring-offset-2 ring-maroon-200 scale-110' : ''}`}>
                           <Icon size={16} />
                         </div>
@@ -490,7 +490,7 @@ function OrderDetailContent() {
                     {i < allEvents.length - 1 && (
                       <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-orange-100 z-0" />
                     )}
-                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-white border-orange-300 text-orange-500'}`}>
+                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-paper-bright border-orange-300 text-orange-500'}`}>
                       <MapPin size={14} />
                     </div>
                     <div className="pb-5 flex-1">
@@ -531,12 +531,12 @@ function OrderDetailContent() {
                 <h3 className="font-bold text-orange-900">Your Delivery OTP</h3>
               </div>
               <p className="text-sm text-gray-700 mb-4">Your order is out for delivery! Share this OTP with the delivery agent when they arrive.</p>
-              <div className="bg-white border-2 border-orange-300 rounded-xl p-4 text-center mb-4">
+              <div className="bg-paper-bright border-2 border-orange-300 rounded-xl p-4 text-center mb-4">
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Delivery OTP</p>
                 <p className="text-5xl font-bold tracking-[0.4em] font-mono text-orange-700">{order.delivery_otp}</p>
               </div>
               {(order.delivery_person_name || order.delivery_person_phone) && (
-                <div className="bg-white border border-orange-200 rounded-xl p-4">
+                <div className="bg-paper-bright border border-orange-200 rounded-xl p-4">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Your Delivery Agent</p>
                   {order.delivery_person_name && <p className="text-sm font-semibold text-gray-800">{order.delivery_person_name}</p>}
                   {order.delivery_person_phone && (
@@ -707,7 +707,7 @@ function OrderDetailContent() {
               {order.payment_transaction_id && order.payment_method !== 'cod' && (
                 <div className="mt-2 pt-2 border-t border-orange-50">
                   <p className="text-[10px] text-gray-400 mb-1">Transaction ID</p>
-                  <p className="font-mono text-[10px] text-gray-600 bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 break-all leading-relaxed">
+                  <p className="font-mono text-[10px] text-gray-600 bg-paper border border-gray-100 rounded-lg px-2 py-1.5 break-all leading-relaxed">
                     {order.payment_transaction_id}
                   </p>
                 </div>
@@ -742,7 +742,7 @@ function OrderDetailContent() {
               ) : existingReturn ? (
                 <div>
                   <p className="text-xs text-gray-500 mb-2">You have a {existingReturn.request_type === 'return' ? 'Return' : 'Exchange'} request</p>
-                  <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border mb-3 ${RETURN_STATUS_LABEL[existingReturn.status]?.color || 'bg-gray-100 text-gray-600 border-gray-300'}`}>
+                  <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border mb-3 ${RETURN_STATUS_LABEL[existingReturn.status]?.color || 'bg-paper-shade text-gray-600 border-gray-300'}`}>
                     {RETURN_STATUS_LABEL[existingReturn.status]?.label || existingReturn.status}
                   </div>
                   {existingReturn.admin_notes && (
@@ -756,7 +756,7 @@ function OrderDetailContent() {
                   </Link>
                 </div>
               ) : hoursSinceDelivery > EXCHANGE_WINDOW_HOURS ? (
-                <div className="flex items-start gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+                <div className="flex items-start gap-2 p-3 bg-paper border border-gray-200 rounded-xl">
                   <Clock size={16} className="text-gray-400 mt-0.5 shrink-0" />
                   <p className="text-xs text-gray-500">The return ({RETURN_WINDOW_HOURS}h) and exchange ({EXCHANGE_WINDOW_HOURS}h) windows for this order have both passed.</p>
                 </div>
@@ -803,14 +803,14 @@ function OrderDetailContent() {
       {/* ── Return / Exchange Request Modal ── */}
       {showReturnModal && (
         <div className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4" onClick={resetReturnModal}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-paper-bright rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-maroon-200">
               <div>
                 <h3 className="font-bold text-maroon-900 text-lg">{returnKind === 'return' ? 'Return Request' : returnKind === 'exchange' ? 'Exchange Request' : 'Return / Exchange'}</h3>
                 <p className="text-xs text-gray-500">{order.order_number} · Step {stepPosition} of {stepTotal}</p>
               </div>
-              <button onClick={resetReturnModal} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+              <button onClick={resetReturnModal} className="p-2 hover:bg-paper-shade rounded-lg"><X size={18} /></button>
             </div>
 
             {/* Step indicator */}
@@ -859,7 +859,7 @@ function OrderDetailContent() {
                       </button>
                     ))}
                   </div>
-                  <button onClick={() => setReturnStep(1)} className="mt-4 w-full py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                  <button onClick={() => setReturnStep(1)} className="mt-4 w-full py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-paper">Back</button>
                 </div>
               )}
 
@@ -888,7 +888,7 @@ function OrderDetailContent() {
                       className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-maroon-400 resize-none" />
                   </div>
                   <div className="flex gap-3 mt-5">
-                    <button onClick={() => setReturnStep(multiItem ? 2 : 1)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(multiItem ? 2 : 1)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={() => {
                         if (!returnReason) { toast.error('Please select a reason'); return; }
                         setReturnStep(returnKind === 'exchange' ? 4 : 6);
@@ -972,7 +972,7 @@ function OrderDetailContent() {
                   )}
 
                   <div className="flex gap-3">
-                    <button onClick={() => setReturnStep(3)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(3)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={() => {
                         if (!newProduct) { toast.error('Please choose a replacement product'); return; }
                         setReturnStep(priceDifference > 0 ? 5 : 6);
@@ -1005,7 +1005,7 @@ function OrderDetailContent() {
                     </button>
                   )}
                   <div className="flex gap-3">
-                    <button onClick={() => setReturnStep(4)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(4)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={() => { if (!paymentProof) { toast.error('Please complete the payment first'); return; } setReturnStep(6); }}
                       className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2 disabled:opacity-60"
                       disabled={!paymentProof}>
@@ -1074,7 +1074,7 @@ function OrderDetailContent() {
                   </div>
 
                   <div className="flex gap-3">
-                    <button onClick={() => setReturnStep(returnKind === 'exchange' ? (priceDifference > 0 ? 5 : 4) : 3)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(returnKind === 'exchange' ? (priceDifference > 0 ? 5 : 4) : 3)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={handleReturnSubmit} disabled={submittingReturn}
                       className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2">
                       {submittingReturn ? <><RefreshCw size={14} className="animate-spin" /> Submitting...</> : `Submit ${returnKind === 'return' ? 'Return' : 'Exchange'} Request`}
@@ -1090,7 +1090,7 @@ function OrderDetailContent() {
       {/* ── Cancel Confirmation Modal ── */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setShowCancelModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-paper-bright rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle size={20} className="text-red-600" />
@@ -1129,7 +1129,7 @@ function OrderDetailContent() {
 
             <div className="flex gap-3">
               <button onClick={() => setShowCancelModal(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors">
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-paper transition-colors">
                 Keep Order
               </button>
               <button onClick={handleCancelConfirm} disabled={cancelling || !cancelReason}

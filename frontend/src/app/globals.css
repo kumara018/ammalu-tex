@@ -30,7 +30,18 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* NO CSS SMOOTH SCROLL. This is the half that makes Lenis feel wrong.
+   `scroll-behavior: smooth` animates every programmatic scroll and anchor
+   jump, which is a SECOND interpolation layer on top of the smooth-scroll
+   layer ThreeProvider already runs. Two smoothers acting on the same scroll
+   disagree on every frame, and against a scene whose camera is driven by
+   scroll offset the result is judder — the scene placed at the real offset
+   while the animation reads the interpolated one.
+   Removing Lenis would remove the judder and the smoothness together, which
+   is the wrong half. Lenis stays; this goes. Anchors now jump, and every
+   anchor target already carries scroll-mt to clear the fixed nav, so a jump
+   lands correctly and predictably. */
+html { scroll-behavior: auto; }
 
 /* Smooth transitions on all interactive elements */
 a, button { transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease, color 0.15s ease; }
