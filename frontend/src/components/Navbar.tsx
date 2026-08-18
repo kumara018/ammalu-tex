@@ -343,7 +343,7 @@ export default function Navbar() {
                           </div>
                           <Check size={16} className="text-green-600 flex-shrink-0" />
                         </div>
-                        <span className={`inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-green-50 text-green-700'}`}>
+                        <span className={`inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-transparent text-green-700'}`}>
                           {user.is_admin ? '⚙ Admin' : '👤 Customer'}
                         </span>
                       </div>
@@ -379,7 +379,7 @@ export default function Navbar() {
                         </Link>
                       )}
 
-                      <Link href="/account/delete" className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-500" onClick={() => setUserMenuOpen(false)}>
+                      <Link href="/account/delete" className="flex items-center gap-3 px-4 py-2.5 hover:bg-transparent text-sm text-red-500" onClick={() => setUserMenuOpen(false)}>
                         <UserX size={16} /> Delete Account
                       </Link>
 
@@ -433,7 +433,7 @@ export default function Navbar() {
 
                       <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 w-full">
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-transparent text-sm text-red-600 w-full">
                         <LogOut size={16} /> Sign Out
                       </button>
                     </div>
@@ -451,7 +451,7 @@ export default function Navbar() {
                   <div className="relative">
                     <Heart size={20} fill={wishCount > 0 ? '#ef4444' : 'none'} className={wishCount > 0 ? 'text-red-400' : ''} />
                     {wishCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-normal rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                      <span className="absolute -top-2 -right-2 bg-transparent0 text-white text-[10px] font-normal rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                         {wishCount > 99 ? '99+' : wishCount}
                       </span>
                     )}
@@ -697,7 +697,7 @@ export default function Navbar() {
 
             {/* If other sessions exist, show a note */}
             {sessions.filter(s => s.user.id !== user?.id).length > 0 && (
-              <p className="text-xs text-graphite-faint bg-blue-50 border border-blue-100 rounded-sm px-3 py-2 mb-4">
+              <p className="text-xs text-graphite-faint bg-transparent border border-blue-100 rounded-sm px-3 py-2 mb-4">
                 💡 You will be switched to your other saved account.
               </p>
             )}

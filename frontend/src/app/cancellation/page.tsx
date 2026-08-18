@@ -10,12 +10,11 @@ export const metadata = {
 export default function CancellationPage() {
   const updated = '4 August 2026';
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <XCircle size={15} /> Cancellation, Return & Exchange Policy
-        </div>
-        <h1 className="text-3xl font-display font-normal text-maroon-900 mb-2">Cancellation, Return & Exchange Policy</h1>
+    <div className="mx-auto w-full max-w-[68rem] px-6 py-[clamp(3rem,9vh,6rem)] sm:px-10">
+      <div className="mb-[clamp(2.5rem,7vh,4.5rem)]">
+        
+        <p className="mb-4 text-rule uppercase text-thread">Changing your mind</p>
+        <h1 className="font-display text-chapter font-normal text-graphite">Cancellation, Return & Exchange Policy</h1>
         <p className="text-graphite-faint text-sm">Last updated: {updated}</p>
       </div>
 
@@ -23,24 +22,24 @@ export default function CancellationPage() {
 
         {/* Quick Summary — 3 windows */}
         <div className="grid sm:grid-cols-3 gap-4">
-          <div className="bg-red-50 rounded-sm p-4">
+          <div className="border-t border-thread/40 pt-4">
             <p className="font-normal text-red-800 mb-2 flex items-center gap-2"><XCircle size={16} /> Cancel</p>
             <p className="text-red-700 text-xs mb-1">Within <strong>1 hour</strong> of purchase</p>
             <p className="text-red-600 text-xs">Instant, automatic — no reason needed</p>
           </div>
-          <div className="bg-blue-50 rounded-sm p-4">
+          <div className="border-t border-paper-edge pt-4">
             <p className="font-normal text-blue-800 mb-2 flex items-center gap-2"><RotateCcw size={16} /> Return</p>
             <p className="text-blue-700 text-xs mb-1">Within <strong>4 hours</strong> of delivery</p>
             <p className="text-blue-600 text-xs">Valid reason + photos, admin-approved</p>
           </div>
-          <div className="bg-green-50 rounded-sm p-4">
+          <div className="border-t border-green-700/40 pt-4">
             <p className="font-normal text-green-800 mb-2 flex items-center gap-2"><Repeat size={16} /> Exchange</p>
             <p className="text-green-700 text-xs mb-1">Within <strong>12 hours</strong> of delivery</p>
             <p className="text-green-600 text-xs">Valid reason + photos, admin-approved</p>
           </div>
         </div>
 
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-sm text-xs text-amber-800 flex items-start gap-2">
+        <div className="p-4 border-l-2 border-amber-700/50 pl-4 text-xs text-amber-800 flex items-start gap-2">
           <Clock size={15} className="flex-shrink-0 mt-0.5" />
           <p>These windows are tracked automatically from the moment of purchase / delivery and enforced by our system — requests raised after the window has closed cannot be accepted under any circumstances, so please act promptly.</p>
         </div>
@@ -137,8 +136,8 @@ export default function CancellationPage() {
           <h2 className="text-lg font-normal text-graphite mb-3">7. Contact for Cancellation, Return & Exchange</h2>
           <div className="mt-2 p-4 bg-maroon-50 rounded-sm text-sm">
             <p className="font-semibold text-graphite mb-2">{STORE.name} — Customer Support</p>
-            <p>📧 Email: <a href={`mailto:${STORE.supportEmail}`} className="text-maroon-700">{STORE.supportEmail}</a></p>
-            <p>📱 WhatsApp: <a href={WHATSAPP_URL} className="text-maroon-700 font-semibold" target="_blank" rel="noopener noreferrer">{STORE.phone1}</a> / <a href={`tel:${STORE.phone2.replace(/\s/g, '')}`} className="text-maroon-700 font-semibold">{STORE.phone2}</a></p>
+            <p>📧 Email: <a href={`mailto:${STORE.supportEmail}`} className="text-graphite-muted">{STORE.supportEmail}</a></p>
+            <p>📱 WhatsApp: <a href={WHATSAPP_URL} className="text-graphite-muted font-semibold" target="_blank" rel="noopener noreferrer">{STORE.phone1}</a> / <a href={`tel:${STORE.phone2.replace(/\s/g, '')}`} className="text-graphite-muted font-semibold">{STORE.phone2}</a></p>
             <p>⏰ Support Hours: Mon–Sat, 9:00 AM – 8:00 PM</p>
           </div>
         </section>
@@ -146,11 +145,11 @@ export default function CancellationPage() {
       </div>
 
       <div className="flex gap-3 mt-8 justify-center flex-wrap">
-        <Link href="/privacy"  className="text-sm text-maroon-700 hover:underline">Privacy Policy</Link>
+        <Link href="/privacy"  className="text-sm text-graphite-muted hover:underline">Privacy Policy</Link>
         <span className="text-paper-edge">|</span>
-        <Link href="/terms"    className="text-sm text-maroon-700 hover:underline">Terms & Conditions</Link>
+        <Link href="/terms"    className="text-sm text-graphite-muted hover:underline">Terms & Conditions</Link>
         <span className="text-paper-edge">|</span>
-        <Link href="/shipping" className="text-sm text-maroon-700 hover:underline">Shipping Policy</Link>
+        <Link href="/shipping" className="text-sm text-graphite-muted hover:underline">Shipping Policy</Link>
       </div>
     </div>
   );

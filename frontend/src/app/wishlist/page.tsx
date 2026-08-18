@@ -172,7 +172,7 @@ export default function WishlistPage() {
                     </button>
                     <button
                       onClick={() => handleRemove(p.id)}
-                      className="p-2 rounded-sm border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                      className="p-2 rounded-sm border border-red-200 text-red-400 hover:bg-transparent hover:text-red-500 transition-colors"
                       title="Remove from wishlist"
                     >
                       <Trash2 size={15} />

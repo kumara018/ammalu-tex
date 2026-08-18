@@ -29,27 +29,27 @@ const RETURN_STATUS_LABEL: Record<string, { label: string; color: string }> = {
 // -200/-800 shade pattern instead of the pill's -100/-300/-700, so the top
 // banner can switch to the return's own colour once one is active.
 const RETURN_BANNER_COLOR: Record<string, string> = {
-  pending:             'bg-yellow-50 border-yellow-200 text-yellow-800',
-  under_review:        'bg-blue-50 border-blue-200 text-blue-800',
-  approved:            'bg-green-50 border-green-200 text-green-800',
-  rejected:            'bg-red-50 border-red-200 text-red-800',
-  pickup_scheduled:    'bg-purple-50 border-purple-200 text-purple-800',
+  pending:             'border-l-2 border-yellow-700/50 text-yellow-900',
+  under_review:        'border-l-2 border-blue-700/50 text-blue-900',
+  approved:            'border-l-2 border-green-700/50 bg-transparent text-green-800',
+  rejected:            'border-l-2 border-red-700/50 bg-transparent text-red-800',
+  pickup_scheduled:    'border-l-2 border-purple-700/50 text-purple-900',
   picked_up:           'bg-cyan-50 border-cyan-200 text-cyan-800',
-  processing:          'bg-indigo-50 border-indigo-200 text-indigo-800',
-  replacement_shipped: 'bg-purple-50 border-purple-200 text-purple-800',
-  refund_initiated:    'bg-amber-50 border-amber-200 text-amber-800',
-  refunded:            'bg-green-50 border-green-200 text-green-800',
-  completed:           'bg-green-50 border-green-200 text-green-800',
+  processing:          'border-l-2 border-indigo-700/50 text-indigo-900',
+  replacement_shipped: 'border-l-2 border-purple-700/50 text-purple-900',
+  refund_initiated:    'border-l-2 border-amber-700/50 bg-transparent text-amber-800',
+  refunded:            'border-l-2 border-green-700/50 bg-transparent text-green-800',
+  completed:           'border-l-2 border-green-700/50 bg-transparent text-green-800',
 };
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; badge: string; banner: string }> = {
-  pending:          { label: 'Pending',          icon: Clock,        color: 'text-yellow-600', badge: 'badge-warning', banner: 'bg-yellow-50 border-yellow-200 text-yellow-800' },
-  confirmed:        { label: 'Confirmed',         icon: CheckCircle,  color: 'text-blue-600',   badge: 'badge-info',    banner: 'bg-blue-50 border-blue-200 text-blue-800' },
-  processing:       { label: 'Processing',        icon: Package,      color: 'text-purple-600', badge: 'badge-default', banner: 'bg-purple-50 border-purple-200 text-purple-800' },
-  shipped:          { label: 'Shipped',           icon: Truck,        color: 'text-blue-700',   badge: 'badge-info',    banner: 'bg-blue-50 border-blue-200 text-blue-800' },
+  pending:          { label: 'Pending',          icon: Clock,        color: 'text-yellow-600', badge: 'badge-warning', banner: 'border-l-2 border-yellow-700/50 text-yellow-900' },
+  confirmed:        { label: 'Confirmed',         icon: CheckCircle,  color: 'text-blue-600',   badge: 'badge-info',    banner: 'border-l-2 border-blue-700/50 text-blue-900' },
+  processing:       { label: 'Processing',        icon: Package,      color: 'text-purple-600', badge: 'badge-default', banner: 'border-l-2 border-purple-700/50 text-purple-900' },
+  shipped:          { label: 'Shipped',           icon: Truck,        color: 'text-blue-700',   badge: 'badge-info',    banner: 'border-l-2 border-blue-700/50 text-blue-900' },
   out_for_delivery: { label: 'Out for Delivery',  icon: Truck,        color: 'text-orange-600', badge: 'badge-warning', banner: 'bg-maroon-50 border-orange-200 text-orange-800' },
-  delivered:        { label: 'Delivered',         icon: CheckCircle,  color: 'text-green-600',  badge: 'badge-success', banner: 'bg-green-50 border-green-200 text-green-800' },
-  cancelled:        { label: 'Cancelled',         icon: XCircle,      color: 'text-red-600',    badge: 'badge-danger',  banner: 'bg-red-50 border-red-200 text-red-800' },
+  delivered:        { label: 'Delivered',         icon: CheckCircle,  color: 'text-green-600',  badge: 'badge-success', banner: 'border-l-2 border-green-700/50 bg-transparent text-green-800' },
+  cancelled:        { label: 'Cancelled',         icon: XCircle,      color: 'text-red-600',    badge: 'badge-danger',  banner: 'border-l-2 border-red-700/50 bg-transparent text-red-800' },
 };
 
 function getDeliveryLine(status: string): string {

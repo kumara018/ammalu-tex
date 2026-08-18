@@ -10,12 +10,11 @@ export const metadata = {
 export default function TermsPage() {
   const updated = '21 May 2026';
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <FileText size={15} /> Terms & Conditions
-        </div>
-        <h1 className="text-3xl font-display font-normal text-maroon-900 mb-2">Terms & Conditions</h1>
+    <div className="mx-auto w-full max-w-[68rem] px-6 py-[clamp(3rem,9vh,6rem)] sm:px-10">
+      <div className="mb-[clamp(2.5rem,7vh,4.5rem)]">
+        
+        <p className="mb-4 text-rule uppercase text-thread">The agreement</p>
+        <h1 className="font-display text-chapter font-normal text-graphite">Terms & Conditions</h1>
         <p className="text-graphite-faint text-sm">Last updated: {updated}</p>
       </div>
 
@@ -62,7 +61,7 @@ export default function TermsPage() {
             <li>Once delivered, a <strong>return (for refund)</strong> can be requested within <strong>4 hours</strong>, or an <strong>exchange</strong> within <strong>12 hours</strong> — both require a valid reason (size issue or damage) with 2–3 photos as proof, and admin approval.</li>
             <li>Approved returns are refunded via Razorpay to the original payment method once the item is picked up. Exchanges can be swapped for any product of equal or higher value (price difference payable online; no refund for a lower-value choice).</li>
             <li>Certain products marked as <strong>Non-Returnable</strong> are not eligible for return/exchange, except where the item received is genuinely damaged.</li>
-            <li>Full details: <Link href="/cancellation" className="text-maroon-700 hover:underline">Cancellation, Return & Exchange Policy</Link>.</li>
+            <li>Full details: <Link href="/cancellation" className="text-graphite-muted hover:underline">Cancellation, Return & Exchange Policy</Link>.</li>
           </ul>
         </section>
 
@@ -102,19 +101,19 @@ export default function TermsPage() {
             <p className="font-semibold text-graphite">{STORE.name}</p>
             <p>{STORE.shopNo}, {STORE.area}</p>
             <p>{STORE.city}, {STORE.state} — {STORE.pincode}</p>
-            <p>Email: <a href={`mailto:${STORE.supportEmail}`} className="text-maroon-700">{STORE.supportEmail}</a></p>
-            <p>Phone: <a href={`tel:${STORE.phone1}`} className="text-maroon-700">{STORE.phone1}</a></p>
+            <p>Email: <a href={`mailto:${STORE.supportEmail}`} className="text-graphite-muted">{STORE.supportEmail}</a></p>
+            <p>Phone: <a href={`tel:${STORE.phone1}`} className="text-graphite-muted">{STORE.phone1}</a></p>
           </div>
         </section>
 
       </div>
 
       <div className="flex gap-3 mt-8 justify-center flex-wrap">
-        <Link href="/privacy"      className="text-sm text-maroon-700 hover:underline">Privacy Policy</Link>
+        <Link href="/privacy"      className="text-sm text-graphite-muted hover:underline">Privacy Policy</Link>
         <span className="text-paper-edge">|</span>
-        <Link href="/cancellation" className="text-sm text-maroon-700 hover:underline">Cancellation, Return & Exchange Policy</Link>
+        <Link href="/cancellation" className="text-sm text-graphite-muted hover:underline">Cancellation, Return & Exchange Policy</Link>
         <span className="text-paper-edge">|</span>
-        <Link href="/shipping"     className="text-sm text-maroon-700 hover:underline">Shipping Policy</Link>
+        <Link href="/shipping"     className="text-sm text-graphite-muted hover:underline">Shipping Policy</Link>
       </div>
     </div>
   );

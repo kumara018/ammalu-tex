@@ -114,8 +114,8 @@ export default function SupportPage() {
       {/* ── Contact cards ──────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
         <a href={CALL_URL}
-          className="card p-4 text-center transition-shadow group">
-          <div className="inline-flex p-2.5 bg-blue-50 rounded-sm mb-2 text-blue-700 group-hover:bg-blue-100 transition-colors">
+          className="card p-4 text-center transition-colors duration-500 group">
+          <div className="inline-flex p-2.5 bg-transparent rounded-sm mb-2 text-blue-700 group-hover:bg-blue-100 transition-colors">
             <Phone size={20} />
           </div>
           <p className="font-normal text-graphite text-sm mb-0.5">Call Us</p>
@@ -125,8 +125,8 @@ export default function SupportPage() {
         </a>
 
         <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-          className="card p-4 text-center transition-shadow group">
-          <div className="inline-flex p-2.5 bg-green-50 rounded-sm mb-2 text-green-700 group-hover:bg-green-100 transition-colors">
+          className="card p-4 text-center transition-colors duration-500 group">
+          <div className="inline-flex p-2.5 bg-transparent rounded-sm mb-2 text-green-700 group-hover:bg-green-100 transition-colors">
             <MessageCircle size={20} />
           </div>
           <p className="font-normal text-graphite text-sm mb-0.5">WhatsApp</p>
@@ -135,7 +135,7 @@ export default function SupportPage() {
         </a>
 
         <a href={MAIL_URL}
-          className="card p-4 text-center transition-shadow group">
+          className="card p-4 text-center transition-colors duration-500 group">
           <div className="inline-flex p-2.5 bg-maroon-50 rounded-sm mb-2 text-orange-700 group-hover:bg-orange-100 transition-colors">
             <Mail size={20} />
           </div>
@@ -145,8 +145,8 @@ export default function SupportPage() {
         </a>
 
         <a href={STORE.googleMapsUrl} target="_blank" rel="noopener noreferrer"
-          className="card p-4 text-center transition-shadow group">
-          <div className="inline-flex p-2.5 bg-purple-50 rounded-sm mb-2 text-purple-700 group-hover:bg-purple-100 transition-colors">
+          className="card p-4 text-center transition-colors duration-500 group">
+          <div className="inline-flex p-2.5 bg-transparent rounded-sm mb-2 text-purple-700 group-hover:bg-purple-100 transition-colors">
             <MapPin size={20} />
           </div>
           <p className="font-normal text-graphite text-sm mb-0.5">Visit Store</p>
@@ -235,7 +235,7 @@ export default function SupportPage() {
           </div>
         </div>
 
-        <div className="p-4 bg-amber-50 rounded-sm text-xs text-graphite-muted border border-amber-100">
+        <div className="p-4 bg-transparent rounded-sm text-xs text-graphite-muted border border-amber-100">
           💡 <b>Measurement Tips:</b> Use a soft measuring tape. Measure chest at the fullest
           part, waist at the narrowest, and hips at the widest. For fitted styles (bodycon),
           choose your exact size. For flowing styles (lehenga, half saree), you can go one size
@@ -283,15 +283,15 @@ export default function SupportPage() {
       {/* ── Cancellation, Return & Exchange ────────────────────────────── */}
       <Accordion id="returns" title="Cancellation, Return & Exchange Policy" icon={RotateCcw}>
         <div className="grid md:grid-cols-3 gap-4 mb-5">
-          <div className="p-4 bg-red-50 rounded-sm border border-red-100">
+          <div className="p-4 bg-transparent rounded-sm border border-red-100">
             <h3 className="font-normal text-red-700 mb-1.5 text-sm">❌ Cancel</h3>
             <p className="text-xs text-graphite-muted">Within <b>1 hour</b> of purchase. Instant, automatic — no reason needed, refund auto-initiated if paid.</p>
           </div>
-          <div className="p-4 bg-blue-50 rounded-sm border border-blue-100">
+          <div className="p-4 bg-transparent rounded-sm border border-blue-100">
             <h3 className="font-normal text-blue-700 mb-1.5 text-sm">↩️ Return</h3>
             <p className="text-xs text-graphite-muted">Within <b>4 hours</b> of delivery. Size issue or damage only, with photo proof — admin-approved, then refunded via Razorpay after pickup.</p>
           </div>
-          <div className="p-4 bg-green-50 rounded-sm border border-green-100">
+          <div className="p-4 bg-transparent rounded-sm border border-green-100">
             <h3 className="font-normal text-green-700 mb-1.5 text-sm">🔁 Exchange</h3>
             <p className="text-xs text-graphite-muted">Within <b>12 hours</b> of delivery. Size issue or damage only — swap for any product of equal or higher value (pay the difference if higher).</p>
           </div>
@@ -332,7 +332,7 @@ export default function SupportPage() {
           </div>
         </div>
 
-        <div className="p-4 bg-blue-50 rounded-sm text-sm text-graphite-muted border border-blue-100 mb-3">
+        <div className="p-4 bg-transparent rounded-sm text-sm text-graphite-muted border border-blue-100 mb-3">
           <b className="text-graphite">How to Request:</b> Go to My Orders → Select the
           order → Cancel, Return or Exchange (only options still inside their window will show). Or contact us on WhatsApp at{' '}
           <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-maroon-700 font-medium hover:underline">
@@ -341,7 +341,7 @@ export default function SupportPage() {
           and we will guide you through.
         </div>
 
-        <div className="p-4 bg-green-50 rounded-sm text-sm text-graphite-muted border border-green-100">
+        <div className="p-4 bg-transparent rounded-sm text-sm text-graphite-muted border border-green-100">
           <b className="text-graphite">Return refund timeline:</b> Once your returned item is picked up and confirmed,
           a refund is automatically initiated with Razorpay to your original payment method — you'll get an email/WhatsApp
           with the exact expected credit date. See the full{' '}

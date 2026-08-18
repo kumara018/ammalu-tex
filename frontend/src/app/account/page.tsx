@@ -176,7 +176,7 @@ export default function AccountPage() {
         <div>
           <h1 className="font-display text-band font-normal text-graphite">{user.full_name}</h1>
           <p className="text-sm text-graphite-faint">{user.email}</p>
-          <span className={`inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-green-50 text-green-700'}`}>
+          <span className={`inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-transparent text-green-700'}`}>
             {user.is_admin ? '⚙ Admin Account' : '👤 Customer Account'}
           </span>
         </div>
@@ -186,7 +186,7 @@ export default function AccountPage() {
       {sessionsLoaded && (
         <button
           onClick={() => setTab('devices')}
-          className="w-full mb-6 flex items-center gap-3 card p-4 hover:border-maroon-200 border-2 border-transparent transition-shadow text-left"
+          className="w-full mb-6 flex items-center gap-3 card p-4 hover:border-maroon-200 border-2 border-transparent transition-colors duration-500 text-left"
         >
           <div className="w-10 h-10 rounded-full bg-maroon-100 flex items-center justify-center flex-shrink-0">
             <MonitorSmartphone size={18} className="text-maroon-700" />
@@ -210,7 +210,7 @@ export default function AccountPage() {
           { icon: UserX,      label: 'Delete Account',  href: '/account/delete', danger: true },
         ].map(({ icon: Icon, label, href, danger }) => (
           <Link key={label} href={href}
-            className={`card p-4 flex flex-col items-center gap-2 text-center transition-shadow border-2 ${danger ? 'border-transparent hover:border-red-200 hover:bg-red-50' : 'border-transparent hover:border-maroon-100'}`}>
+            className={`card p-4 flex flex-col items-center gap-2 text-center transition-colors duration-500 border-2 ${danger ? 'border-transparent hover:border-red-700/40' : 'border-transparent hover:border-thread/50'}`}>
             <Icon size={20} className={danger ? 'text-red-500' : 'text-maroon-700'} />
             <span className={`text-xs font-semibold ${danger ? 'text-red-500' : 'text-graphite-muted'}`}>{label}</span>
           </Link>
@@ -247,7 +247,7 @@ export default function AccountPage() {
           <h2 className="font-normal text-graphite text-lg mb-5">Personal Information</h2>
 
           {profileMsg && (
-            <div className={`mb-5 flex items-start gap-3 rounded-sm p-4 border ${profileMsg.type === 'ok' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className={`mb-5 flex items-start gap-3 rounded-sm p-4 border ${profileMsg.type === 'ok' ? 'border-l-2 border-green-700/50 bg-transparent' : 'border-l-2 border-red-700/50 bg-transparent'}`}>
               {profileMsg.type === 'ok'
                 ? <CheckCircle size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
                 : <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />}
@@ -321,7 +321,7 @@ export default function AccountPage() {
           <p className="text-sm text-graphite-faint mb-5">Choose a strong password of at least 6 characters.</p>
 
           {pwMsg && (
-            <div className={`mb-5 flex items-start gap-3 rounded-sm p-4 border ${pwMsg.type === 'ok' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className={`mb-5 flex items-start gap-3 rounded-sm p-4 border ${pwMsg.type === 'ok' ? 'border-l-2 border-green-700/50 bg-transparent' : 'border-l-2 border-red-700/50 bg-transparent'}`}>
               {pwMsg.type === 'ok'
                 ? <CheckCircle size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
                 : <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />}
@@ -489,7 +489,7 @@ export default function AccountPage() {
             <LogOut size={15} /> Sign Out
           </button>
           <Link href="/account/delete"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-sm border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-sm border border-red-700/40 text-red-800 hover:border-red-700 text-sm font-medium transition-colors">
             <UserX size={15} /> Delete My Account
           </Link>
         </div>

@@ -152,7 +152,7 @@ export default function CartPage() {
                       {/* Remove */}
                       <button
                         onClick={() => handleRemove(item.id, item.product.name)}
-                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-sm transition-colors"
+                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-transparent rounded-sm transition-colors"
                       >
                         <Trash2 size={16} />
                       </button>

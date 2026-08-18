@@ -12,14 +12,12 @@ export const metadata = {
 
 export default function ShippingPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="mx-auto w-full max-w-[68rem] px-6 py-[clamp(3rem,9vh,6rem)] sm:px-10">
 
       {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <Truck size={15} /> Fast Delivery across India
-        </div>
-        <h1 className="text-3xl font-display font-normal text-maroon-900 mb-3">Shipping Policy</h1>
+      <div className="mb-[clamp(2.5rem,7vh,4.5rem)]">
+        
+        <h1 className="text-3xl font-display font-normal text-graphite mb-3">Shipping Policy</h1>
         <p className="text-graphite-faint max-w-xl mx-auto text-sm">
           We deliver across India with care. Here&apos;s everything you need to know about
           our shipping timelines, fees, and tracking.
@@ -59,8 +57,8 @@ export default function ShippingPage() {
             <p className="text-3xl mb-3">{icon}</p>
             <p className="font-normal text-graphite mb-1">{title}</p>
             <div className="space-y-1.5 text-sm text-graphite-muted">
-              <p className="flex items-center gap-2"><Clock size={14} className="text-maroon-600" /> {time}</p>
-              <p className="flex items-center gap-2"><span className="text-maroon-600 font-normal text-base leading-none">₹</span> {fee}</p>
+              <p className="flex items-center gap-2"><Clock size={14} className="text-graphite-muted" /> {time}</p>
+              <p className="flex items-center gap-2"><span className="text-graphite-muted font-normal text-base leading-none">₹</span> {fee}</p>
               <p className="text-graphite-faint text-xs mt-2">{note}</p>
             </div>
           </div>
@@ -91,7 +89,7 @@ export default function ShippingPage() {
       <div className="grid md:grid-cols-2 gap-4 mb-10">
         <div className="card p-5">
           <p className="font-normal text-graphite mb-3 flex items-center gap-2">
-            <MapPin size={16} className="text-maroon-700" /> Service Coverage
+            <MapPin size={16} className="text-graphite-muted" /> Service Coverage
           </p>
           <ul className="space-y-2 text-sm text-graphite-muted">
             {[
@@ -109,7 +107,7 @@ export default function ShippingPage() {
 
         <div className="card p-5">
           <p className="font-normal text-graphite mb-3 flex items-center gap-2">
-            <Package size={16} className="text-maroon-700" /> Order Tracking
+            <Package size={16} className="text-graphite-muted" /> Order Tracking
           </p>
           <ul className="space-y-2 text-sm text-graphite-muted">
             {[

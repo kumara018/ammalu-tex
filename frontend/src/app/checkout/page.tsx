@@ -425,7 +425,7 @@ export default function CheckoutPage() {
 
               {/* Razorpay info */}
               {payMethod === 'razorpay' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-sm p-4 space-y-2">
+                <div className="border-l-2 border-blue-700/50 pl-4 p-4 space-y-2">
                   <p className="font-semibold text-blue-800 flex items-center gap-2"><CreditCard size={16} /> Razorpay Secure Payment</p>
                   <p className="text-sm text-blue-700">You will be redirected to Razorpay's secure payment page. Accepts:</p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -439,7 +439,7 @@ export default function CheckoutPage() {
 
               {/* EMI info */}
               {payMethod === 'emi' && (
-                <div className="bg-purple-50 border border-purple-200 rounded-sm p-4 space-y-2">
+                <div className="border-l-2 border-purple-700/50 pl-4 p-4 space-y-2">
                   <p className="font-semibold text-purple-800 flex items-center gap-2"><CalendarDays size={16} /> EMI — Pay in Easy Instalments</p>
                   <p className="text-sm text-purple-700">Split your payment into monthly instalments. Available on Credit Cards.</p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -520,7 +520,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Open Box Delivery option */}
-              <label className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-sm cursor-pointer hover:bg-blue-100 transition-colors mb-4">
+              <label className="flex items-start gap-3 p-4 border-l-2 border-blue-700/50 pl-4 cursor-pointer hover:bg-blue-100 transition-colors mb-4">
                 <input type="checkbox" checked={openBox} onChange={e => setOpenBox(e.target.checked)}
                   className="mt-0.5 w-4 h-4 accent-blue-700 flex-shrink-0" />
                 <div>

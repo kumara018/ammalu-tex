@@ -99,7 +99,7 @@ export default function DeleteAccountPage() {
         {mode === 'choose' && (
           <div className="card p-8">
             <div className="flex justify-center mb-5">
-              <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-transparent flex items-center justify-center">
                 <UserX size={30} className="text-red-600" />
               </div>
             </div>
@@ -135,7 +135,7 @@ export default function DeleteAccountPage() {
             {/* Option 2 — Permanent delete */}
             <button
               onClick={() => { setMode('delete'); setStep('warning'); }}
-              className="w-full p-5 rounded-sm border-2 border-red-200 hover:border-red-400 hover:bg-red-50 text-left transition-all group"
+              className="w-full p-5 rounded-sm border-2 border-red-200 hover:border-red-400 hover:bg-transparent text-left transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="p-2.5 bg-red-100 rounded-sm group-hover:bg-red-200 transition-colors flex-shrink-0">
@@ -187,7 +187,7 @@ export default function DeleteAccountPage() {
             <div className={`rounded-sm p-4 mb-5 border ${
               mode === 'deactivate'
                 ? 'bg-maroon-50 border-orange-200'
-                : 'bg-red-50 border-red-200'
+                : 'border-l-2 border-red-700/50 bg-transparent'
             }`}>
               <p className={`font-semibold flex items-center gap-2 mb-2 ${
                 mode === 'deactivate' ? 'text-orange-700' : 'text-red-700'
@@ -213,7 +213,7 @@ export default function DeleteAccountPage() {
             </div>
 
             {mode === 'deactivate' && (
-              <div className="bg-green-50 border border-green-200 rounded-sm p-4 mb-5">
+              <div className="border-l-2 border-green-700/50 pl-4 p-4 mb-5">
                 <p className="text-green-800 text-sm font-medium flex items-center gap-2">
                   <Clock size={14} /> 7-day reactivation window
                 </p>
@@ -225,7 +225,7 @@ export default function DeleteAccountPage() {
             )}
 
             {mode === 'delete' && (
-              <div className="bg-amber-50 border border-amber-200 rounded-sm p-4 mb-5">
+              <div className="border-l-2 border-amber-700/50 pl-4 p-4 mb-5">
                 <p className="text-amber-800 text-sm font-medium">
                   ⏳ 24-hour cancellation window
                 </p>
@@ -236,7 +236,7 @@ export default function DeleteAccountPage() {
             )}
 
             {error && (
-              <div className="mb-4 flex items-center gap-2 bg-red-50 border border-red-200 rounded-sm p-3">
+              <div className="mb-4 flex items-center gap-2 border-l-2 border-red-700/50 pl-4 p-3">
                 <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
                 <p className="text-red-700 text-sm">{error}</p>
               </div>
@@ -282,14 +282,14 @@ export default function DeleteAccountPage() {
             </p>
 
             {devOtp && (
-              <div className="bg-amber-50 border border-amber-200 rounded-sm p-4 mb-4">
+              <div className="border-l-2 border-amber-700/50 pl-4 p-4 mb-4">
                 <p className="text-amber-800 text-xs font-semibold mb-1">⚠️ Dev mode</p>
                 <p className="text-amber-900 text-sm">OTP: <span className="font-mono font-normal text-lg tracking-widest">{devOtp}</span></p>
               </div>
             )}
 
             {error && (
-              <div className="mb-4 flex items-center gap-2 bg-red-50 border border-red-200 rounded-sm p-3">
+              <div className="mb-4 flex items-center gap-2 border-l-2 border-red-700/50 pl-4 p-3">
                 <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
                 <p className="text-red-700 text-sm">{error}</p>
               </div>
@@ -368,7 +368,7 @@ export default function DeleteAccountPage() {
                 <p className="text-graphite-faint text-sm mb-4">
                   Your account will be permanently deleted in <strong>24 hours</strong>.
                 </p>
-                <div className="bg-green-50 border border-green-200 rounded-sm p-4 mb-4">
+                <div className="border-l-2 border-green-700/50 pl-4 p-4 mb-4">
                   <p className="text-green-800 text-sm font-medium">
                     ✅ Changed your mind? Simply log in within 24 hours to cancel.
                   </p>

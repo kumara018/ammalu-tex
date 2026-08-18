@@ -442,7 +442,7 @@ export default function ProductDetailPage() {
             {/* Wishlist */}
             <button
               onClick={() => { if (!user) { promptLogin('Sign in to save products to your wishlist.'); return; } toggleWishlist(product.id); }}
-              className={`p-2 rounded-full border-2 transition-all ${isWishlisted ? 'border-red-400 bg-red-50 text-red-500' : 'border-paper-edge text-graphite-faint hover:border-red-300 hover:text-red-400'}`}
+              className={`p-2 rounded-full border-2 transition-all ${isWishlisted ? 'border-red-400 bg-transparent text-red-500' : 'border-paper-edge text-graphite-faint hover:border-red-300 hover:text-red-400'}`}
               title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
@@ -548,7 +548,7 @@ export default function ProductDetailPage() {
 
           {/* Stock warnings */}
           {product.stock === 0 ? (
-            <div className="bg-red-50 border border-red-200 rounded-sm p-4 mb-4 text-red-700 text-sm font-medium">
+            <div className="border-l-2 border-red-700/50 pl-4 p-4 mb-4 text-red-700 text-sm font-medium">
               ❌ This product is currently out of stock. Check back later.
             </div>
           ) : product.stock <= 5 ? (
@@ -572,7 +572,7 @@ export default function ProductDetailPage() {
 
           {/* Non-returnable banner */}
           {product.is_returnable === false && (
-            <div className="flex items-start gap-2.5 p-3.5 mb-4 bg-red-50 border border-red-200 rounded-sm">
+            <div className="flex items-start gap-2.5 p-3.5 mb-4 border-l-2 border-red-700/50 pl-4">
               <XCircle size={18} className="text-red-500 mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-red-700">Non-Returnable Product</p>
@@ -592,7 +592,7 @@ export default function ProductDetailPage() {
               },
               { icon: Shield, text: '100% Authentic' },
             ].map(({ icon: Icon, text, red }) => (
-              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-sm text-center ${red ? 'bg-red-50' : 'bg-maroon-50'}`}>
+              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-sm text-center ${red ? 'bg-transparent' : 'bg-maroon-50'}`}>
                 <Icon size={18} className={red ? 'text-red-500' : 'text-maroon-700'} />
                 <span className={`text-xs leading-tight ${red ? 'text-red-600 font-medium' : 'text-graphite-muted'}`}>{text}</span>
               </div>
@@ -694,7 +694,7 @@ export default function ProductDetailPage() {
               </div>
 
               {product.care_instructions && (
-                <div className="bg-blue-50 rounded-sm p-5 border border-blue-100">
+                <div className="bg-transparent rounded-sm p-5 border border-blue-100">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-2xl">🧺</span>
                     <p className="font-normal text-blue-900 text-sm uppercase tracking-wide">Care Instructions</p>
@@ -795,7 +795,7 @@ export default function ProductDetailPage() {
                 </div>
               )}
               {user && !canReview && reviewReason === 'already_reviewed' && (
-                <div className="bg-green-50 border border-green-200 rounded-sm p-4">
+                <div className="border-l-2 border-green-700/50 pl-4 p-4">
                   <p className="text-sm text-green-700 flex items-center gap-2">
                     <CheckCircle size={16} /> You have already reviewed this product. Thank you!
                   </p>

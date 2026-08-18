@@ -106,7 +106,7 @@ export default function ProductCard({ product }: Props) {
       className="h-full"
     >
     <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer" className="group block h-full">
-      <div className="card transition-shadow duration-300 h-full flex flex-col">
+      <div className="card transition-colors duration-500 duration-300 h-full flex flex-col">
 
         {/* ── Image / Carousel ───────────────────────────────────────────────── */}
         <div
@@ -215,7 +215,7 @@ export default function ProductCard({ product }: Props) {
               </span>
             )}
             {product.is_new_arrival && (
-              <span className="bg-emerald-500 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
+              <span className="bg-transparent0 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
                 New Arrival
               </span>
             )}

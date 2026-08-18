@@ -11,21 +11,19 @@ export const metadata = {
 
 export default function AuthenticPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="mx-auto w-full max-w-[68rem] px-6 py-[clamp(3rem,9vh,6rem)] sm:px-10">
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-graphite-faint mb-6">
-        <Link href="/" className="hover:text-maroon-700">Home</Link>
+        <Link href="/" className="hover:text-graphite-muted">Home</Link>
         <ChevronRight size={12} />
         <span className="text-graphite font-medium">100% Authentic</span>
       </nav>
 
       {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-maroon-50 text-maroon-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <Shield size={15} /> Quality Guarantee
-        </div>
-        <h1 className="text-3xl font-display font-normal text-maroon-900 mb-3">100% Authentic Products</h1>
+      <div className="mb-[clamp(2.5rem,7vh,4.5rem)]">
+        <p className="mb-4 text-rule uppercase text-thread">Our word</p>
+        <h1 className="text-3xl font-display font-normal text-graphite mb-3">100% Authentic Products</h1>
         <p className="text-graphite-faint max-w-xl mx-auto text-sm">
           Every garment at Ammalu Tex is handpicked from verified weavers, manufacturers, and trusted suppliers.
           We guarantee genuine quality — no imitations, no compromises.
@@ -119,7 +117,7 @@ export default function AuthenticPage() {
           <strong>return within 4 hours of delivery</strong> — once approved and picked up, your refund is
           processed automatically via Razorpay.
         </p>
-        <Link href="/support#returns" className="text-sm font-semibold text-maroon-700 hover:underline">
+        <Link href="/support#returns" className="text-sm font-semibold text-graphite-muted hover:underline">
           Read Cancellation, Return & Exchange Policy →
         </Link>
       </div>

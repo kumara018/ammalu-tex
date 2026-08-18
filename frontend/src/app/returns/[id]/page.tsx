@@ -11,8 +11,8 @@ import { ReturnRequest } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
 const TYPE_INFO = {
-  return:   { label: 'Return',   color: 'text-red-700',  bg: 'bg-red-50',  border: 'border-red-200'  },
-  exchange: { label: 'Exchange', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
+  return:   { label: 'Return',   color: 'text-red-700',  bg: 'bg-transparent',  border: 'border-red-200'  },
+  exchange: { label: 'Exchange', color: 'text-blue-700', bg: 'bg-transparent', border: 'border-blue-200' },
 } as const;
 
 const REASON_LABELS: Record<string, string> = {
@@ -56,17 +56,17 @@ const STATUS_MSG: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  pending:             'text-yellow-700 bg-yellow-50 border-yellow-300',
-  under_review:        'text-blue-700 bg-blue-50 border-blue-300',
-  approved:            'text-green-700 bg-green-50 border-green-300',
-  rejected:            'text-red-700 bg-red-50 border-red-300',
-  pickup_scheduled:    'text-purple-700 bg-purple-50 border-purple-300',
+  pending:             'text-yellow-700 bg-transparent border-yellow-300',
+  under_review:        'text-blue-700 bg-transparent border-blue-300',
+  approved:            'text-green-700 bg-transparent border-green-300',
+  rejected:            'text-red-700 bg-transparent border-red-300',
+  pickup_scheduled:    'text-purple-700 bg-transparent border-purple-300',
   picked_up:           'text-cyan-700 bg-cyan-50 border-cyan-300',
-  processing:          'text-indigo-700 bg-indigo-50 border-indigo-300',
-  replacement_shipped: 'text-purple-700 bg-purple-50 border-purple-300',
-  refund_initiated:    'text-amber-700 bg-amber-50 border-amber-300',
-  refunded:             'text-green-700 bg-green-50 border-green-300',
-  completed:            'text-green-700 bg-green-50 border-green-300',
+  processing:          'text-indigo-700 bg-transparent border-indigo-300',
+  replacement_shipped: 'text-purple-700 bg-transparent border-purple-300',
+  refund_initiated:    'text-amber-700 bg-transparent border-amber-300',
+  refunded:             'text-green-700 bg-transparent border-green-300',
+  completed:            'text-green-700 bg-transparent border-green-300',
 };
 
 function ReturnDetailContent() {
@@ -207,7 +207,7 @@ function ReturnDetailContent() {
 
       {/* Rejected state */}
       {isRejected && (
-        <div className="bg-red-50 border border-red-200 rounded-sm p-5 mb-5 flex items-start gap-4">
+        <div className="border-l-2 border-red-700/50 pl-4 p-5 mb-5 flex items-start gap-4">
           <XCircle size={28} className="text-red-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-normal text-red-800 mb-1">Request Rejected</p>
@@ -219,7 +219,7 @@ function ReturnDetailContent() {
 
       {/* Current status message card */}
       {!isRejected && (
-        <div className="bg-blue-50 border border-blue-200 rounded-sm p-4 mb-5 flex items-start gap-3">
+        <div className="border-l-2 border-blue-700/50 pl-4 p-4 mb-5 flex items-start gap-3">
           <AlertCircle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-blue-800">{STATUS_MSG[rr.status] || ''}</p>
         </div>
@@ -227,7 +227,7 @@ function ReturnDetailContent() {
 
       {/* Admin notes */}
       {rr.admin_notes && !isRejected && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-4 mb-5">
+        <div className="border-l-2 border-yellow-700/50 pl-4 p-4 mb-5">
           <p className="text-xs font-semibold text-yellow-700 uppercase tracking-wide mb-1">Note from our team</p>
           <p className="text-sm text-yellow-800">{rr.admin_notes}</p>
         </div>
@@ -251,7 +251,7 @@ function ReturnDetailContent() {
 
       {/* Pickup tracking — only shown once Delhivery has actually confirmed a pickup */}
       {rr.return_awb && (
-        <div className="bg-teal-50 border border-teal-200 rounded-sm p-4 mb-5 flex items-center justify-between gap-3">
+        <div className="border-l-2 border-teal-700/50 pl-4 p-4 mb-5 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Pickup Tracking</p>
             <p className="text-sm text-teal-800 font-mono">{rr.return_awb}</p>
@@ -266,7 +266,7 @@ function ReturnDetailContent() {
 
       {/* Replacement shipment tracking — exchange only */}
       {rr.replacement_awb && (
-        <div className="bg-purple-50 border border-purple-200 rounded-sm p-4 mb-5 flex items-center justify-between gap-3">
+        <div className="border-l-2 border-purple-700/50 pl-4 p-4 mb-5 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Replacement Shipment</p>
             <p className="text-sm text-purple-800 font-mono">{rr.replacement_awb}</p>
@@ -281,7 +281,7 @@ function ReturnDetailContent() {
 
       {/* Refund info */}
       {rr.refund_id && (
-        <div className="bg-green-50 border border-green-200 rounded-sm p-4 mb-5">
+        <div className="border-l-2 border-green-700/50 pl-4 p-4 mb-5">
           <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">Refund Information</p>
           <p className="text-sm text-green-800">
             {rr.status === 'refunded'

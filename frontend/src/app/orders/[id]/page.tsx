@@ -22,13 +22,13 @@ declare global {
 const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string; ring: string }> = {
-  pending:          { label: 'Order Placed',      icon: Clock,        color: 'text-yellow-700', bg: 'bg-yellow-50',  ring: 'border-yellow-400' },
-  confirmed:        { label: 'Confirmed',          icon: CheckCircle,  color: 'text-blue-700',   bg: 'bg-blue-50',    ring: 'border-blue-400' },
-  processing:       { label: 'Being Packed',       icon: Package,      color: 'text-purple-700', bg: 'bg-purple-50',  ring: 'border-purple-400' },
-  shipped:          { label: 'Shipped',            icon: Truck,        color: 'text-indigo-700', bg: 'bg-indigo-50',  ring: 'border-indigo-400' },
+  pending:          { label: 'Order Placed',      icon: Clock,        color: 'text-yellow-700', bg: 'bg-transparent',  ring: 'border-yellow-400' },
+  confirmed:        { label: 'Confirmed',          icon: CheckCircle,  color: 'text-blue-700',   bg: 'bg-transparent',    ring: 'border-blue-400' },
+  processing:       { label: 'Being Packed',       icon: Package,      color: 'text-purple-700', bg: 'bg-transparent',  ring: 'border-purple-400' },
+  shipped:          { label: 'Shipped',            icon: Truck,        color: 'text-indigo-700', bg: 'bg-transparent',  ring: 'border-indigo-400' },
   out_for_delivery: { label: 'Out for Delivery',   icon: Truck,        color: 'text-orange-700', bg: 'bg-maroon-50',  ring: 'border-orange-400' },
-  delivered:        { label: 'Delivered',          icon: CheckCircle,  color: 'text-green-700',  bg: 'bg-green-50',   ring: 'border-green-400' },
-  cancelled:        { label: 'Cancelled',          icon: XCircle,      color: 'text-red-700',    bg: 'bg-red-50',     ring: 'border-red-400' },
+  delivered:        { label: 'Delivered',          icon: CheckCircle,  color: 'text-green-700',  bg: 'bg-transparent',   ring: 'border-green-400' },
+  cancelled:        { label: 'Cancelled',          icon: XCircle,      color: 'text-red-700',    bg: 'bg-transparent',     ring: 'border-red-400' },
 };
 
 const CANCEL_REASONS = [
@@ -360,7 +360,7 @@ function OrderDetailContent() {
 
       {/* Success banner for new orders */}
       {isNew && (
-        <div className="bg-green-50 border border-green-200 rounded-sm p-6 mb-6 text-center">
+        <div className="border-l-2 border-green-700/50 pl-4 p-6 mb-6 text-center">
           <Sparkles size={40} className="mx-auto text-green-600 mb-3" />
           <h2 className="text-xl font-normal text-green-800 mb-1">Order Placed Successfully! 🎉</h2>
           <p className="text-green-700 text-sm">Thank you for shopping at Ammalu Tex! Your order <b>{order.order_number}</b> has been confirmed.</p>
@@ -431,7 +431,7 @@ function OrderDetailContent() {
 
               {/* Current location badge */}
               {currentLocation && (
-                <div className="mt-5 flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-sm px-4 py-2.5">
+                <div className="mt-5 flex items-center gap-2 border-l-2 border-blue-700/50 pl-4 px-4 py-2.5">
                   <Navigation size={15} className="text-blue-600 flex-shrink-0" />
                   <span className="text-sm text-blue-800 font-medium">{currentLocation}</span>
                 </div>
@@ -469,7 +469,7 @@ function OrderDetailContent() {
 
               {/* Estimated delivery banner for pre-ship statuses */}
               {['confirmed', 'processing'].includes(order.status) && (
-                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-sm p-3 flex items-center gap-2">
+                <div className="mt-4 border-l-2 border-blue-700/50 pl-4 p-3 flex items-center gap-2">
                   <Truck size={16} className="text-blue-600 flex-shrink-0" />
                   <p className="text-sm text-blue-700 font-medium">Estimated Delivery: 3–7 Business Days</p>
                 </div>
@@ -514,7 +514,7 @@ function OrderDetailContent() {
 
           {/* ── Open Box Delivery ── */}
           {order.open_box_delivery && (
-            <div className="bg-blue-50 border border-blue-200 rounded-sm p-4 flex items-center gap-3">
+            <div className="border-l-2 border-blue-700/50 pl-4 p-4 flex items-center gap-3">
               <PackageOpen size={24} className="text-blue-600 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-blue-800 text-sm">Open Box Delivery Requested</p>
@@ -553,7 +553,7 @@ function OrderDetailContent() {
 
           {/* ── Cancelled ── */}
           {isCancelled && (
-            <div className="bg-red-50 border border-red-200 rounded-sm p-5">
+            <div className="border-l-2 border-red-700/50 pl-4 p-5">
               <div className="flex items-center gap-4 mb-3">
                 <XCircle size={32} className="text-red-500 flex-shrink-0" />
                 <div>
@@ -565,7 +565,7 @@ function OrderDetailContent() {
                 </div>
               </div>
               {order.rto_pending && (
-                <div className="flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-sm px-4 py-3 mb-3">
+                <div className="flex items-start gap-3 border-l-2 border-orange-700/50 pl-4 px-4 py-3 mb-3">
                   <AlertCircle size={18} className="text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-normal text-orange-800">This order was already with our courier</p>
@@ -577,7 +577,7 @@ function OrderDetailContent() {
                 </div>
               )}
               {order.payment_status === 'refunded' ? (
-                <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-sm px-4 py-3">
+                <div className="flex items-center gap-3 border-l-2 border-green-700/50 pl-4 px-4 py-3">
                   <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-normal text-green-800">Refund Processed ✅</p>
@@ -685,10 +685,10 @@ function OrderDetailContent() {
               </p>
               <p className="text-xs flex items-center gap-1.5">
                 <span className={`inline-block font-normal px-2 py-0.5 rounded-full text-[10px] border
-                  ${order.payment_status === 'paid'             ? 'text-green-700 bg-green-50 border-green-300'     :
+                  ${order.payment_status === 'paid'             ? 'text-green-700 bg-transparent border-green-300'     :
                     order.payment_status === 'refund_initiated' ? 'text-orange-700 bg-maroon-50 border-orange-300'  :
-                    order.payment_status === 'refunded'         ? 'text-purple-700 bg-purple-50 border-purple-300'  :
-                    'text-amber-700 bg-amber-50 border-amber-300'}`}>
+                    order.payment_status === 'refunded'         ? 'text-purple-700 bg-transparent border-purple-300'  :
+                    'text-amber-700 bg-transparent border-amber-300'}`}>
                   {order.payment_status === 'paid'             ? '✅ PAID'                 :
                    order.payment_status === 'refund_initiated' ? '🔄 REFUND INITIATED'     :
                    order.payment_status === 'refunded'         ? '✅ REFUND PROCESSED'     : '⏳ PENDING'}
@@ -700,7 +700,7 @@ function OrderDetailContent() {
                 </p>
               )}
               {order.payment_status === 'refunded' && (
-                <p className="text-[10px] text-green-600 bg-green-50 border border-green-100 rounded-sm px-2 py-1.5 mt-1">
+                <p className="text-[10px] text-green-600 bg-transparent border border-green-100 rounded-sm px-2 py-1.5 mt-1">
                   ✅ Refund processed by Razorpay — will appear in your bank account within <b>1–3 business days</b>.
                 </p>
               )}
@@ -732,7 +732,7 @@ function OrderDetailContent() {
                 <RotateCcw size={16} /> Return / Exchange
               </h3>
               {hasNonReturnableItem ? (
-                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-sm">
+                <div className="flex items-start gap-2 p-3 border-l-2 border-red-700/50 pl-4">
                   <XCircle size={16} className="text-red-500 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-red-700">Non-Returnable Order</p>
@@ -746,7 +746,7 @@ function OrderDetailContent() {
                     {RETURN_STATUS_LABEL[existingReturn.status]?.label || existingReturn.status}
                   </div>
                   {existingReturn.admin_notes && (
-                    <p className="text-xs text-graphite-muted bg-yellow-50 border border-yellow-200 rounded-sm px-3 py-2 mb-3">
+                    <p className="text-xs text-graphite-muted border-l-2 border-yellow-700/50 pl-4 px-3 py-2 mb-3">
                       Note: {existingReturn.admin_notes}
                     </p>
                   )}
@@ -789,7 +789,7 @@ function OrderDetailContent() {
 
           {canCancel && (
             <button onClick={() => setShowCancelModal(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-red-600 border border-red-300 hover:bg-red-50 rounded-sm transition-colors">
+              className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-red-600 border border-red-300 hover:bg-transparent rounded-sm transition-colors">
               <XCircle size={16} /> Cancel This Order
             </button>
           )}
@@ -827,12 +827,12 @@ function OrderDetailContent() {
                   <p className="font-semibold text-graphite mb-4">What would you like to do?</p>
                   <div className="space-y-3">
                     <button onClick={() => afterKindChosen('return')}
-                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'return' ? 'border-red-400 bg-red-50' : 'border-paper-edge hover:border-maroon-300 bg-white'}`}>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'return' ? 'border-red-400 bg-transparent' : 'border-paper-edge hover:border-maroon-300 bg-white'}`}>
                       <p className="font-semibold text-graphite text-sm">Return for a refund</p>
                       <p className="text-xs text-graphite-faint mt-0.5">Send the item back and get your money refunded to your original payment method. Window: {RETURN_WINDOW_HOURS} hours from delivery.</p>
                     </button>
                     <button onClick={() => afterKindChosen('exchange')}
-                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'exchange' ? 'border-blue-400 bg-blue-50' : 'border-paper-edge hover:border-maroon-300 bg-white'}`}>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'exchange' ? 'border-blue-400 bg-transparent' : 'border-paper-edge hover:border-maroon-300 bg-white'}`}>
                       <p className="font-semibold text-graphite text-sm">Exchange for another product</p>
                       <p className="text-xs text-graphite-faint mt-0.5">Swap for any product of the same or higher price — pay only the difference. Window: {EXCHANGE_WINDOW_HOURS} hours from delivery.</p>
                     </button>
@@ -994,7 +994,7 @@ function OrderDetailContent() {
                     <p className="font-display text-band font-normal text-maroon-800">₹{priceDifference.toLocaleString()}</p>
                   </div>
                   {paymentProof ? (
-                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-sm mb-4">
+                    <div className="flex items-center gap-2 p-3 border-l-2 border-green-700/50 pl-4 mb-4">
                       <CheckCircle size={18} className="text-green-600" />
                       <p className="text-sm text-green-700 font-medium">Payment received — ready to submit</p>
                     </div>
@@ -1038,7 +1038,7 @@ function OrderDetailContent() {
                       <div key={idx} className="relative group">
                         <img src={url} alt={`Exchange photo ${idx+1}`} className="w-20 h-20 object-cover rounded-sm border-2 border-orange-200" />
                         <button onClick={() => setReturnImages(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-transparent0 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
                           <X size={10} />
                         </button>
                       </div>
