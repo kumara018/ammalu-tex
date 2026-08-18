@@ -314,6 +314,21 @@ function AdminPageInner() {
     }
     return map;
   }, [returns]);
+  /**
+   * Returns still needing a human decision.
+   *
+   * "Open" is defined as NOT one of the settled endings — rejected, refunded
+   * and completed are finished, everything else is somebody waiting. Written
+   * as an exclusion rather than a list of open statuses on purpose: a new
+   * mid-flight status added later (a second pickup attempt, say) is then
+   * counted as open by default, which is the safe direction to be wrong in.
+   * A list of open statuses would silently stop counting it.
+   */
+  const openReturnCount = useMemo(
+    () => returns.filter((r) => !['rejected', 'refunded', 'completed'].includes(r.status)).length,
+    [returns],
+  );
+
   const [admins, setAdmins] = useState<any[]>([]);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [expandedReturn, setExpandedReturn] = useState<number | null>(null);
@@ -887,9 +902,20 @@ function AdminPageInner() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+        {/**
+          * THE WORKROOM, NOT AN "ADMIN PANEL".
+          *
+          * "Admin Panel / Ammalu Tex Store Management" is the heading every
+          * bootstrap dashboard has ever carried. It names the software rather
+          * than the work, and the shop already has a better word for the room
+          * where the work happens — it is what the account menu calls this.
+          */}
         <div>
-          <h1 className="section-title">Admin Panel</h1>
-          <p className="text-sm text-graphite-faint">Ammalu Tex Store Management</p>
+          <p className="text-rule uppercase text-thread">Ammalu Tex</p>
+          <h1 className="mt-2 font-display text-band leading-none text-graphite">The workroom</h1>
+          <p className="mt-2 text-sm text-graphite-muted">
+            What needs you, and how the shop stands today.
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {tab === 'products' && (
@@ -963,8 +989,17 @@ function AdminPageInner() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-orange-200 mb-6 gap-1 overflow-x-auto">
+      {/**
+        * The strip is ruled, not filled.
+        *
+        * The active tab used to be a filled tile with a heavy underline — the
+        * default "selected tab" of every admin template, and the one element
+        * on the page loud enough to compete with the figures underneath it.
+        * A thread rule under the active label says the same thing, matches the
+        * rail on the storefront, and leaves the numbers as the loudest thing
+        * on a page whose whole job is numbers.
+        */}
+      <div className="mb-8 flex gap-x-7 overflow-x-auto border-b border-paper-edge">
         {TABS.map(({ key, label }) => {
           const isCancel = key === 'cancellations';
           const isReturn = key === 'returns';
@@ -977,12 +1012,14 @@ function AdminPageInner() {
             <button
               key={key}
               onClick={() => { setTab(key as TabKey); localStorage.setItem('admin_tab', key); if(key==='cancellations') loadOrders(); if(key==='returns') loadReturns(); }}
-              className={`relative px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${tab === key ? 'border-maroon-800 text-maroon-800 bg-maroon-50' : 'border-transparent text-graphite-faint hover:text-maroon-700'}`}
+              aria-current={tab === key ? 'page' : undefined}
+              className={`relative -mb-px whitespace-nowrap border-b-2 pb-3 text-caption uppercase transition-colors duration-500 ${tab === key ? 'border-thread text-graphite' : 'border-transparent text-graphite-faint hover:text-graphite-muted'}`}
             >
               {label}
               {badge > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-normal rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="ml-2 text-rule tabular-nums text-thread">
                   {badge}
+                  <span className="sr-only"> needing attention</span>
                 </span>
               )}
             </button>
@@ -993,46 +1030,122 @@ function AdminPageInner() {
       {/* Dashboard */}
       {tab === 'dash' && dash && (
         <div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {[
-              { label: 'Active Products', value: dash.active_products, icon: Package,     color: 'text-graphite-faint' },
-              { label: 'Total Customers', value: dash.total_users,     icon: Users,       color: 'text-graphite-faint' },
-              { label: 'Total Orders',    value: dash.total_orders,    icon: ShoppingBag, color: 'text-graphite-faint' },
-              // The only tile that is ever a call to action: it takes the
-              // accent when there is something waiting, and goes quiet at zero.
-              { label: 'Pending Orders',  value: dash.pending_orders,  icon: Package,     color: dash.pending_orders > 0 ? 'text-thread' : 'text-graphite-faint' },
-              { label: 'Total Revenue',   value: `₹${dash.total_revenue.toLocaleString('en-IN')}`, icon: TrendingUp, color: 'text-graphite-faint' },
-              { label: 'All Products',    value: dash.total_products,  icon: Package,     color: 'text-graphite-faint' },
-            ].map(({ label, value, icon: Icon, color }) => (
-              // The number is the tile. It is set in the display face at the
-              // size a figure deserves when it is the only reason the tile
-              // exists; the icon drops back to a mark beside the label rather
-              // than a coloured square competing with it.
-              <div key={label} className="card p-5">
-                <p className="font-display text-band leading-none tabular-nums text-graphite">{value}</p>
-                <p className="mt-3 flex items-center gap-2 text-rule uppercase text-graphite-faint">
-                  <Icon size={13} className={color} /> {label}
-                </p>
-              </div>
-            ))}
-          </div>
+          {/**
+            * WHAT NEEDS YOU, BEFORE ANYTHING ELSE.
+            *
+            * This opened with six equal boxed tiles — the card grid every
+            * admin template ships with — and that arrangement makes three
+            * mistakes at once. It gives a number nobody acts on ("All
+            * Products") exactly the same weight as the one number that means
+            * work is waiting. It repeated itself: "Active Products" and "All
+            * Products" differ only when something is unlisted, so on most days
+            * the page showed the same figure twice in two boxes. And it opened
+            * with inventory when the first question anyone opening this page
+            * has is "is there anything I have to do".
+            *
+            * So the page opens with the answer to that question in a sentence,
+            * and says so plainly when the answer is no — a quiet workroom is a
+            * good state and a page that cannot express it will invent alarm.
+            * The figures follow, as a ruled row rather than boxes, because a
+            * box around a number adds a rectangle and no information.
+            */}
+          {(() => {
+            const waiting = [
+              dash.pending_orders > 0
+                ? `${dash.pending_orders} order${dash.pending_orders === 1 ? '' : 's'} not yet moved on`
+                : null,
+              openReturnCount > 0
+                ? `${openReturnCount} return${openReturnCount === 1 ? '' : 's'} waiting on a decision`
+                : null,
+            ].filter(Boolean) as string[];
 
-          <div className="card p-5">
-            <h3 className="font-normal text-maroon-900 mb-4">Recent Orders</h3>
+            return (
+              <section className="mb-12">
+                <p className="text-rule uppercase text-graphite-faint">On the counter</p>
+                {waiting.length === 0 ? (
+                  <p className="mt-4 max-w-[52ch] font-display text-[1.5rem] leading-snug text-graphite">
+                    Nothing is waiting. Every order has moved on and no return needs
+                    a decision — this is the state you want the page in.
+                  </p>
+                ) : (
+                  <ul className="mt-4 flex flex-col gap-3">
+                    {waiting.map((line, i) => (
+                      <li key={i} className="flex items-baseline gap-4">
+                        <span aria-hidden="true" className="mt-2 block h-px w-6 shrink-0 bg-thread" />
+                        <span className="font-display text-[1.5rem] leading-snug text-graphite">{line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {waiting.length > 0 && (
+                  <div className="mt-5 flex flex-wrap gap-x-8 gap-y-2">
+                    {dash.pending_orders > 0 && (
+                      <button
+                        onClick={() => { setTab('orders'); localStorage.setItem('admin_tab', 'orders'); loadOrders(); }}
+                        className="border-b border-thread pb-1 text-caption uppercase text-graphite transition-colors duration-500 hover:text-thread"
+                      >
+                        Go to orders &rarr;
+                      </button>
+                    )}
+                    {openReturnCount > 0 && (
+                      <button
+                        onClick={() => { setTab('returns'); localStorage.setItem('admin_tab', 'returns'); loadReturns(); }}
+                        className="border-b border-thread pb-1 text-caption uppercase text-graphite transition-colors duration-500 hover:text-thread"
+                      >
+                        Go to returns &rarr;
+                      </button>
+                    )}
+                  </div>
+                )}
+              </section>
+            );
+          })()}
+
+          {/* The shop, as a ruled row. No boxes: a rectangle around a figure
+              adds a rectangle and no information. "All Products" is gone —
+              it differed from "Active" only when something was unlisted, so
+              most days it printed the same number twice. */}
+          <section className="mb-12 border-t border-paper-edge pt-8">
+            <p className="text-rule uppercase text-graphite-faint">The shop</p>
+            <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
+              {[
+                { label: 'Orders, all time',  value: dash.total_orders },
+                { label: 'Revenue, all time', value: `₹${dash.total_revenue.toLocaleString('en-IN')}` },
+                { label: 'Pieces listed',     value: dash.active_products },
+                { label: 'Customers',         value: dash.total_users },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <dt className="text-rule uppercase text-graphite-faint">{label}</dt>
+                  <dd className="mt-2 font-display text-band leading-none tabular-nums text-graphite">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <div className="border-t border-paper-edge pt-8">
+            <div className="mb-5 flex flex-wrap items-baseline justify-between gap-4">
+              <p className="text-rule uppercase text-graphite-faint">Just placed</p>
+              <button
+                onClick={() => { setTab('orders'); localStorage.setItem('admin_tab', 'orders'); loadOrders(); }}
+                className="text-caption uppercase text-graphite-muted transition-colors duration-500 hover:text-thread"
+              >
+                All orders &rarr;
+              </button>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead><tr className="text-left text-graphite-faint border-b border-maroon-200">
+                <thead><tr className="border-b border-paper-edge text-left text-graphite-faint">
                   <th className="pb-3 pr-4">Order #</th>
                   <th className="pb-3 pr-4">Amount</th>
                   <th className="pb-3 pr-4">Status</th>
                   <th className="pb-3">Date</th>
                 </tr></thead>
-                <tbody className="divide-y divide-orange-50">
+                <tbody className="divide-y divide-paper-edge">
                   {dash.recent_orders.map((o) => {
                     const linkedReturn = returnsByOrderId[o.id];
                     return (
-                      <tr key={o.id} className="hover:bg-maroon-50">
-                        <td className="py-3 pr-4 font-mono font-medium text-maroon-800">{o.order_number}</td>
+                      <tr key={o.id} className="transition-colors duration-300 hover:bg-paper-shade">
+                        <td className="py-3 pr-4 font-mono text-graphite">{o.order_number}</td>
                         <td className="py-3 pr-4 font-semibold">₹{o.total.toLocaleString()}</td>
                         <td className="py-3 pr-4">
                           <span className="capitalize badge badge-info">{o.status}</span>
