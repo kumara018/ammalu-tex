@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { STORE } from '@/lib/config';
+import { LogoMark } from '@/components/Logo';
 
 /**
  * The rail — Ammalu Tex's navigation, and the structural opposite of the
@@ -111,9 +112,15 @@ export default function AtelierRail() {
             rather than a logo lockup — this shop signs its work. */}
         <Link
           href="/"
-          className="shrink-0 font-display text-[1.35rem] leading-none tracking-tight text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+          aria-label={`${STORE.name} — home`}
+          className="group flex shrink-0 items-center gap-2.5 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
-          {STORE.name}
+          {/* The A mark, kept alongside the name. Swapping it for a real
+              logo file later is one component — see components/Logo.tsx. */}
+          <LogoMark size={28} className="shrink-0 transition-opacity duration-500 group-hover:opacity-80" />
+          <span className="font-display text-[1.35rem] leading-none tracking-tight">
+            {STORE.name}
+          </span>
         </Link>
 
         {/* The shelf, inline. Six names, no dropdown — a dropdown hides six
