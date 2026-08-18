@@ -906,9 +906,17 @@ function AdminPageInner() {
           * THE WORKROOM, NOT AN "ADMIN PANEL".
           *
           * "Admin Panel / Ammalu Tex Store Management" is the heading every
-          * bootstrap dashboard has ever carried. It names the software rather
+          * bootstrap dashboard has ever carried: it names the software rather
           * than the work, and the shop already has a better word for the room
-          * where the work happens — it is what the account menu calls this.
+          * where the work happens.
+          *
+          * The name was briefly changed to "Admin dashboard" after the
+          * shopkeeper, shown a menu containing THE WORKROOM, asked where the
+          * admin dashboard was — and then changed back at their request once
+          * the two were connected. Worth recording, because the reasoning that
+          * argued for renaming it was sound and was simply outvoted by the
+          * person who uses it: they know it as the workroom now, and a name
+          * only has to be learned once.
           */}
         <div>
           <p className="text-rule uppercase text-thread">Ammalu Tex</p>

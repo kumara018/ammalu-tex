@@ -70,12 +70,41 @@ export default function SceneRouter() {
     outWeight.current = 1;
   }, [scene]);
 
+  // 'muslin' covers every page that is not the homepage: the shelf, a piece,
+  // the bag, checkout, the account, the admin someone has open all day. Those
+  // reach genuinely zero draw calls — the backdrop stays mounted only long
+  // enough to dissolve the previous scene away. Declared here rather than
+  // further down because the dissolve rate below reads it.
+  const idle = scene === 'muslin';
+
+  /**
+   * LEAVING IS FAST. ARRIVING IS SLOW.
+   *
+   * There used to be one dissolve rate for both directions — 0.038 per frame,
+   * which needs about 119 frames to fall under 1%. That is close to two full
+   * seconds, and it was the right number when this router cross-faded one
+   * atmosphere into another: you want to see the old room give way to the new
+   * one.
+   *
+   * It stopped being right the moment the scene became the homepage and
+   * nothing else. Every navigation is now "scene → nothing", so that two
+   * seconds is spent showing a ghost of the homepage's drifting panels lying
+   * over the product page somebody just tapped. Reported exactly that way:
+   * the design shows for one to two seconds while navigating.
+   *
+   * So the rate depends on where you are going. Arriving at the homepage keeps
+   * the slow reveal, because that is the one place the scene is the point.
+   * Leaving it clears in about a fifth of a second — long enough not to snap,
+   * short enough that the page you asked for is the only thing you see.
+   */
   useFrame((_, delta) => {
     // Normalised against a 60Hz step — a fixed factor would dissolve twice as
     // fast on a 120Hz display.
-    const k = 1 - Math.pow(1 - 0.038, Math.min(delta, 0.1) * 60);
+    const step = Math.min(delta, 0.1) * 60;
+    const k = 1 - Math.pow(1 - 0.038, step);        // the cinematic reveal
+    const kOut = 1 - Math.pow(1 - (idle ? 0.34 : 0.038), step);
     inWeight.current += (1 - inWeight.current) * k;
-    outWeight.current += (0 - outWeight.current) * k;
+    outWeight.current += (0 - outWeight.current) * kOut;
   });
 
   // Release the outgoing scene's geometry and materials once it is genuinely
@@ -96,11 +125,6 @@ export default function SceneRouter() {
   const budget = effectiveBudget(tier, scene, { effectsSuspended, reducedMotion });
 
   if (tier === 'off') return null;
-
-  // 'muslin' covers the policy pages, support, and the admin dashboard someone
-  // has open all day. Those reach genuinely zero draw calls — the backdrop
-  // stays mounted only long enough to dissolve the previous scene away.
-  const idle = scene === 'muslin';
 
   return (
     <>
