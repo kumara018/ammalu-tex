@@ -3,7 +3,7 @@ from typing import Optional
 import jwt as pyjwt
 from jwt.exceptions import InvalidTokenError
 import bcrypt
-from fastapi import Depends, HTTPException, Response, status
+from fastapi import Depends, HTTPException, Response, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 import os
@@ -46,6 +46,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 def get_current_user(
+    request: Request = None,
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
     response: Response = None,
@@ -66,6 +67,10 @@ def get_current_user(
         raise credentials_exc
 
     user = db.query(models.User).filter(models.User.id == user_id).first()
+    # The id, never the email or the phone: a log line is a copy of whatever it
+    # holds, kept somewhere with weaker access control than the database.
+    if request is not None and user is not None:
+        request.state.user_id = user.id
     if user is None or not user.is_active:
         raise credentials_exc
 

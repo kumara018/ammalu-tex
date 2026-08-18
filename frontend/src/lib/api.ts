@@ -3,7 +3,17 @@ import axios from 'axios';
 // Determine backend URL based on where the app is running.
 // - localhost / 127.0.0.1  →  local FastAPI server
 // - anywhere else (Vercel) →  Render backend
-function getApiBase(): string {
+/**
+ * The one place that decides which backend the browser talks to.
+ *
+ * Exported so nothing has to reimplement it. Three call sites in AuthContext
+ * used `process.env.NEXT_PUBLIC_API_URL || <render url>` instead, and because
+ * next.config inlines that variable with the Render fallback, a build served
+ * from localhost sent the customer's bearer token to the LIVE backend on two of
+ * them. CORS blocked it, which means the "fetch fresh user data" path had never
+ * worked locally at all.
+ */
+export function getApiBase(): string {
   if (typeof window === 'undefined') {
     // Server-side (Next.js SSR) — always use Render
     return 'https://ammalu-tex.onrender.com';

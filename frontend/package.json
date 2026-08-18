@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:csp": "node scripts/check-csp.mjs",
+    "check:api-base": "node scripts/check-api-base.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.8.0",

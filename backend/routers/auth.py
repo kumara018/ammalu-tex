@@ -8,12 +8,22 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from database import get_db
 import models, schemas, auth as auth_utils
+from rate_limit import (
+    enforce_ip_limit, enforce_identifier_limit,
+    SEND_CODE, VERIFY_CODE, REGISTER, SESSION_SWAP,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 MAX_DEVICES = 4
 
 # ── helpers ───────────────────────────────────────────────────────────────────
+
+# AUTH-SPEC R3. A bcrypt hash of a password nobody has, so the no-user branch
+# can pay exactly the same cost as the user branch. Computed once at import;
+# hashing per request would itself be a timing difference.
+_DUMMY_HASH = auth_utils.hash_password("not-a-real-password-only-for-timing")
+
 
 def _is_email(value: str) -> bool:
     return bool(re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", value))
@@ -205,10 +215,13 @@ def _create_session_or_409(db: Session, user: models.User, request: Request) -> 
 # ── REGISTER ──────────────────────────────────────────────────────────────────
 
 @router.post("/register", status_code=201)
-def register(payload: schemas.UserRegister, db: Session = Depends(get_db)):
+def register(request: Request, payload: schemas.UserRegister, db: Session = Depends(get_db)):
     """Step 1 of signup: create the (unverified) account and send a 6-digit
     OTP to both email and mobile. The account only becomes usable once
     /verify-register-otp confirms it — see that endpoint for the token."""
+    # AUTH-SPEC R1: per-address budget, counted in the database so it
+    # survives the restarts this instance does constantly.
+    enforce_ip_limit(db, request, "register", REGISTER)
     existing_email = db.query(models.User).filter(models.User.email == payload.email.lower()).first()
     if existing_email and existing_email.is_verified:
         raise HTTPException(409, "An account with this email already exists. Please login.")
@@ -248,6 +261,9 @@ def register(payload: schemas.UserRegister, db: Session = Depends(get_db)):
 
 @router.post("/verify-register-otp", response_model=schemas.Token)
 def verify_register_otp(payload: schemas.LoginOTPVerify, request: Request, db: Session = Depends(get_db)):
+    # AUTH-SPEC R1: per-address budget, counted in the database so it
+    # survives the restarts this instance does constantly.
+    enforce_ip_limit(db, request, "verify-register-otp", VERIFY_CODE)
     user = _find_user(db, payload.identifier)
     if not user:
         raise HTTPException(404, "Account not found.")
@@ -271,7 +287,10 @@ def verify_register_otp(payload: schemas.LoginOTPVerify, request: Request, db: S
 # ── RESEND REGISTRATION OTP ───────────────────────────────────────────────────
 
 @router.post("/resend-register-otp")
-def resend_register_otp(payload: schemas.OTPRequest, db: Session = Depends(get_db)):
+def resend_register_otp(request: Request, payload: schemas.OTPRequest, db: Session = Depends(get_db)):
+    # AUTH-SPEC R1: per-address budget, counted in the database so it
+    # survives the restarts this instance does constantly.
+    enforce_ip_limit(db, request, "resend-register-otp", SEND_CODE)
     user = _find_user(db, payload.identifier)
     if not user or user.is_verified:
         return {"message": "If a pending signup exists for this account, a new OTP has been sent."}
@@ -286,6 +305,10 @@ def resend_register_otp(payload: schemas.OTPRequest, db: Session = Depends(get_d
 
 @router.post("/login", response_model=schemas.Token)
 def login(payload: schemas.UserLogin, request: Request, db: Session = Depends(get_db)):
+    # AUTH-SPEC R1: per-address budget, counted in the database so it
+    # survives the restarts this instance does constantly.
+    enforce_ip_limit(db, request, "login", VERIFY_CODE)
+    enforce_identifier_limit(db, payload.identifier)
     user = _find_user(db, payload.identifier)
 
     if not user or not auth_utils.verify_password(payload.password, user.password_hash):
@@ -346,27 +369,48 @@ def update_profile(
 # ── FORGOT PASSWORD — send OTP ────────────────────────────────────────────────
 
 @router.post("/forgot-password")
-def forgot_password(payload: schemas.OTPRequest, db: Session = Depends(get_db)):
+def forgot_password(request: Request, payload: schemas.OTPRequest, db: Session = Depends(get_db)):
+    """
+    AUTH-SPEC R2. ONE identical response, whether or not the account exists.
+
+    The old code carried the comment "Don't reveal if user exists" directly
+    above a branch that revealed it: a missing account got "If this account
+    exists, an OTP has been sent", while a real one got "OTP sent to your
+    registered email (abc***)" plus an `email_hint` field. Different wording,
+    different shape, different keys — anyone could tell the two apart from the
+    response body alone, and walk a list of phone numbers to find which belong
+    to customers.
+
+    The reply below is now assembled from the SUBMITTED identifier and is the
+    same bytes either way. The hint that used to come from the stored record is
+    gone with it; a masked echo of what the caller typed tells them what they
+    need and tells an attacker nothing.
+    """
+    enforce_ip_limit(db, request, "forgot-password", SEND_CODE)
+    enforce_identifier_limit(db, payload.identifier)
+
     identifier = payload.identifier.strip()
     user = _find_user(db, identifier)
-    if not user:
-        # Don't reveal if user exists — just return success
-        return {"message": "If this account exists, an OTP has been sent."}
 
-    # Use email as identifier for OTP
-    otp = _create_otp(db, user.email, otp_type="reset")
-    notifications.send_password_reset_otp_email(user.email, user.full_name, otp)
+    if user:
+        otp = _create_otp(db, user.email, otp_type="reset")
+        try:
+            notifications.send_password_reset_otp_email(user.email, user.full_name, otp)
+        except Exception:
+            # A failing mail server must not become the oracle the wording
+            # above was carefully written to remove.
+            pass
 
-    return {
-        "message": f"OTP sent to your registered email ({user.email[:3]}***). Valid for 10 minutes.",
-        "email_hint": user.email[:3] + "***@" + user.email.split("@")[-1],
-    }
+    return {"message": "If this account exists, a reset code has been sent. Valid for 10 minutes."}
 
 
 # ── VERIFY OTP & RESET PASSWORD ───────────────────────────────────────────────
 
 @router.post("/reset-password")
-def reset_password(payload: schemas.OTPVerify, db: Session = Depends(get_db)):
+def reset_password(request: Request, payload: schemas.OTPVerify, db: Session = Depends(get_db)):
+    # AUTH-SPEC R1: per-address budget, counted in the database so it
+    # survives the restarts this instance does constantly.
+    enforce_ip_limit(db, request, "reset-password", VERIFY_CODE)
     identifier = payload.identifier.strip()
     user = _find_user(db, identifier)
     if not user:
@@ -384,10 +428,26 @@ def reset_password(payload: schemas.OTPVerify, db: Session = Depends(get_db)):
 # ── SEND LOGIN OTP (Step 1) ───────────────────────────────────────────────────
 
 @router.post("/send-login-otp")
-def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
+def send_login_otp(request: Request, payload: schemas.UserLogin, db: Session = Depends(get_db)):
     """Verify credentials then send a 6-digit OTP to the user's email."""
+    enforce_ip_limit(db, request, "send-login-otp", SEND_CODE)
+    enforce_identifier_limit(db, payload.identifier)
+
     user = _find_user(db, payload.identifier)
-    if not user or not auth_utils.verify_password(payload.password, user.password_hash):
+    # AUTH-SPEC R3: always pay the hash, so presence and absence cost the same.
+    #
+    # `if not user or not verify_password(...)` short-circuits: with no user,
+    # bcrypt never runs and the endpoint answers in microseconds instead of the
+    # ~300ms a real check takes. That is a thousandfold difference and it is
+    # measurable over the internet — the wording can be identical and the
+    # response time still says whether the account exists.
+    #
+    # `password_ok` is computed BEFORE the branch precisely so that no `or` can
+    # skip it.
+    password_ok = auth_utils.verify_password(
+        payload.password, user.password_hash if user else _DUMMY_HASH
+    )
+    if not user or not password_ok:
         raise HTTPException(
             status_code=401,
             detail="Incorrect email/phone or password. Please check and try again.",
@@ -416,6 +476,9 @@ def send_login_otp(payload: schemas.UserLogin, db: Session = Depends(get_db)):
 @router.post("/verify-login-otp", response_model=schemas.Token)
 def verify_login_otp(payload: schemas.LoginOTPVerify, request: Request, db: Session = Depends(get_db)):
     """Verify the 6-digit OTP and return a JWT if correct."""
+    # AUTH-SPEC R1: per-address budget, counted in the database so it
+    # survives the restarts this instance does constantly.
+    enforce_ip_limit(db, request, "verify-login-otp", VERIFY_CODE)
     user = _find_user(db, payload.identifier)
     if not user:
         raise HTTPException(404, "Account not found.")
@@ -652,6 +715,9 @@ def logout(
 def evict_and_login(payload: schemas.DeviceEvictLogin, request: Request, db: Session = Depends(get_db)):
     """Complete a login that hit the device cap: revoke the chosen device,
     then create the new session — no need to re-enter a password/OTP."""
+    # AUTH-SPEC R1: per-address budget, counted in the database so it
+    # survives the restarts this instance does constantly.
+    enforce_ip_limit(db, request, "evict-and-login", SESSION_SWAP)
     claims = auth_utils.decode_action_token(payload.pending_token, "device_evict")
     user = db.query(models.User).filter(models.User.id == claims.get("uid")).first()
     if not user:
