@@ -1,24 +1,15 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { STORE, WHATSAPP_URL, MAIL_URL, CALL_URL } from '@/lib/config';
+import { STORE, WHATSAPP_URL, MAIL_URL } from '@/lib/config';
 import Link from 'next/link';
 import MeasureRule from '@/components/home/MeasureRule';
+import SizeGuide from '@/components/system/SizeGuide';
 import {
   Phone, Mail, MapPin, Clock, ChevronDown, ChevronUp,
   MessageCircle, Package, RotateCcw, Truck, Shield,
   Ruler, FileText, Lock, HelpCircle,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-
-// ── Size data ────────────────────────────────────────────────────────────────
-const SIZE_ROWS = [
-  { size: 'S',    chest: '32–34" / 81–86 cm',    waist: '26–28" / 66–71 cm',   hip: '35–37" / 89–94 cm'    },
-  { size: 'M',    chest: '34–36" / 86–91 cm',    waist: '28–30" / 71–76 cm',   hip: '37–39" / 94–99 cm'    },
-  { size: 'L',    chest: '36–38" / 91–97 cm',    waist: '30–32" / 76–81 cm',   hip: '39–41" / 99–104 cm'   },
-  { size: 'XL',   chest: '38–40" / 97–102 cm',   waist: '32–34" / 81–86 cm',   hip: '41–43" / 104–109 cm'  },
-  { size: 'XXL',  chest: '40–42" / 102–107 cm',  waist: '34–36" / 86–91 cm',   hip: '43–45" / 109–114 cm'  },
-  { size: 'XXXL', chest: '42–44" / 107–112 cm',  waist: '36–38" / 91–97 cm',   hip: '45–47" / 114–119 cm'  },
-];
 
 // ── Accordion component ──────────────────────────────────────────────────────
 function Accordion({
@@ -126,98 +117,71 @@ export default function SupportPage() {
       <MeasureRule className="mb-2" />
 
       <div className="mb-[clamp(3rem,10vh,7rem)]">
-        {[
-          { label: 'Call the shop',  value: `${STORE.phone1}`, note: STORE.weekdays,       href: CALL_URL,             external: false },
-          { label: 'WhatsApp',       value: STORE.phone1,      note: 'Any time — we reply when the shop opens', href: WHATSAPP_URL, external: true  },
-          { label: 'Email',          value: STORE.email,       note: 'Answered within a day', href: MAIL_URL,          external: false },
-          { label: 'Come in',        value: `${STORE.shopNo}, ${STORE.area}`, note: `${STORE.city} · open in maps`, href: STORE.googleMapsUrl, external: true },
-        ].map(({ label, value, note, href, external }) => (
-          <a
-            key={label}
-            href={href}
-            {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-            className="group grid grid-cols-[auto_1fr] items-baseline gap-x-6 border-b border-paper-edge py-7 transition-colors duration-500 hover:border-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread sm:gap-x-10"
-          >
-            <span className="text-rule uppercase text-graphite-faint transition-colors duration-500 group-hover:text-thread">
-              {label}
-            </span>
-            <div className="grid gap-y-1.5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-baseline lg:gap-x-10">
-              <span className="font-display text-band font-normal text-graphite">{value}</span>
-              <span className="text-caption uppercase text-graphite-faint">{note}</span>
-            </div>
-          </a>
-        ))}
+
+        {/* The two lines. One fact, two numbers — and the second one had
+            never appeared on this page at all. */}
+        <div className="grid gap-x-14 gap-y-8 border-b border-paper-edge pb-9 sm:grid-cols-2">
+          {[
+            { number: STORE.phone1, note: STORE.weekdays },
+            { number: STORE.phone2, note: STORE.weekend },
+          ].map(({ number, note }) => (
+            <a
+              key={number}
+              href={`tel:${number.replace(/\s/g, '')}`}
+              className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+            >
+              <span className="block font-display text-band leading-none text-graphite transition-colors duration-500 group-hover:text-thread">
+                {number}
+              </span>
+              <span className="mt-3 block text-caption uppercase text-graphite-faint">{note}</span>
+            </a>
+          ))}
+        </div>
+
+        {/* The channels. On these the number is plumbing, not information —
+            printing it again is what made the page look duplicated. */}
+        <div className="grid gap-x-14 border-b border-paper-edge sm:grid-cols-2 sm:divide-x sm:divide-paper-edge">
+          {[
+            { label: 'WhatsApp', note: 'Any time — we answer when the shop opens', href: WHATSAPP_URL, external: true },
+            { label: STORE.email, note: 'Answered within a day', href: MAIL_URL, external: false },
+          ].map(({ label, note, href, external }) => (
+            <a
+              key={label}
+              href={href}
+              {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              className="group flex flex-col py-7 transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread sm:first:pr-14 sm:last:pl-14"
+            >
+              <span className="break-all font-display text-[1.35rem] leading-snug text-graphite transition-colors duration-500 group-hover:text-thread">
+                {label}
+              </span>
+              <span className="mt-2 text-caption uppercase text-graphite-faint">{note}</span>
+            </a>
+          ))}
+        </div>
+
+        {/* The place. */}
+        <a
+          href={STORE.googleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-paper-edge py-7 transition-colors duration-500 hover:border-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+        >
+          <span className="font-display text-[1.35rem] leading-snug text-graphite transition-colors duration-500 group-hover:text-thread">
+            {STORE.shopNo}, {STORE.area}
+          </span>
+          <span className="flex items-baseline gap-3 text-caption uppercase text-graphite-faint transition-colors duration-500 group-hover:text-thread">
+            {STORE.city} · open in maps
+            <span
+              aria-hidden="true"
+              className="inline-block h-px w-6 bg-paper-edge transition-all duration-500 group-hover:w-12 group-hover:bg-thread"
+            />
+          </span>
+        </a>
       </div>
 
       {/* ── Size Guide ─────────────────────────────────────────────────── */}
       <Accordion id="size-guide" title="Size Guide" icon={Ruler} defaultOpen>
-        <p className="text-sm text-graphite-faint mb-5">
-          Take your body measurements (chest, waist, hips) in a relaxed position and compare
-          with the chart below for the perfect fit.
-        </p>
-
-        <div className="mb-4">
-          <p className="text-rule uppercase text-graphite-faint mb-2">
-            Tops &amp; Crop Tops — S to XXXL
-          </p>
-          <div className="overflow-x-auto border-y border-paper-edge">
-            <table className="w-full text-sm">
-              <thead className="">
-                <tr className="text-rule uppercase text-thread">
-                  <th className="px-4 py-3 text-left">Size</th>
-                  <th className="px-4 py-3 text-left">Chest</th>
-                  <th className="px-4 py-3 text-left">Waist</th>
-                  <th className="px-4 py-3 text-left">Hip</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-paper-edge">
-                {SIZE_ROWS.map((row) => (
-                  <tr key={row.size} className="hover:bg-paper-shade transition-colors duration-500">
-                    <td className="px-4 py-3 font-normal text-maroon-900">{row.size}</td>
-                    <td className="px-4 py-3 text-graphite-muted">{row.chest}</td>
-                    <td className="px-4 py-3 text-graphite-muted">{row.waist}</td>
-                    <td className="px-4 py-3 text-graphite-muted">{row.hip}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <p className="text-rule uppercase text-graphite-faint mb-2">
-            Chudithar, Lehenga, Half Saree &amp; Party Wears — L to XXXL
-          </p>
-          <div className="overflow-x-auto border-y border-paper-edge">
-            <table className="w-full text-sm">
-              <thead className="">
-                <tr className="text-rule uppercase text-thread">
-                  <th className="px-4 py-3 text-left">Size</th>
-                  <th className="px-4 py-3 text-left">Chest</th>
-                  <th className="px-4 py-3 text-left">Waist</th>
-                  <th className="px-4 py-3 text-left">Hip</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-paper-edge">
-                {SIZE_ROWS.filter((r) => ['L', 'XL', 'XXL', 'XXXL'].includes(r.size)).map((row) => (
-                  <tr key={row.size} className="hover:bg-paper-shade transition-colors duration-500">
-                    <td className="px-4 py-3 font-normal text-maroon-900">{row.size}</td>
-                    <td className="px-4 py-3 text-graphite-muted">{row.chest}</td>
-                    <td className="px-4 py-3 text-graphite-muted">{row.waist}</td>
-                    <td className="px-4 py-3 text-graphite-muted">{row.hip}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="border-l border-thread/50 pl-5 text-sm text-graphite-muted">
-          <b className="font-normal text-graphite">How to measure.</b> Use a soft measuring tape. Measure chest at the fullest
-          part, waist at the narrowest, and hips at the widest. For fitted styles (bodycon),
-          choose your exact size. For flowing styles (lehenga, half saree), you can go one size
-          down. When in doubt, size up.
-        </div>
+        <SizeGuide />
       </Accordion>
 
       {/* ── Shipping Policy ────────────────────────────────────────────── */}

@@ -244,68 +244,18 @@ export default function HomePage() {
             Replaces a trust-badge row with the thing that actually
             reassures someone buying online: a real shop, at a real
             address, with someone who answers the phone. */}
-        <section
-          aria-labelledby="counter-heading"
-          className="relative overflow-hidden px-6 py-[14vh] sm:px-10"
-        >
-          {/* The light changes here. Same ground as the counter at the foot of
-              the page, lit from the same corner, so the two read as one room
-              ending rather than two dark blocks stacked. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                'radial-gradient(120% 110% at 22% 0%, rgba(193,135,111,0.18) 0%, rgba(193,135,111,0) 62%),' +
-                                // Ends on the exact tone the footer BEGINS on (#402C25), so
-                // the band and the counter read as one unbroken dark room
-                // rather than two blocks with a seam between them. Lands
-                // darkest in the middle, which is where the headline sits.
-                'linear-gradient(172deg, #3A2822 0%, #241713 52%, #402C25 100%)',
-            }}
-          />
-
-          <div className="relative mx-auto grid w-full max-w-[104rem] gap-x-14 gap-y-10 lg:grid-cols-12">
-            <div className="lg:col-span-6">
-              <Reveal>
-                <p className="mb-7 text-rule uppercase text-thread-pale">Ground floor, Texvalley</p>
-                <h2
-                  id="counter-heading"
-                  className="max-w-[16ch] font-display text-plate font-normal leading-[0.98] text-paper"
-                >
-                  Come to the counter
-                </h2>
-              </Reveal>
-            </div>
-
-            <div className="lg:col-span-5 lg:col-start-8 lg:self-end">
-              <Reveal delay={120}>
-                <p className="max-w-[42ch] text-lede text-paper/75">
-                  Everything here is chosen by hand, checked by hand, and packed by
-                  someone who will answer the phone if it is wrong.
-                </p>
-
-                {/* One action. The address, the numbers and the hours are all
-                    at the foot of this page already — printing them again
-                    here is what this section used to do. */}
-                <a
-                  href={STORE.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group mt-10 inline-flex items-baseline gap-4 border-b border-thread/60 pb-2 text-caption uppercase text-paper transition-colors duration-500 hover:border-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
-                >
-                  Find us on the map
-                  <span
-                    aria-hidden="true"
-                    className="transition-transform duration-500 group-hover:translate-x-1.5 motion-reduce:transition-none"
-                  >
-                    →
-                  </span>
-                </a>
-              </Reveal>
-            </div>
-          </div>
-        </section>
+        {/* THE COUNTER SECTION IS GONE, AND THAT IS THE RIGHT ANSWER.
+         *
+         * It began as a block listing the address, both phone numbers, the
+         * email, the hours and the delivery terms — every one of which the
+         * footer already carried, sixty pixels further down, under the same
+         * heading. Stripping it back to an invitation plus a map link only
+         * moved the duplication: the footer's own "Find us on the map" sat
+         * two hundred pixels below the one this section offered.
+         *
+         * A page does not need a section that says "come and see us"
+         * immediately above a counter that says where, when, and on which
+         * number. The footer IS this section, and it is better at it. */}
       </div>
     </div>
   );
