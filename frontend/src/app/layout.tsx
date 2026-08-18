@@ -1,4 +1,32 @@
 import type { Metadata } from 'next';
+import { Instrument_Serif, DM_Sans } from 'next/font/google';
+
+/**
+ * The atelier's two voices, and neither is the sister shop's.
+ *
+ * Instrument Serif is high-contrast and narrow — it reads like the name
+ * stitched into a couture label, which is exactly the register a workroom
+ * wants. DM Sans carries everything else: geometric, quiet, and legible at the
+ * small annotated sizes this design leans on.
+ *
+ * Loaded through next/font, which SELF-HOSTS the files at build time. That is
+ * not only a performance choice here: the Content-Security-Policy added in
+ * next.config.js has no font CDN in `font-src`, so a <link> to Google would be
+ * refused and the page would silently fall back to a system face.
+ */
+const display = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const body = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+});
+
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
@@ -10,7 +38,6 @@ import LoginPromptModal from '@/components/LoginPromptModal';
 import PageTransition from '@/components/PageTransition';
 import QueryProvider from '@/components/QueryProvider';
 import ThreeProvider from '@/three/ThreeProvider';
-import Letterbox from '@/components/Letterbox';
 import SoundToggle from '@/components/SoundToggle';
 import { Toaster } from 'react-hot-toast';
 import { STORE } from '@/lib/config';
@@ -54,13 +81,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
         <link rel="shortcut icon" href="/favicon.svg?v=3" />
         <link rel="apple-touch-icon" href="/favicon.svg?v=3" />
       </head>
-      <body className="bg-maroon-100 min-h-screen flex flex-col">
+      <body className="bg-paper text-graphite min-h-screen flex flex-col font-sans antialiased">
         {/* The single persistent 3D canvas. Sits outside the providers and
             outside PageTransition so a route change never remounts it — the
             GL context, compiled shaders and uploaded textures survive
@@ -85,8 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* Cinematic overlays. Both sit above the canvas and below the
                   modals, and neither takes pointer events — the path to
                   checkout is never behind them. */}
-              <Letterbox />
-              <SoundToggle />
+                    <SoundToggle />
               <LoginPromptModal />
               <Toaster
                 position="top-right"

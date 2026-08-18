@@ -4,7 +4,31 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
- * 21:9 letterbox bars on hero routes.
+ * NOT MOUNTED ON THIS SHOP. Kept for reference; see the note below.
+ *
+ * 21:9 matte bars on hero routes — in PAPER, not black.
+ *
+ * WHY IT IS NO LONGER IN THE LAYOUT. A matte is a cinema device, and it earns
+ * its cost on the sister shop, which is a dark room where the bars read as the
+ * edge of a frame. This shop is a workroom in daylight, and on a 1418x802
+ * laptop a 21:9 matte takes 97 pixels off the top AND the bottom — 194px, a
+ * quarter of the viewport — to draw two bars the same colour as the page. It
+ * bought nothing and it pushed the opening headline off the bottom of the
+ * screen, which is what the screenshot showed.
+ *
+ * Left in the tree rather than deleted because the behaviour (retract on
+ * scroll, skip on already-wide viewports, honour reduced motion) is worth
+ * having if a future page genuinely wants a framed shot.
+ *
+ * They were `bg-black`, carried over from the sister shop, where the whole
+ * site is a dark room and a black matte reads as the edge of the frame. This
+ * shop is a workroom in daylight: the ground is #FAF6F3, and two black bands
+ * across it do not read as a frame, they read as a broken page. Screenshotted
+ * at the top of the homepage they clipped the headline against a hard black
+ * edge.
+ *
+ * Same device, same behaviour, the shop's own colour. A matte is the colour of
+ * the wall the picture is hung on.
  *
  * Purely a CSS overlay — it never crops the canvas or changes the camera's
  * aspect. Cropping would cost real pixels and would push page content around;
@@ -61,11 +85,11 @@ export default function Letterbox() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-20">
       <div
-        className="absolute inset-x-0 top-0 bg-black motion-safe:transition-[height,opacity] motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,0.61,0.24,1)]"
+        className="absolute inset-x-0 top-0 bg-paper motion-safe:transition-[height,opacity] motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,0.61,0.24,1)]"
         style={{ height: bar, opacity: visible ? 1 : 0 }}
       />
       <div
-        className="absolute inset-x-0 bottom-0 bg-black motion-safe:transition-[height,opacity] motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,0.61,0.24,1)]"
+        className="absolute inset-x-0 bottom-0 bg-paper motion-safe:transition-[height,opacity] motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,0.61,0.24,1)]"
         style={{ height: bar, opacity: visible ? 1 : 0 }}
       />
     </div>
