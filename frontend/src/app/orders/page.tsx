@@ -111,14 +111,14 @@ export default function OrdersPage() {
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-4">
       {Array(3).fill(0).map((_, i) => (
         <div key={i} className="card overflow-hidden animate-pulse">
-          <div className="h-10 bg-gray-200" />
+          <div className="h-10 bg-paper-shade" />
           <div className="p-5 space-y-3">
             <div className="flex justify-between">
-              <div className="h-5 bg-gray-200 rounded w-40" />
-              <div className="h-5 bg-gray-200 rounded w-20" />
+              <div className="h-5 bg-paper-shade rounded w-40" />
+              <div className="h-5 bg-paper-shade rounded w-20" />
             </div>
-            <div className="h-4 bg-gray-200 rounded w-1/2" />
-            <div className="h-4 bg-gray-200 rounded w-1/3" />
+            <div className="h-4 bg-paper-shade rounded w-1/2" />
+            <div className="h-4 bg-paper-shade rounded w-1/3" />
           </div>
         </div>
       ))}
@@ -128,8 +128,8 @@ export default function OrdersPage() {
   if (error) return (
     <div className="max-w-2xl mx-auto px-4 py-20 text-center">
       <AlertCircle size={80} className="mx-auto text-red-200 mb-6" />
-      <h2 className="text-2xl font-bold text-gray-800 mb-3">Couldn&apos;t load your orders</h2>
-      <p className="text-gray-500 mb-8">Something went wrong on our end. Please try again.</p>
+      <h2 className="font-display text-band font-normal text-graphite mb-3">Couldn&apos;t load your orders</h2>
+      <p className="text-graphite-faint mb-8">Something went wrong on our end. Please try again.</p>
       <button onClick={load} className="btn-primary inline-flex items-center gap-2">
         <RefreshCw size={16} /> Try Again
       </button>
@@ -139,8 +139,8 @@ export default function OrdersPage() {
   if (orders.length === 0) return (
     <div className="max-w-2xl mx-auto px-4 py-20 text-center">
       <Package size={80} className="mx-auto text-maroon-200 mb-6" />
-      <h2 className="text-2xl font-bold text-gray-800 mb-3">No orders yet</h2>
-      <p className="text-gray-500 mb-8">You haven&apos;t placed any orders yet. Start shopping!</p>
+      <h2 className="font-display text-band font-normal text-graphite mb-3">No orders yet</h2>
+      <p className="text-graphite-faint mb-8">You haven&apos;t placed any orders yet. Start shopping!</p>
       <Link href="/products" className="btn-primary inline-flex items-center gap-2">
         Start Shopping
       </Link>
@@ -160,7 +160,7 @@ export default function OrdersPage() {
 
           return (
             <Link key={order.id} href={`/orders/${order.id}`} className="block group">
-              <div className="card overflow-hidden hover:shadow-md transition-all">
+              <div className="card overflow-hidden transition-all">
 
                 {/* Colored status banner — once a return/exchange is active, this
                     shows the compound status ("Delivered → Pickup Scheduled")
@@ -186,16 +186,16 @@ export default function OrdersPage() {
                   {/* Order number + date */}
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                     <div>
-                      <p className="font-bold text-maroon-900 text-sm">{order.order_number}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="font-normal text-maroon-900 text-sm">{order.order_number}</p>
+                      <p className="text-xs text-graphite-faint mt-0.5">
                         {new Date(order.created_at).toLocaleDateString('en-IN', {
                           day: 'numeric', month: 'long', year: 'numeric',
                         })}
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-xs text-gray-500">Total</p>
-                      <p className="font-bold text-maroon-900 text-base">₹{order.total.toLocaleString()}</p>
+                      <p className="text-xs text-graphite-faint">Total</p>
+                      <p className="font-normal text-maroon-900 text-base">₹{order.total.toLocaleString()}</p>
                     </div>
                   </div>
 
@@ -205,30 +205,30 @@ export default function OrdersPage() {
                       {items.slice(0, 4).map((item: any, idx: number) => (
                         <div
                           key={idx}
-                          className="w-9 h-9 rounded-lg bg-gradient-to-br from-maroon-100 to-gold-50 border border-white flex items-center justify-center text-lg shadow-sm"
+                          className="w-9 h-9 rounded-sm bg-gradient-to-br from-maroon-100 to-gold-50 border border-white flex items-center justify-center text-lg shadow-sm"
                           title={item.name}
                         >
                           {getCategoryEmoji(item.category)}
                         </div>
                       ))}
                       {items.length > 4 && (
-                        <div className="w-9 h-9 rounded-lg bg-paper-shade border border-white flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">
+                        <div className="w-9 h-9 rounded-sm bg-paper-shade border border-white flex items-center justify-center text-xs font-normal text-graphite-faint shadow-sm">
                           +{items.length - 4}
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-700 font-medium line-clamp-1">
+                      <p className="text-sm text-graphite-muted font-medium line-clamp-1">
                         {items.map((i: any) => i.name).join(', ')}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-graphite-faint mt-0.5">
                         {items.length} {items.length === 1 ? 'item' : 'items'}
                       </p>
                     </div>
                   </div>
 
                   {/* Tracking + payment */}
-                  <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                  <div className="flex items-center gap-3 text-xs text-graphite-faint flex-wrap">
                     <span className="capitalize">Payment: {order.payment_method.toUpperCase()}</span>
                     <span>·</span>
                     <span className={order.payment_status === 'paid' ? 'text-green-600 font-medium' : 'text-orange-600 font-medium'}>

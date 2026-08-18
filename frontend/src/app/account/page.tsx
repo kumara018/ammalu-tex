@@ -162,10 +162,10 @@ export default function AccountPage() {
     <div className="max-w-3xl mx-auto px-4 py-8">
 
       {/* ── Breadcrumb ───────────────────────────────────────────────── */}
-      <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-6">
+      <nav className="flex items-center gap-1.5 text-xs text-graphite-faint mb-6">
         <Link href="/" className="hover:text-maroon-700 flex items-center gap-1"><Home size={12} /> Home</Link>
         <ChevronRight size={12} />
-        <span className="text-gray-800 font-medium">My Account</span>
+        <span className="text-graphite font-medium">My Account</span>
       </nav>
 
       {/* ── Header ───────────────────────────────────────────────────── */}
@@ -174,8 +174,8 @@ export default function AccountPage() {
           <User size={32} className="text-maroon-700" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{user.full_name}</h1>
-          <p className="text-sm text-gray-500">{user.email}</p>
+          <h1 className="font-display text-band font-normal text-graphite">{user.full_name}</h1>
+          <p className="text-sm text-graphite-faint">{user.email}</p>
           <span className={`inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-green-50 text-green-700'}`}>
             {user.is_admin ? '⚙ Admin Account' : '👤 Customer Account'}
           </span>
@@ -186,18 +186,18 @@ export default function AccountPage() {
       {sessionsLoaded && (
         <button
           onClick={() => setTab('devices')}
-          className="w-full mb-6 flex items-center gap-3 card p-4 hover:shadow-md hover:border-maroon-200 border-2 border-transparent transition-shadow text-left"
+          className="w-full mb-6 flex items-center gap-3 card p-4 hover:border-maroon-200 border-2 border-transparent transition-shadow text-left"
         >
           <div className="w-10 h-10 rounded-full bg-maroon-100 flex items-center justify-center flex-shrink-0">
             <MonitorSmartphone size={18} className="text-maroon-700" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-graphite">
               Signed in on {sessions.length} of 4 devices
             </p>
-            <p className="text-xs text-gray-500">Tap to see where and when — sign out of any device you don&apos;t recognize.</p>
+            <p className="text-xs text-graphite-faint">Tap to see where and when — sign out of any device you don&apos;t recognize.</p>
           </div>
-          <ChevronRight size={16} className="text-gray-400 flex-shrink-0" />
+          <ChevronRight size={16} className="text-graphite-faint flex-shrink-0" />
         </button>
       )}
 
@@ -210,15 +210,15 @@ export default function AccountPage() {
           { icon: UserX,      label: 'Delete Account',  href: '/account/delete', danger: true },
         ].map(({ icon: Icon, label, href, danger }) => (
           <Link key={label} href={href}
-            className={`card p-4 flex flex-col items-center gap-2 text-center hover:shadow-md transition-shadow border-2 ${danger ? 'border-transparent hover:border-red-200 hover:bg-red-50' : 'border-transparent hover:border-maroon-100'}`}>
+            className={`card p-4 flex flex-col items-center gap-2 text-center transition-shadow border-2 ${danger ? 'border-transparent hover:border-red-200 hover:bg-red-50' : 'border-transparent hover:border-maroon-100'}`}>
             <Icon size={20} className={danger ? 'text-red-500' : 'text-maroon-700'} />
-            <span className={`text-xs font-semibold ${danger ? 'text-red-500' : 'text-gray-700'}`}>{label}</span>
+            <span className={`text-xs font-semibold ${danger ? 'text-red-500' : 'text-graphite-muted'}`}>{label}</span>
           </Link>
         ))}
       </div>
 
       {/* ── Tabs ─────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 mb-6 bg-paper-shade p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-6 bg-paper-shade p-1 rounded-sm w-fit">
         {([
           { key: 'profile',  label: 'Profile Info',    icon: User },
           { key: 'password', label: 'Change Password', icon: Lock },
@@ -230,10 +230,10 @@ export default function AccountPage() {
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-sm text-sm font-semibold transition-all ${
               tab === key
                 ? 'bg-paper-bright shadow text-maroon-800'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-graphite-faint hover:text-graphite-muted'
             }`}
           >
             <Icon size={15} /> {label}
@@ -244,10 +244,10 @@ export default function AccountPage() {
       {/* ── Profile Tab ──────────────────────────────────────────────── */}
       {tab === 'profile' && (
         <div className="card p-6">
-          <h2 className="font-bold text-gray-800 text-lg mb-5">Personal Information</h2>
+          <h2 className="font-normal text-graphite text-lg mb-5">Personal Information</h2>
 
           {profileMsg && (
-            <div className={`mb-5 flex items-start gap-3 rounded-xl p-4 border ${profileMsg.type === 'ok' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className={`mb-5 flex items-start gap-3 rounded-sm p-4 border ${profileMsg.type === 'ok' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
               {profileMsg.type === 'ok'
                 ? <CheckCircle size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
                 : <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />}
@@ -260,7 +260,7 @@ export default function AccountPage() {
             <div>
               <label className="label">Full Name *</label>
               <div className="relative">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
                 <input
                   type="text"
                   value={fullName}
@@ -276,22 +276,22 @@ export default function AccountPage() {
             <div>
               <label className="label">Email Address</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
                 <input
                   type="email"
                   value={user.email}
                   readOnly
-                  className="input-field pl-9 bg-paper text-gray-500 cursor-not-allowed"
+                  className="input-field pl-9 bg-paper text-graphite-faint cursor-not-allowed"
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">Email address cannot be changed.</p>
+              <p className="text-xs text-graphite-faint mt-1">Email address cannot be changed.</p>
             </div>
 
             {/* Phone */}
             <div>
               <label className="label">Mobile Number</label>
               <div className="relative">
-                <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
                 <input
                   type="tel"
                   value={phone}
@@ -317,11 +317,11 @@ export default function AccountPage() {
       {/* ── Password Tab ─────────────────────────────────────────────── */}
       {tab === 'password' && (
         <div className="card p-6">
-          <h2 className="font-bold text-gray-800 text-lg mb-2">Change Password</h2>
-          <p className="text-sm text-gray-500 mb-5">Choose a strong password of at least 6 characters.</p>
+          <h2 className="font-normal text-graphite text-lg mb-2">Change Password</h2>
+          <p className="text-sm text-graphite-faint mb-5">Choose a strong password of at least 6 characters.</p>
 
           {pwMsg && (
-            <div className={`mb-5 flex items-start gap-3 rounded-xl p-4 border ${pwMsg.type === 'ok' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className={`mb-5 flex items-start gap-3 rounded-sm p-4 border ${pwMsg.type === 'ok' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
               {pwMsg.type === 'ok'
                 ? <CheckCircle size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
                 : <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />}
@@ -334,7 +334,7 @@ export default function AccountPage() {
             <div>
               <label className="label">Current Password *</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
                 <input
                   type={showCurr ? 'text' : 'password'}
                   value={currentPw}
@@ -344,7 +344,7 @@ export default function AccountPage() {
                   autoComplete="current-password"
                 />
                 <button type="button" onClick={() => setShowCurr(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint hover:text-graphite-muted p-1">
                   {showCurr ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -354,7 +354,7 @@ export default function AccountPage() {
             <div>
               <label className="label">New Password *</label>
               <div className="relative">
-                <ShieldCheck size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <ShieldCheck size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
                 <input
                   type={showNew ? 'text' : 'password'}
                   value={newPw}
@@ -364,7 +364,7 @@ export default function AccountPage() {
                   autoComplete="new-password"
                 />
                 <button type="button" onClick={() => setShowNew(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint hover:text-graphite-muted p-1">
                   {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -373,13 +373,13 @@ export default function AccountPage() {
                 <div className="mt-2 flex gap-1">
                   {[1,2,3,4].map(i => (
                     <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
-                      newPw.length < 6 ? (i <= 1 ? 'bg-red-400' : 'bg-gray-200')
-                      : newPw.length < 9 ? (i <= 2 ? 'bg-orange-400' : 'bg-gray-200')
-                      : newPw.length < 12 ? (i <= 3 ? 'bg-yellow-400' : 'bg-gray-200')
+                      newPw.length < 6 ? (i <= 1 ? 'bg-red-400' : 'bg-paper-shade')
+                      : newPw.length < 9 ? (i <= 2 ? 'bg-orange-400' : 'bg-paper-shade')
+                      : newPw.length < 12 ? (i <= 3 ? 'bg-yellow-400' : 'bg-paper-shade')
                       : 'bg-green-400'
                     }`} />
                   ))}
-                  <span className="text-xs text-gray-400 ml-1">
+                  <span className="text-xs text-graphite-faint ml-1">
                     {newPw.length < 6 ? 'Weak' : newPw.length < 9 ? 'Fair' : newPw.length < 12 ? 'Good' : 'Strong'}
                   </span>
                 </div>
@@ -390,7 +390,7 @@ export default function AccountPage() {
             <div>
               <label className="label">Confirm New Password *</label>
               <div className="relative">
-                <ShieldCheck size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <ShieldCheck size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
                 <input
                   type={showConf ? 'text' : 'password'}
                   value={confirmPw}
@@ -400,7 +400,7 @@ export default function AccountPage() {
                   autoComplete="new-password"
                 />
                 <button type="button" onClick={() => setShowConf(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint hover:text-graphite-muted p-1">
                   {showConf ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -423,13 +423,13 @@ export default function AccountPage() {
       {tab === 'devices' && (
         <div className="card p-6">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="font-bold text-gray-800 text-lg">Linked Devices</h2>
+            <h2 className="font-normal text-graphite text-lg">Linked Devices</h2>
             <button onClick={loadSessions} disabled={sessionsLoading}
-              className="text-xs font-medium text-maroon-700 hover:underline flex items-center gap-1 disabled:text-gray-400">
+              className="text-xs font-medium text-maroon-700 hover:underline flex items-center gap-1 disabled:text-graphite-faint">
               <RefreshCw size={12} className={sessionsLoading ? 'animate-spin' : ''} /> Refresh
             </button>
           </div>
-          <p className="text-sm text-gray-500 mb-5">
+          <p className="text-sm text-graphite-faint mb-5">
             Every device currently signed in to your account — up to 4 at a time. Don&apos;t recognize one? Sign it out immediately.
           </p>
 
@@ -438,24 +438,24 @@ export default function AccountPage() {
               <span className="animate-spin rounded-full h-6 w-6 border-b-2 border-maroon-700" />
             </div>
           ) : sessions.length === 0 ? (
-            <p className="text-sm text-gray-400 py-6 text-center">No active devices found.</p>
+            <p className="text-sm text-graphite-faint py-6 text-center">No active devices found.</p>
           ) : (
             <div className="space-y-2.5">
               {sessions.map(s => {
                 const Icon = deviceIcon(s.device_type);
                 return (
-                  <div key={s.id} className={`flex items-center gap-3 p-4 rounded-xl border ${s.is_current ? 'border-maroon-300 bg-maroon-50' : 'border-gray-200'}`}>
+                  <div key={s.id} className={`flex items-center gap-3 p-4 rounded-sm border ${s.is_current ? 'border-maroon-300 bg-maroon-50' : 'border-paper-edge'}`}>
                     <div className="w-11 h-11 rounded-full bg-paper-bright border border-maroon-100 flex items-center justify-center flex-shrink-0">
                       <Icon size={19} className="text-maroon-700" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-gray-900">{s.device_name || 'Unknown device'}</p>
+                        <p className="text-sm font-semibold text-graphite">{s.device_name || 'Unknown device'}</p>
                         {s.is_current && (
-                          <span className="text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 px-2 py-0.5 rounded-full">This device</span>
+                          <span className="text-[10px] font-normal uppercase tracking-wide bg-green-100 text-green-700 px-2 py-0.5 rounded-full">This device</span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-graphite-faint mt-0.5">
                         {deviceTypeLabel(s.device_type)} · {s.location || 'Unknown location'} · {fmtWhen(s.last_active_at || s.created_at)}
                       </p>
                     </div>
@@ -476,20 +476,20 @@ export default function AccountPage() {
 
       {/* ── Danger zone ──────────────────────────────────────────────── */}
       <div className="mt-8 card border-red-100 p-5">
-        <h3 className="font-bold text-red-700 mb-3 text-sm uppercase tracking-wide">Danger Zone</h3>
+        <h3 className="font-normal text-red-700 mb-3 text-sm uppercase tracking-wide">Danger Zone</h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => window.open('/auth/login?add=1', '_blank', 'noopener,noreferrer')}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-paper text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-sm border border-paper-edge text-graphite-muted hover:bg-paper text-sm font-medium transition-colors"
           >
             <RefreshCw size={15} /> Add Another Account
           </button>
           <button onClick={performLogout}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-paper text-sm font-medium transition-colors">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-sm border border-paper-edge text-graphite-muted hover:bg-paper text-sm font-medium transition-colors">
             <LogOut size={15} /> Sign Out
           </button>
           <Link href="/account/delete"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-sm border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors">
             <UserX size={15} /> Delete My Account
           </Link>
         </div>

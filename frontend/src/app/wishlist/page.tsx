@@ -82,14 +82,14 @@ export default function WishlistPage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/products" className="p-2 hover:bg-orange-100 rounded-lg transition-colors">
+        <Link href="/products" className="p-2 hover:bg-orange-100 rounded-sm transition-colors">
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-maroon-900 flex items-center gap-2">
+          <h1 className="font-display text-band font-normal text-maroon-900 flex items-center gap-2">
             <Heart size={24} fill="#ef4444" className="text-red-500" /> My Wishlist
           </h1>
-          <p className="text-sm text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''} saved</p>
+          <p className="text-sm text-graphite-faint">{items.length} item{items.length !== 1 ? 's' : ''} saved</p>
         </div>
       </div>
 
@@ -97,8 +97,8 @@ export default function WishlistPage() {
       {items.length === 0 && (
         <div className="card p-12 text-center">
           <Heart size={64} className="text-gray-200 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-700 mb-2">Your wishlist is empty</h2>
-          <p className="text-gray-500 mb-6">Save items you love by tapping the ❤️ heart on any product.</p>
+          <h2 className="text-xl font-normal text-graphite-muted mb-2">Your wishlist is empty</h2>
+          <p className="text-graphite-faint mb-6">Save items you love by tapping the ❤️ heart on any product.</p>
           <Link href="/products" className="btn-primary px-8 py-3 inline-flex items-center gap-2">
             <Package size={18} /> Browse Products
           </Link>
@@ -118,7 +118,7 @@ export default function WishlistPage() {
               <div key={item.id} className="card p-4 flex gap-4">
                 {/* Image */}
                 <Link href={`/products/${p.id}`} className="flex-shrink-0">
-                  <div className="w-24 h-28 rounded-xl overflow-hidden bg-maroon-50">
+                  <div className="w-24 h-28 rounded-sm overflow-hidden bg-maroon-50">
                     {p.images?.[0] && !p.images[0].includes('placeholder') ? (
                       <img
                         src={p.images[0].startsWith('http') ? p.images[0] : `${process.env.NEXT_PUBLIC_API_URL}${p.images[0]}`}
@@ -137,19 +137,19 @@ export default function WishlistPage() {
                 <div className="flex-1 min-w-0 flex flex-col">
                   <p className="text-xs text-maroon-600 font-medium">{p.category}</p>
                   <Link href={`/products/${p.id}`}>
-                    <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-maroon-700 transition-colors mt-0.5">
+                    <h3 className="text-sm font-semibold text-graphite line-clamp-2 hover:text-maroon-700 transition-colors mt-0.5">
                       {p.name}
                     </h3>
                   </Link>
 
                   {/* Price */}
                   <div className="flex items-baseline gap-2 mt-1.5">
-                    <span className="text-base font-bold text-maroon-900">₹{p.price.toLocaleString()}</span>
+                    <span className="text-base font-normal text-maroon-900">₹{p.price.toLocaleString()}</span>
                     {p.compare_price && (
-                      <span className="text-xs text-gray-400 line-through">₹{p.compare_price.toLocaleString()}</span>
+                      <span className="text-xs text-graphite-faint line-through">₹{p.compare_price.toLocaleString()}</span>
                     )}
                     {discount && (
-                      <span className="text-xs font-bold text-green-600">{discount}% off</span>
+                      <span className="text-xs font-normal text-green-600">{discount}% off</span>
                     )}
                   </div>
 
@@ -163,7 +163,7 @@ export default function WishlistPage() {
                     <button
                       onClick={() => handleMoveToCart(item)}
                       disabled={p.stock === 0 || addingId === p.id}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-maroon-800 hover:bg-maroon-900 text-white text-xs font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-sm bg-maroon-800 hover:bg-maroon-900 text-white text-xs font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                       {addingId === p.id
                         ? <span className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />
@@ -172,7 +172,7 @@ export default function WishlistPage() {
                     </button>
                     <button
                       onClick={() => handleRemove(p.id)}
-                      className="p-2 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                      className="p-2 rounded-sm border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                       title="Remove from wishlist"
                     >
                       <Trash2 size={15} />

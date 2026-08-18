@@ -20,7 +20,7 @@ export default function Logo({ className = '' }: { className?: string }) {
     <div className={`flex items-center gap-2.5 ${className}`}>
       <LogoMark className="text-gold-500 flex-shrink-0" size={34} />
       <div className="hidden sm:block leading-tight">
-        <p className="font-bold text-maroon-900 uppercase" style={{ letterSpacing: '0.04em', fontSize: '15px' }}>
+        <p className="font-normal text-maroon-900 uppercase" style={{ letterSpacing: '0.04em', fontSize: '15px' }}>
           Ammalu Tex
         </p>
         <p className="font-semibold text-maroon-500 uppercase" style={{ letterSpacing: '0.1em', fontSize: '9.5px' }}>

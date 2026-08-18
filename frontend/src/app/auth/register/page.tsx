@@ -190,6 +190,12 @@ function RegisterInner() {
 
   return (
     <AuthShell
+      // Creating an account is TWO operations, not three: the details, then
+      // the code. The device chooser is an interruption of the second, not a
+      // third step — counting it would tell the customer there is more left to
+      // do than there is.
+      step={stage === 'details' ? 1 : 2}
+      steps={2}
       title={stage === 'details' ? 'Create an account' : stage === 'code' ? 'Check your email' : 'One more thing'}
       standfirst={
         stage === 'details'

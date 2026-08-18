@@ -90,8 +90,8 @@ function ReturnDetailContent() {
 
   if (loading) return (
     <div className="max-w-2xl mx-auto px-4 py-12 animate-pulse space-y-4">
-      <div className="h-8 bg-gray-200 rounded w-48" />
-      <div className="card p-6 h-40 bg-paper-shade rounded-2xl" />
+      <div className="h-8 bg-paper-shade rounded w-48" />
+      <div className="card p-6 h-40 bg-paper-shade rounded-sm" />
     </div>
   );
 
@@ -108,54 +108,54 @@ function ReturnDetailContent() {
       {/* Lightbox */}
       {lightbox && (
         <div className="fixed inset-0 bg-black/80 z-[300] flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
-          <img src={lightbox} alt="Return photo" className="max-w-full max-h-full rounded-2xl object-contain" />
+          <img src={lightbox} alt="Return photo" className="max-w-full max-h-full rounded-sm object-contain" />
         </div>
       )}
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href={`/orders/${rr.order_id}`} className="p-2 hover:bg-orange-100 rounded-lg">
+        <Link href={`/orders/${rr.order_id}`} className="p-2 hover:bg-orange-100 rounded-sm">
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-maroon-900">{typeInfo.label} Request #{rr.id}</h1>
-          <p className="text-sm text-gray-500">Submitted on {new Date(rr.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          <h1 className="text-xl font-normal text-maroon-900">{typeInfo.label} Request #{rr.id}</h1>
+          <p className="text-sm text-graphite-faint">Submitted on {new Date(rr.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         </div>
-        <div className={`ml-auto inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${STATUS_COLOR[rr.status] || 'bg-paper-shade text-gray-600 border-gray-300'}`}>
+        <div className={`ml-auto inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${STATUS_COLOR[rr.status] || 'bg-paper-shade text-graphite-muted border-paper-edge'}`}>
           {rr.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
         </div>
       </div>
 
       {/* Request type badge */}
-      <div className={`flex items-center gap-3 rounded-2xl border p-4 mb-5 ${typeInfo.bg} ${typeInfo.border}`}>
-        <div className={`p-2 rounded-xl bg-paper-bright border ${typeInfo.border}`}>
+      <div className={`flex items-center gap-3 rounded-sm border p-4 mb-5 ${typeInfo.bg} ${typeInfo.border}`}>
+        <div className={`p-2 rounded-sm bg-paper-bright border ${typeInfo.border}`}>
           <Package size={20} className={typeInfo.color} />
         </div>
         <div>
-          <p className={`font-bold ${typeInfo.color}`}>{typeInfo.label}</p>
-          <p className="text-sm text-gray-600">Reason: {REASON_LABELS[rr.reason] || rr.reason}</p>
+          <p className={`font-normal ${typeInfo.color}`}>{typeInfo.label}</p>
+          <p className="text-sm text-graphite-muted">Reason: {REASON_LABELS[rr.reason] || rr.reason}</p>
         </div>
       </div>
 
       {/* Exchanging into */}
       {rr.new_product && (
         <div className="card p-5 mb-5">
-          <h3 className="font-bold text-maroon-900 mb-3">Exchanging Into</h3>
+          <h3 className="font-normal text-maroon-900 mb-3">Exchanging Into</h3>
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-lg bg-maroon-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-14 h-14 rounded-sm bg-maroon-50 flex items-center justify-center overflow-hidden flex-shrink-0">
               {rr.new_product.images?.[0]
                 ? <img src={rr.new_product.images[0]} alt={rr.new_product.name} className="w-full h-full object-cover" />
-                : <Package size={22} className="text-gray-300" />}
+                : <Package size={22} className="text-paper-edge" />}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-800 truncate">{rr.new_product.name}</p>
-              <p className="text-xs text-gray-500">{rr.new_size ? `Size ${rr.new_size}` : ''}{rr.new_size && rr.new_color ? ' · ' : ''}{rr.new_color || ''}</p>
+              <p className="text-sm font-semibold text-graphite truncate">{rr.new_product.name}</p>
+              <p className="text-xs text-graphite-faint">{rr.new_size ? `Size ${rr.new_size}` : ''}{rr.new_size && rr.new_color ? ' · ' : ''}{rr.new_color || ''}</p>
             </div>
-            <p className="text-sm font-bold text-maroon-800">₹{rr.new_product.price.toLocaleString()}</p>
+            <p className="text-sm font-normal text-maroon-800">₹{rr.new_product.price.toLocaleString()}</p>
           </div>
           {rr.price_difference > 0 && (
             <div className="mt-3 pt-3 border-t border-maroon-200 flex justify-between text-sm">
-              <span className="text-gray-500">Price difference paid</span>
+              <span className="text-graphite-faint">Price difference paid</span>
               <span className="font-semibold text-green-700">₹{rr.price_difference.toLocaleString()} ✓</span>
             </div>
           )}
@@ -165,11 +165,11 @@ function ReturnDetailContent() {
       {/* Status timeline */}
       {!isRejected && (
         <div className="card p-6 mb-5">
-          <h3 className="font-bold text-maroon-900 mb-5">Request Progress</h3>
+          <h3 className="font-normal text-maroon-900 mb-5">Request Progress</h3>
 
           {/* Progress bar */}
           <div className="relative mb-6">
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div className="w-full bg-paper-shade rounded-full h-1.5">
               <div className="bg-maroon-800 h-1.5 rounded-full transition-all duration-700" style={{ width: `${progressPct}%` }} />
             </div>
           </div>
@@ -183,19 +183,19 @@ function ReturnDetailContent() {
               return (
                 <div key={step.key} className="flex gap-4 relative">
                   {i < steps.length - 1 && (
-                    <div className={`absolute left-[15px] top-8 bottom-0 w-0.5 ${done ? 'bg-maroon-300' : 'bg-gray-200'} z-0`} />
+                    <div className={`absolute left-[15px] top-8 bottom-0 w-0.5 ${done ? 'bg-maroon-300' : 'bg-paper-shade'} z-0`} />
                   )}
                   <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 transition-all ${
                     active  ? 'bg-maroon-800 border-maroon-800 text-white ring-4 ring-maroon-100' :
                     done    ? 'bg-maroon-700 border-maroon-700 text-white' :
-                              'bg-paper-bright border-gray-300 text-gray-400'
+                              'bg-paper-bright border-paper-edge text-graphite-faint'
                   }`}>
                     <Icon size={13} />
                   </div>
                   <div className="pb-5 flex-1">
-                    <p className={`text-sm font-semibold ${done ? 'text-maroon-900' : 'text-gray-400'}`}>{step.label}</p>
+                    <p className={`text-sm font-semibold ${done ? 'text-maroon-900' : 'text-graphite-faint'}`}>{step.label}</p>
                     {active && (
-                      <p className="text-xs text-gray-500 mt-0.5">{STATUS_MSG[step.key] || ''}</p>
+                      <p className="text-xs text-graphite-faint mt-0.5">{STATUS_MSG[step.key] || ''}</p>
                     )}
                   </div>
                 </div>
@@ -207,10 +207,10 @@ function ReturnDetailContent() {
 
       {/* Rejected state */}
       {isRejected && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-5 flex items-start gap-4">
+        <div className="bg-red-50 border border-red-200 rounded-sm p-5 mb-5 flex items-start gap-4">
           <XCircle size={28} className="text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-red-800 mb-1">Request Rejected</p>
+            <p className="font-normal text-red-800 mb-1">Request Rejected</p>
             <p className="text-sm text-red-600">{STATUS_MSG.rejected}</p>
             {rr.admin_notes && <p className="text-sm text-red-700 mt-2 font-medium">Reason: {rr.admin_notes}</p>}
           </div>
@@ -219,7 +219,7 @@ function ReturnDetailContent() {
 
       {/* Current status message card */}
       {!isRejected && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 flex items-start gap-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-sm p-4 mb-5 flex items-start gap-3">
           <AlertCircle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-blue-800">{STATUS_MSG[rr.status] || ''}</p>
         </div>
@@ -227,7 +227,7 @@ function ReturnDetailContent() {
 
       {/* Admin notes */}
       {rr.admin_notes && !isRejected && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-4 mb-5">
           <p className="text-xs font-semibold text-yellow-700 uppercase tracking-wide mb-1">Note from our team</p>
           <p className="text-sm text-yellow-800">{rr.admin_notes}</p>
         </div>
@@ -235,15 +235,15 @@ function ReturnDetailContent() {
 
       {/* Pickup OTP — give this to the courier when they arrive */}
       {rr.status === 'pickup_scheduled' && rr.pickup_otp && (
-        <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-2xl p-6 mb-5">
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-sm p-6 mb-5">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck size={22} className="text-orange-700" />
-            <h3 className="font-bold text-orange-900">Your Pickup OTP</h3>
+            <h3 className="font-normal text-orange-900">Your Pickup OTP</h3>
           </div>
-          <p className="text-sm text-gray-700 mb-4">Our courier is on the way to collect your item! Give this OTP to the pickup agent when they arrive.</p>
-          <div className="bg-paper-bright border-2 border-orange-300 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Pickup OTP</p>
-            <p className="text-5xl font-bold tracking-[0.4em] font-mono text-orange-700">{rr.pickup_otp}</p>
+          <p className="text-sm text-graphite-muted mb-4">Our courier is on the way to collect your item! Give this OTP to the pickup agent when they arrive.</p>
+          <div className="bg-paper-bright border-2 border-orange-300 rounded-sm p-4 text-center">
+            <p className="text-xs text-graphite-faint uppercase tracking-widest mb-2">Pickup OTP</p>
+            <p className="text-5xl font-normal tracking-[0.4em] font-mono text-orange-700">{rr.pickup_otp}</p>
           </div>
           <p className="text-xs text-orange-700 mt-3 font-medium">⚠️ Never share this OTP via phone call or message. Only give it to the agent in person.</p>
         </div>
@@ -251,14 +251,14 @@ function ReturnDetailContent() {
 
       {/* Pickup tracking — only shown once Delhivery has actually confirmed a pickup */}
       {rr.return_awb && (
-        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 mb-5 flex items-center justify-between gap-3">
+        <div className="bg-teal-50 border border-teal-200 rounded-sm p-4 mb-5 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Pickup Tracking</p>
             <p className="text-sm text-teal-800 font-mono">{rr.return_awb}</p>
           </div>
           <a href={rr.return_tracking_url || `https://www.delhivery.com/track/package/${rr.return_awb}`}
             target="_blank" rel="noopener noreferrer"
-            className="text-xs font-semibold text-teal-700 hover:text-teal-900 border border-teal-300 hover:border-teal-500 rounded-lg px-3 py-1.5 transition-colors whitespace-nowrap">
+            className="text-xs font-semibold text-teal-700 hover:text-teal-900 border border-teal-300 hover:border-teal-500 rounded-sm px-3 py-1.5 transition-colors whitespace-nowrap">
             Track Pickup
           </a>
         </div>
@@ -266,14 +266,14 @@ function ReturnDetailContent() {
 
       {/* Replacement shipment tracking — exchange only */}
       {rr.replacement_awb && (
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-5 flex items-center justify-between gap-3">
+        <div className="bg-purple-50 border border-purple-200 rounded-sm p-4 mb-5 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Replacement Shipment</p>
             <p className="text-sm text-purple-800 font-mono">{rr.replacement_awb}</p>
           </div>
           <a href={rr.replacement_tracking_url || `https://www.delhivery.com/track/package/${rr.replacement_awb}`}
             target="_blank" rel="noopener noreferrer"
-            className="text-xs font-semibold text-purple-700 hover:text-purple-900 border border-purple-300 hover:border-purple-500 rounded-lg px-3 py-1.5 transition-colors whitespace-nowrap">
+            className="text-xs font-semibold text-purple-700 hover:text-purple-900 border border-purple-300 hover:border-purple-500 rounded-sm px-3 py-1.5 transition-colors whitespace-nowrap">
             Track Replacement
           </a>
         </div>
@@ -281,7 +281,7 @@ function ReturnDetailContent() {
 
       {/* Refund info */}
       {rr.refund_id && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5">
+        <div className="bg-green-50 border border-green-200 rounded-sm p-4 mb-5">
           <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">Refund Information</p>
           <p className="text-sm text-green-800">
             {rr.status === 'refunded'
@@ -294,25 +294,25 @@ function ReturnDetailContent() {
 
       {/* Details card */}
       <div className="card p-5 mb-5">
-        <h3 className="font-bold text-maroon-900 mb-4">Request Details</h3>
+        <h3 className="font-normal text-maroon-900 mb-4">Request Details</h3>
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">Request Type</span>
+            <span className="text-graphite-faint">Request Type</span>
             <span className={`font-semibold ${typeInfo.color}`}>{typeInfo.label}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Reason</span>
-            <span className="font-medium text-gray-800">{REASON_LABELS[rr.reason] || rr.reason}</span>
+            <span className="text-graphite-faint">Reason</span>
+            <span className="font-medium text-graphite">{REASON_LABELS[rr.reason] || rr.reason}</span>
           </div>
           {rr.description && (
             <div>
-              <p className="text-gray-500 mb-1">Description</p>
-              <p className="text-gray-800 bg-paper border border-gray-100 rounded-lg px-3 py-2">{rr.description}</p>
+              <p className="text-graphite-faint mb-1">Description</p>
+              <p className="text-graphite bg-paper border border-paper-edge rounded-sm px-3 py-2">{rr.description}</p>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-gray-500">Submitted</span>
-            <span className="text-gray-700">{new Date(rr.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <span className="text-graphite-faint">Submitted</span>
+            <span className="text-graphite-muted">{new Date(rr.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </div>
         </div>
       </div>
@@ -320,29 +320,29 @@ function ReturnDetailContent() {
       {/* Photos */}
       {rr.images && rr.images.length > 0 && (
         <div className="card p-5 mb-5">
-          <h3 className="font-bold text-maroon-900 mb-3 flex items-center gap-2">
+          <h3 className="font-normal text-maroon-900 mb-3 flex items-center gap-2">
             <ImageIcon size={16} /> Uploaded Photos
           </h3>
           <div className="grid grid-cols-3 gap-3">
             {rr.images.map((url, i) => (
               <button key={i} onClick={() => setLightbox(url)}
-                className="aspect-square rounded-xl overflow-hidden border-2 border-maroon-200 hover:border-maroon-400 transition-colors">
+                className="aspect-square rounded-sm overflow-hidden border-2 border-maroon-200 hover:border-maroon-400 transition-colors">
                 <img src={url} alt={`Return photo ${i+1}`} className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-2">Click a photo to view full size</p>
+          <p className="text-xs text-graphite-faint mt-2">Click a photo to view full size</p>
         </div>
       )}
 
       {/* Actions */}
       <div className="space-y-3">
         <Link href={`/orders/${rr.order_id}`}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-maroon-800 hover:bg-maroon-900 text-white font-semibold rounded-xl transition-colors">
+          className="w-full flex items-center justify-center gap-2 py-3 bg-maroon-800 hover:bg-maroon-900 text-white font-semibold rounded-sm transition-colors">
           <ArrowLeft size={16} /> Back to Order
         </Link>
         <Link href="/orders"
-          className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 hover:bg-paper font-medium rounded-xl transition-colors text-sm">
+          className="w-full flex items-center justify-center gap-2 py-3 border border-paper-edge text-graphite-muted hover:bg-paper font-medium rounded-sm transition-colors text-sm">
           View All Orders
         </Link>
       </div>
@@ -354,8 +354,8 @@ export default function ReturnDetailPage() {
   return (
     <Suspense fallback={
       <div className="max-w-2xl mx-auto px-4 py-12 animate-pulse space-y-4">
-        <div className="h-8 bg-gray-200 rounded w-48" />
-        <div className="card p-6 h-40 bg-paper-shade rounded-2xl" />
+        <div className="h-8 bg-paper-shade rounded w-48" />
+        <div className="card p-6 h-40 bg-paper-shade rounded-sm" />
       </div>
     }>
       <ReturnDetailContent />

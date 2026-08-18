@@ -106,7 +106,7 @@ export default function ProductCard({ product }: Props) {
       className="h-full"
     >
     <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer" className="group block h-full">
-      <div className="card hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+      <div className="card transition-shadow duration-300 h-full flex flex-col">
 
         {/* ── Image / Carousel ───────────────────────────────────────────────── */}
         <div
@@ -129,7 +129,7 @@ export default function ProductCard({ product }: Props) {
                 exit={{ opacity: 0, rotateY: 14, scale: 0.94 }}
                 transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                 style={{ transformStyle: 'preserve-3d' }}
-                className="absolute inset-0 bg-gray-900 rounded-lg flex items-center justify-center"
+                className="absolute inset-0 bg-gray-900 rounded-sm flex items-center justify-center"
               >
                 <Play size={40} className="text-white opacity-80" fill="white" />
                 <span className="absolute bottom-4 text-white text-xs font-medium bg-black/50 px-2 py-0.5 rounded-full">
@@ -173,13 +173,13 @@ export default function ProductCard({ product }: Props) {
             <>
               <button
                 onClick={e => { e.preventDefault(); goCard(imgIdx - 1); }}
-                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center text-gray-700 hover:bg-white transition-all z-20"
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center text-graphite-muted hover:bg-white transition-all z-20"
               >
                 <ChevronLeft size={14} />
               </button>
               <button
                 onClick={e => { e.preventDefault(); goCard(imgIdx + 1); }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center text-gray-700 hover:bg-white transition-all z-20"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center text-graphite-muted hover:bg-white transition-all z-20"
               >
                 <ChevronRight size={14} />
               </button>
@@ -205,22 +205,22 @@ export default function ProductCard({ product }: Props) {
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-10">
             {discount && (
-              <span className="bg-maroon-800 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-maroon-800 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
                 {discount}% OFF
               </span>
             )}
             {product.is_featured && (
-              <span className="bg-gold-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-gold-600 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
                 Featured
               </span>
             )}
             {product.is_new_arrival && (
-              <span className="bg-emerald-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-emerald-500 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
                 New Arrival
               </span>
             )}
             {product.stock === 0 && (
-              <span className="bg-gray-700 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-gray-700 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
                 Out of Stock
               </span>
             )}
@@ -243,7 +243,7 @@ export default function ProductCard({ product }: Props) {
         {/* ── Info ────────────────────────────────────────────────────────────── */}
         <div className="p-3 flex flex-col flex-1">
           <p className="text-xs text-maroon-600 font-medium mb-1">{product.category}</p>
-          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1.5 leading-snug">
+          <h3 className="text-sm font-semibold text-graphite line-clamp-2 mb-1.5 leading-snug">
             {product.name}
           </h3>
 
@@ -260,20 +260,20 @@ export default function ProductCard({ product }: Props) {
                   />
                 ))}
               </div>
-              <span className="text-xs text-gray-500">({product.rating_count})</span>
+              <span className="text-xs text-graphite-faint">({product.rating_count})</span>
             </div>
           )}
 
           {product.fabric && (
-            <p className="text-xs text-gray-500 mb-2">{product.fabric}</p>
+            <p className="text-xs text-graphite-faint mb-2">{product.fabric}</p>
           )}
 
           {/* Price + cart */}
           <div className="mt-auto">
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-lg font-bold text-maroon-900">₹{product.price.toLocaleString()}</span>
+              <span className="text-lg font-normal text-maroon-900">₹{product.price.toLocaleString()}</span>
               {product.compare_price && (
-                <span className="text-sm text-gray-400 line-through">
+                <span className="text-sm text-graphite-faint line-through">
                   ₹{product.compare_price.toLocaleString()}
                 </span>
               )}
@@ -282,7 +282,7 @@ export default function ProductCard({ product }: Props) {
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-maroon-800 hover:bg-maroon-900 text-white text-sm font-semibold transition-all active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-sm bg-maroon-800 hover:bg-maroon-900 text-white text-sm font-semibold transition-all active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               <ShoppingCart size={15} />
               {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}

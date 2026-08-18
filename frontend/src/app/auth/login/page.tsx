@@ -222,6 +222,10 @@ function SignInInner() {
 
   return (
     <AuthShell
+      // The spine counts the operation: identifier, password, code. The
+      // device chooser is not a step — it is an interruption of the last one.
+      step={stage === 'identifier' ? 1 : stage === 'password' ? 2 : 3}
+      steps={3}
       title={titles[stage]}
       standfirst={
         stage === 'identifier'

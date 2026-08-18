@@ -25,9 +25,12 @@ import { STORE } from '@/lib/config';
  * floor, puts the wordmark on the strongest contrast available, and makes the
  * three zones — rail, paper, counter — read as three different places.
  *
- * The wordmark is set enormous and clipped at the baseline, the way a maker's
- * name is stamped into the selvedge at the end of a bolt: you see it when the
- * cloth runs out.
+ * A giant clipped wordmark was tried here — the maker's name stamped into the
+ * selvedge — and removed. On a real screen it was not texture, it was a large
+ * dead band of near-black below the last usable line, and on a phone it pushed
+ * the actual footer content off the top of it. The name is already set at the
+ * head of the first column; saying it again at 15rem was decoration paying for
+ * itself in scroll distance.
  */
 
 const SHELF = ['Chudithar', 'Lehenga', 'Half Saree', 'Party Wears', 'Tops', 'Crop Tops'];
@@ -48,7 +51,7 @@ export default function AtelierFooter() {
   if (pathname.startsWith('/auth')) return null;
 
   return (
-    <footer className="relative z-10 overflow-hidden bg-graphite px-6 pb-0 pt-[9vh] text-paper/70 sm:px-10">
+    <footer className="relative z-10 overflow-hidden bg-graphite px-6 pb-[7vh] pt-[9vh] text-paper/70 sm:px-10">
       {/* The measure, in thread, across the top edge — the counter's own rule. */}
       <div aria-hidden="true" className="mx-auto mb-[7vh] w-full max-w-[104rem] opacity-30">
         <svg viewBox="0 0 400 14" preserveAspectRatio="none" className="h-3.5 w-full text-paper">
@@ -147,15 +150,6 @@ export default function AtelierFooter() {
         </p>
       </div>
 
-      {/* The maker's name stamped into the selvedge. Clipped at the baseline
-          on purpose — you see it as the cloth runs out. aria-hidden because
-          the name is already read above; this is texture, not content. */}
-      <p
-        aria-hidden="true"
-        className="pointer-events-none mx-auto mt-[6vh] w-full max-w-[104rem] select-none translate-y-[0.22em] whitespace-nowrap font-display text-[clamp(4rem,17vw,15rem)] leading-[0.75] text-paper/[0.055]"
-      >
-        {STORE.name}
-      </p>
     </footer>
   );
 }

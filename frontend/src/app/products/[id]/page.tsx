@@ -167,7 +167,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
 
   if (slides.length === 0) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-maroon-100 to-gold-50 rounded-2xl flex items-center justify-center text-8xl">
+      <div className="aspect-square bg-gradient-to-br from-maroon-100 to-gold-50 rounded-sm flex items-center justify-center text-8xl">
         👗
       </div>
     );
@@ -180,7 +180,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
       {/* Main slide */}
       <div
         ref={trackRef}
-        className={`relative bg-gradient-to-br from-maroon-100 to-gold-50 rounded-2xl overflow-hidden mb-3 mx-auto cursor-grab active:cursor-grabbing ${current.type === 'image' ? 'p-6' : ''}`}
+        className={`relative bg-gradient-to-br from-maroon-100 to-gold-50 rounded-sm overflow-hidden mb-3 mx-auto cursor-grab active:cursor-grabbing ${current.type === 'image' ? 'p-6' : ''}`}
         style={{
           aspectRatio: current.type === 'video'
             ? (videoOrientation === 'portrait' ? '9/16' : '16/9')
@@ -211,13 +211,13 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
           <>
             <button
               onClick={e => { e.stopPropagation(); prev(); }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={e => { e.stopPropagation(); next(); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright shadow-md flex items-center justify-center text-gray-700 transition-all z-10"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
             >
               <ChevronRight size={18} />
             </button>
@@ -259,8 +259,8 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
             <button
               key={i}
               onClick={() => go(i)}
-              className={`relative flex-shrink-0 w-16 h-16 rounded-xl border-2 overflow-hidden bg-gradient-to-br from-maroon-50 to-gold-50 transition-all ${
-                i === active ? 'border-maroon-800 ring-2 ring-maroon-300' : 'border-gray-200 hover:border-maroon-400'
+              className={`relative flex-shrink-0 w-16 h-16 rounded-sm border-2 overflow-hidden bg-gradient-to-br from-maroon-50 to-gold-50 transition-all ${
+                i === active ? 'border-maroon-800 ring-2 ring-maroon-300' : 'border-paper-edge hover:border-maroon-400'
               }`}
             >
               {s.type === 'image' ? (
@@ -386,12 +386,12 @@ export default function ProductDetailPage() {
   if (loading) return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-pulse">
-        <div className="bg-gray-200 aspect-square rounded-2xl" />
+        <div className="bg-paper-shade aspect-square rounded-sm" />
         <div className="space-y-4">
-          <div className="h-6 bg-gray-200 rounded w-1/4" />
-          <div className="h-8 bg-gray-200 rounded" />
-          <div className="h-10 bg-gray-200 rounded w-1/3" />
-          <div className="h-24 bg-gray-200 rounded" />
+          <div className="h-6 bg-paper-shade rounded w-1/4" />
+          <div className="h-8 bg-paper-shade rounded" />
+          <div className="h-10 bg-paper-shade rounded w-1/3" />
+          <div className="h-24 bg-paper-shade rounded" />
         </div>
       </div>
     </div>
@@ -414,7 +414,7 @@ export default function ProductDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
+      <nav className="flex items-center gap-1.5 text-sm text-graphite-faint mb-6">
         <Link href="/" className="hover:text-maroon-800">Home</Link>
         <ChevronRight size={14} />
         <Link href="/products" className="hover:text-maroon-800">Products</Link>
@@ -442,13 +442,13 @@ export default function ProductDetailPage() {
             {/* Wishlist */}
             <button
               onClick={() => { if (!user) { promptLogin('Sign in to save products to your wishlist.'); return; } toggleWishlist(product.id); }}
-              className={`p-2 rounded-full border-2 transition-all ${isWishlisted ? 'border-red-400 bg-red-50 text-red-500' : 'border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400'}`}
+              className={`p-2 rounded-full border-2 transition-all ${isWishlisted ? 'border-red-400 bg-red-50 text-red-500' : 'border-paper-edge text-graphite-faint hover:border-red-300 hover:text-red-400'}`}
               title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
             </button>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{product.name}</h1>
+          <h1 className="text-2xl md:font-display text-chapter font-normal text-graphite mb-3">{product.name}</h1>
 
           {/* Rating */}
           {product.rating_count > 0 && (
@@ -456,19 +456,19 @@ export default function ProductDetailPage() {
               <div className="flex items-center gap-1 bg-green-600 text-white text-sm px-2.5 py-0.5 rounded-full font-semibold">
                 <Star size={13} fill="white" /> {product.rating_avg.toFixed(1)}
               </div>
-              <span className="text-gray-500 text-sm">{product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}</span>
+              <span className="text-graphite-faint text-sm">{product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}</span>
             </div>
           )}
 
           {/* Price */}
           <div className="flex items-baseline gap-3 mb-2">
-            <span className="text-3xl font-bold text-maroon-900">₹{product.price.toLocaleString()}</span>
+            <span className="font-display text-chapter font-normal text-maroon-900">₹{product.price.toLocaleString()}</span>
             {product.compare_price && (
-              <span className="text-lg text-gray-400 line-through">₹{product.compare_price.toLocaleString()}</span>
+              <span className="text-lg text-graphite-faint line-through">₹{product.compare_price.toLocaleString()}</span>
             )}
             {discount && <span className="text-green-600 font-semibold text-sm">{discount}% off</span>}
           </div>
-          <p className="text-xs text-gray-500 mb-5">Inclusive of all taxes. ✓ Delivered to your doorstep</p>
+          <p className="text-xs text-graphite-faint mb-5">Inclusive of all taxes. ✓ Delivered to your doorstep</p>
 
           <hr className="border-maroon-200 mb-5" />
 
@@ -476,24 +476,24 @@ export default function ProductDetailPage() {
           {(product.fabric || product.fit || product.material) && (
             <div className="grid grid-cols-3 gap-2 mb-5">
               {product.fabric ? (
-                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-200 rounded-2xl py-3 px-2 text-center">
+                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-200 rounded-sm py-3 px-2 text-center">
                   <span className="text-xl leading-none">🧵</span>
-                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mt-0.5">Fabric</span>
-                  <span className="text-xs font-bold text-gray-800 leading-tight">{product.fabric}</span>
+                  <span className="text-[10px] font-normal text-amber-600 uppercase tracking-widest mt-0.5">Fabric</span>
+                  <span className="text-xs font-normal text-graphite leading-tight">{product.fabric}</span>
                 </div>
               ) : <div />}
               {product.fit ? (
-                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-violet-50 to-purple-50 border border-violet-200 rounded-2xl py-3 px-2 text-center">
+                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-violet-50 to-purple-50 border border-violet-200 rounded-sm py-3 px-2 text-center">
                   <span className="text-xl leading-none">✂️</span>
-                  <span className="text-[10px] font-bold text-violet-500 uppercase tracking-widest mt-0.5">Fit</span>
-                  <span className="text-xs font-bold text-gray-800 leading-tight">{product.fit}</span>
+                  <span className="text-[10px] font-normal text-violet-500 uppercase tracking-widest mt-0.5">Fit</span>
+                  <span className="text-xs font-normal text-graphite leading-tight">{product.fit}</span>
                 </div>
               ) : <div />}
               {product.material ? (
-                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-teal-50 to-emerald-50 border border-teal-200 rounded-2xl py-3 px-2 text-center">
+                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-teal-50 to-emerald-50 border border-teal-200 rounded-sm py-3 px-2 text-center">
                   <span className="text-xl leading-none">🌿</span>
-                  <span className="text-[10px] font-bold text-teal-600 uppercase tracking-widest mt-0.5">Material</span>
-                  <span className="text-xs font-bold text-gray-800 leading-tight">{product.material}</span>
+                  <span className="text-[10px] font-normal text-teal-600 uppercase tracking-widest mt-0.5">Material</span>
+                  <span className="text-xs font-normal text-graphite leading-tight">{product.material}</span>
                 </div>
               ) : <div />}
             </div>
@@ -509,7 +509,7 @@ export default function ProductDetailPage() {
               <div className="flex flex-wrap gap-2">
                 {product.size_options.map((size) => (
                   <button key={size} onClick={() => { setSelectedSize(size); setSizeErr(false); }}
-                    className={`px-4 py-2 rounded-lg border-2 text-sm font-semibold transition-all ${selectedSize === size ? 'border-maroon-800 bg-maroon-800 text-white' : 'border-gray-200 text-gray-700 hover:border-maroon-400'}`}>
+                    className={`px-4 py-2 rounded-sm border-2 text-sm font-semibold transition-all ${selectedSize === size ? 'border-maroon-800 bg-maroon-800 text-white' : 'border-paper-edge text-graphite-muted hover:border-maroon-400'}`}>
                     {size}
                   </button>
                 ))}
@@ -527,7 +527,7 @@ export default function ProductDetailPage() {
               <div className="flex flex-wrap gap-2">
                 {product.colors.map((color) => (
                   <button key={color} onClick={() => { setSelectedColor(color); setColorErr(false); }}
-                    className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${selectedColor === color ? 'border-maroon-800 bg-maroon-50 text-maroon-800' : 'border-gray-200 text-gray-700 hover:border-maroon-400'}`}>
+                    className={`px-4 py-2 rounded-sm border-2 text-sm font-medium transition-all ${selectedColor === color ? 'border-maroon-800 bg-maroon-50 text-maroon-800' : 'border-paper-edge text-graphite-muted hover:border-maroon-400'}`}>
                     {color}
                   </button>
                 ))}
@@ -539,20 +539,20 @@ export default function ProductDetailPage() {
           <div className="mb-6">
             <label className="label">Quantity</label>
             <div className="flex items-center gap-3">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-maroon-400 font-bold text-lg flex items-center justify-center">-</button>
-              <span className="text-lg font-bold w-8 text-center">{quantity}</span>
-              <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-maroon-400 font-bold text-lg flex items-center justify-center">+</button>
-              <span className="text-sm text-gray-500 ml-1">{product.stock} available</span>
+              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 rounded-sm border-2 border-paper-edge hover:border-maroon-400 font-normal text-lg flex items-center justify-center">-</button>
+              <span className="text-lg font-normal w-8 text-center">{quantity}</span>
+              <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="w-10 h-10 rounded-sm border-2 border-paper-edge hover:border-maroon-400 font-normal text-lg flex items-center justify-center">+</button>
+              <span className="text-sm text-graphite-faint ml-1">{product.stock} available</span>
             </div>
           </div>
 
           {/* Stock warnings */}
           {product.stock === 0 ? (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 text-red-700 text-sm font-medium">
+            <div className="bg-red-50 border border-red-200 rounded-sm p-4 mb-4 text-red-700 text-sm font-medium">
               ❌ This product is currently out of stock. Check back later.
             </div>
           ) : product.stock <= 5 ? (
-            <div className="bg-maroon-50 border border-orange-200 rounded-xl p-3 mb-4 text-orange-700 text-sm">
+            <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3 mb-4 text-orange-700 text-sm">
               ⚠️ Only {product.stock} left in stock — order soon!
             </div>
           ) : null}
@@ -572,7 +572,7 @@ export default function ProductDetailPage() {
 
           {/* Non-returnable banner */}
           {product.is_returnable === false && (
-            <div className="flex items-start gap-2.5 p-3.5 mb-4 bg-red-50 border border-red-200 rounded-xl">
+            <div className="flex items-start gap-2.5 p-3.5 mb-4 bg-red-50 border border-red-200 rounded-sm">
               <XCircle size={18} className="text-red-500 mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-red-700">Non-Returnable Product</p>
@@ -592,9 +592,9 @@ export default function ProductDetailPage() {
               },
               { icon: Shield, text: '100% Authentic' },
             ].map(({ icon: Icon, text, red }) => (
-              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-center ${red ? 'bg-red-50' : 'bg-maroon-50'}`}>
+              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-sm text-center ${red ? 'bg-red-50' : 'bg-maroon-50'}`}>
                 <Icon size={18} className={red ? 'text-red-500' : 'text-maroon-700'} />
-                <span className={`text-xs leading-tight ${red ? 'text-red-600 font-medium' : 'text-gray-600'}`}>{text}</span>
+                <span className={`text-xs leading-tight ${red ? 'text-red-600 font-medium' : 'text-graphite-muted'}`}>{text}</span>
               </div>
             ))}
           </div>
@@ -606,7 +606,7 @@ export default function ProductDetailPage() {
         <div className="flex border-b border-maroon-200 overflow-x-auto">
           {TABS.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
-              className={`flex-1 min-w-[120px] py-4 text-sm font-semibold transition-colors whitespace-nowrap ${tab === t.key ? 'text-maroon-800 border-b-2 border-maroon-800 bg-maroon-50' : 'text-gray-500 hover:text-maroon-700'}`}>
+              className={`flex-1 min-w-[120px] py-4 text-sm font-semibold transition-colors whitespace-nowrap ${tab === t.key ? 'text-maroon-800 border-b-2 border-maroon-800 bg-maroon-50' : 'text-graphite-faint hover:text-maroon-700'}`}>
               {t.label}
             </button>
           ))}
@@ -615,45 +615,45 @@ export default function ProductDetailPage() {
         <div className="p-6">
           {/* Description tab */}
           {tab === 'desc' && (
-            <div className="prose prose-sm max-w-none text-gray-700">
+            <div className="prose prose-sm max-w-none text-graphite-muted">
               <p className="leading-relaxed">{product.description}</p>
               <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {product.fabric && (
-                  <div className="bg-maroon-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Fabric</p>
+                  <div className="bg-maroon-50 rounded-sm p-4">
+                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Fabric</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.fabric}</p>
                   </div>
                 )}
                 {product.material && (
-                  <div className="bg-maroon-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Material</p>
+                  <div className="bg-maroon-50 rounded-sm p-4">
+                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Material</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.material}</p>
                   </div>
                 )}
                 {product.fit && (
-                  <div className="bg-maroon-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Fit</p>
+                  <div className="bg-maroon-50 rounded-sm p-4">
+                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Fit</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.fit}</p>
                   </div>
                 )}
                 {product.size_options?.length > 0 && (
-                  <div className="bg-maroon-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Sizes</p>
+                  <div className="bg-maroon-50 rounded-sm p-4">
+                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Sizes</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.size_options.join(', ')}</p>
                   </div>
                 )}
                 {product.colors?.length > 0 && (
-                  <div className="bg-maroon-50 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Colours</p>
+                  <div className="bg-maroon-50 rounded-sm p-4">
+                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Colours</p>
                     <p className="font-semibold text-maroon-900 mt-1">{product.colors.join(', ')}</p>
                   </div>
                 )}
-                <div className="bg-maroon-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Category</p>
+                <div className="bg-maroon-50 rounded-sm p-4">
+                  <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Category</p>
                   <p className="font-semibold text-maroon-900 mt-1">{product.category}</p>
                 </div>
-                <div className="bg-maroon-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Stock</p>
+                <div className="bg-maroon-50 rounded-sm p-4">
+                  <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Stock</p>
                   <p className={`font-semibold mt-1 ${product.stock > 0 ? 'text-maroon-900' : 'text-red-600'}`}>{product.stock > 0 ? `${product.stock} available` : 'Out of stock'}</p>
                 </div>
               </div>
@@ -665,43 +665,43 @@ export default function ProductDetailPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {product.fit && (
-                  <div className="bg-maroon-50 rounded-2xl p-5 border border-maroon-200">
+                  <div className="bg-maroon-50 rounded-sm p-5 border border-maroon-200">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl">👗</span>
-                      <p className="font-bold text-maroon-900 text-sm uppercase tracking-wide">Fit</p>
+                      <p className="font-normal text-maroon-900 text-sm uppercase tracking-wide">Fit</p>
                     </div>
-                    <p className="text-gray-700 font-medium">{product.fit}</p>
+                    <p className="text-graphite-muted font-medium">{product.fit}</p>
                   </div>
                 )}
                 {product.fabric && (
-                  <div className="bg-maroon-50 rounded-2xl p-5 border border-maroon-200">
+                  <div className="bg-maroon-50 rounded-sm p-5 border border-maroon-200">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl">🧵</span>
-                      <p className="font-bold text-maroon-900 text-sm uppercase tracking-wide">Fabric</p>
+                      <p className="font-normal text-maroon-900 text-sm uppercase tracking-wide">Fabric</p>
                     </div>
-                    <p className="text-gray-700 font-medium">{product.fabric}</p>
+                    <p className="text-graphite-muted font-medium">{product.fabric}</p>
                   </div>
                 )}
                 {product.material && (
-                  <div className="bg-maroon-50 rounded-2xl p-5 border border-maroon-200">
+                  <div className="bg-maroon-50 rounded-sm p-5 border border-maroon-200">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl">🔬</span>
-                      <p className="font-bold text-maroon-900 text-sm uppercase tracking-wide">Material / Composition</p>
+                      <p className="font-normal text-maroon-900 text-sm uppercase tracking-wide">Material / Composition</p>
                     </div>
-                    <p className="text-gray-700 font-medium">{product.material}</p>
+                    <p className="text-graphite-muted font-medium">{product.material}</p>
                   </div>
                 )}
               </div>
 
               {product.care_instructions && (
-                <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
+                <div className="bg-blue-50 rounded-sm p-5 border border-blue-100">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-2xl">🧺</span>
-                    <p className="font-bold text-blue-900 text-sm uppercase tracking-wide">Care Instructions</p>
+                    <p className="font-normal text-blue-900 text-sm uppercase tracking-wide">Care Instructions</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {product.care_instructions.split(/[.\n]+/).filter(s => s.trim()).map((instruction, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                      <div key={i} className="flex items-start gap-2 text-sm text-graphite-muted">
                         <CheckCircle size={15} className="text-blue-500 mt-0.5 flex-shrink-0" />
                         <span>{instruction.trim()}</span>
                       </div>
@@ -711,9 +711,9 @@ export default function ProductDetailPage() {
               )}
 
               {/* General care tips */}
-              <div className="bg-paper rounded-2xl p-5 border border-gray-100">
-                <p className="font-bold text-gray-700 text-sm uppercase tracking-wide mb-3">General Tips</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+              <div className="bg-paper rounded-sm p-5 border border-paper-edge">
+                <p className="font-normal text-graphite-muted text-sm uppercase tracking-wide mb-3">General Tips</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-graphite-muted">
                   {[
                     'Wash dark colours separately for first few washes',
                     'Turn inside out before washing to preserve colour',
@@ -734,20 +734,20 @@ export default function ProductDetailPage() {
           {tab === 'reviews' && (
             <div className="space-y-6">
               {!user && (
-                <div className="bg-maroon-50 border border-orange-200 rounded-xl p-4 text-center">
-                  <p className="text-sm text-gray-700 mb-2">Sign in to write a review</p>
+                <div className="bg-maroon-50 border border-orange-200 rounded-sm p-4 text-center">
+                  <p className="text-sm text-graphite-muted mb-2">Sign in to write a review</p>
                   <Link href="/auth/login" className="btn-primary inline-flex items-center gap-2 py-2 px-5 text-sm">Sign In</Link>
                 </div>
               )}
 
               {user && canReview && (
-                <div className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-6">
-                  <h3 className="font-bold text-maroon-900 mb-4 flex items-center gap-2">
+                <div className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-sm p-6">
+                  <h3 className="font-normal text-maroon-900 mb-4 flex items-center gap-2">
                     <Star size={18} className="text-yellow-500 fill-yellow-500" /> Rate this product
                   </h3>
                   <form onSubmit={handleSubmitReview} className="space-y-4">
                     <div>
-                      <p className="text-sm text-gray-600 mb-2">Your rating *</p>
+                      <p className="text-sm text-graphite-muted mb-2">Your rating *</p>
                       <div className="flex gap-1">
                         {[1,2,3,4,5].map(n => (
                           <button key={n} type="button"
@@ -756,11 +756,11 @@ export default function ProductDetailPage() {
                             onClick={() => setMyRating(n)}
                             className="focus:outline-none"
                           >
-                            <Star size={32} className={(hoverRating || myRating) >= n ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} />
+                            <Star size={32} className={(hoverRating || myRating) >= n ? 'text-yellow-400 fill-yellow-400' : 'text-paper-edge'} />
                           </button>
                         ))}
                         {myRating > 0 && (
-                          <span className="ml-2 text-sm text-gray-600 self-center">
+                          <span className="ml-2 text-sm text-graphite-muted self-center">
                             {['','Poor','Fair','Good','Very Good','Excellent'][myRating]}
                           </span>
                         )}
@@ -776,7 +776,7 @@ export default function ProductDetailPage() {
                       <textarea value={myComment} onChange={e => setMyComment(e.target.value)}
                         placeholder="Share your experience with this product — quality, fit, colour, delivery..."
                         className="input-field resize-none" rows={4} maxLength={1000} />
-                      <p className="text-xs text-gray-400 mt-1">{myComment.length}/1000 characters</p>
+                      <p className="text-xs text-graphite-faint mt-1">{myComment.length}/1000 characters</p>
                     </div>
                     <button type="submit" disabled={submitting || myRating === 0}
                       className="btn-primary flex items-center gap-2 py-2.5 px-6 disabled:opacity-60">
@@ -787,15 +787,15 @@ export default function ProductDetailPage() {
               )}
 
               {user && !canReview && reviewReason === 'not_purchased' && (
-                <div className="bg-paper border border-gray-200 rounded-xl p-4">
-                  <p className="text-sm text-gray-600">
+                <div className="bg-paper border border-paper-edge rounded-sm p-4">
+                  <p className="text-sm text-graphite-muted">
                     🛡️ <strong>Only verified buyers</strong> who have received this product can leave a review.
                     <Link href="/products" className="text-maroon-700 hover:underline ml-1">Purchase it to review.</Link>
                   </p>
                 </div>
               )}
               {user && !canReview && reviewReason === 'already_reviewed' && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div className="bg-green-50 border border-green-200 rounded-sm p-4">
                   <p className="text-sm text-green-700 flex items-center gap-2">
                     <CheckCircle size={16} /> You have already reviewed this product. Thank you!
                   </p>
@@ -805,15 +805,15 @@ export default function ProductDetailPage() {
               {reviews.length > 0 ? (
                 <div className="space-y-4">
                   {product && product.rating_count > 0 && (
-                    <div className="flex items-center gap-4 bg-maroon-50 rounded-xl p-4 mb-6">
+                    <div className="flex items-center gap-4 bg-maroon-50 rounded-sm p-4 mb-6">
                       <div className="text-center flex-shrink-0">
-                        <p className="text-4xl font-bold text-maroon-900">{product.rating_avg.toFixed(1)}</p>
+                        <p className="text-4xl font-normal text-maroon-900">{product.rating_avg.toFixed(1)}</p>
                         <div className="flex gap-0.5 justify-center mt-1">
                           {[1,2,3,4,5].map(i => (
-                            <Star key={i} size={14} className={i <= Math.round(product.rating_avg) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} />
+                            <Star key={i} size={14} className={i <= Math.round(product.rating_avg) ? 'text-yellow-400 fill-yellow-400' : 'text-paper-edge'} />
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">{product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}</p>
+                        <p className="text-xs text-graphite-faint mt-1">{product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}</p>
                       </div>
                       <div className="flex-1 space-y-1">
                         {[5,4,3,2,1].map(star => {
@@ -821,12 +821,12 @@ export default function ProductDetailPage() {
                           const pct = reviews.length ? Math.round((cnt / reviews.length) * 100) : 0;
                           return (
                             <div key={star} className="flex items-center gap-2 text-xs">
-                              <span className="w-4 text-gray-600 text-right">{star}</span>
+                              <span className="w-4 text-graphite-muted text-right">{star}</span>
                               <Star size={10} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
-                              <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                              <div className="flex-1 bg-paper-shade rounded-full h-1.5">
                                 <div className="bg-yellow-400 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
                               </div>
-                              <span className="w-6 text-gray-400">{cnt}</span>
+                              <span className="w-6 text-graphite-faint">{cnt}</span>
                             </div>
                           );
                         })}
@@ -836,30 +836,30 @@ export default function ProductDetailPage() {
                   {reviews.map((r) => (
                     <div key={r.id} className="border-b border-orange-50 pb-5 last:border-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-full bg-maroon-100 flex items-center justify-center text-maroon-800 font-bold text-sm flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-maroon-100 flex items-center justify-center text-maroon-800 font-normal text-sm flex-shrink-0">
                           {r.user.full_name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-sm text-gray-900">{r.user.full_name}</p>
+                            <p className="font-semibold text-sm text-graphite">{r.user.full_name}</p>
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Verified Buyer</span>
                           </div>
                           <div className="flex gap-0.5 mt-0.5">
                             {Array.from({ length: 5 }, (_, i) => (
-                              <Star key={i} size={12} fill={i < r.rating ? '#facc15' : 'none'} className={i < r.rating ? 'text-yellow-400' : 'text-gray-300'} />
+                              <Star key={i} size={12} fill={i < r.rating ? '#facc15' : 'none'} className={i < r.rating ? 'text-yellow-400' : 'text-paper-edge'} />
                             ))}
                           </div>
                         </div>
-                        <span className="text-xs text-gray-400 flex-shrink-0">{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <span className="text-xs text-graphite-faint flex-shrink-0">{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                       </div>
-                      {r.title && <p className="font-semibold text-sm text-gray-800 mb-1">{r.title}</p>}
-                      {r.comment && <p className="text-sm text-gray-600 leading-relaxed">{r.comment}</p>}
+                      {r.title && <p className="font-semibold text-sm text-graphite mb-1">{r.title}</p>}
+                      {r.comment && <p className="text-sm text-graphite-muted leading-relaxed">{r.comment}</p>}
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 text-gray-500">
-                  <Star size={40} className="mx-auto mb-3 text-gray-300" />
+                <div className="text-center py-10 text-graphite-faint">
+                  <Star size={40} className="mx-auto mb-3 text-paper-edge" />
                   <p className="font-medium">No reviews yet</p>
                   <p className="text-sm mt-1">Be the first verified buyer to review this product</p>
                 </div>

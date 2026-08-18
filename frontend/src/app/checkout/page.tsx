@@ -269,27 +269,27 @@ export default function CheckoutPage() {
 
   const StepDot = ({ n, label }: { n: number; label: string }) => (
     <div className="flex flex-col items-center gap-1">
-      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all ${step >= n ? 'bg-maroon-800 border-maroon-800 text-white' : 'border-gray-300 text-gray-400'}`}>
+      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-normal text-sm border-2 transition-all ${step >= n ? 'bg-maroon-800 border-maroon-800 text-white' : 'border-paper-edge text-graphite-faint'}`}>
         {step > n ? <CheckCircle size={18} /> : n}
       </div>
-      <span className={`text-xs font-medium ${step >= n ? 'text-maroon-800' : 'text-gray-400'}`}>{label}</span>
+      <span className={`text-xs font-medium ${step >= n ? 'text-maroon-800' : 'text-graphite-faint'}`}>{label}</span>
     </div>
   );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/cart" className="p-2 hover:bg-orange-100 rounded-lg"><ArrowLeft size={20} /></Link>
-        <h1 className="text-2xl font-bold text-maroon-900">Secure Checkout</h1>
+        <Link href="/cart" className="p-2 hover:bg-orange-100 rounded-sm"><ArrowLeft size={20} /></Link>
+        <h1 className="font-display text-band font-normal text-maroon-900">Secure Checkout</h1>
         <Lock size={18} className="text-green-600" />
       </div>
 
       {/* Steps */}
       <div className="flex items-center justify-center gap-0 mb-8">
         <StepDot n={1} label="Address" />
-        <div className={`h-0.5 w-20 sm:w-28 transition-colors ${step >= 2 ? 'bg-maroon-800' : 'bg-gray-200'}`} />
+        <div className={`h-0.5 w-20 sm:w-28 transition-colors ${step >= 2 ? 'bg-maroon-800' : 'bg-paper-shade'}`} />
         <StepDot n={2} label="Payment" />
-        <div className={`h-0.5 w-20 sm:w-28 transition-colors ${step >= 3 ? 'bg-maroon-800' : 'bg-gray-200'}`} />
+        <div className={`h-0.5 w-20 sm:w-28 transition-colors ${step >= 3 ? 'bg-maroon-800' : 'bg-paper-shade'}`} />
         <StepDot n={3} label="Confirm" />
       </div>
 
@@ -299,18 +299,18 @@ export default function CheckoutPage() {
           {/* ── STEP 1: Address ── */}
           {step === 1 && (
             <div className="card p-6">
-              <h2 className="font-bold text-lg text-maroon-900 mb-5 flex items-center gap-2">
+              <h2 className="font-normal text-lg text-maroon-900 mb-5 flex items-center gap-2">
                 <Package size={20} /> Delivery Address
               </h2>
 
               {/* Saved addresses */}
               {savedAddresses.length > 0 && (
                 <div className="mb-5">
-                  <p className="text-sm font-semibold text-gray-700 mb-3">Saved Addresses</p>
+                  <p className="text-sm font-semibold text-graphite-muted mb-3">Saved Addresses</p>
                   <div className="space-y-2">
                     {savedAddresses.map((a: any) => (
                       <label key={a.id}
-                        className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-colors ${selectedAddrId === a.id ? 'border-maroon-700 bg-maroon-50' : 'border-gray-200 hover:border-maroon-300'}`}
+                        className={`flex items-start gap-3 p-3 rounded-sm border-2 cursor-pointer transition-colors ${selectedAddrId === a.id ? 'border-maroon-700 bg-maroon-50' : 'border-paper-edge hover:border-maroon-300'}`}
                       >
                         <input type="radio" name="saved_addr" className="mt-1 accent-maroon-700"
                           checked={selectedAddrId === a.id}
@@ -322,12 +322,12 @@ export default function CheckoutPage() {
                         />
                         <div className="flex-1 text-sm">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900">{a.full_name}</span>
+                            <span className="font-semibold text-graphite">{a.full_name}</span>
                             {a.label && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">{a.label}</span>}
                             {a.is_default && <span className="text-xs bg-maroon-100 text-maroon-700 px-2 py-0.5 rounded-full flex items-center gap-1"><Star size={10} /> Default</span>}
                           </div>
-                          <p className="text-gray-500 mt-0.5">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ''}, {a.city}, {a.state} – {a.pincode}</p>
-                          <p className="text-gray-500">{a.phone}</p>
+                          <p className="text-graphite-faint mt-0.5">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ''}, {a.city}, {a.state} – {a.pincode}</p>
+                          <p className="text-graphite-faint">{a.phone}</p>
                         </div>
                       </label>
                     ))}
@@ -344,7 +344,7 @@ export default function CheckoutPage() {
               <div className="space-y-4">
                 {/* GPS detect button */}
                 <button type="button" onClick={detectLocation} disabled={gpsLoading}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-maroon-300 rounded-xl text-maroon-700 text-sm font-medium hover:bg-maroon-50 transition-colors">
+                  className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-maroon-300 rounded-sm text-maroon-700 text-sm font-medium hover:bg-maroon-50 transition-colors">
                   {gpsLoading
                     ? <><span className="animate-spin h-4 w-4 border-2 border-maroon-600 border-t-transparent rounded-full" /> Detecting location...</>
                     : <><Navigation size={16} /> Use my current location</>}
@@ -404,7 +404,7 @@ export default function CheckoutPage() {
           {/* ── STEP 2: Payment ── */}
           {step === 2 && (
             <div className="card p-6">
-              <h2 className="font-bold text-lg text-maroon-900 mb-5 flex items-center gap-2">
+              <h2 className="font-normal text-lg text-maroon-900 mb-5 flex items-center gap-2">
                 <Lock size={20} className="text-green-600" /> Payment Method
                 <span className="ml-auto text-xs text-green-600 flex items-center gap-1"><Lock size={11} /> 100% Secure</span>
               </h2>
@@ -415,17 +415,17 @@ export default function CheckoutPage() {
                   { val: 'emi',      icon: CalendarDays,  label: 'Pay in EMI',               sub: 'No-cost EMI available' },
                 ] as const).map(({ val, icon: Icon, label, sub }) => (
                   <button key={val} onClick={() => setPayMethod(val)}
-                    className={`flex flex-col items-center gap-1.5 p-4 rounded-xl border-2 text-sm font-medium transition-all ${payMethod === val ? 'border-maroon-800 bg-maroon-50 text-maroon-800' : 'border-gray-200 text-gray-600 hover:border-maroon-300'}`}>
+                    className={`flex flex-col items-center gap-1.5 p-4 rounded-sm border-2 text-sm font-medium transition-all ${payMethod === val ? 'border-maroon-800 bg-maroon-50 text-maroon-800' : 'border-paper-edge text-graphite-muted hover:border-maroon-300'}`}>
                     <Icon size={22} />
                     <span className="text-center leading-tight font-semibold">{label}</span>
-                    <span className="text-[10px] text-gray-400">{sub}</span>
+                    <span className="text-[10px] text-graphite-faint">{sub}</span>
                   </button>
                 ))}
               </div>
 
               {/* Razorpay info */}
               {payMethod === 'razorpay' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
+                <div className="bg-blue-50 border border-blue-200 rounded-sm p-4 space-y-2">
                   <p className="font-semibold text-blue-800 flex items-center gap-2"><CreditCard size={16} /> Razorpay Secure Payment</p>
                   <p className="text-sm text-blue-700">You will be redirected to Razorpay's secure payment page. Accepts:</p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -439,7 +439,7 @@ export default function CheckoutPage() {
 
               {/* EMI info */}
               {payMethod === 'emi' && (
-                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 space-y-2">
+                <div className="bg-purple-50 border border-purple-200 rounded-sm p-4 space-y-2">
                   <p className="font-semibold text-purple-800 flex items-center gap-2"><CalendarDays size={16} /> EMI — Pay in Easy Instalments</p>
                   <p className="text-sm text-purple-700">Split your payment into monthly instalments. Available on Credit Cards.</p>
                   <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -448,7 +448,7 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                   {grandTotal < 1000 ? (
-                    <div className="bg-maroon-50 border border-orange-200 rounded-lg p-3">
+                    <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3">
                       <p className="text-xs text-orange-700 font-semibold">⚠️ Your order total is ₹{grandTotal}. EMI requires a minimum order of ₹1,000.</p>
                       <p className="text-xs text-orange-600 mt-1">You can still pay via Card / UPI using the option above.</p>
                     </div>
@@ -470,30 +470,30 @@ export default function CheckoutPage() {
           {/* ── STEP 3: Confirm ── */}
           {step === 3 && (
             <div className="card p-6">
-              <h2 className="font-bold text-lg text-maroon-900 mb-5 flex items-center gap-2">
+              <h2 className="font-normal text-lg text-maroon-900 mb-5 flex items-center gap-2">
                 <CheckCircle size={20} className="text-green-600" /> Review & Place Order
               </h2>
 
               {/* Address summary */}
-              <div className="bg-maroon-50 rounded-xl p-4 mb-4">
+              <div className="bg-maroon-50 rounded-sm p-4 mb-4">
                 <div className="flex justify-between">
                   <div>
                     <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">Delivering to</p>
-                    <p className="font-semibold text-gray-800">{addr.full_name}</p>
-                    <p className="text-sm text-gray-600">{addr.address_line1}{addr.address_line2 ? `, ${addr.address_line2}` : ''}</p>
-                    <p className="text-sm text-gray-600">{addr.city}, {addr.state} — {addr.pincode}</p>
-                    <p className="text-sm text-gray-500">📞 {addr.phone}</p>
+                    <p className="font-semibold text-graphite">{addr.full_name}</p>
+                    <p className="text-sm text-graphite-muted">{addr.address_line1}{addr.address_line2 ? `, ${addr.address_line2}` : ''}</p>
+                    <p className="text-sm text-graphite-muted">{addr.city}, {addr.state} — {addr.pincode}</p>
+                    <p className="text-sm text-graphite-faint">📞 {addr.phone}</p>
                   </div>
                   <button onClick={() => setStep(1)} className="text-sm text-maroon-700 hover:underline font-medium">Edit</button>
                 </div>
               </div>
 
               {/* Payment summary */}
-              <div className="bg-maroon-50 rounded-xl p-4 mb-4">
+              <div className="bg-maroon-50 rounded-sm p-4 mb-4">
                 <div className="flex justify-between">
                   <div>
                     <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">Payment</p>
-                    <p className="font-semibold text-gray-800 flex items-center gap-2">
+                    <p className="font-semibold text-graphite flex items-center gap-2">
                       {payMethod === 'razorpay' && <><CreditCard size={16} /> Razorpay (Card / Net Banking / UPI)</>}
                       {payMethod === 'emi'      && <><CalendarDays size={16} /> EMI — Pay in Instalments</>}
                     </p>
@@ -507,12 +507,12 @@ export default function CheckoutPage() {
                 <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide">Items ({items.length})</p>
                 {items.map(item => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-maroon-50 flex items-center justify-center text-xl flex-shrink-0">
+                    <div className="w-12 h-12 rounded-sm bg-maroon-50 flex items-center justify-center text-xl flex-shrink-0">
                       {item.product.category === 'Lehenga' ? '👗' : item.product.category === 'Chudithar' ? '👘' : '👚'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{item.product.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}{item.size ? ` · ${item.size}` : ''}{item.color ? ` · ${item.color}` : ''}</p>
+                      <p className="text-sm font-medium text-graphite truncate">{item.product.name}</p>
+                      <p className="text-xs text-graphite-faint">Qty: {item.quantity}{item.size ? ` · ${item.size}` : ''}{item.color ? ` · ${item.color}` : ''}</p>
                     </div>
                     <p className="font-semibold text-maroon-900 text-sm">₹{(item.product.price * item.quantity).toLocaleString()}</p>
                   </div>
@@ -520,7 +520,7 @@ export default function CheckoutPage() {
               </div>
 
               {/* Open Box Delivery option */}
-              <label className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors mb-4">
+              <label className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-sm cursor-pointer hover:bg-blue-100 transition-colors mb-4">
                 <input type="checkbox" checked={openBox} onChange={e => setOpenBox(e.target.checked)}
                   className="mt-0.5 w-4 h-4 accent-blue-700 flex-shrink-0" />
                 <div>
@@ -535,14 +535,14 @@ export default function CheckoutPage() {
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="btn-secondary flex-1 py-3">← Back</button>
                 <button onClick={handlePlaceOrder} disabled={placing}
-                  className="btn-gold flex-1 py-3.5 flex items-center justify-center gap-2 text-base font-bold rounded-xl">
+                  className="btn-gold flex-1 py-3.5 flex items-center justify-center gap-2 text-base font-normal rounded-sm">
                   {placing
                     ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Processing...</>
                     : <><Lock size={18} /> {payMethod === 'razorpay' ? 'Pay with Razorpay' : 'Choose EMI Plan'} · ₹{grandTotal.toLocaleString()}</>
                   }
                 </button>
               </div>
-              <p className="text-xs text-gray-400 text-center mt-3">By placing this order, you agree to our Terms of Service.</p>
+              <p className="text-xs text-graphite-faint text-center mt-3">By placing this order, you agree to our Terms of Service.</p>
             </div>
           )}
         </div>
@@ -550,30 +550,30 @@ export default function CheckoutPage() {
         {/* Order Summary sidebar */}
         <div className="lg:col-span-1">
           <div className="card p-5 sticky top-28">
-            <h3 className="font-bold text-maroon-900 mb-4">Price Details</h3>
+            <h3 className="font-normal text-maroon-900 mb-4">Price Details</h3>
             <div className="space-y-2.5 text-sm">
               {items.map(item => (
-                <div key={item.id} className="flex justify-between text-gray-700">
+                <div key={item.id} className="flex justify-between text-graphite-muted">
                   <span className="truncate mr-2">{item.product.name} × {item.quantity}</span>
                   <span className="font-medium flex-shrink-0">₹{(item.product.price * item.quantity).toLocaleString()}</span>
                 </div>
               ))}
-              <div className="border-t border-maroon-200 pt-2.5 flex justify-between text-gray-700">
+              <div className="border-t border-maroon-200 pt-2.5 flex justify-between text-graphite-muted">
                 <span>Subtotal</span><span className="font-medium">₹{total.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-gray-700">
+              <div className="flex justify-between text-graphite-muted">
                 <span>Shipping</span>
                 <span className="font-medium">₹{shipping}</span>
               </div>
-              <div className="border-t-2 border-maroon-100 pt-2.5 flex justify-between font-bold text-base">
+              <div className="border-t-2 border-maroon-100 pt-2.5 flex justify-between font-normal text-base">
                 <span className="text-maroon-900">Total</span>
                 <span className="text-maroon-900">₹{grandTotal.toLocaleString()}</span>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-maroon-200 space-y-1.5">
-              <p className="text-xs text-gray-500 flex items-center gap-1.5"><Lock size={11} className="text-green-500" /> SSL Secured Checkout</p>
-              <p className="text-xs text-gray-500">↩️ 7-day easy returns</p>
-              <p className="text-xs text-gray-500">✅ 100% Authentic Products</p>
+              <p className="text-xs text-graphite-faint flex items-center gap-1.5"><Lock size={11} className="text-green-500" /> SSL Secured Checkout</p>
+              <p className="text-xs text-graphite-faint">↩️ 7-day easy returns</p>
+              <p className="text-xs text-graphite-faint">✅ 100% Authentic Products</p>
             </div>
           </div>
         </div>

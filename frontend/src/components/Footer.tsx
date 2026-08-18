@@ -36,7 +36,7 @@ export default function Footer() {
             <Link href="/" className="flex items-center gap-3 mb-4">
               <LogoMark size={40} className="text-graphite flex-shrink-0" />
               <div>
-                <p className="text-graphite font-bold uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>
+                <p className="text-graphite font-normal uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>
                   Ammalu Tex
                 </p>
                 <p className="text-graphite-faint font-semibold uppercase leading-tight mt-1" style={{ fontSize: '9.5px', letterSpacing: '0.1em' }}>
@@ -49,11 +49,11 @@ export default function Footer() {
             </p>
             <div className="flex gap-2 flex-wrap">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-                className="p-2 bg-graphite hover:bg-thread rounded-lg transition-colors" title="WhatsApp">
+                className="p-2 bg-graphite hover:bg-thread rounded-sm transition-colors" title="WhatsApp">
                 <MessageCircle size={16} />
               </a>
               <a href={STORE.instagram} target="_blank" rel="noopener noreferrer"
-                className="p-2 bg-graphite hover:bg-thread rounded-lg transition-colors" title="Instagram">
+                className="p-2 bg-graphite hover:bg-thread rounded-sm transition-colors" title="Instagram">
                 <InstagramIcon size={16} />
               </a>
             </div>
@@ -136,7 +136,7 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-            <div className="mt-4 p-3 bg-paper-bright rounded-lg text-xs text-graphite-muted border border-paper-edge">
+            <div className="mt-4 p-3 bg-paper-bright rounded-sm text-xs text-graphite-muted border border-paper-edge">
               <p className="font-medium text-graphite mb-1">Store Timings</p>
               <p>{STORE.weekdays}</p>
               <p>{STORE.weekend}</p>

@@ -172,7 +172,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow-md">
+    <header className="sticky top-0 z-50">
 
       {/* Top bar */}
       <div className="bg-gold-50 border-b border-maroon-100 text-maroon-800 text-xs py-1.5 px-4 flex justify-between items-center">
@@ -205,7 +205,7 @@ export default function Navbar() {
             {/* Search with live dropdown */}
             <div ref={searchBoxRef} className="relative flex-1 hidden md:flex max-w-xl mx-auto">
               <form onSubmit={handleSearch} className="w-full">
-                <div className="flex w-full rounded-lg overflow-hidden">
+                <div className="flex w-full rounded-sm overflow-hidden">
                   <input
                     type="text"
                     value={search}
@@ -215,7 +215,7 @@ export default function Navbar() {
                       else if (!search.trim() && searchHistory.length > 0) { setShowHistory(true); }
                     }}
                     placeholder="Search chudithar, tops, lehenga, half saree..."
-                    className="flex-1 px-4 py-2.5 text-gray-900 text-sm outline-none"
+                    className="flex-1 px-4 py-2.5 text-graphite text-sm outline-none"
                     autoComplete="off"
                   />
                   <button type="submit" className="bg-gold-600 hover:bg-gold-700 px-4 flex items-center transition-colors">
@@ -226,9 +226,9 @@ export default function Navbar() {
 
               {/* Search history dropdown (shown when focused with empty input) */}
               {showHistory && !search.trim() && searchHistory.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-gray-200 z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-2.5 bg-paper border-b border-gray-100">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recent Searches</span>
+                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-paper-edge z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-paper border-b border-paper-edge">
+                    <span className="text-xs font-normal text-graphite-faint uppercase tracking-wider">Recent Searches</span>
                     <button
                       onClick={clearHistory}
                       className="text-xs text-maroon-600 hover:text-maroon-900 font-semibold hover:underline"
@@ -238,16 +238,16 @@ export default function Navbar() {
                   </div>
                   {searchHistory.map((term) => (
                     <div key={term} className="flex items-center gap-3 px-4 py-3 hover:bg-maroon-50 border-b border-gray-50 last:border-0 cursor-pointer group">
-                      <Search size={14} className="text-gray-400 flex-shrink-0" />
+                      <Search size={14} className="text-graphite-faint flex-shrink-0" />
                       <button
-                        className="flex-1 text-left text-sm text-gray-800 font-medium group-hover:text-maroon-800"
+                        className="flex-1 text-left text-sm text-graphite font-medium group-hover:text-maroon-800"
                         onClick={() => runSearch(term)}
                       >
                         {term}
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); removeHistory(term); }}
-                        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
+                        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-graphite-faint hover:text-graphite-muted hover:bg-paper-shade transition-colors"
                         title="Remove"
                       >
                         <X size={13} />
@@ -259,7 +259,7 @@ export default function Navbar() {
 
               {/* Live search dropdown */}
               {showDrop && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-gray-100 z-50 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl border border-paper-edge z-50 overflow-hidden">
                   {searchResults.map((p: any) => (
                     <button
                       key={p.id}
@@ -274,15 +274,15 @@ export default function Navbar() {
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-gray-900 text-sm font-medium truncate">{p.name}</p>
-                        <p className="text-xs text-gray-500">{p.category}</p>
+                        <p className="text-graphite text-sm font-medium truncate">{p.name}</p>
+                        <p className="text-xs text-graphite-faint">{p.category}</p>
                       </div>
-                      <p className="text-maroon-700 font-bold text-sm flex-shrink-0">₹{Number(p.price).toLocaleString('en-IN')}</p>
+                      <p className="text-maroon-700 font-normal text-sm flex-shrink-0">₹{Number(p.price).toLocaleString('en-IN')}</p>
                     </button>
                   ))}
                   <button
                     onClick={() => { router.push(`/products?search=${encodeURIComponent(search.trim())}`); setShowDrop(false); setSearch(''); }}
-                    className="w-full px-4 py-3 text-center text-sm text-maroon-700 hover:bg-maroon-50 font-semibold border-t border-gray-100"
+                    className="w-full px-4 py-3 text-center text-sm text-maroon-700 hover:bg-maroon-50 font-semibold border-t border-paper-edge"
                   >
                     <Search size={14} className="inline mr-1.5" />
                     See all results for &quot;{search}&quot;
@@ -299,13 +299,13 @@ export default function Navbar() {
                 <div className="hidden sm:flex items-center gap-2">
                   <Link
                     href="/auth/login"
-                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-maroon-900 border border-maroon-300 hover:bg-maroon-100 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-maroon-900 border border-maroon-300 hover:bg-maroon-100 rounded-sm transition-colors"
                   >
                     <LogIn size={15} /> Sign In
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold bg-gold-600 hover:bg-gold-700 text-white rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-semibold bg-gold-600 hover:bg-gold-700 text-white rounded-sm transition-colors"
                   >
                     <User size={15} /> Create Account
                   </Link>
@@ -318,9 +318,9 @@ export default function Navbar() {
                   {/* Avatar button */}
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-lg transition-colors"
+                    className="flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-sm transition-colors"
                   >
-                    <div className="w-7 h-7 rounded-full bg-gold-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-gold-500 text-white text-xs font-normal flex items-center justify-center flex-shrink-0">
                       {user.full_name.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-[11px] mt-0.5 hidden sm:block">
@@ -329,17 +329,17 @@ export default function Navbar() {
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-1 w-72 bg-white rounded-xl shadow-xl border border-maroon-200 py-2 text-gray-800 z-50 max-h-[90vh] overflow-y-auto">
+                    <div className="absolute right-0 mt-1 w-72 bg-white rounded-sm border border-maroon-200 py-2 text-graphite z-50 max-h-[90vh] overflow-y-auto">
 
                       {/* ── Current account ── */}
                       <div className="px-4 py-3 border-b border-maroon-200">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-maroon-700 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-maroon-700 text-white text-sm font-normal flex items-center justify-center flex-shrink-0">
                             {user.full_name.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-maroon-900 truncate">{user.full_name}</p>
-                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                            <p className="text-xs text-graphite-faint truncate">{user.email}</p>
                           </div>
                           <Check size={16} className="text-green-600 flex-shrink-0" />
                         </div>
@@ -386,7 +386,7 @@ export default function Navbar() {
                       <hr className="border-maroon-200 my-1" />
 
                       {/* ── Switch Account ── */}
-                      <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Switch Account</p>
+                      <p className="px-4 pt-2 pb-1 text-[10px] font-semibold text-graphite-faint uppercase tracking-widest">Switch Account</p>
                       {sessions.filter(s => s.user.id !== user.id).map(session => (
                         <div key={session.user.id} className="flex items-center gap-1 px-2 hover:bg-maroon-50 transition-colors group">
                           <button
@@ -399,20 +399,20 @@ export default function Navbar() {
                             }}
                             className="flex items-center gap-3 flex-1 py-2.5 text-left"
                           >
-                            <div className="w-8 h-8 rounded-full bg-maroon-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-maroon-600 text-white text-xs font-normal flex items-center justify-center flex-shrink-0">
                               {session.user.full_name.charAt(0).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-800 truncate">{session.user.full_name}</p>
-                              <p className="text-xs text-gray-400 truncate">{session.user.email}</p>
+                              <p className="text-sm font-medium text-graphite truncate">{session.user.full_name}</p>
+                              <p className="text-xs text-graphite-faint truncate">{session.user.email}</p>
                             </div>
-                            <ChevronRight size={14} className="text-gray-400 flex-shrink-0" />
+                            <ChevronRight size={14} className="text-graphite-faint flex-shrink-0" />
                           </button>
                           {/* Remove this saved session */}
                           <button
                             onClick={(e) => { e.stopPropagation(); removeSession(session.user.id); }}
                             title="Remove account"
-                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all flex-shrink-0"
+                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-red-100 text-graphite-faint hover:text-red-500 transition-all flex-shrink-0"
                           >
                             <X size={13} />
                           </button>
@@ -423,9 +423,9 @@ export default function Navbar() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-maroon-50 text-sm text-gray-600"
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-maroon-50 text-sm text-graphite-muted"
                       >
-                        <UserPlus size={15} className="text-gray-500" />
+                        <UserPlus size={15} className="text-graphite-faint" />
                         Add Another Account
                       </Link>
 
@@ -446,12 +446,12 @@ export default function Navbar() {
               {user && (
                 <Link
                   href="/wishlist"
-                  className="relative flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-lg transition-colors"
+                  className="relative flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-sm transition-colors"
                 >
                   <div className="relative">
                     <Heart size={20} fill={wishCount > 0 ? '#ef4444' : 'none'} className={wishCount > 0 ? 'text-red-400' : ''} />
                     {wishCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-normal rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                         {wishCount > 99 ? '99+' : wishCount}
                       </span>
                     )}
@@ -463,12 +463,12 @@ export default function Navbar() {
               {/* Cart */}
               <Link
                 href={user ? '/cart' : '/auth/login'}
-                className="relative flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-lg transition-colors"
+                className="relative flex flex-col items-center px-3 py-1 hover:bg-maroon-700 rounded-sm transition-colors"
               >
                 <div className="relative">
                   <ShoppingCart size={20} />
                   {count > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-gold-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                    <span className="absolute -top-2 -right-2 bg-gold-500 text-white text-[10px] font-normal rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                       {count > 99 ? '99+' : count}
                     </span>
                   )}
@@ -478,13 +478,13 @@ export default function Navbar() {
 
               {/* Mobile: show Sign In button when logged out */}
               {!user && (
-                <Link href="/auth/login" className="sm:hidden flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-gold-600 hover:bg-gold-700 rounded-lg transition-colors">
+                <Link href="/auth/login" className="sm:hidden flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-gold-600 hover:bg-gold-700 rounded-sm transition-colors">
                   Sign In
                 </Link>
               )}
 
               {/* Mobile toggle */}
-              <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 hover:bg-maroon-700 rounded-lg">
+              <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 hover:bg-maroon-700 rounded-sm">
                 {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
@@ -514,7 +514,7 @@ export default function Navbar() {
                   <ChevronDown size={14} className={`transition-transform duration-200 ${catMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {catMenuOpen && (
-                  <div className="absolute top-full left-0 w-56 bg-white shadow-xl rounded-b-xl border border-maroon-200 py-2 z-50">
+                  <div className="absolute top-full left-0 w-56 bg-white rounded-b-xl border border-maroon-200 py-2 z-50">
                     {CATEGORIES.map((cat) => (
                       <button
                         key={cat}
@@ -522,7 +522,7 @@ export default function Navbar() {
                           setCatMenuOpen(false);
                           router.push(`/products?category=${encodeURIComponent(cat)}`);
                         }}
-                        className="w-full text-left block px-4 py-2.5 text-gray-800 hover:bg-maroon-50 hover:text-maroon-800 text-sm font-medium transition-colors"
+                        className="w-full text-left block px-4 py-2.5 text-graphite hover:bg-maroon-50 hover:text-maroon-800 text-sm font-medium transition-colors"
                       >
                         {cat}
                       </button>
@@ -552,13 +552,13 @@ export default function Navbar() {
         {mobileOpen && (
           <div className="md:hidden bg-maroon-900 border-t border-maroon-700">
             <form onSubmit={handleSearch} className="p-4">
-              <div className="flex rounded-lg overflow-hidden">
+              <div className="flex rounded-sm overflow-hidden">
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products..."
-                  className="flex-1 px-4 py-2.5 text-gray-900 text-sm outline-none"
+                  className="flex-1 px-4 py-2.5 text-graphite text-sm outline-none"
                 />
                 <button type="submit" className="bg-gold-600 px-4 flex items-center">
                   <Search size={18} />
@@ -568,14 +568,14 @@ export default function Navbar() {
             <div className="px-4 pb-4 flex flex-col gap-1">
               {/* Home link */}
               <Link href="/" onClick={() => setMobileOpen(false)}
-                className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
+                className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
                 <Home size={15} /> Home
               </Link>
               <hr className="border-maroon-700 my-1" />
               {CATEGORIES.map((cat) => (
                 <Link key={cat} href={`/products?category=${encodeURIComponent(cat)}`}
                   onClick={() => setMobileOpen(false)}
-                  className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium">
+                  className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium">
                   {cat}
                 </Link>
               ))}
@@ -584,20 +584,20 @@ export default function Navbar() {
                 <>
                   {user.is_admin && (
                     <Link href="/admin?tab=dash" onClick={() => setMobileOpen(false)}
-                      className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-semibold text-gold-300 flex items-center gap-2">
+                      className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-semibold text-gold-300 flex items-center gap-2">
                       <LayoutDashboard size={15} /> Admin Dashboard
                     </Link>
                   )}
                   <Link href="/orders" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
+                    className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
                     <Package size={15} /> My Orders
                   </Link>
                   <Link href="/account" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
+                    className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
                     <UserCog size={15} /> Account Settings
                   </Link>
                   <Link href="/support" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
+                    className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium flex items-center gap-2">
                     <HelpCircle size={15} /> Help &amp; Policies
                   </Link>
                   {/* Switch Account — mobile */}
@@ -611,9 +611,9 @@ export default function Navbar() {
                           const fresh = JSON.parse(localStorage.getItem('user') || '{}');
                           window.location.href = fresh.is_admin ? '/admin' : '/';
                         }}
-                        className="flex-1 px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 text-left"
+                        className="flex-1 px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium flex items-center gap-2 text-left"
                       >
-                        <div className="w-6 h-6 rounded-full bg-maroon-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-maroon-500 text-white text-xs font-normal flex items-center justify-center flex-shrink-0">
                           {session.user.full_name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -623,7 +623,7 @@ export default function Navbar() {
                       </button>
                       <button
                         onClick={() => removeSession(session.user.id)}
-                        className="p-2 rounded-lg hover:bg-red-900 text-maroon-400 hover:text-red-300 flex-shrink-0"
+                        className="p-2 rounded-sm hover:bg-red-900 text-maroon-400 hover:text-red-300 flex-shrink-0"
                         title="Remove account"
                       >
                         <X size={14} />
@@ -635,31 +635,31 @@ export default function Navbar() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2">
+                    className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium text-maroon-200 flex items-center gap-2">
                     <UserPlus size={15} /> Add Another Account
                   </Link>
                   <Link href="/account/delete" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
+                    className="px-4 py-2.5 rounded-sm hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2">
                     <UserX size={15} /> Delete Account
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="px-4 py-2.5 rounded-lg hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2 w-full text-left">
+                    className="px-4 py-2.5 rounded-sm hover:bg-red-900 text-sm font-medium text-red-300 flex items-center gap-2 w-full text-left">
                     <LogOut size={15} /> Sign Out
                   </button>
                 </>
               ) : (
                 <>
                   <Link href="/auth/login" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-semibold text-gold-300">
+                    className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-semibold text-gold-300">
                     Sign In
                   </Link>
                   <Link href="/auth/register" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium">
+                    className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium">
                     Create Account
                   </Link>
                   <Link href="/support" onClick={() => setMobileOpen(false)}
-                    className="px-4 py-2.5 rounded-lg hover:bg-maroon-700 text-sm font-medium text-maroon-200">
+                    className="px-4 py-2.5 rounded-sm hover:bg-maroon-700 text-sm font-medium text-maroon-200">
                     Customer Support
                   </Link>
                 </>
@@ -672,32 +672,32 @@ export default function Navbar() {
       {/* ── Sign-Out Confirmation Modal ── */}
       {showSignOutConfirm && (
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setShowSignOutConfirm(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-sm shadow-2xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
               <div className="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                 <LogOut size={20} className="text-red-600" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 text-lg">Sign Out</h3>
-                <p className="text-sm text-gray-500">Are you sure you want to sign out?</p>
+                <h3 className="font-normal text-graphite text-lg">Sign Out</h3>
+                <p className="text-sm text-graphite-faint">Are you sure you want to sign out?</p>
               </div>
             </div>
 
             {/* Current user card */}
-            <div className="bg-maroon-50 border border-maroon-200 rounded-xl p-3 mb-5 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-maroon-700 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+            <div className="bg-maroon-50 border border-maroon-200 rounded-sm p-3 mb-5 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-maroon-700 text-white text-sm font-normal flex items-center justify-center flex-shrink-0">
                 {user?.full_name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-maroon-900 text-sm truncate">{user?.full_name}</p>
-                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                <p className="text-xs text-graphite-faint truncate">{user?.email}</p>
               </div>
             </div>
 
             {/* If other sessions exist, show a note */}
             {sessions.filter(s => s.user.id !== user?.id).length > 0 && (
-              <p className="text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-4">
+              <p className="text-xs text-graphite-faint bg-blue-50 border border-blue-100 rounded-sm px-3 py-2 mb-4">
                 💡 You will be switched to your other saved account.
               </p>
             )}
@@ -706,13 +706,13 @@ export default function Navbar() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowSignOutConfirm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-paper transition-colors"
+                className="flex-1 px-4 py-2.5 border border-paper-edge rounded-sm text-graphite-muted font-medium text-sm hover:bg-paper transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmSignOut}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-semibold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-sm font-semibold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
               >
                 <LogOut size={15} /> Yes, Sign Out
               </button>

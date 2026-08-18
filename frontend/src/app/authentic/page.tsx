@@ -14,10 +14,10 @@ export default function AuthenticPage() {
     <div className="max-w-4xl mx-auto px-4 py-10">
 
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-6">
+      <nav className="flex items-center gap-1.5 text-xs text-graphite-faint mb-6">
         <Link href="/" className="hover:text-maroon-700">Home</Link>
         <ChevronRight size={12} />
-        <span className="text-gray-800 font-medium">100% Authentic</span>
+        <span className="text-graphite font-medium">100% Authentic</span>
       </nav>
 
       {/* Header */}
@@ -25,15 +25,15 @@ export default function AuthenticPage() {
         <div className="inline-flex items-center gap-2 bg-maroon-50 text-maroon-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
           <Shield size={15} /> Quality Guarantee
         </div>
-        <h1 className="text-3xl font-display font-bold text-maroon-900 mb-3">100% Authentic Products</h1>
-        <p className="text-gray-500 max-w-xl mx-auto text-sm">
+        <h1 className="text-3xl font-display font-normal text-maroon-900 mb-3">100% Authentic Products</h1>
+        <p className="text-graphite-faint max-w-xl mx-auto text-sm">
           Every garment at Ammalu Tex is handpicked from verified weavers, manufacturers, and trusted suppliers.
           We guarantee genuine quality — no imitations, no compromises.
         </p>
       </div>
 
       {/* Quality badge banner */}
-      <div className="bg-brand-gradient text-white rounded-2xl p-8 mb-10 text-center relative overflow-hidden">
+      <div className="bg-brand-gradient text-white rounded-sm p-8 mb-10 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5 text-[180px] flex items-center justify-center">🛡️</div>
         <div className="relative">
           <div className="flex justify-center mb-4">
@@ -41,7 +41,7 @@ export default function AuthenticPage() {
               <Shield size={40} className="text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold mb-2">Ammalu Tex Authenticity Guarantee</h2>
+          <h2 className="font-display text-band font-normal mb-2">Ammalu Tex Authenticity Guarantee</h2>
           <p className="text-maroon-200 max-w-lg mx-auto text-sm leading-relaxed">
             We source directly from weavers across Tamil Nadu and trusted textile hubs — bypassing middlemen to
             bring you genuine quality at fair prices. What you see is exactly what you get.
@@ -50,7 +50,7 @@ export default function AuthenticPage() {
       </div>
 
       {/* Our promise */}
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Our Quality Promise</h2>
+      <h2 className="text-xl font-normal text-graphite mb-4">Our Quality Promise</h2>
       <div className="grid sm:grid-cols-2 gap-4 mb-10">
         {[
           {
@@ -81,15 +81,15 @@ export default function AuthenticPage() {
           <div key={title} className="card p-5 flex items-start gap-4">
             <div className="text-3xl flex-shrink-0">{icon}</div>
             <div>
-              <p className="font-bold text-gray-800 mb-1.5">{title}</p>
-              <p className="text-sm text-gray-600 leading-relaxed">{desc}</p>
+              <p className="font-normal text-graphite mb-1.5">{title}</p>
+              <p className="text-sm text-graphite-muted leading-relaxed">{desc}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Quality checks */}
-      <h2 className="text-xl font-bold text-gray-800 mb-4">What We Check Before Dispatch</h2>
+      <h2 className="text-xl font-normal text-graphite mb-4">What We Check Before Dispatch</h2>
       <div className="card p-6 mb-10">
         <div className="grid sm:grid-cols-2 gap-3">
           {[
@@ -102,7 +102,7 @@ export default function AuthenticPage() {
             'No stains or damage from storage',
             'Proper ironing and presentation',
           ].map(item => (
-            <div key={item} className="flex items-center gap-2 text-sm text-gray-700">
+            <div key={item} className="flex items-center gap-2 text-sm text-graphite-muted">
               <CheckCircle size={15} className="text-green-500 flex-shrink-0" /> {item}
             </div>
           ))}
@@ -111,10 +111,10 @@ export default function AuthenticPage() {
 
       {/* Not happy? */}
       <div className="card p-6 mb-10 bg-maroon-50 border-maroon-200">
-        <p className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <p className="font-normal text-graphite mb-2 flex items-center gap-2">
           <Award size={18} className="text-gold-600" /> Not Satisfied? We'll Make It Right.
         </p>
-        <p className="text-sm text-gray-600 leading-relaxed mb-3">
+        <p className="text-sm text-graphite-muted leading-relaxed mb-3">
           If a product arrives with a genuine size issue or damage, you can request a{' '}
           <strong>return within 4 hours of delivery</strong> — once approved and picked up, your refund is
           processed automatically via Razorpay.
@@ -132,7 +132,7 @@ export default function AuthenticPage() {
         <Link href="/shipping" className="btn-outline flex items-center gap-2 justify-center text-maroon-800 border-maroon-300 hover:bg-maroon-50">
           <Truck size={15} /> Shipping Info
         </Link>
-        <Link href="/support" className="flex items-center gap-2 justify-center px-5 py-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-paper text-sm font-medium">
+        <Link href="/support" className="flex items-center gap-2 justify-center px-5 py-2.5 rounded-sm border border-paper-edge text-graphite-muted hover:bg-paper text-sm font-medium">
           <Headphones size={15} /> Need Help?
         </Link>
       </div>
