@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { STORE } from '@/lib/config';
+import { LogoMark } from '@/components/Logo';
 import { isAuthRoute } from '@/lib/routes';
 
 /**
@@ -110,7 +111,25 @@ export default function AtelierFooter() {
       <div className="mx-auto grid w-full max-w-[104rem] gap-x-12 gap-y-12 lg:grid-cols-12">
 
         <div className="lg:col-span-4">
-          <p className="font-display text-band font-normal text-paper">{STORE.name}</p>
+          {/* THE MARK, AND A WAY HOME.
+              This was a `<p>`: the shop's name set at the head of the footer,
+              with no mark beside it and nothing clickable about it. Every
+              visitor who has ever used a website tries the name in the footer
+              to get back to the front page, and on this one it did nothing.
+              It is the stamp and the name now, and it is a link. */}
+          <Link
+            href="/"
+            aria-label={`${STORE.name} — back to the front page`}
+            className="group inline-flex items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
+          >
+            <LogoMark
+              size={34}
+              className="shrink-0 text-thread-pale transition-colors duration-500 group-hover:text-paper"
+            />
+            <span className="font-display text-band font-normal text-paper transition-colors duration-500 group-hover:text-thread-pale">
+              {STORE.name}
+            </span>
+          </Link>
           <address className="mt-5 not-italic text-paper/80">
             {STORE.shopNo}<br />
             {STORE.area}<br />
