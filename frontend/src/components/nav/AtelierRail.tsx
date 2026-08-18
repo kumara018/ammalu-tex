@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
 import { STORE } from '@/lib/config';
 import { LogoMark } from '@/components/Logo';
+import AccountMenu from '@/components/nav/AccountMenu';
 
 /**
  * The rail — Ammalu Tex's navigation, and the structural opposite of the
@@ -59,7 +59,6 @@ const RAIL = [
 export default function AtelierRail() {
   const pathname = usePathname();
   const { count } = useCart();
-  const { user } = useAuth();
 
   /**
    * The rule under the rail thickens once the page has moved.
@@ -209,12 +208,9 @@ export default function AtelierRail() {
         {/* `ml-auto` pins the actions to the right edge on the phone's top row,
             where the destinations are no longer between them and the mark. */}
         <div className="ml-auto flex shrink-0 items-center gap-x-6">
-          <Link
-            href={user ? '/account' : '/auth/login'}
-            className="text-caption uppercase text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
-          >
-            {user ? (user.full_name?.split(' ')[0] ?? 'Account') : 'Sign in'}
-          </Link>
+          {/* The name was a plain link to /account. It opens a menu now —
+              see components/nav/AccountMenu.tsx. */}
+          <AccountMenu />
 
           {/* The count is set in the accent and only appears when it is not
               zero. A badge reading "0" is a decoration pretending to be

@@ -220,7 +220,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
          column beside this, so the plate does not repeat it. */
       <div
         style={wovenGround(dyeFor(category), seed)}
-        className="flex aspect-square flex-col justify-between border border-paper-edge p-8"
+        className="flex aspect-square flex-col justify-between p-8"
       >
         <span className="text-rule uppercase" style={{ color: dyeFor(category).ink, opacity: 0.66 }}>
           {dyeFor(category).name}
@@ -257,12 +257,12 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
               onClick={() => go(i)}
               aria-label={`View ${i + 1} of ${slides.length}`}
               aria-current={i === active}
-              className={`relative aspect-square w-16 shrink-0 overflow-hidden border bg-paper-shade transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread sm:w-full ${
-                i === active ? 'border-thread' : 'border-paper-edge hover:border-thread/50'
+              className={`relative aspect-square w-16 shrink-0 overflow-hidden border-b-2 bg-paper-shade transition-all duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread sm:w-full ${
+                i === active ? 'border-thread opacity-100' : 'border-transparent opacity-55 hover:opacity-100'
               }`}
             >
               {s.type === 'image' ? (
-                <img src={s.src} alt="" className="h-full w-full object-contain p-1" />
+                <img src={s.src} alt="" className="h-full w-full object-cover" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center bg-graphite">
                   <span aria-hidden="true" className="block h-0 w-0 border-y-[5px] border-l-[8px] border-y-transparent border-l-thread-pale" />
@@ -280,7 +280,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
         onKeyDown={onKeyDown}
         role="group"
         aria-label={`${name} — gallery`}
-        className={`group relative flex-1 overflow-hidden border border-paper-edge bg-paper-shade focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${
+        className={`group relative flex-1 overflow-hidden bg-paper-shade focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${
           current.type === 'image' ? 'cursor-zoom-in' : ''
         }`}
         style={{
@@ -303,7 +303,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
             alt={`${name} — view ${active + 1} of ${slides.length}`}
             draggable={false}
             style={{ transformOrigin: origin, transform: zoom && !reduced ? 'scale(2)' : 'scale(1)' }}
-            className="h-full w-full object-contain p-6 transition-transform duration-[600ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] motion-reduce:transition-none"
+            className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] motion-reduce:transition-none"
           />
         ) : (
           <VideoSlide url={current.src} />
@@ -482,16 +482,43 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Breadcrumb */}
-      {/* One way back, to the shelf you came from. The four-link breadcrumb
-          with three chevrons that used to be here ended in the name of the
-          page you are already on. */}
+      {/**
+        * THE WAY BACK, DRAWN AS A CONTROL.
+        *
+        * There was already a link here and it still got the question "how can
+        * we go back" — which is the answer: it was rule-sized grey small caps
+        * with a text arrow, sitting where a breadcrumb usually sits, and it
+        * read as a label rather than as something you press. A control has to
+        * look like it can be pressed before anyone finds out that it can.
+        *
+        * So it is a stitched ring holding an arrow, at the size of a thumb.
+        * The ring is the shop's own mark (see components/Logo.tsx) put to
+        * work: this is the one piece of the identity that can be a button
+        * without being decoration. The stitch closes and the arrow steps left
+        * on approach, which is the whole animation — a back control that
+        * needed a tutorial would be a worse back control.
+        */}
       <Link
         href={`/products?category=${encodeURIComponent(product.category)}`}
-        className="group mb-[clamp(2rem,5vh,3.5rem)] inline-flex items-baseline gap-3 text-rule uppercase text-graphite-faint transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+        aria-label={`Back to all ${product.category}`}
+        className="group mb-[clamp(2rem,5vh,3.5rem)] inline-flex items-center gap-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
       >
-        <span aria-hidden="true" className="inline-block transition-transform duration-500 group-hover:-translate-x-1 motion-reduce:transition-none">&larr;</span>
-        All {product.category}
+        <span aria-hidden="true" className="relative grid h-12 w-12 shrink-0 place-items-center">
+          <svg viewBox="0 0 48 48" className="absolute inset-0 h-full w-full text-thread/45 transition-colors duration-500 group-hover:text-thread">
+            <circle
+              cx="24" cy="24" r="21" fill="none" stroke="currentColor" strokeWidth="1.4"
+              strokeLinecap="round" strokeDasharray="4 5"
+              className="origin-center transition-transform duration-[900ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:rotate-[-24deg] motion-reduce:transition-none"
+            />
+          </svg>
+          <ArrowLeft
+            size={17}
+            className="text-graphite-muted transition-all duration-500 group-hover:-translate-x-0.5 group-hover:text-thread motion-reduce:transition-none"
+          />
+        </span>
+        <span className="text-rule uppercase text-graphite-faint transition-colors duration-500 group-hover:text-thread">
+          All {product.category}
+        </span>
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">

@@ -188,7 +188,14 @@ export default function ProductCard({ product }: Props) {
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
             style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-            className="relative aspect-[3/4] overflow-hidden border border-paper-edge bg-paper-shade transition-colors duration-500 group-hover:border-thread/50"
+            /* NO FRAME. The plate was a hairline box with a tinted fill and
+               the garment sat inside it with 20px of padding, letterboxed by
+               object-contain — so every piece was a small picture mounted in a
+               window rather than the piece itself. The sister shop fills its
+               plates edge to edge and reads far better for it. The photograph
+               IS the plate now: it covers, it bleeds to the edges, and the
+               only thing drawn around it is the shadow it casts on hover. */
+            className="relative aspect-[3/4] overflow-hidden bg-paper-shade shadow-[0_1px_2px_rgba(51,39,34,0.06)] transition-shadow duration-700 group-hover:shadow-[0_18px_44px_-16px_rgba(51,39,34,0.32)]"
           >
             <AnimatePresence mode="sync" initial={false}>
               {isVideoSlide ? (
@@ -218,7 +225,7 @@ export default function ProductCard({ product }: Props) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5, ease: [0.22, 0.61, 0.24, 1] }}
-                  className="absolute inset-0 h-full w-full object-contain p-5 transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:scale-[1.045] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:scale-[1.045] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 />
               ) : (
                 /**

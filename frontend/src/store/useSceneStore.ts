@@ -93,33 +93,24 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 export function sceneForPath(pathname: string): SceneId {
   if (pathname === '/') return 'atelier';
   /**
-   * THE SHELF AND THE PIECE GET THE QUIET GROUND, NOT A SCENE.
+   * THE SCENE IS THE ATELIER, AND NOWHERE ELSE.
    *
-   * These two routes used to run `form` and `cutting`, and on both the scene
-   * drew large pale polygons that slid behind the grid. Behind a hero that is
-   * atmosphere; behind forty product plates it is a second set of rectangles
-   * competing with the merchandise, and on a phone the shapes cut across the
-   * cards badly enough to read as a rendering fault.
+   * Every route used to run its own scene, and each drew large pale polygons
+   * that slid behind the page. Behind the opening that is atmosphere; behind
+   * forty product plates it is a second set of rectangles competing with the
+   * merchandise, and on a phone the shapes cut across the cards badly enough
+   * to read as a rendering fault.
    *
-   * The instinct when a shop asks for something cinematic is to put the
-   * cinema everywhere. Every storefront worth copying does the opposite: the
-   * spectacle lives on the way in, and the moment a customer is comparing
-   * things they might buy, the background stops asking for attention. The
-   * atelier scene still opens the homepage and still does the work.
+   * The instinct when a shop asks for something cinematic is to put the cinema
+   * everywhere. Every storefront worth copying does the opposite: a film has
+   * one title sequence, not one per scene. The spectacle lives on the way in,
+   * and the moment a customer is comparing things they might buy, paying, or
+   * reading their own records, the background stops asking for attention.
    *
-   * `muslin` is the quiet ground, and it is already in RESTRAINED below, so
-   * this also takes the effects budget off the two pages most likely to be
-   * open on a cheap phone with forty images loading.
+   * `muslin` is the quiet ground and is already in RESTRAINED below, so this
+   * also takes the effects budget off every page that is not the homepage —
+   * which is most of the time a phone spends on this site.
    */
-  if (pathname.startsWith('/products')) return 'muslin';
-  if (pathname.startsWith('/cart') || pathname.startsWith('/wishlist')) return 'basket';
-  if (pathname.startsWith('/checkout')) return 'ledger';
-  if (
-    pathname.startsWith('/orders') ||
-    pathname.startsWith('/account') ||
-    pathname.startsWith('/returns')
-  ) return 'archive';
-  if (isAuthRoute(pathname)) return 'threshold';
   return 'muslin';
 }
 
