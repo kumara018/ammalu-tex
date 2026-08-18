@@ -42,35 +42,35 @@ export default function SupportRatePage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-maroon-100 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-maroon-800" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-maroon-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-black text-maroon-900">{STORE.name}</h1>
+          <h1 className="font-display text-band font-normal text-maroon-900">{STORE.name}</h1>
           <p className="text-xs text-maroon-600 font-medium uppercase tracking-widest mt-1">{STORE.tagline}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-maroon-200 p-8 text-center">
+        <div className="bg-paper-bright rounded-sm shadow-sm border border-maroon-200 p-8 text-center">
           {error ? (
             /* Error / Already rated */
             <div>
               <XCircle size={48} className="text-red-400 mx-auto mb-4" />
-              <h2 className="text-lg font-bold text-gray-800 mb-2">Link Unavailable</h2>
-              <p className="text-gray-500 text-sm">{error}</p>
+              <h2 className="text-lg font-normal text-graphite mb-2">Link Unavailable</h2>
+              <p className="text-graphite-faint text-sm">{error}</p>
             </div>
           ) : submitted ? (
             /* Thank-you */
             <div>
               <div className="text-6xl mb-3">{EMOJIS[selected]}</div>
               <CheckCircle size={32} className="text-green-500 mx-auto mb-3" />
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Thank you, {info?.customer_name?.split(' ')[0]}!</h2>
-              <p className="text-gray-500 text-sm mb-4">Your feedback has been recorded and shared with our team.</p>
+              <h2 className="text-xl font-normal text-graphite mb-1">Thank you, {info?.customer_name?.split(' ')[0]}!</h2>
+              <p className="text-graphite-faint text-sm mb-4">Your feedback has been recorded and shared with our team.</p>
               <div className="flex justify-center gap-1 mb-2">
                 {[1,2,3,4,5].map(i => (
                   <Star key={i} size={28} fill={i <= selected ? '#facc15' : 'none'} className={i <= selected ? 'text-yellow-400' : 'text-gray-200'} />
@@ -82,14 +82,14 @@ export default function SupportRatePage() {
             /* Rating form */
             <div>
               <div className="w-16 h-16 bg-maroon-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⭐</div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">How was your experience?</h2>
+              <h2 className="text-xl font-normal text-graphite mb-1">How was your experience?</h2>
               {info?.cs_name && (
-                <p className="text-sm text-gray-500 mb-1">
+                <p className="text-sm text-graphite-faint mb-1">
                   You were helped by <span className="font-semibold text-maroon-700">{info.cs_name}</span>
                 </p>
               )}
               {info?.issue_summary && (
-                <p className="text-xs text-gray-400 mb-5">Topic: {info.issue_summary}</p>
+                <p className="text-xs text-graphite-faint mb-5">Topic: {info.issue_summary}</p>
               )}
               {!info?.issue_summary && <div className="mb-5" />}
 
@@ -108,13 +108,13 @@ export default function SupportRatePage() {
                     <Star
                       size={52}
                       fill={(hover || selected) >= star ? '#facc15' : 'none'}
-                      className={(hover || selected) >= star ? 'text-yellow-400 drop-shadow' : 'text-gray-300'}
+                      className={(hover || selected) >= star ? 'text-yellow-400 drop-shadow' : 'text-paper-edge'}
                     />
                   </button>
                 ))}
               </div>
 
-              <p className={`text-sm font-semibold h-5 mb-5 transition-all ${hover ? 'text-maroon-700' : 'text-gray-300'}`}>
+              <p className={`text-sm font-semibold h-5 mb-5 transition-all ${hover ? 'text-maroon-700' : 'text-paper-edge'}`}>
                 {hover ? `${EMOJIS[hover]} ${LABELS[hover]}` : 'Tap a star to rate'}
               </p>
 
@@ -125,14 +125,14 @@ export default function SupportRatePage() {
                 rows={2}
                 maxLength={200}
                 placeholder="Any additional feedback? (optional)"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 resize-none focus:outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-200 bg-gray-50"
+                className="w-full border border-paper-edge rounded-sm px-4 py-3 text-sm text-graphite-muted resize-none focus:outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-200 bg-paper"
               />
-              <p className="text-xs text-gray-400 mt-3">Tap any star to submit instantly</p>
+              <p className="text-xs text-graphite-faint mt-3">Tap any star to submit instantly</p>
             </div>
           )}
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">© {new Date().getFullYear()} {STORE.name}</p>
+        <p className="text-center text-xs text-graphite-faint mt-6">© {new Date().getFullYear()} {STORE.name}</p>
       </div>
     </div>
   );

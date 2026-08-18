@@ -6,6 +6,11 @@ import Fuse from 'fuse.js';
 import { productsAPI } from '@/lib/api';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
+import PageShell from '@/components/PageShell';
+import { EmptyState, ErrorState } from '@/components/system/States';
+import { ActionButton, ActionLink } from '@/components/system/Action';
+import Reveal from '@/components/home/Reveal';
+import MeasureRule from '@/components/home/MeasureRule';
 
 const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
 const SORT_OPTIONS = [
@@ -25,6 +30,15 @@ function ProductsContent() {
   const [total, setTotal]             = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [fuzzyMatch, setFuzzyMatch]   = useState<string>('');
+  /**
+   * Did the last load FAIL, as opposed to returning nothing?
+   *
+   * Two different sentences, two different next actions: a failure is ours and
+   * needs a retry; an empty shelf is the shop's stock and needs a wider net.
+   */
+  const [loadError, setLoadError] = useState(false);
+  /** Bumped by the retry button to re-run the fetch effect. */
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Single source of truth — derived directly from URL on every render
   const filters = {
@@ -119,11 +133,13 @@ function ProductsContent() {
           setFuzzyMatch('');
           setProducts([]);
           setTotal(0);
+          setLoadError(true);
           setLoading(false);
         }
       }
     };
 
+    setLoadError(false);
     doFetch();
     return () => { cancelled = true; }; // cancel on unmount or re-run
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,6 +150,7 @@ function ProductsContent() {
     filters.maxPrice,
     filters.featured,
     filters.sort,
+    reloadKey,
   ]);
 
   // Update a filter: write to URL only (effect above reads from URL)
@@ -153,16 +170,22 @@ function ProductsContent() {
   const hasFilters = filters.category || filters.search || filters.minPrice || filters.maxPrice || filters.featured;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <div>
-          <h1 className="section-title">
-            {filters.category || 'All Products'}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {loading ? 'Loading...' : `${total} product${total !== 1 ? 's' : ''} found`}
-          </p>
+    <PageShell rhythm="tight">
+      {/* The cutting table. The count is set as a rule label rather than
+          "24 products found" in grey — on this shop a number is a measurement,
+          and it belongs in the same register as the sizes. */}
+      <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
+        <div className="min-w-0">
+          <Reveal>
+            <p className="mb-4 text-rule uppercase text-thread">
+              {loading ? 'Counting' : `${total} piece${total !== 1 ? 's' : ''}`}
+            </p>
+          </Reveal>
+          <Reveal delay={80}>
+            <h1 className="font-display text-chapter font-normal text-graphite">
+              {filters.category || 'The whole shelf'}
+            </h1>
+          </Reveal>
         </div>
         <div className="flex items-center gap-3">
           {/* Sort */}
@@ -176,17 +199,21 @@ function ProductsContent() {
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint pointer-events-none" />
           </div>
           <button
             onClick={() => setFiltersOpen(!filtersOpen)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${filtersOpen ? 'border-maroon-800 bg-maroon-800 text-white' : 'border-maroon-200 text-maroon-800 hover:border-maroon-800'}`}
+            className={`flex items-center gap-2 rounded-sm border px-5 py-2.5 text-caption uppercase transition-colors duration-500 ${filtersOpen ? 'border-thread text-thread' : 'border-paper-edge text-graphite-muted hover:border-thread hover:text-thread'}`}
           >
-            <SlidersHorizontal size={16} /> Filters
-            {hasFilters && <span className="bg-gold-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">!</span>}
+            <SlidersHorizontal size={15} /> Filters
+            {/* A dot, not a red "!" bubble — it says "something is set" without
+                claiming something is wrong. */}
+            {hasFilters && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-thread" />}
           </button>
         </div>
       </div>
+
+      <MeasureRule className="mb-9" />
 
       {/* Filters panel */}
       {filtersOpen && (
@@ -195,7 +222,7 @@ function ProductsContent() {
           <div>
             <label className="label text-xs">Search</label>
             <div className="relative">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
               <input
                 type="text"
                 defaultValue={filters.search}
@@ -251,7 +278,7 @@ function ProductsContent() {
           <div className="flex flex-col justify-end gap-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={!!filters.featured} onChange={(e) => setF('featured', e.target.checked ? 'true' : '')} className="w-4 h-4 accent-maroon-800" />
-              <span className="text-sm font-medium text-gray-700">Featured only</span>
+              <span className="text-sm font-medium text-graphite-muted">Featured only</span>
             </label>
             {hasFilters && (
               <button onClick={clearFilters} className="flex items-center gap-1.5 text-sm text-red-600 hover:text-red-800 font-medium">
@@ -266,7 +293,7 @@ function ProductsContent() {
       <div className="flex gap-2 flex-wrap mb-6">
         <button
           onClick={() => setF('category', '')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${!filters.category ? 'bg-maroon-800 text-white border-maroon-800' : 'bg-white text-gray-700 border-gray-200 hover:border-maroon-300'}`}
+          className={`border-b pb-1.5 text-caption uppercase transition-colors duration-500 ${!filters.category ? 'border-thread text-thread' : 'border-transparent text-graphite-muted hover:border-paper-edge hover:text-graphite'}`}
         >
           All
         </button>
@@ -274,7 +301,7 @@ function ProductsContent() {
           <button
             key={cat}
             onClick={() => setF('category', cat === filters.category ? '' : cat)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${filters.category === cat ? 'bg-maroon-800 text-white border-maroon-800' : 'bg-white text-gray-700 border-gray-200 hover:border-maroon-300'}`}
+            className={`border-b pb-1.5 text-caption uppercase transition-colors duration-500 ${filters.category === cat ? 'border-thread text-thread' : 'border-transparent text-graphite-muted hover:border-paper-edge hover:text-graphite'}`}
           >
             {cat}
           </button>
@@ -283,11 +310,11 @@ function ProductsContent() {
 
       {/* Fuzzy match banner */}
       {!loading && fuzzyMatch && filters.search && (
-        <div className="mb-4 flex items-center gap-2 bg-gold-50 border border-gold-200 rounded-xl px-4 py-3 text-sm">
-          <Search size={15} className="text-gold-600 flex-shrink-0" />
-          <span className="text-gray-600">
+        <div className="mb-6 flex items-center gap-2.5 border-l border-thread pl-4 py-1 text-sm">
+          <Search size={15} className="flex-shrink-0 text-thread" />
+          <span className="text-graphite-muted">
             No exact results for <strong>&ldquo;{filters.search}&rdquo;</strong>. Showing results for{' '}
-            <span className="font-bold text-maroon-700">&ldquo;{fuzzyMatch}&rdquo;</span> instead.
+            <span className="text-graphite">&ldquo;{fuzzyMatch}&rdquo;</span> instead.
           </span>
         </div>
       )}
@@ -296,13 +323,15 @@ function ProductsContent() {
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array(12).fill(0).map((_, i) => (
-            <div key={i} className="card animate-pulse">
-              <div className="bg-gray-200 aspect-[3/4]" />
-              <div className="p-3 space-y-2">
-                <div className="h-3 bg-gray-200 rounded w-1/3" />
-                <div className="h-4 bg-gray-200 rounded" />
-                <div className="h-4 bg-gray-200 rounded w-2/3" />
-                <div className="h-9 bg-gray-200 rounded" />
+            // The skeleton has to be the shape of the thing arriving, or the
+            // grid jumps when it does. Plate, then caption — no card box.
+            <div key={i} className="animate-pulse">
+              <div className="aspect-[3/4] border border-paper-edge bg-paper-shade" />
+              <div className="space-y-2 pt-4">
+                <div className="h-2 w-1/3 bg-paper-shade" />
+                <div className="h-4 bg-paper-shade" />
+                <div className="h-4 w-2/3 bg-paper-shade" />
+                <div className="mt-5 h-10 bg-paper-shade" />
               </div>
             </div>
           ))}
@@ -311,21 +340,51 @@ function ProductsContent() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
+      ) : loadError ? (
+        /* Ours. Say so, and give them the button back. */
+        <ErrorState
+          title="The shelf didn't load"
+          body="The connection dropped on the way here. Nothing is wrong with your bag or your account."
+          onRetry={() => setReloadKey((k) => k + 1)}
+          fallbackHref="/support"
+          fallbackLabel="Speak to us"
+        />
+      ) : hasFilters ? (
+        /* Theirs, and fixable: the shelf has pieces, this cut of it does not.
+           Naming the filter that is doing the excluding is the difference
+           between a dead end and one click back to the whole shelf. */
+        <EmptyState
+          eyebrow="Nothing in this cut"
+          title={
+            filters.search
+              ? `Nothing on the shelf matches “${filters.search}”`
+              : 'Nothing on the shelf matches those filters'
+          }
+          body="Widen it and the pieces come back. Everything we have is one click away."
+          action={
+            <>
+              <ActionButton onClick={clearFilters}>Show the whole shelf</ActionButton>
+              <ActionLink href="/support" tone="quiet">Ask us to look</ActionLink>
+            </>
+          }
+        />
       ) : (
-        <div className="text-center py-20">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
-          <p className="text-gray-500 mb-6">Try adjusting your filters or search terms.</p>
-          <button onClick={clearFilters} className="btn-primary">Clear Filters</button>
-        </div>
+        /* Genuinely bare. Not the customer's fault and not a fault at all —
+           a shop between deliveries. */
+        <EmptyState
+          eyebrow="Between deliveries"
+          title="Nothing on the shelf just now"
+          body="New pieces are cut and photographed every week. Call the counter and we will tell you what is coming."
+          action={<ActionLink href="/support">Speak to us</ActionLink>}
+        />
       )}
-    </div>
+    </PageShell>
   );
 }
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{Array(12).fill(0).map((_, i) => <div key={i} className="card animate-pulse"><div className="bg-gray-200 aspect-[3/4]" /><div className="p-3 space-y-2"><div className="h-4 bg-gray-200 rounded" /><div className="h-9 bg-gray-200 rounded" /></div></div>)}</div></div>}>
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{Array(12).fill(0).map((_, i) => <div key={i} className="animate-pulse"><div className="aspect-[3/4] border border-paper-edge bg-paper-shade" /><div className="space-y-2 pt-4"><div className="h-4 bg-paper-shade" /><div className="mt-5 h-10 bg-paper-shade" /></div></div>)}</div></div>}>
       <ProductsContent />
     </Suspense>
   );

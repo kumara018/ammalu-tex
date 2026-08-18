@@ -14,6 +14,7 @@ import api from '@/lib/api';
 import { Order, OrderItem, Product, ReturnRequest } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { mediaUrl } from '@/lib/media';
 
 declare global {
   interface Window { Razorpay: any; }
@@ -22,13 +23,13 @@ declare global {
 const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string; ring: string }> = {
-  pending:          { label: 'Order Placed',      icon: Clock,        color: 'text-yellow-700', bg: 'bg-yellow-50',  ring: 'border-yellow-400' },
-  confirmed:        { label: 'Confirmed',          icon: CheckCircle,  color: 'text-blue-700',   bg: 'bg-blue-50',    ring: 'border-blue-400' },
-  processing:       { label: 'Being Packed',       icon: Package,      color: 'text-purple-700', bg: 'bg-purple-50',  ring: 'border-purple-400' },
-  shipped:          { label: 'Shipped',            icon: Truck,        color: 'text-indigo-700', bg: 'bg-indigo-50',  ring: 'border-indigo-400' },
+  pending:          { label: 'Order Placed',      icon: Clock,        color: 'text-yellow-700', bg: 'bg-transparent',  ring: 'border-yellow-400' },
+  confirmed:        { label: 'Confirmed',          icon: CheckCircle,  color: 'text-blue-700',   bg: 'bg-transparent',    ring: 'border-blue-400' },
+  processing:       { label: 'Being Packed',       icon: Package,      color: 'text-purple-700', bg: 'bg-transparent',  ring: 'border-purple-400' },
+  shipped:          { label: 'Shipped',            icon: Truck,        color: 'text-indigo-700', bg: 'bg-transparent',  ring: 'border-indigo-400' },
   out_for_delivery: { label: 'Out for Delivery',   icon: Truck,        color: 'text-orange-700', bg: 'bg-maroon-50',  ring: 'border-orange-400' },
-  delivered:        { label: 'Delivered',          icon: CheckCircle,  color: 'text-green-700',  bg: 'bg-green-50',   ring: 'border-green-400' },
-  cancelled:        { label: 'Cancelled',          icon: XCircle,      color: 'text-red-700',    bg: 'bg-red-50',     ring: 'border-red-400' },
+  delivered:        { label: 'Delivered',          icon: CheckCircle,  color: 'text-green-700',  bg: 'bg-transparent',   ring: 'border-green-400' },
+  cancelled:        { label: 'Cancelled',          icon: XCircle,      color: 'text-red-700',    bg: 'bg-transparent',     ring: 'border-red-400' },
 };
 
 const CANCEL_REASONS = [
@@ -324,8 +325,8 @@ function OrderDetailContent() {
 
   if (loading) return (
     <div className="max-w-4xl mx-auto px-4 py-12 animate-pulse space-y-4">
-      <div className="h-8 bg-gray-200 rounded w-64" />
-      <div className="card p-6 space-y-4"><div className="h-6 bg-gray-200 rounded w-48" /><div className="h-24 bg-gray-200 rounded" /></div>
+      <div className="h-8 bg-paper-shade rounded w-64" />
+      <div className="card p-6 space-y-4"><div className="h-6 bg-paper-shade rounded w-48" /><div className="h-24 bg-paper-shade rounded" /></div>
     </div>
   );
 
@@ -356,13 +357,13 @@ function OrderDetailContent() {
   const currentLocation = tracking?.status_location || tracking?.current_status?.location || order.status_location;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
 
       {/* Success banner for new orders */}
       {isNew && (
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6 text-center">
+        <div className="border-l-2 border-green-700/50 pl-4 p-6 mb-6 text-center">
           <Sparkles size={40} className="mx-auto text-green-600 mb-3" />
-          <h2 className="text-xl font-bold text-green-800 mb-1">Order Placed Successfully! 🎉</h2>
+          <h2 className="text-xl font-normal text-green-800 mb-1">Order Placed Successfully! 🎉</h2>
           <p className="text-green-700 text-sm">Thank you for shopping at Ammalu Tex! Your order <b>{order.order_number}</b> has been confirmed.</p>
           <p className="text-green-600 text-xs mt-2">You will receive a confirmation via Email, SMS & WhatsApp shortly.</p>
         </div>
@@ -370,15 +371,15 @@ function OrderDetailContent() {
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6 flex-wrap">
-        <Link href="/orders" className="p-2 hover:bg-orange-100 rounded-lg"><ArrowLeft size={20} /></Link>
+        <Link href="/orders" className="text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"><ArrowLeft size={20} /></Link>
         <div>
-          <h1 className="text-xl font-bold text-maroon-900">Order {order.order_number}</h1>
-          <p className="text-sm text-gray-500">Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          <h1 className="text-xl font-normal text-maroon-900">Order {order.order_number}</h1>
+          <p className="text-sm text-graphite-faint">Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         </div>
         {canCancel && (
           <button
             onClick={() => setShowCancelModal(true)}
-            className="ml-auto text-sm text-red-600 hover:text-red-800 border border-red-300 hover:border-red-500 px-4 py-2 rounded-lg transition-colors"
+            className="ml-auto text-sm text-red-600 hover:text-red-800 border border-red-300 hover:border-red-500 px-4 py-2 rounded-sm transition-colors"
           >
             Cancel Order
           </button>
@@ -391,13 +392,13 @@ function OrderDetailContent() {
           {/* ── Status Timeline ── */}
           {!isCancelled && (
             <div className="card p-6">
-              <h3 className="font-bold text-maroon-900 mb-5 flex items-center gap-2">
+              <h3 className="font-normal text-maroon-900 mb-5 flex items-center gap-2">
                 <Package size={18} /> Order Status
               </h3>
 
               {/* Progress bar */}
               <div className="relative mb-2">
-                <div className="absolute top-5 left-5 right-5 h-0.5 bg-gray-200">
+                <div className="absolute top-5 left-5 right-5 h-0.5 bg-paper-shade">
                   <div
                     className="h-full bg-maroon-800 transition-all duration-700"
                     style={{ width: `${Math.max(0, (currentStep / (STATUS_STEPS.length - 1)) * 100)}%` }}
@@ -416,11 +417,11 @@ function OrderDetailContent() {
                             ? (s === 'out_for_delivery' ? 'bg-orange-600 border-orange-600 text-white' :
                                s === 'delivered' ? 'bg-green-600 border-green-600 text-white' :
                                'bg-maroon-800 border-maroon-800 text-white')
-                            : 'bg-white border-gray-300 text-gray-400'}
+                            : 'bg-paper-bright border-paper-edge text-graphite-faint'}
                           ${active ? 'ring-4 ring-offset-2 ring-maroon-200 scale-110' : ''}`}>
                           <Icon size={16} />
                         </div>
-                        <span className={`text-[10px] font-medium text-center hidden sm:block leading-tight ${done ? 'text-maroon-800 font-semibold' : 'text-gray-400'}`} style={{ maxWidth: 64 }}>
+                        <span className={`text-[10px] font-medium text-center hidden sm:block leading-tight ${done ? 'text-maroon-800 font-semibold' : 'text-graphite-faint'}`} style={{ maxWidth: 64 }}>
                           {cfg.label}
                         </span>
                       </div>
@@ -431,7 +432,7 @@ function OrderDetailContent() {
 
               {/* Current location badge */}
               {currentLocation && (
-                <div className="mt-5 flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5">
+                <div className="mt-5 flex items-center gap-2 border-l-2 border-blue-700/50 pl-4 px-4 py-2.5">
                   <Navigation size={15} className="text-blue-600 flex-shrink-0" />
                   <span className="text-sm text-blue-800 font-medium">{currentLocation}</span>
                 </div>
@@ -441,25 +442,25 @@ function OrderDetailContent() {
               {(order.tracking_number || order.awb_code) && (
                 <div className="mt-4 pt-4 border-t border-maroon-200 space-y-2">
                   {order.courier_name && (
-                    <p className="text-sm text-gray-600">Courier: <span className="font-semibold text-maroon-800">{order.courier_name}</span></p>
+                    <p className="text-sm text-graphite-muted">Courier: <span className="font-semibold text-maroon-800">{order.courier_name}</span></p>
                   )}
-                  <p className="text-sm text-gray-600">
-                    AWB / Tracking: <span className="font-mono font-bold text-maroon-800">{order.awb_code || order.tracking_number}</span>
+                  <p className="text-sm text-graphite-muted">
+                    AWB / Tracking: <span className="font-mono font-normal text-maroon-800">{order.awb_code || order.tracking_number}</span>
                   </p>
                   {order.estimated_delivery && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-graphite-muted">
                       Estimated Delivery: <span className="font-semibold text-green-700">{order.estimated_delivery}</span>
                     </p>
                   )}
                   <div className="flex gap-3 flex-wrap mt-2">
                     {order.tracking_url && (
                       <a href={order.tracking_url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-white bg-maroon-800 hover:bg-maroon-900 px-3 py-1.5 rounded-lg transition-colors">
+                        className="inline-flex items-center gap-1.5 text-sm text-white bg-maroon-800 hover:bg-maroon-900 px-3 py-1.5 rounded-sm transition-colors">
                         <ExternalLink size={13} /> Track on {order.courier_name || 'Courier'} Website
                       </a>
                     )}
                     <button onClick={fetchTracking} disabled={trackLoading}
-                      className="inline-flex items-center gap-1.5 text-sm text-maroon-700 border border-maroon-300 hover:bg-maroon-50 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-60">
+                      className="inline-flex items-center gap-1.5 text-sm text-maroon-700 border border-maroon-300 hover:bg-maroon-50 px-3 py-1.5 rounded-sm transition-colors disabled:opacity-60">
                       <RefreshCw size={13} className={trackLoading ? 'animate-spin' : ''} />
                       {trackLoading ? 'Loading...' : 'Refresh Tracking'}
                     </button>
@@ -469,7 +470,7 @@ function OrderDetailContent() {
 
               {/* Estimated delivery banner for pre-ship statuses */}
               {['confirmed', 'processing'].includes(order.status) && (
-                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2">
+                <div className="mt-4 border-l-2 border-blue-700/50 pl-4 p-3 flex items-center gap-2">
                   <Truck size={16} className="text-blue-600 flex-shrink-0" />
                   <p className="text-sm text-blue-700 font-medium">Estimated Delivery: 3–7 Business Days</p>
                 </div>
@@ -480,29 +481,29 @@ function OrderDetailContent() {
           {/* ── Live Tracking History (Delhivery / Shiprocket) ── */}
           {allEvents.length > 0 && (
             <div className="card p-6">
-              <h3 className="font-bold text-maroon-900 mb-4 flex items-center gap-2">
+              <h3 className="font-normal text-maroon-900 mb-4 flex items-center gap-2">
                 <Navigation size={18} /> Live Tracking History
-                {order.courier_name && <span className="text-xs font-normal text-gray-400 ml-1">via {order.courier_name}</span>}
+                {order.courier_name && <span className="text-xs font-normal text-graphite-faint ml-1">via {order.courier_name}</span>}
               </h3>
               <div className="space-y-0">
                 {allEvents.slice(0, 12).map((ev: any, i: number) => (
                   <div key={i} className="flex gap-3 relative">
                     {i < allEvents.length - 1 && (
-                      <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-orange-100 z-0" />
+                      <div className="absolute left-[15px] top-8 bottom-0 z-0 w-px bg-paper-edge" />
                     )}
-                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-white border-orange-300 text-orange-500'}`}>
+                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-paper-bright border-orange-300 text-orange-500'}`}>
                       <MapPin size={14} />
                     </div>
                     <div className="pb-5 flex-1">
-                      <p className={`text-sm font-semibold ${i === 0 ? 'text-maroon-900' : 'text-gray-700'}`}>
+                      <p className={`text-sm font-semibold ${i === 0 ? 'text-maroon-900' : 'text-graphite-muted'}`}>
                         {ev.activity || ev.status || 'Update'}
                       </p>
                       {ev.location && (
-                        <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                        <p className="text-xs text-graphite-faint mt-0.5 flex items-center gap-1">
                           <MapPin size={11} /> {ev.location}
                         </p>
                       )}
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-graphite-faint mt-0.5">
                         {ev.datetime ? new Date(ev.datetime).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
                       </p>
                     </div>
@@ -514,7 +515,7 @@ function OrderDetailContent() {
 
           {/* ── Open Box Delivery ── */}
           {order.open_box_delivery && (
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
+            <div className="border-l-2 border-blue-700/50 pl-4 p-4 flex items-center gap-3">
               <PackageOpen size={24} className="text-blue-600 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-blue-800 text-sm">Open Box Delivery Requested</p>
@@ -525,20 +526,20 @@ function OrderDetailContent() {
 
           {/* ── Delivery OTP ── */}
           {order.status === 'out_for_delivery' && order.delivery_otp && (
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-2xl p-6">
+            <div className="border-y border-thread py-7">
               <div className="flex items-center gap-2 mb-4">
                 <ShieldCheck size={22} className="text-orange-700" />
-                <h3 className="font-bold text-orange-900">Your Delivery OTP</h3>
+                <h3 className="font-normal text-orange-900">Your Delivery OTP</h3>
               </div>
-              <p className="text-sm text-gray-700 mb-4">Your order is out for delivery! Share this OTP with the delivery agent when they arrive.</p>
-              <div className="bg-white border-2 border-orange-300 rounded-xl p-4 text-center mb-4">
-                <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Delivery OTP</p>
-                <p className="text-5xl font-bold tracking-[0.4em] font-mono text-orange-700">{order.delivery_otp}</p>
+              <p className="text-sm text-graphite-muted mb-4">Your order is out for delivery! Share this OTP with the delivery agent when they arrive.</p>
+              <div className="bg-paper-bright border-2 border-orange-300 rounded-sm p-4 text-center mb-4">
+                <p className="text-xs text-graphite-faint uppercase tracking-widest mb-2">Delivery OTP</p>
+                <p className="text-5xl font-normal tracking-[0.4em] font-mono text-orange-700">{order.delivery_otp}</p>
               </div>
               {(order.delivery_person_name || order.delivery_person_phone) && (
-                <div className="bg-white border border-orange-200 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Your Delivery Agent</p>
-                  {order.delivery_person_name && <p className="text-sm font-semibold text-gray-800">{order.delivery_person_name}</p>}
+                <div className="bg-paper-bright border border-orange-200 rounded-sm p-4">
+                  <p className="text-xs font-semibold text-graphite-faint uppercase tracking-wide mb-2">Your Delivery Agent</p>
+                  {order.delivery_person_name && <p className="text-sm font-semibold text-graphite">{order.delivery_person_name}</p>}
                   {order.delivery_person_phone && (
                     <a href={`tel:${order.delivery_person_phone}`}
                       className="flex items-center gap-1.5 text-sm text-maroon-700 hover:underline font-medium mt-1">
@@ -547,17 +548,17 @@ function OrderDetailContent() {
                   )}
                 </div>
               )}
-              <p className="text-xs text-orange-700 mt-3 font-medium">⚠️ Never share this OTP via phone call or message. Only share it in person at your door.</p>
+              <p className="text-xs text-orange-700 mt-3 font-medium">Never share this OTP via phone call or message. Only share it in person at your door.</p>
             </div>
           )}
 
           {/* ── Cancelled ── */}
           {isCancelled && (
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-5">
+            <div className="border-l-2 border-red-700/50 pl-4 p-5">
               <div className="flex items-center gap-4 mb-3">
                 <XCircle size={32} className="text-red-500 flex-shrink-0" />
                 <div>
-                  <p className="font-bold text-red-800">Order Cancelled</p>
+                  <p className="font-normal text-red-800">Order Cancelled</p>
                   <p className="text-sm text-red-600 mt-0.5">
                     {order.cancelled_by === 'user' ? 'Cancelled by you.' : 'Cancelled by store.'}
                     {order.cancel_reason ? ` Reason: ${order.cancel_reason}` : ''}
@@ -565,10 +566,10 @@ function OrderDetailContent() {
                 </div>
               </div>
               {order.rto_pending && (
-                <div className="flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-3">
+                <div className="flex items-start gap-3 border-l-2 border-orange-700/50 pl-4 px-4 py-3 mb-3">
                   <AlertCircle size={18} className="text-orange-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-bold text-orange-800">This order was already with our courier</p>
+                    <p className="text-sm font-normal text-orange-800">This order was already with our courier</p>
                     <p className="text-xs text-orange-700 mt-0.5">
                       Please do not accept the package if a delivery agent arrives — we're arranging its return to us.
                       Any refund will be processed once we receive it back.
@@ -577,24 +578,24 @@ function OrderDetailContent() {
                 </div>
               )}
               {order.payment_status === 'refunded' ? (
-                <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3 border-l-2 border-green-700/50 pl-4 px-4 py-3">
                   <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-bold text-green-800">Refund Processed ✅</p>
+                    <p className="text-sm font-normal text-green-800">Refund Processed ✅</p>
                     <p className="text-xs text-green-600 mt-0.5">₹{order.total.toLocaleString()} refund has been processed by Razorpay. It will appear in your account within 1–3 business days depending on your bank.</p>
                   </div>
                 </div>
               ) : order.payment_status === 'refund_initiated' ? (
-                <div className="flex items-center gap-3 bg-maroon-50 border border-orange-200 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3 bg-maroon-50 border border-orange-200 rounded-sm px-4 py-3">
                   <RotateCcw size={18} className="text-orange-600 flex-shrink-0 animate-spin" style={{animationDuration:'3s'}} />
                   <div>
-                    <p className="text-sm font-bold text-orange-800">Refund Initiated 🔄</p>
+                    <p className="text-sm font-normal text-orange-800">Refund Initiated 🔄</p>
                     <p className="text-xs text-orange-600 mt-0.5">Your refund of ₹{order.total.toLocaleString()} has been initiated with Razorpay and is being processed. Will be credited to your original payment method within <b>5–7 business days</b>.</p>
                   </div>
                 </div>
               ) : order.payment_method !== 'cod' && (
-                <p className="text-sm text-orange-700 bg-maroon-50 border border-orange-200 rounded-xl px-4 py-2.5">
-                  💰 Refund will be initiated within 24 hours and credited within 5–7 business days.
+                <p className="text-sm text-orange-700 bg-maroon-50 border border-orange-200 rounded-sm px-4 py-2.5">
+                  Refund will be initiated within 24 hours and credited within 5–7 business days.
                 </p>
               )}
             </div>
@@ -602,29 +603,29 @@ function OrderDetailContent() {
 
           {/* ── Items ── */}
           <div className="card p-6">
-            <h3 className="font-bold text-maroon-900 mb-4">Ordered Items</h3>
+            <h3 className="font-normal text-maroon-900 mb-4">Ordered Items</h3>
             <div className="space-y-4">
               {(order.items_snapshot as any[]).map((item, i) => {
                 const emoji = item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : item.category === 'Crop Tops' ? '🎽' : item.category === 'Party Wears' ? '✨' : '👚';
-                const imgSrc = item.image ? (item.image.startsWith('http') ? item.image : `${process.env.NEXT_PUBLIC_API_URL}${item.image}`) : null;
+                const imgSrc = item.image ? (mediaUrl(item.image)) : null;
                 const itemVisual = (
                   <>
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-maroon-100 to-gold-50 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden border border-maroon-200">
+                    <div className="h-14 w-14 flex-shrink-0 overflow-hidden border border-paper-edge bg-paper-shade">
                       {imgSrc ? (
                         <img src={imgSrc} alt={item.name} className="w-full h-full object-cover"
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                       ) : <span>{emoji}</span>}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-gray-800 truncate group-hover:text-maroon-700 group-hover:underline">{item.name}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="font-semibold text-sm text-graphite truncate group-hover:text-maroon-700 group-hover:underline">{item.name}</p>
+                      <p className="text-xs text-graphite-faint mt-0.5">
                         Qty: {item.quantity}
                         {item.size ? ` · Size: ${item.size}` : ''}
                         {item.color ? ` · Colour: ${item.color}` : ''}
                       </p>
-                      <p className="text-xs text-gray-500">₹{Number(item.price).toLocaleString()} each</p>
+                      <p className="text-xs text-graphite-faint">₹{Number(item.price).toLocaleString()} each</p>
                     </div>
-                    <p className="font-bold text-maroon-900 flex-shrink-0">₹{Number(item.subtotal).toLocaleString()}</p>
+                    <p className="font-normal text-maroon-900 flex-shrink-0">₹{Number(item.subtotal).toLocaleString()}</p>
                   </>
                 );
                 return (
@@ -637,7 +638,7 @@ function OrderDetailContent() {
                         href={`/products/${item.product_id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group flex items-start gap-4 -m-1.5 p-1.5 rounded-lg hover:bg-maroon-50/60 transition-colors"
+                        className="group flex items-start gap-4 -m-1.5 p-1.5 rounded-sm hover:bg-maroon-50/60 transition-colors"
                       >
                         {itemVisual}
                       </Link>
@@ -646,8 +647,8 @@ function OrderDetailContent() {
                     )}
                     {isDelivered && item.product_id && (
                       <Link href={`/products/${item.product_id}#reviews`}
-                        className="inline-flex items-center gap-1 mt-2 ml-[72px] text-xs font-medium text-maroon-700 hover:text-maroon-900 border border-maroon-300 hover:border-maroon-500 rounded-lg px-2.5 py-1 transition-colors">
-                        ✍️ Write a Review
+                        className="inline-flex items-center gap-1 mt-2 ml-[72px] text-xs font-medium text-maroon-700 hover:text-maroon-900 border border-maroon-300 hover:border-maroon-500 rounded-sm px-2.5 py-1 transition-colors">
+                        Write a Review
                       </Link>
                     )}
                   </div>
@@ -661,22 +662,22 @@ function OrderDetailContent() {
         <div className="space-y-5">
           {/* Price summary */}
           <div className="card p-5">
-            <h3 className="font-bold text-maroon-900 mb-4">Price Breakdown</h3>
+            <h3 className="font-normal text-maroon-900 mb-4">Price Breakdown</h3>
             <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between text-gray-700"><span>Subtotal</span><span>₹{order.subtotal.toLocaleString()}</span></div>
-              <div className="flex justify-between text-gray-700">
+              <div className="flex justify-between text-graphite-muted"><span>Subtotal</span><span>₹{order.subtotal.toLocaleString()}</span></div>
+              <div className="flex justify-between text-graphite-muted">
                 <span>Shipping</span>
                 <span className={order.shipping_fee === 0 ? 'text-green-600' : ''}>{order.shipping_fee === 0 ? 'FREE' : `₹${order.shipping_fee}`}</span>
               </div>
               {order.discount > 0 && (
                 <div className="flex justify-between text-green-600"><span>Discount</span><span>-₹{order.discount.toLocaleString()}</span></div>
               )}
-              <div className="border-t border-maroon-200 pt-2.5 flex justify-between font-bold text-base">
+              <div className="border-t border-maroon-200 pt-2.5 flex justify-between font-normal text-base">
                 <span>Total Paid</span><span className="text-maroon-900">₹{order.total.toLocaleString()}</span>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-orange-50 space-y-2">
-              <p className="text-xs text-gray-500 flex items-center gap-1.5">
+              <p className="text-xs text-graphite-faint flex items-center gap-1.5">
                 <CreditCard size={12} />
                 Mode: <b className="capitalize">
                   {order.payment_method === 'razorpay' ? 'Online (Razorpay)' :
@@ -684,30 +685,30 @@ function OrderDetailContent() {
                 </b>
               </p>
               <p className="text-xs flex items-center gap-1.5">
-                <span className={`inline-block font-bold px-2 py-0.5 rounded-full text-[10px] border
-                  ${order.payment_status === 'paid'             ? 'text-green-700 bg-green-50 border-green-300'     :
+                <span className={`inline-block font-normal px-2 py-0.5 rounded-full text-[10px] border
+                  ${order.payment_status === 'paid'             ? 'text-green-700 bg-transparent border-green-300'     :
                     order.payment_status === 'refund_initiated' ? 'text-orange-700 bg-maroon-50 border-orange-300'  :
-                    order.payment_status === 'refunded'         ? 'text-purple-700 bg-purple-50 border-purple-300'  :
-                    'text-amber-700 bg-amber-50 border-amber-300'}`}>
-                  {order.payment_status === 'paid'             ? '✅ PAID'                 :
-                   order.payment_status === 'refund_initiated' ? '🔄 REFUND INITIATED'     :
-                   order.payment_status === 'refunded'         ? '✅ REFUND PROCESSED'     : '⏳ PENDING'}
+                    order.payment_status === 'refunded'         ? 'text-purple-700 bg-transparent border-purple-300'  :
+                    'text-amber-700 bg-transparent border-amber-300'}`}>
+                  {order.payment_status === 'paid'             ? 'PAID'                 :
+                   order.payment_status === 'refund_initiated' ? 'REFUND INITIATED'     :
+                   order.payment_status === 'refunded'         ? 'REFUND PROCESSED'     : '⏳ PENDING'}
                 </span>
               </p>
               {order.payment_status === 'refund_initiated' && (
-                <p className="text-[10px] text-orange-600 bg-maroon-50 border border-maroon-200 rounded-lg px-2 py-1.5 mt-1">
+                <p className="text-[10px] text-orange-600 bg-maroon-50 border border-maroon-200 rounded-sm px-2 py-1.5 mt-1">
                   ⏱️ Refund initiated — will be credited to your account within <b>5–7 business days</b>.
                 </p>
               )}
               {order.payment_status === 'refunded' && (
-                <p className="text-[10px] text-green-600 bg-green-50 border border-green-100 rounded-lg px-2 py-1.5 mt-1">
-                  ✅ Refund processed by Razorpay — will appear in your bank account within <b>1–3 business days</b>.
+                <p className="text-[10px] text-green-600 bg-transparent border border-green-100 rounded-sm px-2 py-1.5 mt-1">
+                  Refund processed by Razorpay — will appear in your bank account within <b>1–3 business days</b>.
                 </p>
               )}
               {order.payment_transaction_id && order.payment_method !== 'cod' && (
                 <div className="mt-2 pt-2 border-t border-orange-50">
-                  <p className="text-[10px] text-gray-400 mb-1">Transaction ID</p>
-                  <p className="font-mono text-[10px] text-gray-600 bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 break-all leading-relaxed">
+                  <p className="text-[10px] text-graphite-faint mb-1">Transaction ID</p>
+                  <p className="font-mono text-[10px] text-graphite-muted bg-paper border border-paper-edge rounded-sm px-2 py-1.5 break-all leading-relaxed">
                     {order.payment_transaction_id}
                   </p>
                 </div>
@@ -717,10 +718,10 @@ function OrderDetailContent() {
 
           {/* Invoice */}
           <div className="card p-5">
-            <h3 className="font-bold text-maroon-900 mb-3 flex items-center gap-2"><FileText size={16} /> Invoice</h3>
-            <p className="text-xs text-gray-500 mb-3">Download or share your order invoice</p>
+            <h3 className="font-normal text-maroon-900 mb-3 flex items-center gap-2"><FileText size={16} /> Invoice</h3>
+            <p className="text-xs text-graphite-faint mb-3">Download or share your order invoice</p>
             <Link href={`/orders/${order.id}/invoice`}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-maroon-800 hover:bg-maroon-900 text-white text-sm font-medium rounded-xl transition-colors">
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-maroon-800 hover:bg-maroon-900 text-white text-sm font-medium rounded-sm transition-colors">
               <FileText size={15} /> View & Download Invoice
             </Link>
           </div>
@@ -728,11 +729,11 @@ function OrderDetailContent() {
           {/* Return / Exchange / Replace */}
           {isDelivered && (
             <div className="card p-5">
-              <h3 className="font-bold text-maroon-900 mb-2 flex items-center gap-2">
+              <h3 className="font-normal text-maroon-900 mb-2 flex items-center gap-2">
                 <RotateCcw size={16} /> Return / Exchange
               </h3>
               {hasNonReturnableItem ? (
-                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-start gap-2 p-3 border-l-2 border-red-700/50 pl-4">
                   <XCircle size={16} className="text-red-500 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-red-700">Non-Returnable Order</p>
@@ -741,33 +742,33 @@ function OrderDetailContent() {
                 </div>
               ) : existingReturn ? (
                 <div>
-                  <p className="text-xs text-gray-500 mb-2">You have a {existingReturn.request_type === 'return' ? 'Return' : 'Exchange'} request</p>
-                  <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border mb-3 ${RETURN_STATUS_LABEL[existingReturn.status]?.color || 'bg-gray-100 text-gray-600 border-gray-300'}`}>
+                  <p className="text-xs text-graphite-faint mb-2">You have a {existingReturn.request_type === 'return' ? 'Return' : 'Exchange'} request</p>
+                  <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border mb-3 ${RETURN_STATUS_LABEL[existingReturn.status]?.color || 'bg-paper-shade text-graphite-muted border-paper-edge'}`}>
                     {RETURN_STATUS_LABEL[existingReturn.status]?.label || existingReturn.status}
                   </div>
                   {existingReturn.admin_notes && (
-                    <p className="text-xs text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-3">
+                    <p className="text-xs text-graphite-muted border-l-2 border-yellow-700/50 pl-4 px-3 py-2 mb-3">
                       Note: {existingReturn.admin_notes}
                     </p>
                   )}
                   <Link href={`/returns/${existingReturn.id}`}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 border border-maroon-300 text-maroon-700 hover:bg-maroon-50 text-sm font-medium rounded-xl transition-colors">
+                    className="w-full flex items-center justify-center gap-2 py-2.5 border border-maroon-300 text-maroon-700 hover:bg-maroon-50 text-sm font-medium rounded-sm transition-colors">
                     View Request Details <ChevronRight size={14} />
                   </Link>
                 </div>
               ) : hoursSinceDelivery > EXCHANGE_WINDOW_HOURS ? (
-                <div className="flex items-start gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl">
-                  <Clock size={16} className="text-gray-400 mt-0.5 shrink-0" />
-                  <p className="text-xs text-gray-500">The return ({RETURN_WINDOW_HOURS}h) and exchange ({EXCHANGE_WINDOW_HOURS}h) windows for this order have both passed.</p>
+                <div className="flex items-start gap-2 p-3 bg-paper border border-paper-edge rounded-sm">
+                  <Clock size={16} className="text-graphite-faint mt-0.5 shrink-0" />
+                  <p className="text-xs text-graphite-faint">The return ({RETURN_WINDOW_HOURS}h) and exchange ({EXCHANGE_WINDOW_HOURS}h) windows for this order have both passed.</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-xs text-gray-500 mb-3">
+                  <p className="text-xs text-graphite-faint mb-3">
                     Return for a refund within {RETURN_WINDOW_HOURS} hours, or exchange for any product within {EXCHANGE_WINDOW_HOURS} hours of delivery. We do not offer cancellations after purchase's 1-hour window.
                   </p>
                   <button
                     onClick={openReturnModal}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 border border-maroon-300 text-maroon-700 hover:bg-maroon-50 text-sm font-medium rounded-xl transition-colors">
+                    className="w-full flex items-center justify-center gap-2 py-2.5 border border-maroon-300 text-maroon-700 hover:bg-maroon-50 text-sm font-medium rounded-sm transition-colors">
                     <RotateCcw size={15} /> Request Return / Exchange
                   </button>
                 </div>
@@ -777,19 +778,19 @@ function OrderDetailContent() {
 
           {/* Delivery address */}
           <div className="card p-5">
-            <h3 className="font-bold text-maroon-900 mb-3 flex items-center gap-2"><MapPin size={16} /> Delivery Address</h3>
-            <div className="text-sm text-gray-700 space-y-1">
+            <h3 className="font-normal text-maroon-900 mb-3 flex items-center gap-2"><MapPin size={16} /> Delivery Address</h3>
+            <div className="text-sm text-graphite-muted space-y-1">
               <p className="font-semibold">{addr.full_name}</p>
               <p>{addr.address_line1}</p>
               {addr.address_line2 && <p>{addr.address_line2}</p>}
               <p>{addr.city}, {addr.state} — {addr.pincode}</p>
-              <p className="text-gray-500">📞 {addr.phone}</p>
+              <p className="text-graphite-faint">📞 {addr.phone}</p>
             </div>
           </div>
 
           {canCancel && (
             <button onClick={() => setShowCancelModal(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-red-600 border border-red-300 hover:bg-red-50 rounded-xl transition-colors">
+              className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-red-600 border border-red-300 hover:bg-transparent rounded-sm transition-colors">
               <XCircle size={16} /> Cancel This Order
             </button>
           )}
@@ -803,20 +804,20 @@ function OrderDetailContent() {
       {/* ── Return / Exchange Request Modal ── */}
       {showReturnModal && (
         <div className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4" onClick={resetReturnModal}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto border border-paper-edge bg-paper" onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-maroon-200">
               <div>
-                <h3 className="font-bold text-maroon-900 text-lg">{returnKind === 'return' ? 'Return Request' : returnKind === 'exchange' ? 'Exchange Request' : 'Return / Exchange'}</h3>
-                <p className="text-xs text-gray-500">{order.order_number} · Step {stepPosition} of {stepTotal}</p>
+                <h3 className="font-normal text-maroon-900 text-lg">{returnKind === 'return' ? 'Return Request' : returnKind === 'exchange' ? 'Exchange Request' : 'Return / Exchange'}</h3>
+                <p className="text-xs text-graphite-faint">{order.order_number} · Step {stepPosition} of {stepTotal}</p>
               </div>
-              <button onClick={resetReturnModal} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+              <button onClick={resetReturnModal} className="p-2 hover:bg-paper-shade rounded-sm"><X size={18} /></button>
             </div>
 
             {/* Step indicator */}
             <div className="flex gap-0 px-5 pt-4">
               {activeSteps.map(s => (
-                <div key={s} className={`flex-1 h-1.5 rounded-full mx-0.5 transition-all ${returnStep >= s ? 'bg-maroon-800' : 'bg-gray-200'}`} />
+                <div key={s} className={`flex-1 h-1.5 rounded-full mx-0.5 transition-all ${returnStep >= s ? 'bg-maroon-800' : 'bg-paper-shade'}`} />
               ))}
             </div>
 
@@ -824,17 +825,17 @@ function OrderDetailContent() {
               {/* Step 1: Return or Exchange? */}
               {returnStep === 1 && (
                 <div>
-                  <p className="font-semibold text-gray-800 mb-4">What would you like to do?</p>
+                  <p className="font-semibold text-graphite mb-4">What would you like to do?</p>
                   <div className="space-y-3">
                     <button onClick={() => afterKindChosen('return')}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${returnKind === 'return' ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-maroon-300 bg-white'}`}>
-                      <p className="font-semibold text-gray-800 text-sm">Return for a refund</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Send the item back and get your money refunded to your original payment method. Window: {RETURN_WINDOW_HOURS} hours from delivery.</p>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'return' ? 'border-red-400 bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
+                      <p className="font-semibold text-graphite text-sm">Return for a refund</p>
+                      <p className="text-xs text-graphite-faint mt-0.5">Send the item back and get your money refunded to your original payment method. Window: {RETURN_WINDOW_HOURS} hours from delivery.</p>
                     </button>
                     <button onClick={() => afterKindChosen('exchange')}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${returnKind === 'exchange' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-maroon-300 bg-white'}`}>
-                      <p className="font-semibold text-gray-800 text-sm">Exchange for another product</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Swap for any product of the same or higher price — pay only the difference. Window: {EXCHANGE_WINDOW_HOURS} hours from delivery.</p>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'exchange' ? 'border-blue-400 bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
+                      <p className="font-semibold text-graphite text-sm">Exchange for another product</p>
+                      <p className="text-xs text-graphite-faint mt-0.5">Swap for any product of the same or higher price — pay only the difference. Window: {EXCHANGE_WINDOW_HOURS} hours from delivery.</p>
                     </button>
                   </div>
                 </div>
@@ -843,39 +844,39 @@ function OrderDetailContent() {
               {/* Step 2: Which item (only shown for multi-item orders) */}
               {returnStep === 2 && (
                 <div>
-                  <p className="font-semibold text-gray-800 mb-4">Which item do you want to {returnKind === 'return' ? 'return' : 'exchange'}?</p>
+                  <p className="font-semibold text-graphite mb-4">Which item do you want to {returnKind === 'return' ? 'return' : 'exchange'}?</p>
                   <div className="space-y-2">
                     {(order.items_snapshot as OrderItem[]).map((it, idx) => (
                       <button key={idx} onClick={() => { setSelectedItem(it); setReturnStep(3); }}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 hover:border-maroon-400 text-left transition-all">
-                        <div className="w-12 h-12 rounded-lg bg-maroon-50 flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
+                        className="w-full flex items-center gap-3 p-3 rounded-sm border-2 border-paper-edge hover:border-maroon-400 text-left transition-all">
+                        <div className="w-12 h-12 rounded-sm bg-maroon-50 flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
                           {it.image ? <img src={it.image} alt={it.name} className="w-full h-full object-cover" /> : '👗'}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{it.name}</p>
-                          <p className="text-xs text-gray-500">Qty {it.quantity}{it.size ? ` · ${it.size}` : ''}{it.color ? ` · ${it.color}` : ''} · ₹{it.price.toLocaleString()}</p>
+                          <p className="text-sm font-medium text-graphite truncate">{it.name}</p>
+                          <p className="text-xs text-graphite-faint">Qty {it.quantity}{it.size ? ` · ${it.size}` : ''}{it.color ? ` · ${it.color}` : ''} · ₹{it.price.toLocaleString()}</p>
                         </div>
-                        <ChevronRight size={16} className="text-gray-400" />
+                        <ChevronRight size={16} className="text-graphite-faint" />
                       </button>
                     ))}
                   </div>
-                  <button onClick={() => setReturnStep(1)} className="mt-4 w-full py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                  <button onClick={() => setReturnStep(1)} className="mt-4 w-full py-2.5 border border-paper-edge rounded-sm text-graphite-muted text-sm font-medium hover:bg-paper">Back</button>
                 </div>
               )}
 
               {/* Step 3: Reason */}
               {returnStep === 3 && (
                 <div>
-                  <p className="font-semibold text-gray-800 mb-1">Why are you {returnKind === 'return' ? 'returning' : 'exchanging'} this item?</p>
-                  <p className="text-xs text-gray-500 mb-4">Select the most appropriate reason</p>
+                  <p className="font-semibold text-graphite mb-1">Why are you {returnKind === 'return' ? 'returning' : 'exchanging'} this item?</p>
+                  <p className="text-xs text-graphite-faint mb-4">Select the most appropriate reason</p>
                   <div className="space-y-2 mb-4">
                     {EXCHANGE_REASONS.map(r => (
-                      <label key={r.value} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${returnReason === r.value ? 'border-maroon-500 bg-maroon-50' : 'border-gray-200 hover:border-maroon-300'}`}>
+                      <label key={r.value} className={`flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-all ${returnReason === r.value ? 'border-maroon-500 bg-maroon-50' : 'border-paper-edge hover:border-maroon-300'}`}>
                         <input type="radio" name="return_reason" value={r.value} checked={returnReason === r.value}
                           onChange={() => setReturnReason(r.value)} className="accent-maroon-700" />
                         <div>
-                          <span className="text-sm text-gray-800 font-medium block">{r.label}</span>
-                          <span className="text-xs text-gray-500">{r.desc}</span>
+                          <span className="text-sm text-graphite font-medium block">{r.label}</span>
+                          <span className="text-xs text-graphite-faint">{r.desc}</span>
                         </div>
                       </label>
                     ))}
@@ -885,15 +886,15 @@ function OrderDetailContent() {
                     <textarea value={returnDesc} onChange={e => setReturnDesc(e.target.value)}
                       placeholder="Describe the issue in more detail..."
                       rows={3}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-maroon-400 resize-none" />
+                      className="w-full border border-paper-edge rounded-sm px-4 py-2.5 text-sm outline-none focus:border-maroon-400 resize-none" />
                   </div>
                   <div className="flex gap-3 mt-5">
-                    <button onClick={() => setReturnStep(multiItem ? 2 : 1)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(multiItem ? 2 : 1)} className="flex-1 py-2.5 border border-paper-edge rounded-sm text-graphite-muted text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={() => {
                         if (!returnReason) { toast.error('Please select a reason'); return; }
                         setReturnStep(returnKind === 'exchange' ? 4 : 6);
                       }}
-                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2">
+                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-sm font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2">
                       Continue <ChevronRight size={16} />
                     </button>
                   </div>
@@ -903,19 +904,19 @@ function OrderDetailContent() {
               {/* Step 4: Choose replacement — exchange only, any product, must cost the same or more */}
               {returnStep === 4 && (
                 <div>
-                  <p className="font-semibold text-gray-800 mb-1">Choose your replacement</p>
-                  <p className="text-xs text-gray-500 mb-4">
+                  <p className="font-semibold text-graphite mb-1">Choose your replacement</p>
+                  <p className="text-xs text-graphite-faint mb-4">
                     Original item: ₹{selectedItem?.price.toLocaleString()}. Your replacement must cost the same or more — no cheaper items (no refund is issued for the difference).
                   </p>
 
                   <div className="relative mb-3">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-graphite-faint" />
                     <input type="text" value={productSearch} onChange={e => searchReplacementProducts(e.target.value)}
                       placeholder="Search products to exchange into..."
-                      className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none focus:border-maroon-400" />
+                      className="w-full border border-paper-edge rounded-sm pl-9 pr-4 py-2.5 text-sm outline-none focus:border-maroon-400" />
                   </div>
 
-                  {searchingProducts && <p className="text-xs text-gray-400 mb-3">Searching...</p>}
+                  {searchingProducts && <p className="text-xs text-graphite-faint mb-3">Searching...</p>}
 
                   {productResults.length > 0 && (
                     <div className="grid grid-cols-2 gap-2 mb-4 max-h-56 overflow-y-auto">
@@ -923,11 +924,11 @@ function OrderDetailContent() {
                         const tooCheap = p.price < (selectedItem?.price || 0);
                         return (
                           <button key={p.id} disabled={tooCheap} onClick={() => selectNewProduct(p)}
-                            className={`text-left p-2.5 rounded-xl border-2 transition-all ${newProduct?.id === p.id ? 'border-maroon-700 bg-maroon-50' : tooCheap ? 'border-gray-100 opacity-40 cursor-not-allowed' : 'border-gray-200 hover:border-maroon-300'}`}>
-                            <div className="w-full aspect-square rounded-lg bg-maroon-50 mb-1.5 overflow-hidden flex items-center justify-center">
+                            className={`text-left p-2.5 rounded-sm border-2 transition-all ${newProduct?.id === p.id ? 'border-maroon-700 bg-maroon-50' : tooCheap ? 'border-paper-edge opacity-40 cursor-not-allowed' : 'border-paper-edge hover:border-maroon-300'}`}>
+                            <div className="w-full aspect-square rounded-sm bg-maroon-50 mb-1.5 overflow-hidden flex items-center justify-center">
                               {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : <span className="text-2xl">👗</span>}
                             </div>
-                            <p className="text-xs font-medium text-gray-800 truncate">{p.name}</p>
+                            <p className="text-xs font-medium text-graphite truncate">{p.name}</p>
                             <p className="text-xs font-semibold text-maroon-800">₹{p.price.toLocaleString()}</p>
                             {tooCheap && <p className="text-[10px] text-red-500 mt-0.5">Too low — pick ₹{selectedItem?.price.toLocaleString()}+</p>}
                           </button>
@@ -937,15 +938,15 @@ function OrderDetailContent() {
                   )}
 
                   {newProduct && (
-                    <div className="bg-maroon-50 border border-orange-200 rounded-xl p-3 mb-4 space-y-3">
-                      <p className="text-sm font-semibold text-gray-800">Selected: {newProduct.name}</p>
+                    <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3 mb-4 space-y-3">
+                      <p className="text-sm font-semibold text-graphite">Selected: {newProduct.name}</p>
                       {newProduct.size_options?.length > 0 && (
                         <div>
                           <label className="label">Size</label>
                           <div className="flex flex-wrap gap-1.5">
                             {newProduct.size_options.map(s => (
                               <button key={s} onClick={() => setNewSize(s)}
-                                className={`px-3 py-1.5 rounded-lg border text-xs font-medium ${newSize === s ? 'border-maroon-700 bg-maroon-800 text-white' : 'border-gray-300 text-gray-600'}`}>{s}</button>
+                                className={`px-3 py-1.5 rounded-sm border text-xs font-medium ${newSize === s ? 'border-maroon-700 bg-maroon-800 text-white' : 'border-paper-edge text-graphite-muted'}`}>{s}</button>
                             ))}
                           </div>
                         </div>
@@ -956,12 +957,12 @@ function OrderDetailContent() {
                           <div className="flex flex-wrap gap-1.5">
                             {newProduct.colors.map(c => (
                               <button key={c} onClick={() => setNewColor(c)}
-                                className={`px-3 py-1.5 rounded-lg border text-xs font-medium ${newColor === c ? 'border-maroon-700 bg-maroon-800 text-white' : 'border-gray-300 text-gray-600'}`}>{c}</button>
+                                className={`px-3 py-1.5 rounded-sm border text-xs font-medium ${newColor === c ? 'border-maroon-700 bg-maroon-800 text-white' : 'border-paper-edge text-graphite-muted'}`}>{c}</button>
                             ))}
                           </div>
                         </div>
                       )}
-                      <div className="border-t border-orange-200 pt-2 text-xs text-gray-700 space-y-0.5">
+                      <div className="border-t border-orange-200 pt-2 text-xs text-graphite-muted space-y-0.5">
                         <p>Original: ₹{selectedItem?.price.toLocaleString()}</p>
                         <p>Replacement: ₹{newProduct.price.toLocaleString()}</p>
                         <p className="font-semibold text-maroon-800">
@@ -972,12 +973,12 @@ function OrderDetailContent() {
                   )}
 
                   <div className="flex gap-3">
-                    <button onClick={() => setReturnStep(3)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(3)} className="flex-1 py-2.5 border border-paper-edge rounded-sm text-graphite-muted text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={() => {
                         if (!newProduct) { toast.error('Please choose a replacement product'); return; }
                         setReturnStep(priceDifference > 0 ? 5 : 6);
                       }}
-                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2">
+                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-sm font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2">
                       Continue <ChevronRight size={16} />
                     </button>
                   </div>
@@ -987,27 +988,27 @@ function OrderDetailContent() {
               {/* Step 5: Pay the difference (only when replacement costs more) */}
               {returnStep === 5 && (
                 <div>
-                  <p className="font-semibold text-gray-800 mb-1 flex items-center gap-2"><Lock size={16} className="text-green-600" /> Pay Price Difference</p>
-                  <p className="text-xs text-gray-500 mb-4">Your replacement costs more than the original item. This must be paid upfront before your exchange request is submitted.</p>
-                  <div className="bg-maroon-50 border border-orange-200 rounded-xl p-4 mb-4 text-center">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Amount Due</p>
-                    <p className="text-2xl font-bold text-maroon-800">₹{priceDifference.toLocaleString()}</p>
+                  <p className="font-semibold text-graphite mb-1 flex items-center gap-2"><Lock size={16} className="text-green-600" /> Pay Price Difference</p>
+                  <p className="text-xs text-graphite-faint mb-4">Your replacement costs more than the original item. This must be paid upfront before your exchange request is submitted.</p>
+                  <div className="bg-maroon-50 border border-orange-200 rounded-sm p-4 mb-4 text-center">
+                    <p className="text-xs text-graphite-faint uppercase tracking-wide">Amount Due</p>
+                    <p className="font-display text-band font-normal text-maroon-800">₹{priceDifference.toLocaleString()}</p>
                   </div>
                   {paymentProof ? (
-                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl mb-4">
+                    <div className="flex items-center gap-2 p-3 border-l-2 border-green-700/50 pl-4 mb-4">
                       <CheckCircle size={18} className="text-green-600" />
                       <p className="text-sm text-green-700 font-medium">Payment received — ready to submit</p>
                     </div>
                   ) : (
                     <button onClick={handlePayDifference} disabled={payingDiff}
-                      className="w-full py-3 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2 mb-4">
+                      className="w-full py-3 bg-maroon-800 text-white rounded-sm font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2 mb-4">
                       {payingDiff ? <><RefreshCw size={14} className="animate-spin" /> Opening payment...</> : <><Lock size={16} /> Pay ₹{priceDifference.toLocaleString()}</>}
                     </button>
                   )}
                   <div className="flex gap-3">
-                    <button onClick={() => setReturnStep(4)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(4)} className="flex-1 py-2.5 border border-paper-edge rounded-sm text-graphite-muted text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={() => { if (!paymentProof) { toast.error('Please complete the payment first'); return; } setReturnStep(6); }}
-                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2 disabled:opacity-60"
+                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-sm font-semibold text-sm hover:bg-maroon-900 flex items-center justify-center gap-2 disabled:opacity-60"
                       disabled={!paymentProof}>
                       Continue <ChevronRight size={16} />
                     </button>
@@ -1018,11 +1019,11 @@ function OrderDetailContent() {
               {/* Step 6: Photos + checklist + submit */}
               {returnStep === 6 && (
                 <div>
-                  <p className="font-semibold text-gray-800 mb-1">Upload Photos & Confirm</p>
-                  <p className="text-xs text-gray-500 mb-4">At least 2 photos are required as proof. Max 3.</p>
+                  <p className="font-semibold text-graphite mb-1">Upload Photos & Confirm</p>
+                  <p className="text-xs text-graphite-faint mb-4">At least 2 photos are required as proof. Max 3.</p>
 
                   {/* Summary */}
-                  <div className="bg-maroon-50 border border-orange-200 rounded-xl p-3 mb-4 text-xs text-gray-600 space-y-0.5">
+                  <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3 mb-4 text-xs text-graphite-muted space-y-0.5">
                     <p><span className="font-semibold">Type:</span> {returnKind === 'return' ? 'Return (Refund)' : 'Exchange'}</p>
                     <p><span className="font-semibold">Item:</span> {selectedItem?.name}</p>
                     <p><span className="font-semibold">Reason:</span> {EXCHANGE_REASONS.find(r => r.value === returnReason)?.label}</p>
@@ -1036,16 +1037,16 @@ function OrderDetailContent() {
                   <div className="flex flex-wrap gap-3 mb-2">
                     {returnImages.map((url, idx) => (
                       <div key={idx} className="relative group">
-                        <img src={url} alt={`Exchange photo ${idx+1}`} className="w-20 h-20 object-cover rounded-xl border-2 border-orange-200" />
+                        <img src={url} alt={`Exchange photo ${idx+1}`} className="w-20 h-20 object-cover rounded-sm border-2 border-orange-200" />
                         <button onClick={() => setReturnImages(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center bg-graphite text-xs text-paper opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus-visible:opacity-100">
                           <X size={10} />
                         </button>
                       </div>
                     ))}
                     {returnImages.length < 3 && (
                       <button onClick={() => returnImgRef.current?.click()} disabled={uploadingReturnImg}
-                        className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-maroon-400 hover:text-maroon-500 transition-colors disabled:opacity-50">
+                        className="w-20 h-20 border-2 border-dashed border-paper-edge rounded-sm flex flex-col items-center justify-center text-graphite-faint hover:border-maroon-400 hover:text-maroon-500 transition-colors disabled:opacity-50">
                         {uploadingReturnImg ? (
                           <RefreshCw size={18} className="animate-spin" />
                         ) : (
@@ -1055,7 +1056,7 @@ function OrderDetailContent() {
                     )}
                   </div>
                   <input ref={returnImgRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleReturnImageUpload} />
-                  <p className="text-xs text-gray-400 mb-4">JPEG, PNG or WebP · Max 10MB each {returnImages.length < 2 && <span className="text-red-500 font-medium">· {2 - returnImages.length} more required</span>}</p>
+                  <p className="text-xs text-graphite-faint mb-4">JPEG, PNG or WebP · Max 10MB each {returnImages.length < 2 && <span className="text-red-500 font-medium">· {2 - returnImages.length} more required</span>}</p>
 
                   {/* Checklist */}
                   <div className="space-y-2 mb-5">
@@ -1064,19 +1065,19 @@ function OrderDetailContent() {
                       { key: 'packaging' as const,  label: 'It will be packed properly for pickup' },
                       { key: 'invoice' as const,    label: 'The original invoice/bill will be included' },
                     ].map(c => (
-                      <label key={c.key} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-gray-200 cursor-pointer hover:border-maroon-300">
+                      <label key={c.key} className="flex items-center gap-2.5 p-2.5 rounded-sm border border-paper-edge cursor-pointer hover:border-maroon-300">
                         <input type="checkbox" checked={checklist[c.key]}
                           onChange={e => setChecklist(prev => ({ ...prev, [c.key]: e.target.checked }))}
                           className="w-4 h-4 accent-maroon-700" />
-                        <span className="text-sm text-gray-700">{c.label}</span>
+                        <span className="text-sm text-graphite-muted">{c.label}</span>
                       </label>
                     ))}
                   </div>
 
                   <div className="flex gap-3">
-                    <button onClick={() => setReturnStep(returnKind === 'exchange' ? (priceDifference > 0 ? 5 : 4) : 3)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50">Back</button>
+                    <button onClick={() => setReturnStep(returnKind === 'exchange' ? (priceDifference > 0 ? 5 : 4) : 3)} className="flex-1 py-2.5 border border-paper-edge rounded-sm text-graphite-muted text-sm font-medium hover:bg-paper">Back</button>
                     <button onClick={handleReturnSubmit} disabled={submittingReturn}
-                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2">
+                      className="flex-1 py-2.5 bg-maroon-800 text-white rounded-sm font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2">
                       {submittingReturn ? <><RefreshCw size={14} className="animate-spin" /> Submitting...</> : `Submit ${returnKind === 'return' ? 'Return' : 'Exchange'} Request`}
                     </button>
                   </div>
@@ -1090,18 +1091,18 @@ function OrderDetailContent() {
       {/* ── Cancel Confirmation Modal ── */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setShowCancelModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md border border-paper-edge bg-paper p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle size={20} className="text-red-600" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 text-lg">Cancel Order?</h3>
-                <p className="text-sm text-gray-500">{order.order_number}</p>
+                <h3 className="font-normal text-graphite text-lg">Cancel Order?</h3>
+                <p className="text-sm text-graphite-faint">{order.order_number}</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-graphite-muted mb-4">
               Please tell us why you want to cancel. This helps us improve.
               {order.payment_method !== 'cod' && <span className="block mt-1 text-orange-600 font-medium">Your payment will be refunded within 5–7 business days.</span>}
             </p>
@@ -1109,10 +1110,10 @@ function OrderDetailContent() {
             {/* Reason selector */}
             <div className="space-y-2 mb-4">
               {CANCEL_REASONS.map(reason => (
-                <label key={reason} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${cancelReason === reason ? 'border-maroon-500 bg-maroon-50' : 'border-gray-200 hover:border-maroon-300'}`}>
+                <label key={reason} className={`flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-all ${cancelReason === reason ? 'border-maroon-500 bg-maroon-50' : 'border-paper-edge hover:border-maroon-300'}`}>
                   <input type="radio" name="cancel_reason" value={reason} checked={cancelReason === reason}
                     onChange={() => setCancelReason(reason)} className="accent-maroon-700" />
-                  <span className="text-sm text-gray-700">{reason}</span>
+                  <span className="text-sm text-graphite-muted">{reason}</span>
                 </label>
               ))}
             </div>
@@ -1123,17 +1124,17 @@ function OrderDetailContent() {
                 onChange={e => setCustomReason(e.target.value)}
                 placeholder="Please describe your reason..."
                 rows={3}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-maroon-400 resize-none mb-4"
+                className="w-full border border-paper-edge rounded-sm px-4 py-2.5 text-sm outline-none focus:border-maroon-400 resize-none mb-4"
               />
             )}
 
             <div className="flex gap-3">
               <button onClick={() => setShowCancelModal(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors">
+                className="flex-1 px-4 py-2.5 border border-paper-edge rounded-sm text-graphite-muted font-medium text-sm hover:bg-paper transition-colors">
                 Keep Order
               </button>
               <button onClick={handleCancelConfirm} disabled={cancelling || !cancelReason}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-semibold text-sm hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-sm font-semibold text-sm hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                 {cancelling ? <><RefreshCw size={14} className="animate-spin" /> Cancelling...</> : <><XCircle size={14} /> Yes, Cancel</>}
               </button>
             </div>
@@ -1146,7 +1147,7 @@ function OrderDetailContent() {
 
 export default function OrderDetailPage() {
   return (
-    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-12 animate-pulse space-y-4"><div className="h-8 bg-gray-200 rounded w-64" /><div className="card p-6 h-48 bg-gray-200 rounded" /></div>}>
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-12 animate-pulse space-y-4"><div className="h-8 bg-paper-shade rounded w-64" /><div className="card p-6 h-48 bg-paper-shade rounded" /></div>}>
       <OrderDetailContent />
     </Suspense>
   );

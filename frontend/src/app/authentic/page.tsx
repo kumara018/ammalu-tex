@@ -1,142 +1,137 @@
 import Link from 'next/link';
-import {
-  Shield, CheckCircle, Award,
-  ChevronRight, Headphones, Truck,
-} from 'lucide-react';
+import PolicyDoc, { type PolicySection } from '@/components/system/PolicyDoc';
+
+/**
+ * The guarantee.
+ *
+ * WHAT WAS LEFT HERE. The banner and the emoji cards went in an earlier pass,
+ * but two boxes survived it: the eight dispatch checks in a `.card` with green
+ * tick icons, and a maroon-tinted panel promising to make it right. Both are
+ * the same mistake in miniature — the shop's promise set inside a container
+ * that says "notice", instead of set as the document it is.
+ *
+ * The pull quote survives, because it is the one thing on the page doing real
+ * work: a guarantee is a sentence somebody stands behind, so it is set at the
+ * size of a sentence somebody stands behind.
+ *
+ * WHY IT IS THE SAME COMPONENT AS THE POLICIES. This page makes claims a
+ * customer may later hold us to, which is exactly what a policy is. Setting it
+ * in the same document frame as the terms is the honest presentation — it says
+ * these are commitments, not marketing.
+ */
 
 export const metadata = {
-  title: '100% Authentic Products — Ammalu Tex',
-  description: 'Every product at Ammalu Tex is sourced directly from trusted weavers and manufacturers. Guaranteed authentic.',
+  title: '100% Authentic — Ammalu Tex',
+  description:
+    'Where the cloth comes from, what the listing promises, and the eight checks every piece passes before it leaves the counter.',
 };
+
+function Guarantee() {
+  return (
+    <figure className="border-y border-paper-edge py-[clamp(2.5rem,7vh,4.5rem)]">
+      <blockquote className="max-w-[24ch] font-display text-chapter font-normal leading-[1.06] text-graphite">
+        What you see is exactly what you get.
+      </blockquote>
+      <figcaption className="mt-7 max-w-[52ch] text-lede text-graphite-muted">
+        We source directly from weavers across Tamil Nadu and trusted textile hubs, bypassing
+        middlemen — which is why the price is what it is and the cloth is what we say it is.
+      </figcaption>
+    </figure>
+  );
+}
+
+const SECTIONS: PolicySection[] = [
+  {
+    title: 'How the cloth reaches us',
+    clauses: [
+      {
+        heading: 'Direct from the weaver',
+        body: 'We work directly with skilled weavers and manufacturers in Tamil Nadu and the major textile hubs across India. No middlemen, and no markup added by anybody between them and the counter.',
+      },
+      {
+        heading: 'Who the money reaches',
+        body: 'We buy from local artisans on fair terms. Shopping here supports the craftspeople who made the piece, which is a claim we can make because we know their names.',
+      },
+    ],
+  },
+  {
+    title: 'What the listing promises',
+    clauses: [
+      {
+        heading: 'Colour',
+        body: 'We photograph in natural light, so the colour you see is the colour that arrives. Slight variation between screens is normal and is the only variation there should be.',
+      },
+      {
+        heading: 'Size',
+        body: 'Our size guide is calibrated against actual garment measurements, in inches and centimetres, not against a generic national standard.',
+      },
+      {
+        heading: 'Fabric',
+        body: 'Cotton, silk, georgette, crepe — every fabric comes from a certified supplier and is named accurately on the product page. If the page says silk, it is silk.',
+      },
+    ],
+  },
+  {
+    title: 'Checked before it is folded',
+    clauses: [
+      {
+        heading: 'Every piece, by hand',
+        body: 'Each garment is inspected before it reaches the shop floor: fabric, stitching, colour fastness, finishing. Nothing is sent on from a supplier unopened.',
+      },
+      {
+        heading: 'The eight checks before dispatch',
+        body: (
+          <ol>
+            <li>Fabric composition matches the product description.</li>
+            <li>No loose threads or stitching defects.</li>
+            <li>Colour matches the product photograph.</li>
+            <li>Correct sizing, against our size guide.</li>
+            <li>Embroidery and embellishments are secure.</li>
+            <li>Zips, buttons and hooks all work.</li>
+            <li>No stains or storage damage.</li>
+            <li>Pressed and presented properly.</li>
+          </ol>
+        ),
+      },
+    ],
+  },
+  {
+    title: 'If we got it wrong',
+    clauses: [
+      {
+        heading: 'The window',
+        body: (
+          <>
+            If a piece arrives with a genuine size issue or damage, you can request a{' '}
+            <strong>return within 4 hours of delivery</strong>, or an{' '}
+            <strong>exchange within 12 hours</strong>.
+          </>
+        ),
+      },
+      {
+        heading: 'What happens then',
+        body: (
+          <>
+            Once the request is approved and the piece is picked up, the refund is processed
+            automatically through Razorpay to your original payment method. The full terms are in
+            the <Link href="/cancellation">cancellation, return &amp; exchange policy</Link>.
+          </>
+        ),
+      },
+    ],
+  },
+];
 
 export default function AuthenticPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-6">
-        <Link href="/" className="hover:text-maroon-700">Home</Link>
-        <ChevronRight size={12} />
-        <span className="text-gray-800 font-medium">100% Authentic</span>
-      </nav>
-
-      {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-maroon-50 text-maroon-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <Shield size={15} /> Quality Guarantee
-        </div>
-        <h1 className="text-3xl font-display font-bold text-maroon-900 mb-3">100% Authentic Products</h1>
-        <p className="text-gray-500 max-w-xl mx-auto text-sm">
-          Every garment at Ammalu Tex is handpicked from verified weavers, manufacturers, and trusted suppliers.
-          We guarantee genuine quality — no imitations, no compromises.
-        </p>
-      </div>
-
-      {/* Quality badge banner */}
-      <div className="bg-brand-gradient text-white rounded-2xl p-8 mb-10 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 text-[180px] flex items-center justify-center">🛡️</div>
-        <div className="relative">
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
-              <Shield size={40} className="text-white" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold mb-2">Ammalu Tex Authenticity Guarantee</h2>
-          <p className="text-maroon-200 max-w-lg mx-auto text-sm leading-relaxed">
-            We source directly from weavers across Tamil Nadu and trusted textile hubs — bypassing middlemen to
-            bring you genuine quality at fair prices. What you see is exactly what you get.
-          </p>
-        </div>
-      </div>
-
-      {/* Our promise */}
-      <h2 className="text-xl font-bold text-gray-800 mb-4">Our Quality Promise</h2>
-      <div className="grid sm:grid-cols-2 gap-4 mb-10">
-        {[
-          {
-            icon: '🏭', title: 'Direct from Weavers',
-            desc: 'We work directly with skilled weavers and manufacturers in Tamil Nadu and major textile hubs across India — no middlemen, no markups.',
-          },
-          {
-            icon: '🔍', title: 'Every Piece Inspected',
-            desc: 'Each garment undergoes a quality check before it reaches our store. We inspect fabric quality, stitching, colour fastness, and finishing.',
-          },
-          {
-            icon: '🎨', title: 'True-to-Photo Colours',
-            desc: 'We photograph our products in natural light to show the most accurate colour representation. Slight screen variations are natural.',
-          },
-          {
-            icon: '📏', title: 'Accurate Sizing',
-            desc: 'Our size guide (inches + cm) is calibrated against actual garment measurements — not generic standards — so you get the right fit.',
-          },
-          {
-            icon: '🧵', title: 'Genuine Fabrics',
-            desc: 'Cotton, silk, georgette, crepe — every fabric type is sourced from certified suppliers and labelled accurately on our product pages.',
-          },
-          {
-            icon: '♻️', title: 'Ethical Sourcing',
-            desc: 'We support local artisans and fair trade practices. When you shop at Ammalu Tex, you support real craftspeople and their livelihoods.',
-          },
-        ].map(({ icon, title, desc }) => (
-          <div key={title} className="card p-5 flex items-start gap-4">
-            <div className="text-3xl flex-shrink-0">{icon}</div>
-            <div>
-              <p className="font-bold text-gray-800 mb-1.5">{title}</p>
-              <p className="text-sm text-gray-600 leading-relaxed">{desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quality checks */}
-      <h2 className="text-xl font-bold text-gray-800 mb-4">What We Check Before Dispatch</h2>
-      <div className="card p-6 mb-10">
-        <div className="grid sm:grid-cols-2 gap-3">
-          {[
-            'Fabric composition matches product description',
-            'No loose threads or stitching defects',
-            'Colour matches the product photo',
-            'Correct sizing as per our size guide',
-            'Embroidery / embellishments are secure',
-            'Zippers, buttons, and hooks function properly',
-            'No stains or damage from storage',
-            'Proper ironing and presentation',
-          ].map(item => (
-            <div key={item} className="flex items-center gap-2 text-sm text-gray-700">
-              <CheckCircle size={15} className="text-green-500 flex-shrink-0" /> {item}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Not happy? */}
-      <div className="card p-6 mb-10 bg-maroon-50 border-maroon-200">
-        <p className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-          <Award size={18} className="text-gold-600" /> Not Satisfied? We'll Make It Right.
-        </p>
-        <p className="text-sm text-gray-600 leading-relaxed mb-3">
-          If a product arrives with a genuine size issue or damage, you can request a{' '}
-          <strong>return within 4 hours of delivery</strong> — once approved and picked up, your refund is
-          processed automatically via Razorpay.
-        </p>
-        <Link href="/support#returns" className="text-sm font-semibold text-maroon-700 hover:underline">
-          Read Cancellation, Return & Exchange Policy →
-        </Link>
-      </div>
-
-      {/* CTA */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Link href="/products" className="btn-primary flex items-center gap-2 justify-center">
-          <Shield size={16} /> Shop Authentic Products
-        </Link>
-        <Link href="/shipping" className="btn-outline flex items-center gap-2 justify-center text-maroon-800 border-maroon-300 hover:bg-maroon-50">
-          <Truck size={15} /> Shipping Info
-        </Link>
-        <Link href="/support" className="flex items-center gap-2 justify-center px-5 py-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium">
-          <Headphones size={15} /> Need Help?
-        </Link>
-      </div>
-
-    </div>
+    <PolicyDoc
+      eyebrow="Our word"
+      title="100% authentic"
+      standfirst="Every garment is handpicked from verified weavers, manufacturers and trusted suppliers. No imitations, and no compromises on what the label says."
+      updated="21 May 2026"
+      summary={<Guarantee />}
+      sections={SECTIONS}
+      footnote="This page is a set of commitments, not a marketing claim. If a piece you received does not match any line on it, we want to hear about that specific line."
+    />
   );
 }

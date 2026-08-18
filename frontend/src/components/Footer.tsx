@@ -1,7 +1,23 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Instagram, MessageCircle, MapIcon } from 'lucide-react';
+import { MapPin, Phone, Mail, MessageCircle, MapIcon } from 'lucide-react';
+
+// lucide-react v1 removed every brand glyph, Instagram included, for trademark
+// reasons. Inlined rather than pinned to v0 so the icon set stays current.
+function InstagramIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
 import { STORE, WHATSAPP_URL, MAIL_URL, CALL_URL } from '@/lib/config';
 import { LogoMark } from './Logo';
 
@@ -11,42 +27,42 @@ export default function Footer() {
   const router = useRouter();
 
   return (
-    <footer className="bg-maroon-950 text-maroon-100 mt-16">
+    <footer className="bg-paper-shade text-graphite-muted mt-0 border-t border-paper-edge">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
           {/* Brand + Social */}
           <div>
             <Link href="/" className="flex items-center gap-3 mb-4">
-              <LogoMark size={40} className="text-white flex-shrink-0" />
+              <LogoMark size={40} className="text-graphite flex-shrink-0" />
               <div>
-                <p className="text-white font-bold uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>
+                <p className="text-graphite font-normal uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>
                   Ammalu Tex
                 </p>
-                <p className="text-maroon-300 font-semibold uppercase leading-tight mt-1" style={{ fontSize: '9.5px', letterSpacing: '0.1em' }}>
+                <p className="text-graphite-faint font-semibold uppercase leading-tight mt-1" style={{ fontSize: '9.5px', letterSpacing: '0.1em' }}>
                   Premium Women&apos;s Textiles
                 </p>
               </div>
             </Link>
-            <p className="text-sm text-maroon-300 leading-relaxed mb-5">
+            <p className="text-sm text-graphite-faint leading-relaxed mb-5">
               Your trusted destination for premium quality women&apos;s ethnic and contemporary wear at Texvalley Gangapuram.
             </p>
             <div className="flex gap-2 flex-wrap">
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-                className="p-2 bg-green-700 hover:bg-green-600 rounded-lg transition-colors" title="WhatsApp">
+                className="p-2 bg-graphite hover:bg-thread rounded-sm transition-colors" title="WhatsApp">
                 <MessageCircle size={16} />
               </a>
               <a href={STORE.instagram} target="_blank" rel="noopener noreferrer"
-                className="p-2 bg-maroon-800 hover:bg-pink-600 rounded-lg transition-colors" title="Instagram">
-                <Instagram size={16} />
+                className="p-2 bg-graphite hover:bg-thread rounded-sm transition-colors" title="Instagram">
+                <InstagramIcon size={16} />
               </a>
             </div>
           </div>
 
           {/* Shop — use router.push for reliable navigation */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Shop</h4>
-            <ul className="space-y-2 text-sm text-maroon-300">
+            <h4 className="font-semibold text-graphite mb-4">Shop</h4>
+            <ul className="space-y-2 text-sm text-graphite-faint">
               {SHOP_CATEGORIES.map((cat) => (
                 <li key={cat}>
                   <button
@@ -67,8 +83,8 @@ export default function Footer() {
 
           {/* Help & Policies */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Help & Policies</h4>
-            <ul className="space-y-2 text-sm text-maroon-300">
+            <h4 className="font-semibold text-graphite mb-4">Help & Policies</h4>
+            <ul className="space-y-2 text-sm text-graphite-faint">
               <li><Link href="/orders"             className="hover:text-gold-400 transition-colors">My Orders</Link></li>
               <li><Link href="/support"             className="hover:text-gold-400 transition-colors">Contact Us</Link></li>
               <li><Link href="/support#size-guide"  className="hover:text-gold-400 transition-colors">Size Guide</Link></li>
@@ -82,8 +98,8 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Contact Us</h4>
-            <ul className="space-y-3 text-sm text-maroon-300">
+            <h4 className="font-semibold text-graphite mb-4">Contact Us</h4>
+            <ul className="space-y-3 text-sm text-graphite-faint">
               <li className="flex items-start gap-2.5">
                 <MapPin size={16} className="text-gold-400 mt-0.5 flex-shrink-0" />
                 <div>
@@ -120,15 +136,15 @@ export default function Footer() {
                 </a>
               </li>
             </ul>
-            <div className="mt-4 p-3 bg-maroon-900 rounded-lg text-xs text-maroon-300">
-              <p className="font-medium text-white mb-1">Store Timings</p>
+            <div className="mt-4 p-3 bg-paper-bright rounded-sm text-xs text-graphite-muted border border-paper-edge">
+              <p className="font-medium text-graphite mb-1">Store Timings</p>
               <p>{STORE.weekdays}</p>
               <p>{STORE.weekend}</p>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-maroon-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-maroon-400">
+        <div className="border-t border-paper-edge mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-thread">
           <p>&copy; {new Date().getFullYear()} Ammalu Tex. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="/privacy"      className="hover:text-gold-400 transition-colors">Privacy Policy</Link>
@@ -137,7 +153,7 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-maroon-500">Secure payments:</span>
-            <span className="text-maroon-300 font-medium">Visa • Mastercard • UPI</span>
+            <span className="text-graphite-faint font-medium">Visa • Mastercard • UPI</span>
           </div>
         </div>
       </div>

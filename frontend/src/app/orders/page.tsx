@@ -29,27 +29,27 @@ const RETURN_STATUS_LABEL: Record<string, { label: string; color: string }> = {
 // -200/-800 shade pattern instead of the pill's -100/-300/-700, so the top
 // banner can switch to the return's own colour once one is active.
 const RETURN_BANNER_COLOR: Record<string, string> = {
-  pending:             'bg-yellow-50 border-yellow-200 text-yellow-800',
-  under_review:        'bg-blue-50 border-blue-200 text-blue-800',
-  approved:            'bg-green-50 border-green-200 text-green-800',
-  rejected:            'bg-red-50 border-red-200 text-red-800',
-  pickup_scheduled:    'bg-purple-50 border-purple-200 text-purple-800',
+  pending:             'border-l-2 border-yellow-700/50 text-yellow-900',
+  under_review:        'border-l-2 border-blue-700/50 text-blue-900',
+  approved:            'border-l-2 border-green-700/50 bg-transparent text-green-800',
+  rejected:            'border-l-2 border-red-700/50 bg-transparent text-red-800',
+  pickup_scheduled:    'border-l-2 border-purple-700/50 text-purple-900',
   picked_up:           'bg-cyan-50 border-cyan-200 text-cyan-800',
-  processing:          'bg-indigo-50 border-indigo-200 text-indigo-800',
-  replacement_shipped: 'bg-purple-50 border-purple-200 text-purple-800',
-  refund_initiated:    'bg-amber-50 border-amber-200 text-amber-800',
-  refunded:            'bg-green-50 border-green-200 text-green-800',
-  completed:           'bg-green-50 border-green-200 text-green-800',
+  processing:          'border-l-2 border-indigo-700/50 text-indigo-900',
+  replacement_shipped: 'border-l-2 border-purple-700/50 text-purple-900',
+  refund_initiated:    'border-l-2 border-amber-700/50 bg-transparent text-amber-800',
+  refunded:            'border-l-2 border-green-700/50 bg-transparent text-green-800',
+  completed:           'border-l-2 border-green-700/50 bg-transparent text-green-800',
 };
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; badge: string; banner: string }> = {
-  pending:          { label: 'Pending',          icon: Clock,        color: 'text-yellow-600', badge: 'badge-warning', banner: 'bg-yellow-50 border-yellow-200 text-yellow-800' },
-  confirmed:        { label: 'Confirmed',         icon: CheckCircle,  color: 'text-blue-600',   badge: 'badge-info',    banner: 'bg-blue-50 border-blue-200 text-blue-800' },
-  processing:       { label: 'Processing',        icon: Package,      color: 'text-purple-600', badge: 'badge-default', banner: 'bg-purple-50 border-purple-200 text-purple-800' },
-  shipped:          { label: 'Shipped',           icon: Truck,        color: 'text-blue-700',   badge: 'badge-info',    banner: 'bg-blue-50 border-blue-200 text-blue-800' },
+  pending:          { label: 'Pending',          icon: Clock,        color: 'text-yellow-600', badge: 'badge-warning', banner: 'border-l-2 border-yellow-700/50 text-yellow-900' },
+  confirmed:        { label: 'Confirmed',         icon: CheckCircle,  color: 'text-blue-600',   badge: 'badge-info',    banner: 'border-l-2 border-blue-700/50 text-blue-900' },
+  processing:       { label: 'Processing',        icon: Package,      color: 'text-purple-600', badge: 'badge-default', banner: 'border-l-2 border-purple-700/50 text-purple-900' },
+  shipped:          { label: 'Shipped',           icon: Truck,        color: 'text-blue-700',   badge: 'badge-info',    banner: 'border-l-2 border-blue-700/50 text-blue-900' },
   out_for_delivery: { label: 'Out for Delivery',  icon: Truck,        color: 'text-orange-600', badge: 'badge-warning', banner: 'bg-maroon-50 border-orange-200 text-orange-800' },
-  delivered:        { label: 'Delivered',         icon: CheckCircle,  color: 'text-green-600',  badge: 'badge-success', banner: 'bg-green-50 border-green-200 text-green-800' },
-  cancelled:        { label: 'Cancelled',         icon: XCircle,      color: 'text-red-600',    badge: 'badge-danger',  banner: 'bg-red-50 border-red-200 text-red-800' },
+  delivered:        { label: 'Delivered',         icon: CheckCircle,  color: 'text-green-600',  badge: 'badge-success', banner: 'border-l-2 border-green-700/50 bg-transparent text-green-800' },
+  cancelled:        { label: 'Cancelled',         icon: XCircle,      color: 'text-red-600',    badge: 'badge-danger',  banner: 'border-l-2 border-red-700/50 bg-transparent text-red-800' },
 };
 
 function getDeliveryLine(status: string): string {
@@ -108,17 +108,17 @@ export default function OrdersPage() {
   if (authLoading || !user) return null;
 
   if (loading) return (
-    <div className="max-w-4xl mx-auto px-4 py-12 space-y-4">
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(3rem,9vh,6rem)] space-y-4 sm:px-10">
       {Array(3).fill(0).map((_, i) => (
         <div key={i} className="card overflow-hidden animate-pulse">
-          <div className="h-10 bg-gray-200" />
+          <div className="h-10 bg-paper-shade" />
           <div className="p-5 space-y-3">
             <div className="flex justify-between">
-              <div className="h-5 bg-gray-200 rounded w-40" />
-              <div className="h-5 bg-gray-200 rounded w-20" />
+              <div className="h-5 bg-paper-shade rounded w-40" />
+              <div className="h-5 bg-paper-shade rounded w-20" />
             </div>
-            <div className="h-4 bg-gray-200 rounded w-1/2" />
-            <div className="h-4 bg-gray-200 rounded w-1/3" />
+            <div className="h-4 bg-paper-shade rounded w-1/2" />
+            <div className="h-4 bg-paper-shade rounded w-1/3" />
           </div>
         </div>
       ))}
@@ -126,10 +126,9 @@ export default function OrdersPage() {
   );
 
   if (error) return (
-    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <AlertCircle size={80} className="mx-auto text-red-200 mb-6" />
-      <h2 className="text-2xl font-bold text-gray-800 mb-3">Couldn&apos;t load your orders</h2>
-      <p className="text-gray-500 mb-8">Something went wrong on our end. Please try again.</p>
+    <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(5rem,16vh,10rem)] sm:px-10">
+      <h2 className="font-display text-band font-normal text-graphite mb-3">Couldn&apos;t load your orders</h2>
+      <p className="text-graphite-faint mb-8">Something went wrong on our end. Please try again.</p>
       <button onClick={load} className="btn-primary inline-flex items-center gap-2">
         <RefreshCw size={16} /> Try Again
       </button>
@@ -137,10 +136,9 @@ export default function OrdersPage() {
   );
 
   if (orders.length === 0) return (
-    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <Package size={80} className="mx-auto text-maroon-200 mb-6" />
-      <h2 className="text-2xl font-bold text-gray-800 mb-3">No orders yet</h2>
-      <p className="text-gray-500 mb-8">You haven&apos;t placed any orders yet. Start shopping!</p>
+    <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(5rem,16vh,10rem)] sm:px-10">
+      <h2 className="font-display text-band font-normal text-graphite mb-3">No orders yet</h2>
+      <p className="text-graphite-faint mb-8">You haven&apos;t placed any orders yet. Start shopping!</p>
       <Link href="/products" className="btn-primary inline-flex items-center gap-2">
         Start Shopping
       </Link>
@@ -148,8 +146,8 @@ export default function OrdersPage() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="section-title mb-6">My Orders</h1>
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
+      <h1 className="font-display text-chapter font-normal text-graphite mb-8">My Orders</h1>
       <div className="space-y-4">
         {orders.map((order) => {
           const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
@@ -160,7 +158,7 @@ export default function OrdersPage() {
 
           return (
             <Link key={order.id} href={`/orders/${order.id}`} className="block group">
-              <div className="card overflow-hidden hover:shadow-md transition-all">
+              <div className="card overflow-hidden transition-all">
 
                 {/* Colored status banner — once a return/exchange is active, this
                     shows the compound status ("Delivered → Pickup Scheduled")
@@ -186,16 +184,16 @@ export default function OrdersPage() {
                   {/* Order number + date */}
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                     <div>
-                      <p className="font-bold text-maroon-900 text-sm">{order.order_number}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="font-normal text-maroon-900 text-sm">{order.order_number}</p>
+                      <p className="text-xs text-graphite-faint mt-0.5">
                         {new Date(order.created_at).toLocaleDateString('en-IN', {
                           day: 'numeric', month: 'long', year: 'numeric',
                         })}
                       </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-xs text-gray-500">Total</p>
-                      <p className="font-bold text-maroon-900 text-base">₹{order.total.toLocaleString()}</p>
+                      <p className="text-xs text-graphite-faint">Total</p>
+                      <p className="font-normal text-maroon-900 text-base">₹{order.total.toLocaleString()}</p>
                     </div>
                   </div>
 
@@ -205,34 +203,34 @@ export default function OrdersPage() {
                       {items.slice(0, 4).map((item: any, idx: number) => (
                         <div
                           key={idx}
-                          className="w-9 h-9 rounded-lg bg-gradient-to-br from-maroon-100 to-gold-50 border border-white flex items-center justify-center text-lg shadow-sm"
+                          className="flex h-9 w-9 items-center justify-center overflow-hidden border border-paper-edge bg-paper-shade"
                           title={item.name}
                         >
                           {getCategoryEmoji(item.category)}
                         </div>
                       ))}
                       {items.length > 4 && (
-                        <div className="w-9 h-9 rounded-lg bg-gray-100 border border-white flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">
+                        <div className="flex h-9 w-9 items-center justify-center border border-paper-edge bg-paper-shade text-caption text-graphite-faint">
                           +{items.length - 4}
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-700 font-medium line-clamp-1">
+                      <p className="text-sm text-graphite-muted font-medium line-clamp-1">
                         {items.map((i: any) => i.name).join(', ')}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-graphite-faint mt-0.5">
                         {items.length} {items.length === 1 ? 'item' : 'items'}
                       </p>
                     </div>
                   </div>
 
                   {/* Tracking + payment */}
-                  <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                  <div className="flex items-center gap-3 text-xs text-graphite-faint flex-wrap">
                     <span className="capitalize">Payment: {order.payment_method.toUpperCase()}</span>
                     <span>·</span>
                     <span className={order.payment_status === 'paid' ? 'text-green-600 font-medium' : 'text-orange-600 font-medium'}>
-                      {order.payment_status === 'paid' ? '✓ Paid' : 'Pending'}
+                      {order.payment_status === 'paid' ? 'Paid' : 'Pending'}
                     </span>
                     {order.tracking_number && (
                       <>
