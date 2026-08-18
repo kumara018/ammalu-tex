@@ -7,6 +7,8 @@ import { productsAPI } from '@/lib/api';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import PageShell from '@/components/PageShell';
+import { EmptyState, ErrorState } from '@/components/system/States';
+import { ActionButton, ActionLink } from '@/components/system/Action';
 import Reveal from '@/components/home/Reveal';
 import MeasureRule from '@/components/home/MeasureRule';
 
@@ -28,6 +30,15 @@ function ProductsContent() {
   const [total, setTotal]             = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [fuzzyMatch, setFuzzyMatch]   = useState<string>('');
+  /**
+   * Did the last load FAIL, as opposed to returning nothing?
+   *
+   * Two different sentences, two different next actions: a failure is ours and
+   * needs a retry; an empty shelf is the shop's stock and needs a wider net.
+   */
+  const [loadError, setLoadError] = useState(false);
+  /** Bumped by the retry button to re-run the fetch effect. */
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Single source of truth — derived directly from URL on every render
   const filters = {
@@ -122,11 +133,13 @@ function ProductsContent() {
           setFuzzyMatch('');
           setProducts([]);
           setTotal(0);
+          setLoadError(true);
           setLoading(false);
         }
       }
     };
 
+    setLoadError(false);
     doFetch();
     return () => { cancelled = true; }; // cancel on unmount or re-run
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,6 +150,7 @@ function ProductsContent() {
     filters.maxPrice,
     filters.featured,
     filters.sort,
+    reloadKey,
   ]);
 
   // Update a filter: write to URL only (effect above reads from URL)
@@ -326,12 +340,43 @@ function ProductsContent() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
+      ) : loadError ? (
+        /* Ours. Say so, and give them the button back. */
+        <ErrorState
+          title="The shelf didn't load"
+          body="The connection dropped on the way here. Nothing is wrong with your bag or your account."
+          onRetry={() => setReloadKey((k) => k + 1)}
+          fallbackHref="/support"
+          fallbackLabel="Speak to us"
+        />
+      ) : hasFilters ? (
+        /* Theirs, and fixable: the shelf has pieces, this cut of it does not.
+           Naming the filter that is doing the excluding is the difference
+           between a dead end and one click back to the whole shelf. */
+        <EmptyState
+          eyebrow="Nothing in this cut"
+          title={
+            filters.search
+              ? `Nothing on the shelf matches “${filters.search}”`
+              : 'Nothing on the shelf matches those filters'
+          }
+          body="Widen it and the pieces come back. Everything we have is one click away."
+          action={
+            <>
+              <ActionButton onClick={clearFilters}>Show the whole shelf</ActionButton>
+              <ActionLink href="/support" tone="quiet">Ask us to look</ActionLink>
+            </>
+          }
+        />
       ) : (
-        <div className="text-center py-20">
-          <h3 className="text-xl font-semibold text-graphite-muted mb-2">No products found</h3>
-          <p className="text-graphite-faint mb-6">Try adjusting your filters or search terms.</p>
-          <button onClick={clearFilters} className="btn-primary">Clear Filters</button>
-        </div>
+        /* Genuinely bare. Not the customer's fault and not a fault at all —
+           a shop between deliveries. */
+        <EmptyState
+          eyebrow="Between deliveries"
+          title="Nothing on the shelf just now"
+          body="New pieces are cut and photographed every week. Call the counter and we will tell you what is coming."
+          action={<ActionLink href="/support">Speak to us</ActionLink>}
+        />
       )}
     </PageShell>
   );
