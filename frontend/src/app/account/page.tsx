@@ -108,14 +108,17 @@ export default function AccountPage() {
       <section className="mt-14 flex flex-col items-start gap-5 border-t border-paper-edge pt-10">
         <p className="text-rule uppercase text-graphite-faint">Leaving</p>
 
-        <button
-          onClick={() => performLogout('/auth/login')}
+        {/* A navigation, not a sign-out. Signing out first cost you the
+            session you arrived with the moment you changed your mind. */}
+        <Link
+          href="/auth/login?switch=1"
           className="border-b border-paper-edge pb-1 text-caption uppercase text-graphite transition-colors duration-500 hover:border-thread hover:text-thread"
         >
           Switch account →
-        </button>
+        </Link>
         <p className="-mt-3 max-w-[46ch] text-caption text-graphite-faint">
-          Signs you out of this account and opens the sign-in page, so someone else can use their own.
+          Opens the sign-in page so someone else can use their own account. You stay
+          signed in here until they do — change your mind and nothing is lost.
         </p>
 
         <button

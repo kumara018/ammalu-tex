@@ -71,14 +71,24 @@ function SignInInner() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const codeRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Two ways to be on this page while already signed in.
+   *
+   * `switch=1` is the one that matters: Switch account used to sign you out
+   * first and land you here, so changing your mind cost you the session you
+   * arrived with. You now stay signed in for the whole visit — signing in as
+   * somebody else replaces the session, cancelling leaves it untouched.
+   */
   const isAddMode = params.get('add') === '1';
+  const isSwitchMode = params.get('switch') === '1';
+  const staysSignedIn = isAddMode || isSwitchMode;
 
   // Already signed in, and not deliberately adding another account.
   useEffect(() => {
-    if (authLoading || !user || isAddMode) return;
+    if (authLoading || !user || staysSignedIn) return;
     if (stage !== 'identifier' || identifier) return;
     router.replace(user.is_admin ? '/admin' : '/');
-  }, [user, authLoading, isAddMode, router, stage, identifier]);
+  }, [user, authLoading, staysSignedIn, router, stage, identifier]);
 
   // Focus follows the step. Without this a keyboard user has to tab back into
   // the form after every advance, which makes a three-step flow feel like
@@ -229,12 +239,31 @@ function SignInInner() {
       title={titles[stage]}
       standfirst={
         stage === 'identifier'
-          ? 'Use the phone number or email address on your account.'
+          ? (isSwitchMode
+              ? 'Sign in with the other account. You are still signed in until you do.'
+              : 'Use the phone number or email address on your account.')
           : stage === 'code'
             ? emailHint
               ? `We sent a six-digit code to ${emailHint}.`
               : 'We sent a six-digit code to your registered email.'
             : undefined
+      }
+      /* Switching keeps you signed in, so there has to be a way to change
+         your mind that says so. Without this the page looks identical to a
+         signed-out sign-in page and the only clue is the wordmark. */
+      notice={
+        isSwitchMode && user ? (
+          <p className="text-sm text-graphite-muted">
+            Still signed in as{' '}
+            <span className="text-graphite">{user.full_name || user.email}</span>.{' '}
+            <Link
+              href="/account"
+              className="text-graphite underline underline-offset-4 transition-colors duration-500 hover:text-thread"
+            >
+              Stay signed in
+            </Link>
+          </p>
+        ) : undefined
       }
       footer={
         stage === 'identifier' ? (

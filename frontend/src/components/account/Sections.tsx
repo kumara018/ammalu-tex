@@ -129,69 +129,49 @@ export function Details() {
 
 /* ── Password ────────────────────────────────────────────────────────────── */
 
-export function Password() {
-  const [currentPw, setCurrentPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [confirmPw, setConfirmPw] = useState('');
-  const [showPw, setShowPw] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
-
-  const change = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentPw) { setMsg({ type: 'err', text: 'Enter your current password.' }); return; }
-    if (newPw.length < 6) { setMsg({ type: 'err', text: 'A new password needs at least 6 characters.' }); return; }
-    if (newPw !== confirmPw) { setMsg({ type: 'err', text: 'The two new passwords do not match.' }); return; }
-    setSaving(true); setMsg(null);
-    try {
-      await authAPI.updateProfile({ current_password: currentPw, new_password: newPw });
-      setMsg({ type: 'ok', text: 'Password changed.' });
-      toast.success('Password changed');
-      setCurrentPw(''); setNewPw(''); setConfirmPw('');
-    } catch (err: any) {
-      setMsg({ type: 'err', text: err.response?.data?.detail || 'Could not change it — check your current password.' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
+/**
+ * CHANGING A PASSWORD GOES THROUGH THE EMAIL, NOT THROUGH THIS PAGE.
+ *
+ * There was a three-field form here — current, new, confirm — and it was
+ * removed on instruction: "if user wants to change the password once give
+ * forgot password then they will receive otp or reset password mail then they
+ * can change not like portal itself".
+ *
+ * That instinct is the more secure one, and it is worth writing down why. An
+ * in-page form only ever proves the person knows the current password. Anyone
+ * who walks up to an unlocked, already-signed-in phone knows nothing and can
+ * still change it — they simply cannot, if the change requires a code sent to
+ * the address on the account. Routing every change through the reset flow
+ * means a password can only be changed by someone holding the mailbox, which
+ * is the thing the account is actually anchored to.
+ *
+ * It is also one flow instead of two. The reset path already existed for
+ * people who had forgotten theirs, so keeping a second, weaker path for people
+ * who had not meant two code paths to the same outcome — and the weaker one
+ * was the one offered first.
+ *
+ * The identifier is carried through, so the customer does not retype the
+ * address we already have.
+ */
+export function Password({ email }: { email: string }) {
   return (
-    <form onSubmit={change} className="flex max-w-[32rem] flex-col gap-7">
-      <div>
-        <label htmlFor="pw-cur" className={LABEL}>Current password</label>
-        <div className="relative mt-2">
-          <input id="pw-cur" type={showPw ? 'text' : 'password'} autoComplete="current-password"
-            value={currentPw} onChange={(e) => { setCurrentPw(e.target.value); setMsg(null); }}
-            className={`${FIELD} pr-10`} />
-          <button type="button" onClick={() => setShowPw((v) => !v)}
-            aria-label={showPw ? 'Hide passwords' : 'Show passwords'}
-            className="absolute right-0 top-0 text-graphite-faint transition-colors hover:text-thread">
-            {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="pw-new" className={LABEL}>New password</label>
-        <input id="pw-new" type={showPw ? 'text' : 'password'} autoComplete="new-password"
-          value={newPw} onChange={(e) => { setNewPw(e.target.value); setMsg(null); }}
-          className={`${FIELD} mt-2`} />
-        <p className="mt-2 text-caption text-graphite-faint">At least 6 characters.</p>
-      </div>
-
-      <div>
-        <label htmlFor="pw-conf" className={LABEL}>Confirm new password</label>
-        <input id="pw-conf" type={showPw ? 'text' : 'password'} autoComplete="new-password"
-          value={confirmPw} onChange={(e) => { setConfirmPw(e.target.value); setMsg(null); }}
-          className={`${FIELD} mt-2`} />
-      </div>
-
-      {msg && <p className={`text-sm ${msg.type === 'ok' ? 'text-graphite' : 'text-red-700'}`}>{msg.text}</p>}
-
-      <button type="submit" disabled={saving} className={ACTION}>
-        {saving ? 'Changing…' : 'Change password →'}
-      </button>
-    </form>
+    <div className="max-w-[38rem]">
+      <p className="leading-relaxed text-graphite-muted">
+        For your safety a password is changed by email rather than here. We send a
+        six-digit code to <span className="text-graphite">{email}</span>; enter it
+        with your new password and it is done.
+      </p>
+      <p className="mt-4 max-w-[52ch] text-caption text-graphite-faint">
+        This way somebody who finds your phone already signed in still cannot change
+        your password — they would need your mailbox too.
+      </p>
+      <Link
+        href={`/auth/forgot-password?identifier=${encodeURIComponent(email)}`}
+        className={`${ACTION} mt-6 inline-block`}
+      >
+        Send me a code &rarr;
+      </Link>
+    </div>
   );
 }
 

@@ -40,11 +40,7 @@ export default function SecurityPage() {
 
         <section className="border-t border-paper-edge pt-10">
           <h2 className="font-display text-[1.4rem] leading-tight text-graphite">Password</h2>
-          <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-graphite-muted">
-            Change it whenever you like — you will need the current one. If you have
-            forgotten it, sign out and use &ldquo;Forgotten password&rdquo; instead.
-          </p>
-          <div className="mt-7"><Password /></div>
+          <div className="mt-5"><Password email={user.email} /></div>
         </section>
 
         <section className="border-t border-paper-edge pt-10">

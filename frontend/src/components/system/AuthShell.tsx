@@ -44,6 +44,7 @@ export default function AuthShell({
   standfirst,
   children,
   footer,
+  notice,
   /** 1-based position in the flow, for the numbered spine. */
   step = 1,
   steps = 3,
@@ -55,6 +56,9 @@ export default function AuthShell({
   footer?: ReactNode;
   step?: number;
   steps?: number;
+  /** A line above the form, for state the form itself cannot express —
+      currently only "you are still signed in as someone else". */
+  notice?: React.ReactNode;
 }) {
   return (
     <div className="relative min-h-[100svh] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
@@ -114,6 +118,9 @@ export default function AuthShell({
             )}
 
             {/* No card. The form sits on the paper, held by a ruled spine. */}
+            {notice && (
+              <div className="mt-8 border-l-2 border-thread pl-7 sm:pl-9">{notice}</div>
+            )}
             <div className="mt-10 border-l border-paper-edge pl-7 sm:pl-9">{children}</div>
 
             {footer && <div className="mt-10">{footer}</div>}
