@@ -66,7 +66,7 @@ export default function CheckoutPage() {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (items.length === 0) return; // cart already empty — order placed, no need to warn
       const msg = placing
-        ? '⚠️ Your payment is being processed! Leaving now may cause issues.'
+        ? 'Your payment is being processed! Leaving now may cause issues.'
         : 'You are in the middle of checkout. Your order has not been placed yet.';
       e.preventDefault();
       e.returnValue = msg;
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
       <div className="flex items-center gap-3 mb-6">
         <Link href="/cart" className="p-2 hover:bg-orange-100 rounded-sm"><ArrowLeft size={20} /></Link>
         <h1 className="font-display text-band font-normal text-maroon-900">Secure Checkout</h1>
@@ -449,7 +449,7 @@ export default function CheckoutPage() {
                   </div>
                   {grandTotal < 1000 ? (
                     <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3">
-                      <p className="text-xs text-orange-700 font-semibold">⚠️ Your order total is ₹{grandTotal}. EMI requires a minimum order of ₹1,000.</p>
+                      <p className="text-xs text-orange-700 font-semibold">Your order total is ₹{grandTotal}. EMI requires a minimum order of ₹1,000.</p>
                       <p className="text-xs text-orange-600 mt-1">You can still pay via Card / UPI using the option above.</p>
                     </div>
                   ) : (
@@ -524,7 +524,7 @@ export default function CheckoutPage() {
                 <input type="checkbox" checked={openBox} onChange={e => setOpenBox(e.target.checked)}
                   className="mt-0.5 w-4 h-4 accent-blue-700 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-blue-900 text-sm">📦 Request Open Box Delivery</p>
+                  <p className="font-semibold text-blue-900 text-sm">Request Open Box Delivery</p>
                   <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
                     Inspect the package before accepting. If the product is damaged or doesn't match,
                     you can refuse delivery on the spot for a full refund.

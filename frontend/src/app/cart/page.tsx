@@ -1,11 +1,13 @@
 'use client';
 import { useEffect } from 'react';
 import Link from 'next/link';
+import MeasureRule from '@/components/home/MeasureRule';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { mediaUrl } from '@/lib/media';
 
 export default function CartPage() {
   const { items, count, total, loading, fetchCart, updateItem, removeItem, clearCart } = useCart();
@@ -67,24 +69,47 @@ export default function CartPage() {
   );
 
   if (items.length === 0) return (
-    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <ShoppingBag size={80} className="mx-auto text-maroon-200 mb-6" />
-      <h2 className="font-display text-band font-normal text-graphite mb-3">Your cart is empty</h2>
-      <p className="text-graphite-faint mb-8">Looks like you haven&apos;t added anything yet. Explore our beautiful collection!</p>
-      <Link href="/products" className="btn-primary inline-flex items-center gap-2">
-        <ShoppingCart size={18} /> Start Shopping
+    // An empty bag is not an error and does not need an 80px icon apologising
+    // for it. It needs the one sentence that moves the customer on.
+    <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(5rem,16vh,10rem)] sm:px-10">
+      <p className="mb-4 text-rule uppercase text-thread">Nothing in the bag</p>
+      <h1 className="max-w-[18ch] font-display text-chapter font-normal text-graphite">
+        Your bag is empty
+      </h1>
+      <p className="mt-6 max-w-[46ch] text-lede text-graphite-muted">
+        Six bolts on the shelf, all of them cut and finished here. Start wherever
+        the next occasion is.
+      </p>
+      <Link
+        href="/products"
+        className="group mt-9 inline-flex items-baseline gap-3 border-b border-thread/60 pb-2 text-caption uppercase text-graphite transition-colors duration-500 hover:border-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+      >
+        See the whole shelf
+        <span aria-hidden="true" className="transition-transform duration-500 group-hover:translate-x-1.5">→</span>
       </Link>
     </div>
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="section-title">Shopping Cart <span className="text-gold-600">({count} item{count !== 1 ? 's' : ''})</span></h1>
-        <button onClick={handleClear} className="text-sm text-red-500 hover:text-red-700 font-medium flex items-center gap-1.5">
-          <Trash2 size={15} /> Clear Cart
+    <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
+      {/* The docket. The count is a measurement, set in the same register as
+          the sizes and the shelf — not a parenthetical in gold. */}
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p className="mb-4 text-rule uppercase text-thread">
+            {count} piece{count !== 1 ? 's' : ''}
+          </p>
+          <h1 className="font-display text-chapter font-normal text-graphite">Your bag</h1>
+        </div>
+        <button
+          onClick={handleClear}
+          className="flex items-center gap-2 text-caption uppercase text-graphite-faint transition-colors duration-500 hover:text-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+        >
+          <Trash2 size={14} /> Empty the bag
         </button>
       </div>
+
+      <MeasureRule className="mb-8" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Cart items */}
@@ -96,7 +121,7 @@ export default function CartPage() {
                 <div className="w-24 h-24 rounded-sm bg-gradient-to-br from-maroon-100 to-gold-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {item.product.images?.[0] && !item.product.images[0].includes('placeholder') ? (
                     <img
-                      src={item.product.images[0].startsWith('http') ? item.product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}${item.product.images[0]}`}
+                      src={mediaUrl(item.product.images[0])}
                       alt={item.product.name}
                       className="w-full h-full object-cover"
                     />
@@ -193,7 +218,7 @@ export default function CartPage() {
             </Link>
 
             <div className="mt-5 pt-4 border-t border-maroon-200">
-              <p className="text-xs text-graphite-faint text-center">🔒 Secure checkout with SSL encryption</p>
+              <p className="text-xs text-graphite-faint text-center">Secure checkout with SSL encryption</p>
             </div>
           </div>
         </div>

@@ -159,7 +159,7 @@ export default function AccountPage() {
   if (!user) return null; // wait for redirect
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="mx-auto w-full max-w-[68rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
 
       {/* ── Breadcrumb ───────────────────────────────────────────────── */}
       <nav className="flex items-center gap-1.5 text-xs text-graphite-faint mb-6">
@@ -177,7 +177,7 @@ export default function AccountPage() {
           <h1 className="font-display text-band font-normal text-graphite">{user.full_name}</h1>
           <p className="text-sm text-graphite-faint">{user.email}</p>
           <span className={`inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-transparent text-green-700'}`}>
-            {user.is_admin ? '⚙ Admin Account' : '👤 Customer Account'}
+            {user.is_admin ? 'Admin Account' : 'Customer Account'}
           </span>
         </div>
       </div>

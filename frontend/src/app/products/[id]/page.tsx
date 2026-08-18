@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLoginPrompt } from '@/context/LoginPromptContext';
 import { useWishlist } from '@/context/WishlistContext';
 import toast from 'react-hot-toast';
+import { mediaUrl } from '@/lib/media';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 function getYouTubeId(url: string): string | null {
@@ -24,7 +25,7 @@ function getYouTubeId(url: string): string | null {
 function resolveUrl(url: string) {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  return `${process.env.NEXT_PUBLIC_API_URL}${url}`;
+  return mediaUrl(url);
 }
 
 // ── Custom MP4 player (centered Play/Pause like Amazon) ──────────────────────
@@ -468,7 +469,7 @@ export default function ProductDetailPage() {
             )}
             {discount && <span className="text-green-600 font-semibold text-sm">{discount}% off</span>}
           </div>
-          <p className="text-xs text-graphite-faint mb-5">Inclusive of all taxes. ✓ Delivered to your doorstep</p>
+          <p className="text-xs text-graphite-faint mb-5">Inclusive of all taxes. Delivered to your doorstep</p>
 
           <hr className="border-maroon-200 mb-5" />
 
@@ -549,11 +550,11 @@ export default function ProductDetailPage() {
           {/* Stock warnings */}
           {product.stock === 0 ? (
             <div className="border-l-2 border-red-700/50 pl-4 p-4 mb-4 text-red-700 text-sm font-medium">
-              ❌ This product is currently out of stock. Check back later.
+              This product is currently out of stock. Check back later.
             </div>
           ) : product.stock <= 5 ? (
             <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3 mb-4 text-orange-700 text-sm">
-              ⚠️ Only {product.stock} left in stock — order soon!
+              Only {product.stock} left in stock — order soon!
             </div>
           ) : null}
 
@@ -842,7 +843,7 @@ export default function ProductDetailPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-semibold text-sm text-graphite">{r.user.full_name}</p>
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Verified Buyer</span>
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Verified Buyer</span>
                           </div>
                           <div className="flex gap-0.5 mt-0.5">
                             {Array.from({ length: 5 }, (_, i) => (

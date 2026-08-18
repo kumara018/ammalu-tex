@@ -14,6 +14,7 @@ import api from '@/lib/api';
 import { Order, OrderItem, Product, ReturnRequest } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { mediaUrl } from '@/lib/media';
 
 declare global {
   interface Window { Razorpay: any; }
@@ -356,7 +357,7 @@ function OrderDetailContent() {
   const currentLocation = tracking?.status_location || tracking?.current_status?.location || order.status_location;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
 
       {/* Success banner for new orders */}
       {isNew && (
@@ -547,7 +548,7 @@ function OrderDetailContent() {
                   )}
                 </div>
               )}
-              <p className="text-xs text-orange-700 mt-3 font-medium">⚠️ Never share this OTP via phone call or message. Only share it in person at your door.</p>
+              <p className="text-xs text-orange-700 mt-3 font-medium">Never share this OTP via phone call or message. Only share it in person at your door.</p>
             </div>
           )}
 
@@ -594,7 +595,7 @@ function OrderDetailContent() {
                 </div>
               ) : order.payment_method !== 'cod' && (
                 <p className="text-sm text-orange-700 bg-maroon-50 border border-orange-200 rounded-sm px-4 py-2.5">
-                  💰 Refund will be initiated within 24 hours and credited within 5–7 business days.
+                  Refund will be initiated within 24 hours and credited within 5–7 business days.
                 </p>
               )}
             </div>
@@ -606,7 +607,7 @@ function OrderDetailContent() {
             <div className="space-y-4">
               {(order.items_snapshot as any[]).map((item, i) => {
                 const emoji = item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : item.category === 'Crop Tops' ? '🎽' : item.category === 'Party Wears' ? '✨' : '👚';
-                const imgSrc = item.image ? (item.image.startsWith('http') ? item.image : `${process.env.NEXT_PUBLIC_API_URL}${item.image}`) : null;
+                const imgSrc = item.image ? (mediaUrl(item.image)) : null;
                 const itemVisual = (
                   <>
                     <div className="w-14 h-14 rounded-sm bg-gradient-to-br from-maroon-100 to-gold-50 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden border border-maroon-200">
@@ -647,7 +648,7 @@ function OrderDetailContent() {
                     {isDelivered && item.product_id && (
                       <Link href={`/products/${item.product_id}#reviews`}
                         className="inline-flex items-center gap-1 mt-2 ml-[72px] text-xs font-medium text-maroon-700 hover:text-maroon-900 border border-maroon-300 hover:border-maroon-500 rounded-sm px-2.5 py-1 transition-colors">
-                        ✍️ Write a Review
+                        Write a Review
                       </Link>
                     )}
                   </div>
@@ -689,9 +690,9 @@ function OrderDetailContent() {
                     order.payment_status === 'refund_initiated' ? 'text-orange-700 bg-maroon-50 border-orange-300'  :
                     order.payment_status === 'refunded'         ? 'text-purple-700 bg-transparent border-purple-300'  :
                     'text-amber-700 bg-transparent border-amber-300'}`}>
-                  {order.payment_status === 'paid'             ? '✅ PAID'                 :
-                   order.payment_status === 'refund_initiated' ? '🔄 REFUND INITIATED'     :
-                   order.payment_status === 'refunded'         ? '✅ REFUND PROCESSED'     : '⏳ PENDING'}
+                  {order.payment_status === 'paid'             ? 'PAID'                 :
+                   order.payment_status === 'refund_initiated' ? 'REFUND INITIATED'     :
+                   order.payment_status === 'refunded'         ? 'REFUND PROCESSED'     : '⏳ PENDING'}
                 </span>
               </p>
               {order.payment_status === 'refund_initiated' && (
@@ -701,7 +702,7 @@ function OrderDetailContent() {
               )}
               {order.payment_status === 'refunded' && (
                 <p className="text-[10px] text-green-600 bg-transparent border border-green-100 rounded-sm px-2 py-1.5 mt-1">
-                  ✅ Refund processed by Razorpay — will appear in your bank account within <b>1–3 business days</b>.
+                  Refund processed by Razorpay — will appear in your bank account within <b>1–3 business days</b>.
                 </p>
               )}
               {order.payment_transaction_id && order.payment_method !== 'cod' && (

@@ -108,7 +108,7 @@ export default function OrdersPage() {
   if (authLoading || !user) return null;
 
   if (loading) return (
-    <div className="max-w-4xl mx-auto px-4 py-12 space-y-4">
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(3rem,9vh,6rem)] space-y-4 sm:px-10">
       {Array(3).fill(0).map((_, i) => (
         <div key={i} className="card overflow-hidden animate-pulse">
           <div className="h-10 bg-paper-shade" />
@@ -126,8 +126,7 @@ export default function OrdersPage() {
   );
 
   if (error) return (
-    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <AlertCircle size={80} className="mx-auto text-red-200 mb-6" />
+    <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(5rem,16vh,10rem)] sm:px-10">
       <h2 className="font-display text-band font-normal text-graphite mb-3">Couldn&apos;t load your orders</h2>
       <p className="text-graphite-faint mb-8">Something went wrong on our end. Please try again.</p>
       <button onClick={load} className="btn-primary inline-flex items-center gap-2">
@@ -137,8 +136,7 @@ export default function OrdersPage() {
   );
 
   if (orders.length === 0) return (
-    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <Package size={80} className="mx-auto text-maroon-200 mb-6" />
+    <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(5rem,16vh,10rem)] sm:px-10">
       <h2 className="font-display text-band font-normal text-graphite mb-3">No orders yet</h2>
       <p className="text-graphite-faint mb-8">You haven&apos;t placed any orders yet. Start shopping!</p>
       <Link href="/products" className="btn-primary inline-flex items-center gap-2">
@@ -148,8 +146,8 @@ export default function OrdersPage() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="section-title mb-6">My Orders</h1>
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
+      <h1 className="font-display text-chapter font-normal text-graphite mb-8">My Orders</h1>
       <div className="space-y-4">
         {orders.map((order) => {
           const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
@@ -232,7 +230,7 @@ export default function OrdersPage() {
                     <span className="capitalize">Payment: {order.payment_method.toUpperCase()}</span>
                     <span>·</span>
                     <span className={order.payment_status === 'paid' ? 'text-green-600 font-medium' : 'text-orange-600 font-medium'}>
-                      {order.payment_status === 'paid' ? '✓ Paid' : 'Pending'}
+                      {order.payment_status === 'paid' ? 'Paid' : 'Pending'}
                     </span>
                     {order.tracking_number && (
                       <>

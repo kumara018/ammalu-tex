@@ -41,20 +41,19 @@ export default function ShippingPage() {
       <div className="grid md:grid-cols-2 gap-4 mb-10">
         {[
           {
-            icon: '🚚', title: 'Standard Delivery',
+            title: 'Standard Delivery',
             time: '5–7 Business Days',
             fee: `Flat ₹${STORE.shippingFee} shipping`,
             note: 'Available pan-India including remote areas via Delhivery.',
           },
           {
-            icon: '⚡', title: 'Express Delivery',
+            title: 'Express Delivery',
             time: '1–3 Business Days',
             fee: 'Additional charges apply',
             note: 'Available in select cities. Choose at checkout.',
           },
-        ].map(({ icon, title, time, fee, note }) => (
+        ].map(({ title, time, fee, note }) => (
           <div key={title} className="card p-5">
-            <p className="text-3xl mb-3">{icon}</p>
             <p className="font-normal text-graphite mb-1">{title}</p>
             <div className="space-y-1.5 text-sm text-graphite-muted">
               <p className="flex items-center gap-2"><Clock size={14} className="text-graphite-muted" /> {time}</p>
@@ -70,14 +69,13 @@ export default function ShippingPage() {
       <div className="card p-6 mb-10">
         <div className="grid sm:grid-cols-4 gap-6 text-center">
           {[
-            { step: '1', icon: '🛒', label: 'Place Order',   desc: 'Add items to cart & checkout' },
-            { step: '2', icon: '✅', label: 'Confirmed',      desc: 'We confirm & process within 24h' },
-            { step: '3', icon: '📦', label: 'Dispatched',     desc: 'Packed & handed to Delhivery' },
-            { step: '4', icon: '🏠', label: 'Delivered',      desc: 'Delivered to your doorstep' },
-          ].map(({ step, icon, label, desc }) => (
+            { step: '1', label: 'Place Order',   desc: 'Add items to cart & checkout' },
+            { step: '2', label: 'Confirmed',      desc: 'We confirm & process within 24h' },
+            { step: '3', label: 'Dispatched',     desc: 'Packed & handed to Delhivery' },
+            { step: '4', label: 'Delivered',      desc: 'Delivered to your doorstep' },
+          ].map(({ step, label, desc }) => (
             <div key={step} className="flex flex-col items-center">
               <div className="w-10 h-10 rounded-full bg-maroon-100 text-maroon-800 font-normal text-sm flex items-center justify-center mb-2">{step}</div>
-              <div className="text-2xl mb-1">{icon}</div>
               <p className="font-semibold text-graphite text-sm">{label}</p>
               <p className="text-xs text-graphite-faint mt-1">{desc}</p>
             </div>
@@ -126,7 +124,6 @@ export default function ShippingPage() {
 
       {/* Packaging note */}
       <div className="card p-5 mb-10 flex items-start gap-4">
-        <div className="text-3xl">📦</div>
         <div>
           <p className="font-normal text-graphite mb-1">Premium Packaging</p>
           <p className="text-sm text-graphite-muted leading-relaxed">

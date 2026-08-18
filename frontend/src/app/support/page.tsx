@@ -97,14 +97,14 @@ export default function SupportPage() {
   // Admin logs CS interaction → customer receives email/WhatsApp with rating link
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(3rem,9vh,6rem)] sm:px-10">
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="text-center mb-10">
         <div className="inline-flex items-center gap-2 bg-maroon-50 text-maroon-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
           <MessageCircle size={15} /> Customer Support
         </div>
-        <h1 className="section-title mb-3">How can we help you?</h1>
+        <h1 className="font-display text-chapter font-normal text-graphite mb-4">How can we help you?</h1>
         <p className="text-graphite-faint max-w-xl mx-auto text-sm">
           Our support team at Ammalu Tex is here to help. Reach us through any of the
           channels below, or find quick answers in our policy sections.
@@ -248,27 +248,27 @@ export default function SupportPage() {
         <div className="grid md:grid-cols-2 gap-4">
           {[
             {
-              title: '🚚 Standard Delivery',
+              title: 'Standard Delivery',
               desc:  '5–7 business days across India. A flat ₹49 shipping fee applies to all orders.',
             },
             {
-              title: '⚡ Express Delivery',
+              title: 'Express Delivery',
               desc:  '1–3 business days available in select cities. Additional charges apply based on location. Select at checkout.',
             },
             {
-              title: '📦 Packaging',
+              title: 'Packaging',
               desc:  'All items are carefully packed to prevent damage. Delicate fabrics are wrapped in tissue paper for extra protection.',
             },
             {
-              title: '🌍 Service Areas',
+              title: 'Service Areas',
               desc:  'We deliver across all 28 states and 8 union territories of India. Remote / hilly areas may take 1–2 extra days.',
             },
             {
-              title: '📬 Order Processing',
+              title: 'Order Processing',
               desc:  'Orders are confirmed and dispatched within 1–2 business days. You will receive an SMS/email with tracking details once shipped.',
             },
             {
-              title: '🔍 Order Tracking',
+              title: 'Order Tracking',
               desc:  'Track your shipment anytime from the "My Orders" section in your account, or use the tracking link sent to your registered email/phone.',
             },
           ].map(({ title, desc }) => (
@@ -284,7 +284,7 @@ export default function SupportPage() {
       <Accordion id="returns" title="Cancellation, Return & Exchange Policy" icon={RotateCcw}>
         <div className="grid md:grid-cols-3 gap-4 mb-5">
           <div className="p-4 bg-transparent rounded-sm border border-red-100">
-            <h3 className="font-normal text-red-700 mb-1.5 text-sm">❌ Cancel</h3>
+            <h3 className="font-normal text-red-700 mb-1.5 text-sm">Cancel</h3>
             <p className="text-xs text-graphite-muted">Within <b>1 hour</b> of purchase. Instant, automatic — no reason needed, refund auto-initiated if paid.</p>
           </div>
           <div className="p-4 bg-transparent rounded-sm border border-blue-100">
@@ -292,14 +292,14 @@ export default function SupportPage() {
             <p className="text-xs text-graphite-muted">Within <b>4 hours</b> of delivery. Size issue or damage only, with photo proof — admin-approved, then refunded via Razorpay after pickup.</p>
           </div>
           <div className="p-4 bg-transparent rounded-sm border border-green-100">
-            <h3 className="font-normal text-green-700 mb-1.5 text-sm">🔁 Exchange</h3>
+            <h3 className="font-normal text-green-700 mb-1.5 text-sm">Exchange</h3>
             <p className="text-xs text-graphite-muted">Within <b>12 hours</b> of delivery. Size issue or damage only — swap for any product of equal or higher value (pay the difference if higher).</p>
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-5">
           <div>
-            <h3 className="font-normal text-green-700 mb-3 text-sm">✅ Eligible</h3>
+            <h3 className="font-normal text-green-700 mb-3 text-sm">Eligible</h3>
             <ul className="space-y-2 text-sm text-graphite-muted">
               {[
                 'Cancel any order within 1 hour of purchase — no reason required',
@@ -313,7 +313,7 @@ export default function SupportPage() {
             </ul>
           </div>
           <div>
-            <h3 className="font-normal text-red-700 mb-3 text-sm">❌ NOT Available</h3>
+            <h3 className="font-normal text-red-700 mb-3 text-sm">NOT Available</h3>
             <ul className="space-y-2 text-sm text-graphite-muted">
               {[
                 'Cancellation after 1 hour of purchase',

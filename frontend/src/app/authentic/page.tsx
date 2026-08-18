@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import MeasureRule from '@/components/home/MeasureRule';
 import {
   Shield, CheckCircle, Award,
   ChevronRight, Headphones, Truck,
@@ -23,71 +24,64 @@ export default function AuthenticPage() {
       {/* Header */}
       <div className="mb-[clamp(2.5rem,7vh,4.5rem)]">
         <p className="mb-4 text-rule uppercase text-thread">Our word</p>
-        <h1 className="text-3xl font-display font-normal text-graphite mb-3">100% Authentic Products</h1>
-        <p className="text-graphite-faint max-w-xl mx-auto text-sm">
+        <h1 className="font-display text-chapter font-normal text-graphite">100% authentic</h1>
+        <p className="mt-6 max-w-[54ch] text-lede text-graphite-muted">
           Every garment at Ammalu Tex is handpicked from verified weavers, manufacturers, and trusted suppliers.
           We guarantee genuine quality — no imitations, no compromises.
         </p>
       </div>
 
-      {/* Quality badge banner */}
-      <div className="bg-brand-gradient text-white rounded-sm p-8 mb-10 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 text-[180px] flex items-center justify-center">🛡️</div>
-        <div className="relative">
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
-              <Shield size={40} className="text-white" />
-            </div>
-          </div>
-          <h2 className="font-display text-band font-normal mb-2">Ammalu Tex Authenticity Guarantee</h2>
-          <p className="text-maroon-200 max-w-lg mx-auto text-sm leading-relaxed">
-            We source directly from weavers across Tamil Nadu and trusted textile hubs — bypassing middlemen to
-            bring you genuine quality at fair prices. What you see is exactly what you get.
-          </p>
-        </div>
-      </div>
+      {/**
+        * WHAT WAS HERE. A brown gradient panel, white centred text, a 20px
+        * circle holding a shield icon, and a 180px shield emoji washed behind
+        * it at 5% opacity. Four devices saying the same thing, none of them
+        * saying it in this shop's voice.
+        *
+        * A guarantee is a sentence someone stands behind. So it is set as one,
+        * at the size the claim deserves, with the shop's name under it the way
+        * a signature sits under a statement.
+        */}
+      <figure className="mb-[clamp(3rem,10vh,7rem)] border-y border-paper-edge py-[clamp(2.5rem,7vh,4.5rem)]">
+        <blockquote className="max-w-[24ch] font-display text-chapter font-normal leading-[1.06] text-graphite">
+          What you see is exactly what you get.
+        </blockquote>
+        <figcaption className="mt-7 max-w-[52ch] text-lede text-graphite-muted">
+          We source directly from weavers across Tamil Nadu and trusted textile hubs,
+          bypassing middlemen — which is why the price is what it is and the cloth
+          is what we say it is.
+        </figcaption>
+      </figure>
 
-      {/* Our promise */}
-      <h2 className="text-xl font-normal text-graphite mb-4">Our Quality Promise</h2>
-      <div className="grid sm:grid-cols-2 gap-4 mb-10">
+      {/* Six checks, numbered because they happen in this order — from the
+          weaver to the label. An emoji in a bordered card said none of that. */}
+      <h2 className="mb-2 font-display text-band font-normal text-graphite">Our quality promise</h2>
+      <MeasureRule className="mb-2" />
+      <div className="mb-[clamp(3rem,10vh,7rem)]">
         {[
-          {
-            icon: '🏭', title: 'Direct from Weavers',
-            desc: 'We work directly with skilled weavers and manufacturers in Tamil Nadu and major textile hubs across India — no middlemen, no markups.',
-          },
-          {
-            icon: '🔍', title: 'Every Piece Inspected',
-            desc: 'Each garment undergoes a quality check before it reaches our store. We inspect fabric quality, stitching, colour fastness, and finishing.',
-          },
-          {
-            icon: '🎨', title: 'True-to-Photo Colours',
-            desc: 'We photograph our products in natural light to show the most accurate colour representation. Slight screen variations are natural.',
-          },
-          {
-            icon: '📏', title: 'Accurate Sizing',
-            desc: 'Our size guide (inches + cm) is calibrated against actual garment measurements — not generic standards — so you get the right fit.',
-          },
-          {
-            icon: '🧵', title: 'Genuine Fabrics',
-            desc: 'Cotton, silk, georgette, crepe — every fabric type is sourced from certified suppliers and labelled accurately on our product pages.',
-          },
-          {
-            icon: '♻️', title: 'Ethical Sourcing',
-            desc: 'We support local artisans and fair trade practices. When you shop at Ammalu Tex, you support real craftspeople and their livelihoods.',
-          },
-        ].map(({ icon, title, desc }) => (
-          <div key={title} className="card p-5 flex items-start gap-4">
-            <div className="text-3xl flex-shrink-0">{icon}</div>
-            <div>
-              <p className="font-normal text-graphite mb-1.5">{title}</p>
-              <p className="text-sm text-graphite-muted leading-relaxed">{desc}</p>
+          { title: 'Direct from weavers',    desc: 'We work directly with skilled weavers and manufacturers in Tamil Nadu and major textile hubs across India — no middlemen, no markups.' },
+          { title: 'Every piece inspected',  desc: 'Each garment is checked before it reaches the shop: fabric, stitching, colour fastness, finishing.' },
+          { title: 'True-to-photo colours',  desc: 'We photograph in natural light so the colour you see is the colour that arrives. Slight screen variation is normal.' },
+          { title: 'Accurate sizing',        desc: 'Our size guide is calibrated against actual garment measurements — inches and centimetres — not generic standards.' },
+          { title: 'Genuine fabrics',        desc: 'Cotton, silk, georgette, crepe — every fabric is sourced from certified suppliers and labelled accurately on the product page.' },
+          { title: 'Ethical sourcing',       desc: 'We support local artisans and fair trade. Shopping here supports real craftspeople and their livelihoods.' },
+        ].map(({ title, desc }, i) => (
+          <div
+            key={title}
+            className="grid grid-cols-[auto_1fr] items-baseline gap-x-6 border-b border-paper-edge py-7 sm:gap-x-10"
+          >
+            <span className="text-rule uppercase tabular-nums text-thread">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <div className="grid gap-y-2 lg:grid-cols-[minmax(0,24ch)_minmax(0,1fr)] lg:items-baseline lg:gap-x-10">
+              <h3 className="font-display text-band font-normal text-graphite">{title}</h3>
+              <p className="max-w-[58ch] text-lede text-graphite-muted">{desc}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Quality checks */}
-      <h2 className="text-xl font-normal text-graphite mb-4">What We Check Before Dispatch</h2>
+      <h2 className="mb-6 font-display text-band font-normal text-graphite">What we check before it leaves</h2>
       <div className="card p-6 mb-10">
         <div className="grid sm:grid-cols-2 gap-3">
           {[

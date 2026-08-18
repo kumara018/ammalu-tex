@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { ArrowLeft, Download, Mail, Share2, Printer } from 'lucide-react';
 import { LogoMark } from '@/components/Logo';
+import { mediaUrl } from '@/lib/media';
 
 const PAY_LABEL: Record<string, string> = {
   razorpay: 'Online Payment (Razorpay)',
@@ -164,7 +165,7 @@ function InvoiceContent() {
               <tbody>
                 {(order.items_snapshot as any[]).map((item, i) => {
                   const imgSrc = item.image
-                    ? (item.image.startsWith('http') ? item.image : `${process.env.NEXT_PUBLIC_API_URL}${item.image}`)
+                    ? (mediaUrl(item.image))
                     : null;
                   const emoji = item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : '👚';
                   return (
@@ -249,14 +250,14 @@ function InvoiceContent() {
               {isCod && (
                 <div className="sm:col-span-2">
                   <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                    💵 Cash on Delivery — Payment collected at the time of delivery.
+                    Cash on Delivery — Payment collected at the time of delivery.
                   </p>
                 </div>
               )}
               {order.payment_status === 'refunded' && (
                 <div className="sm:col-span-2">
                   <p className="text-xs text-purple-700 bg-purple-50 border border-purple-200 rounded-lg px-3 py-2">
-                    💜 Refund initiated — Amount will be credited within 5–7 business days.
+                    Refund initiated — Amount will be credited within 5–7 business days.
                   </p>
                 </div>
               )}

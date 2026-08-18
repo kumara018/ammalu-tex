@@ -344,7 +344,7 @@ export default function Navbar() {
                           <Check size={16} className="text-green-600 flex-shrink-0" />
                         </div>
                         <span className={`inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-maroon-100 text-maroon-800' : 'bg-transparent text-green-700'}`}>
-                          {user.is_admin ? '⚙ Admin' : '👤 Customer'}
+                          {user.is_admin ? 'Admin' : 'Customer'}
                         </span>
                       </div>
 
@@ -698,7 +698,7 @@ export default function Navbar() {
             {/* If other sessions exist, show a note */}
             {sessions.filter(s => s.user.id !== user?.id).length > 0 && (
               <p className="text-xs text-graphite-faint bg-transparent border border-blue-100 rounded-sm px-3 py-2 mb-4">
-                💡 You will be switched to your other saved account.
+                You will be switched to your other saved account.
               </p>
             )}
 

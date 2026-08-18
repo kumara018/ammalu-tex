@@ -279,7 +279,7 @@ function ProductsContent() {
       <div className="flex gap-2 flex-wrap mb-6">
         <button
           onClick={() => setF('category', '')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${!filters.category ? 'bg-maroon-800 text-white border-maroon-800' : 'bg-white text-graphite-muted border-paper-edge hover:border-maroon-300'}`}
+          className={`border-b pb-1.5 text-caption uppercase transition-colors duration-500 ${!filters.category ? 'border-thread text-thread' : 'border-transparent text-graphite-muted hover:border-paper-edge hover:text-graphite'}`}
         >
           All
         </button>
@@ -287,7 +287,7 @@ function ProductsContent() {
           <button
             key={cat}
             onClick={() => setF('category', cat === filters.category ? '' : cat)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${filters.category === cat ? 'bg-maroon-800 text-white border-maroon-800' : 'bg-white text-graphite-muted border-paper-edge hover:border-maroon-300'}`}
+            className={`border-b pb-1.5 text-caption uppercase transition-colors duration-500 ${filters.category === cat ? 'border-thread text-thread' : 'border-transparent text-graphite-muted hover:border-paper-edge hover:text-graphite'}`}
           >
             {cat}
           </button>
@@ -326,7 +326,6 @@ function ProductsContent() {
         </div>
       ) : (
         <div className="text-center py-20">
-          <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold text-graphite-muted mb-2">No products found</h3>
           <p className="text-graphite-faint mb-6">Try adjusting your filters or search terms.</p>
           <button onClick={clearFilters} className="btn-primary">Clear Filters</button>

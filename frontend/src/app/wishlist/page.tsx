@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { wishlistAPI } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { mediaUrl } from '@/lib/media';
 
 export default function WishlistPage() {
   const { user } = useAuth();
@@ -69,7 +70,7 @@ export default function WishlistPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(3rem,9vh,6rem)] sm:px-10">
         <div className="flex justify-center items-center gap-3 text-maroon-700">
           <span className="animate-spin rounded-full h-6 w-6 border-b-2 border-maroon-700" />
           Loading your wishlist...
@@ -79,7 +80,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/products" className="p-2 hover:bg-orange-100 rounded-sm transition-colors">
@@ -96,9 +97,8 @@ export default function WishlistPage() {
       {/* Empty state */}
       {items.length === 0 && (
         <div className="card p-12 text-center">
-          <Heart size={64} className="text-gray-200 mx-auto mb-4" />
           <h2 className="text-xl font-normal text-graphite-muted mb-2">Your wishlist is empty</h2>
-          <p className="text-graphite-faint mb-6">Save items you love by tapping the ❤️ heart on any product.</p>
+          <p className="text-graphite-faint mb-6">Save items you love by tapping the heart on any product.</p>
           <Link href="/products" className="btn-primary px-8 py-3 inline-flex items-center gap-2">
             <Package size={18} /> Browse Products
           </Link>
@@ -121,7 +121,7 @@ export default function WishlistPage() {
                   <div className="w-24 h-28 rounded-sm overflow-hidden bg-maroon-50">
                     {p.images?.[0] && !p.images[0].includes('placeholder') ? (
                       <img
-                        src={p.images[0].startsWith('http') ? p.images[0] : `${process.env.NEXT_PUBLIC_API_URL}${p.images[0]}`}
+                        src={mediaUrl(p.images[0])}
                         alt={p.name}
                         className="w-full h-full object-cover"
                       />

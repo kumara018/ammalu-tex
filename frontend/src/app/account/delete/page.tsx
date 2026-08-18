@@ -126,7 +126,7 @@ export default function DeleteAccountPage() {
                     Simply log back in to reactivate. After 7 days, the account is permanently deleted.
                   </p>
                   <p className="text-xs text-orange-600 font-medium mt-2">
-                    ✓ Reversible within 7 days &nbsp;·&nbsp; ✓ Data preserved &nbsp;·&nbsp; ✓ Like Amazon
+                    Reversible within 7 days &nbsp;·&nbsp; Data preserved &nbsp;·&nbsp; Like Amazon
                   </p>
                 </div>
               </div>
@@ -148,7 +148,7 @@ export default function DeleteAccountPage() {
                     orders, addresses, reviews — will be erased. This cannot be undone after 24 hours.
                   </p>
                   <p className="text-xs text-red-600 font-medium mt-2">
-                    ✓ 24-hour cancellation window &nbsp;·&nbsp; ✗ Cannot be recovered after
+                    ✓ 24-hour cancellation window &nbsp;·&nbsp; Cannot be recovered after
                   </p>
                 </div>
               </div>
@@ -283,7 +283,7 @@ export default function DeleteAccountPage() {
 
             {devOtp && (
               <div className="border-l-2 border-amber-700/50 pl-4 p-4 mb-4">
-                <p className="text-amber-800 text-xs font-semibold mb-1">⚠️ Dev mode</p>
+                <p className="text-amber-800 text-xs font-semibold mb-1">Dev mode</p>
                 <p className="text-amber-900 text-sm">OTP: <span className="font-mono font-normal text-lg tracking-widest">{devOtp}</span></p>
               </div>
             )}
@@ -354,7 +354,7 @@ export default function DeleteAccountPage() {
                 </p>
                 <div className="bg-maroon-50 border border-orange-200 rounded-sm p-4 mb-4">
                   <p className="text-orange-800 text-sm font-medium">
-                    🕐 You have <strong>7 days</strong> to reactivate.
+                    You have <strong>7 days</strong> to reactivate.
                   </p>
                   <p className="text-orange-700 text-xs mt-1">
                     Simply log in with your email and password to instantly restore your account.
@@ -370,7 +370,7 @@ export default function DeleteAccountPage() {
                 </p>
                 <div className="border-l-2 border-green-700/50 pl-4 p-4 mb-4">
                   <p className="text-green-800 text-sm font-medium">
-                    ✅ Changed your mind? Simply log in within 24 hours to cancel.
+                    Changed your mind? Simply log in within 24 hours to cancel.
                   </p>
                 </div>
               </>

@@ -245,7 +245,7 @@ function ReturnDetailContent() {
             <p className="text-xs text-graphite-faint uppercase tracking-widest mb-2">Pickup OTP</p>
             <p className="text-5xl font-normal tracking-[0.4em] font-mono text-orange-700">{rr.pickup_otp}</p>
           </div>
-          <p className="text-xs text-orange-700 mt-3 font-medium">⚠️ Never share this OTP via phone call or message. Only give it to the agent in person.</p>
+          <p className="text-xs text-orange-700 mt-3 font-medium">Never share this OTP via phone call or message. Only give it to the agent in person.</p>
         </div>
       )}
 

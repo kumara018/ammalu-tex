@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLoginPrompt } from '@/context/LoginPromptContext';
 import { useWishlist } from '@/context/WishlistContext';
 import toast from 'react-hot-toast';
+import { mediaUrl } from '@/lib/media';
 
 interface Props { product: Product; }
 
@@ -93,7 +94,7 @@ export default function ProductCard({ product }: Props) {
   // ── Current slide content ────────────────────────────────────────────────────
   const isVideoSlide = hasVideo && imgIdx === images.length;
   const currentImg = !isVideoSlide && images[imgIdx]
-    ? (images[imgIdx].startsWith('http') ? images[imgIdx] : `${process.env.NEXT_PUBLIC_API_URL}${images[imgIdx]}`)
+    ? (mediaUrl(images[imgIdx]))
     : null;
 
   return (
