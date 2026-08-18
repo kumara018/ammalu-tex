@@ -99,8 +99,8 @@ export default function DeleteAccountPage() {
         {mode === 'choose' && (
           <div className="card p-8">
             <div className="flex justify-center mb-5">
-              <div className="w-16 h-16 rounded-full bg-transparent flex items-center justify-center">
-                <UserX size={30} className="text-red-600" />
+              <div className="flex h-14 w-14 items-center justify-center border border-paper-edge">
+                <UserX size={26} className="text-graphite-muted" />
               </div>
             </div>
             <h1 className="font-display text-band font-normal text-center text-graphite mb-2">
@@ -116,8 +116,8 @@ export default function DeleteAccountPage() {
               className="w-full mb-4 p-5 rounded-sm border-2 border-orange-200 hover:border-orange-400 hover:bg-maroon-50 text-left transition-all group"
             >
               <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-orange-100 rounded-sm group-hover:bg-orange-200 transition-colors flex-shrink-0">
-                  <Pause size={20} className="text-orange-700" />
+                <div className="flex-shrink-0 pt-0.5">
+                  <Pause size={20} className="text-graphite-muted" />
                 </div>
                 <div>
                   <p className="font-normal text-graphite mb-1">Temporarily Deactivate</p>
@@ -125,8 +125,8 @@ export default function DeleteAccountPage() {
                     Suspend your account for up to <strong>7 days</strong>. Your data is preserved.
                     Simply log back in to reactivate. After 7 days, the account is permanently deleted.
                   </p>
-                  <p className="text-xs text-orange-600 font-medium mt-2">
-                    Reversible within 7 days &nbsp;·&nbsp; Data preserved &nbsp;·&nbsp; Like Amazon
+                  <p className="mt-3 text-rule uppercase text-graphite-faint">
+                    Reversible for 7 days &nbsp;·&nbsp; Nothing is erased
                   </p>
                 </div>
               </div>
@@ -138,8 +138,8 @@ export default function DeleteAccountPage() {
               className="w-full p-5 rounded-sm border-2 border-red-200 hover:border-red-400 hover:bg-transparent text-left transition-all group"
             >
               <div className="flex items-start gap-4">
-                <div className="p-2.5 bg-red-100 rounded-sm group-hover:bg-red-200 transition-colors flex-shrink-0">
-                  <Trash2 size={20} className="text-red-700" />
+                <div className="flex-shrink-0 pt-0.5">
+                  <Trash2 size={20} className="text-thread-deep" />
                 </div>
                 <div>
                   <p className="font-normal text-graphite mb-1">Permanently Delete Account</p>
@@ -147,8 +147,8 @@ export default function DeleteAccountPage() {
                     Schedule permanent deletion in <strong>24 hours</strong>. All your data —
                     orders, addresses, reviews — will be erased. This cannot be undone after 24 hours.
                   </p>
-                  <p className="text-xs text-red-600 font-medium mt-2">
-                    ✓ 24-hour cancellation window &nbsp;·&nbsp; Cannot be recovered after
+                  <p className="mt-3 text-rule uppercase text-thread-deep">
+                    24 hours to change your mind &nbsp;·&nbsp; Nothing survives it
                   </p>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function DeleteAccountPage() {
 
             <Link href="/account"
               className="block mt-5 text-center text-sm text-graphite-faint hover:text-graphite-muted hover:underline">
-              ← Back to Account Settings
+              Back to your account
             </Link>
           </div>
         )}
@@ -165,12 +165,12 @@ export default function DeleteAccountPage() {
         {mode !== 'choose' && step === 'warning' && (
           <div className="card p-8">
             <div className="flex justify-center mb-5">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                mode === 'deactivate' ? 'bg-orange-100' : 'bg-red-100'
+              <div className={`flex h-14 w-14 items-center justify-center border ${
+                mode === 'deactivate' ? 'border-paper-edge' : 'border-thread-deep/50'
               }`}>
                 {mode === 'deactivate'
-                  ? <Pause size={30} className="text-orange-600" />
-                  : <Trash2 size={30} className="text-red-600" />}
+                  ? <Pause size={26} className="text-graphite-muted" />
+                  : <Trash2 size={26} className="text-thread-deep" />}
               </div>
             </div>
 

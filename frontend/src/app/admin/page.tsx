@@ -59,7 +59,7 @@ const RETURN_STATUS_BADGE: Record<string, string> = {
   replacement_shipped: 'bg-purple-100 text-purple-700',
   refund_initiated:    'bg-amber-100 text-amber-700',
   refunded:            'bg-green-100 text-green-700',
-  completed:           'bg-gray-100 text-gray-700',
+  completed:           'bg-paper-shade text-graphite-muted',
 };
 
 const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
@@ -107,9 +107,9 @@ function CSInteractionsTab() {
     <div>
       <div className="mb-4 flex items-center gap-3 flex-wrap">
         <Star size={20} className="text-yellow-500 fill-yellow-400" />
-        <h2 className="font-bold text-gray-800 text-lg">Customer Support Ratings</h2>
+        <h2 className="font-normal text-graphite text-lg">Customer Support Ratings</h2>
         {avgRating && (
-          <span className="text-sm text-gray-500 ml-auto">
+          <span className="text-sm text-graphite-faint ml-auto">
             Avg: <b className="text-maroon-700">{avgRating}/5</b> · {rated.length} rated / {interactions.length} total
           </span>
         )}
@@ -121,17 +121,17 @@ function CSInteractionsTab() {
       {/* Log Interaction Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+          <div className="bg-paper-bright rounded-sm w-full max-w-lg border border-paper-edge overflow-hidden">
             <div className="bg-maroon-800 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-white font-bold text-lg">Log Support Interaction</h3>
+              <h3 className="text-white font-normal text-lg">Log Support Interaction</h3>
               <button onClick={() => setShowForm(false)} className="text-maroon-200 hover:text-white"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-xs text-gray-500 bg-maroon-50 border border-maroon-200 rounded-lg px-3 py-2">
+              <p className="text-xs text-graphite-faint bg-maroon-50 border border-maroon-200 rounded-sm px-3 py-2">
                 After saving, the customer will receive a <b>unique rating link</b> via email + WhatsApp. Only they can use it.
               </p>
 
-              <p className="text-xs font-bold text-maroon-700 uppercase tracking-wide">CS Engineer Details</p>
+              <p className="text-xs font-normal text-maroon-700 uppercase tracking-wide">CS Engineer Details</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Name *</label>
@@ -147,7 +147,7 @@ function CSInteractionsTab() {
                 <input type="email" value={form.cs_email} onChange={e => setForm(f=>({...f, cs_email:e.target.value}))} placeholder="cs@ammalutex.com" className="input-field" />
               </div>
 
-              <p className="text-xs font-bold text-maroon-700 uppercase tracking-wide mt-4">Customer Details</p>
+              <p className="text-xs font-normal text-maroon-700 uppercase tracking-wide mt-4">Customer Details</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Name *</label>
@@ -192,25 +192,25 @@ function CSInteractionsTab() {
             </thead>
             <tbody className="divide-y divide-orange-50">
               {loading ? Array(4).fill(0).map((_,i) => (
-                <tr key={i}><td colSpan={5} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                <tr key={i}><td colSpan={5} className="px-4 py-4"><div className="h-4 bg-paper-shade rounded animate-pulse" /></td></tr>
               )) : interactions.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">
+                <tr><td colSpan={5} className="px-4 py-12 text-center text-graphite-faint">
                   <div className="text-3xl mb-2">💬</div>
                   No interactions logged yet. Click "Log CS Interaction" to start.
                 </td></tr>
               ) : interactions.map(i => (
                 <tr key={i.id} className="hover:bg-maroon-50">
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-gray-800">{i.cs_name}</p>
-                    {i.cs_phone && <p className="text-xs text-gray-500">{i.cs_phone}</p>}
-                    {i.cs_email && <p className="text-xs text-gray-400">{i.cs_email}</p>}
+                    <p className="font-semibold text-graphite">{i.cs_name}</p>
+                    {i.cs_phone && <p className="text-xs text-graphite-faint">{i.cs_phone}</p>}
+                    {i.cs_email && <p className="text-xs text-graphite-faint">{i.cs_email}</p>}
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-800">{i.customer_name}</p>
-                    <p className="text-xs text-gray-500">{i.customer_email}</p>
-                    {i.customer_phone && <p className="text-xs text-gray-400">{i.customer_phone}</p>}
+                    <p className="font-medium text-graphite">{i.customer_name}</p>
+                    <p className="text-xs text-graphite-faint">{i.customer_email}</p>
+                    {i.customer_phone && <p className="text-xs text-graphite-faint">{i.customer_phone}</p>}
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-600 max-w-[160px]">
+                  <td className="px-4 py-3 text-xs text-graphite-muted max-w-[160px]">
                     <p className="line-clamp-2">{i.issue_summary || '—'}</p>
                   </td>
                   <td className="px-4 py-3">
@@ -218,17 +218,17 @@ function CSInteractionsTab() {
                       <div>
                         <div className="flex gap-0.5 mb-0.5">
                           {[1,2,3,4,5].map(s => (
-                            <Star key={s} size={13} fill={s<=i.rating?'#facc15':'none'} className={s<=i.rating?'text-yellow-400':'text-gray-200'} />
+                            <Star key={s} size={13} fill={s<=i.rating?'#facc15':'none'} className={s<=i.rating?'text-yellow-400':'text-paper-edge'} />
                           ))}
                         </div>
                         <p className={`text-xs font-semibold ${i.rating>=4?'text-green-600':i.rating===3?'text-orange-500':'text-red-500'}`}>{i.rating}/5</p>
-                        {i.rating_comment && <p className="text-xs text-gray-500 mt-0.5 italic line-clamp-1">"{i.rating_comment}"</p>}
+                        {i.rating_comment && <p className="text-xs text-graphite-faint mt-0.5 italic line-clamp-1">"{i.rating_comment}"</p>}
                       </div>
                     ) : (
                       <span className="text-xs text-orange-500 bg-maroon-50 border border-orange-200 px-2 py-0.5 rounded-full">⏳ Awaiting</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-xs text-graphite-faint whitespace-nowrap">
                     {new Date(i.created_at).toLocaleDateString('en-IN')}
                     {i.rated_at && <p className="text-green-600">Rated: {new Date(i.rated_at).toLocaleDateString('en-IN')}</p>}
                   </td>
@@ -874,7 +874,7 @@ function AdminPageInner() {
     { key: 'returns',       label: 'Returns & Exchange'},
     { key: 'users',         label: 'Customers'         },
     { key: 'ratings',       label: 'Support Ratings'   },
-    { key: 'admins',        label: '🔐 Admin Accounts' },
+    { key: 'admins',        label: 'Admin Accounts' },
   ] as const;
 
   const NOTIF_ICONS: Record<string, string> = {
@@ -889,7 +889,7 @@ function AdminPageInner() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <h1 className="section-title">Admin Panel</h1>
-          <p className="text-sm text-gray-500">Ammalu Tex Store Management</p>
+          <p className="text-sm text-graphite-faint">Ammalu Tex Store Management</p>
         </div>
         <div className="flex items-center gap-3">
           {tab === 'products' && (
@@ -902,11 +902,11 @@ function AdminPageInner() {
           <div className="relative">
             <button
               onClick={() => { setNotifOpen(o => !o); if (!notifOpen) loadNotifications(); }}
-              className="relative p-2.5 rounded-xl bg-maroon-50 hover:bg-maroon-100 border border-maroon-200 transition-colors"
+              className="relative p-2.5 rounded-sm bg-maroon-50 hover:bg-maroon-100 border border-maroon-200 transition-colors"
             >
               <Bell size={20} className="text-maroon-700" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-normal rounded-full w-5 h-5 flex items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -914,9 +914,9 @@ function AdminPageInner() {
 
             {/* Notification Dropdown */}
             {notifOpen && (
-              <div className="absolute right-0 top-12 w-96 bg-white rounded-2xl shadow-2xl border border-maroon-200 z-50 overflow-hidden">
+              <div className="absolute right-0 top-12 w-96 bg-paper-bright rounded-sm border border-paper-edge border border-maroon-200 z-50 overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3 bg-maroon-800">
-                  <span className="text-white font-bold text-sm">Notifications</span>
+                  <span className="text-white font-normal text-sm">Notifications</span>
                   <div className="flex items-center gap-2">
                     {unreadCount > 0 && (
                       <button onClick={markAllRead} className="text-maroon-200 hover:text-white text-xs">
@@ -930,7 +930,7 @@ function AdminPageInner() {
                 </div>
                 <div className="max-h-96 overflow-y-auto divide-y divide-orange-50">
                   {notifications.length === 0 ? (
-                    <div className="px-4 py-8 text-center text-gray-400 text-sm">No notifications yet</div>
+                    <div className="px-4 py-8 text-center text-graphite-faint text-sm">No notifications yet</div>
                   ) : notifications.map(n => (
                     <div
                       key={n.id}
@@ -947,9 +947,9 @@ function AdminPageInner() {
                     >
                       <span className="text-xl flex-shrink-0 mt-0.5">{NOTIF_ICONS[n.type] || '📋'}</span>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-semibold text-gray-900 ${!n.is_read ? 'text-maroon-800' : ''}`}>{n.title}</p>
-                        <p className="text-xs text-gray-500 truncate">{n.message}</p>
-                        <p className="text-[10px] text-gray-400 mt-0.5">
+                        <p className={`text-sm font-semibold text-graphite ${!n.is_read ? 'text-maroon-800' : ''}`}>{n.title}</p>
+                        <p className="text-xs text-graphite-faint truncate">{n.message}</p>
+                        <p className="text-[10px] text-graphite-faint mt-0.5">
                           {n.created_at ? new Date(n.created_at).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : ''}
                         </p>
                       </div>
@@ -977,11 +977,11 @@ function AdminPageInner() {
             <button
               key={key}
               onClick={() => { setTab(key as TabKey); localStorage.setItem('admin_tab', key); if(key==='cancellations') loadOrders(); if(key==='returns') loadReturns(); }}
-              className={`relative px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${tab === key ? 'border-maroon-800 text-maroon-800 bg-maroon-50' : 'border-transparent text-gray-500 hover:text-maroon-700'}`}
+              className={`relative px-5 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${tab === key ? 'border-maroon-800 text-maroon-800 bg-maroon-50' : 'border-transparent text-graphite-faint hover:text-maroon-700'}`}
             >
               {label}
               {badge > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-normal rounded-full w-4 h-4 flex items-center justify-center">
                   {badge}
                 </span>
               )}
@@ -995,28 +995,33 @@ function AdminPageInner() {
         <div>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             {[
-              { label: 'Active Products', value: dash.active_products, icon: Package,     color: 'bg-purple-50 text-purple-700' },
-              { label: 'Total Customers', value: dash.total_users,     icon: Users,       color: 'bg-blue-50 text-blue-700' },
-              { label: 'Total Orders',    value: dash.total_orders,    icon: ShoppingBag, color: 'bg-maroon-50 text-orange-700' },
-              { label: 'Pending Orders',  value: dash.pending_orders,  icon: Package,     color: 'bg-yellow-50 text-yellow-700' },
-              { label: 'Total Revenue',   value: `₹${dash.total_revenue.toLocaleString()}`, icon: TrendingUp, color: 'bg-green-50 text-green-700' },
-              { label: 'All Products',    value: dash.total_products,  icon: Package,     color: 'bg-maroon-50 text-maroon-700' },
+              { label: 'Active Products', value: dash.active_products, icon: Package,     color: 'text-graphite-faint' },
+              { label: 'Total Customers', value: dash.total_users,     icon: Users,       color: 'text-graphite-faint' },
+              { label: 'Total Orders',    value: dash.total_orders,    icon: ShoppingBag, color: 'text-graphite-faint' },
+              // The only tile that is ever a call to action: it takes the
+              // accent when there is something waiting, and goes quiet at zero.
+              { label: 'Pending Orders',  value: dash.pending_orders,  icon: Package,     color: dash.pending_orders > 0 ? 'text-thread' : 'text-graphite-faint' },
+              { label: 'Total Revenue',   value: `₹${dash.total_revenue.toLocaleString('en-IN')}`, icon: TrendingUp, color: 'text-graphite-faint' },
+              { label: 'All Products',    value: dash.total_products,  icon: Package,     color: 'text-graphite-faint' },
             ].map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="card p-5 flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${color}`}><Icon size={22} /></div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{value}</p>
-                  <p className="text-sm text-gray-500">{label}</p>
-                </div>
+              // The number is the tile. It is set in the display face at the
+              // size a figure deserves when it is the only reason the tile
+              // exists; the icon drops back to a mark beside the label rather
+              // than a coloured square competing with it.
+              <div key={label} className="card p-5">
+                <p className="font-display text-band leading-none tabular-nums text-graphite">{value}</p>
+                <p className="mt-3 flex items-center gap-2 text-rule uppercase text-graphite-faint">
+                  <Icon size={13} className={color} /> {label}
+                </p>
               </div>
             ))}
           </div>
 
           <div className="card p-5">
-            <h3 className="font-bold text-maroon-900 mb-4">Recent Orders</h3>
+            <h3 className="font-normal text-maroon-900 mb-4">Recent Orders</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead><tr className="text-left text-gray-500 border-b border-maroon-200">
+                <thead><tr className="text-left text-graphite-faint border-b border-maroon-200">
                   <th className="pb-3 pr-4">Order #</th>
                   <th className="pb-3 pr-4">Amount</th>
                   <th className="pb-3 pr-4">Status</th>
@@ -1032,12 +1037,12 @@ function AdminPageInner() {
                         <td className="py-3 pr-4">
                           <span className="capitalize badge badge-info">{o.status}</span>
                           {linkedReturn && (
-                            <span className={`ml-1 capitalize badge ${RETURN_STATUS_BADGE[linkedReturn.status] || 'bg-gray-100 text-gray-700'}`}>
+                            <span className={`ml-1 capitalize badge ${RETURN_STATUS_BADGE[linkedReturn.status] || 'bg-paper-shade text-graphite-muted'}`}>
                               {linkedReturn.request_type === 'exchange' ? 'Exchange' : 'Return'}: {RETURN_STATUS_LABEL[linkedReturn.status] || linkedReturn.status}
                             </span>
                           )}
                         </td>
-                        <td className="py-3 text-gray-500">{new Date(o.created_at).toLocaleDateString('en-IN')}</td>
+                        <td className="py-3 text-graphite-faint">{new Date(o.created_at).toLocaleDateString('en-IN')}</td>
                       </tr>
                     );
                   })}
@@ -1066,7 +1071,7 @@ function AdminPageInner() {
               </thead>
               <tbody className="divide-y divide-orange-50">
                 {loading ? Array(5).fill(0).map((_, i) => (
-                  <tr key={i}><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                  <tr key={i}><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-paper-shade rounded animate-pulse" /></td></tr>
                 )) : products.map((p) => {
                   const imgSrc = p.images?.[0]
                     ? (p.images[0].startsWith('http') ? p.images[0] : `${process.env.NEXT_PUBLIC_API_URL}${p.images[0]}`)
@@ -1078,13 +1083,13 @@ function AdminPageInner() {
                   return (
                   <tr key={p.id} className={`hover:bg-maroon-50 ${!p.is_active ? 'opacity-50' : ''}`}>
                     {/* ID */}
-                    <td className="px-4 py-3 text-xs font-mono text-gray-400 whitespace-nowrap">#{p.id}</td>
+                    <td className="px-4 py-3 text-xs font-mono text-graphite-faint whitespace-nowrap">#{p.id}</td>
 
                     {/* Image + Name */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {/* Thumbnail */}
-                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-maroon-100 to-gold-50 flex-shrink-0 flex items-center justify-center border border-maroon-200">
+                        <div className="w-12 h-12 rounded-sm overflow-hidden bg-gradient-to-br from-maroon-100 to-gold-50 flex-shrink-0 flex items-center justify-center border border-maroon-200">
                           {imgSrc ? (
                             <img
                               src={imgSrc}
@@ -1105,7 +1110,7 @@ function AdminPageInner() {
                         </div>
                         {/* Name + badges */}
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-800 line-clamp-1 text-sm">{p.name}</p>
+                          <p className="font-medium text-graphite line-clamp-1 text-sm">{p.name}</p>
                           <div className="flex gap-1 flex-wrap mt-0.5">
                             {p.is_featured    && <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Featured</span>}
                             {p.is_new_arrival && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">New Arrival</span>}
@@ -1116,7 +1121,7 @@ function AdminPageInner() {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3 text-gray-600 text-sm">{p.category}</td>
+                    <td className="px-4 py-3 text-graphite-muted text-sm">{p.category}</td>
                     <td className="px-4 py-3 font-semibold text-maroon-900 text-sm">₹{p.price.toLocaleString()}</td>
                     <td className="px-4 py-3">
                       <span className={`font-medium text-sm ${p.stock === 0 ? 'text-red-600' : p.stock <= 5 ? 'text-orange-600' : 'text-green-600'}`}>
@@ -1130,20 +1135,20 @@ function AdminPageInner() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleToggleFeatured(p)}
-                          className={`p-1.5 rounded-lg transition-colors ${p.is_featured ? 'text-amber-500 hover:bg-amber-100' : 'text-gray-300 hover:bg-gray-100 hover:text-amber-400'}`}
+                          className={`p-1.5 rounded-sm transition-colors ${p.is_featured ? 'text-amber-500 hover:bg-amber-100' : 'text-paper-edge hover:bg-paper-shade hover:text-amber-400'}`}
                           title={p.is_featured ? 'Remove from Featured' : 'Mark as Featured'}
                         >
                           <Star size={15} fill={p.is_featured ? 'currentColor' : 'none'} />
                         </button>
-                        <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-maroon-100 rounded-lg text-maroon-700 transition-colors" title={`Edit #${p.id}`}>
+                        <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-maroon-100 rounded-sm text-maroon-700 transition-colors" title={`Edit #${p.id}`}>
                           <Pencil size={15} />
                         </button>
                         {p.is_active ? (
-                          <button onClick={() => handleDelete(p.id, p.name)} className="p-1.5 hover:bg-red-100 rounded-lg text-red-600 transition-colors" title="Deactivate (hide from site)">
+                          <button onClick={() => handleDelete(p.id, p.name)} className="p-1.5 hover:bg-red-100 rounded-sm text-red-600 transition-colors" title="Deactivate (hide from site)">
                             <Trash2 size={15} />
                           </button>
                         ) : (
-                          <button onClick={() => handleReactivate(p)} className="p-1.5 hover:bg-green-100 rounded-lg text-green-600 transition-colors" title="Reactivate (make visible on site)">
+                          <button onClick={() => handleReactivate(p)} className="p-1.5 hover:bg-green-100 rounded-sm text-green-600 transition-colors" title="Reactivate (make visible on site)">
                             <RotateCcw size={15} />
                           </button>
                         )}
@@ -1176,45 +1181,45 @@ function AdminPageInner() {
               </thead>
               <tbody className="divide-y divide-orange-50">
                 {loading ? Array(5).fill(0).map((_, i) => (
-                  <tr key={i}><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                  <tr key={i}><td colSpan={7} className="px-4 py-4"><div className="h-4 bg-paper-shade rounded animate-pulse" /></td></tr>
                 )) : orders.map((o) => (
                   <tr key={o.id} className="hover:bg-maroon-50">
                     <td className="px-4 py-3 font-mono font-medium text-maroon-800 text-xs">{o.order_number}</td>
-                    <td className="px-4 py-3 text-gray-700">{(o.shipping_address as any)?.full_name}</td>
-                    <td className="px-4 py-3 font-bold text-maroon-900">₹{o.total.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-graphite-muted">{(o.shipping_address as any)?.full_name}</td>
+                    <td className="px-4 py-3 font-normal text-maroon-900">₹{o.total.toLocaleString()}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-xs font-medium text-gray-700">
+                        <span className="text-xs font-medium text-graphite-muted">
                           {o.payment_method === 'razorpay' ? 'Razorpay' : o.payment_method === 'upi' ? 'UPI' : 'COD'}
                         </span>
-                        {o.payment_status === 'paid' && <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded w-fit">✅ PAID</span>}
-                        {o.payment_status === 'refund_initiated' && <span className="text-[10px] font-bold text-orange-600 bg-maroon-50 border border-orange-200 px-1.5 py-0.5 rounded w-fit">🔄 REFUND INITIATED</span>}
-                        {o.payment_status === 'refunded' && <span className="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded w-fit">💜 REFUNDED</span>}
-                        {o.payment_status === 'pending' && <span className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded w-fit">⏳ PENDING</span>}
+                        {o.payment_status === 'paid' && <span className="text-[10px] font-normal text-green-600 bg-green-50 border border-green-200 px-1.5 py-0.5 rounded w-fit">PAID</span>}
+                        {o.payment_status === 'refund_initiated' && <span className="text-[10px] font-normal text-orange-600 bg-maroon-50 border border-orange-200 px-1.5 py-0.5 rounded w-fit">🔄 REFUND INITIATED</span>}
+                        {o.payment_status === 'refunded' && <span className="text-[10px] font-normal text-purple-600 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded w-fit">REFUNDED</span>}
+                        {o.payment_status === 'pending' && <span className="text-[10px] font-normal text-graphite-faint bg-paper-shade border border-paper-edge px-1.5 py-0.5 rounded w-fit">⏳ PENDING</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       {o.payment_transaction_id ? (
                         <div className="flex items-center gap-1">
-                          <span className="font-mono text-[10px] text-gray-600 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 max-w-[120px] truncate" title={o.payment_transaction_id}>
+                          <span className="font-mono text-[10px] text-graphite-muted bg-paper-shade border border-paper-edge rounded px-1.5 py-0.5 max-w-[120px] truncate" title={o.payment_transaction_id}>
                             {o.payment_transaction_id}
                           </span>
                           <button
                             onClick={() => { navigator.clipboard.writeText(o.payment_transaction_id); toast.success('Copied!'); }}
-                            className="text-gray-400 hover:text-maroon-700 flex-shrink-0"
+                            className="text-graphite-faint hover:text-maroon-700 flex-shrink-0"
                             title="Copy transaction ID"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[10px] text-gray-400">{o.payment_method === 'cod' ? 'COD' : '—'}</span>
+                        <span className="text-[10px] text-graphite-faint">{o.payment_method === 'cod' ? 'COD' : '—'}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       <span className="capitalize badge badge-info text-xs">{o.status}</span>
                       {returnsByOrderId[o.id] && (
-                        <p className={`text-[10px] font-semibold mt-0.5 capitalize inline-block rounded px-1.5 py-0.5 ${RETURN_STATUS_BADGE[returnsByOrderId[o.id].status] || 'bg-gray-100 text-gray-700'}`}>
+                        <p className={`text-[10px] font-semibold mt-0.5 capitalize inline-block rounded px-1.5 py-0.5 ${RETURN_STATUS_BADGE[returnsByOrderId[o.id].status] || 'bg-paper-shade text-graphite-muted'}`}>
                           {returnsByOrderId[o.id].request_type === 'exchange' ? 'Exchange' : 'Return'}: {RETURN_STATUS_LABEL[returnsByOrderId[o.id].status] || returnsByOrderId[o.id].status}
                         </p>
                       )}
@@ -1223,7 +1228,7 @@ function AdminPageInner() {
                           🔄 Awaiting return to shop
                         </p>
                       )}
-                      {o.status_location && <p className="text-[10px] text-gray-500 mt-0.5 truncate max-w-[120px]">📍 {o.status_location}</p>}
+                      {o.status_location && <p className="text-[10px] text-graphite-faint mt-0.5 truncate max-w-[120px]">📍 {o.status_location}</p>}
                       {o.awb_code && <p className="text-[10px] font-mono text-maroon-600 mt-0.5">{o.awb_code}</p>}
                     </td>
                     <td className="px-4 py-3">
@@ -1231,14 +1236,14 @@ function AdminPageInner() {
                         <select
                           value={o.status}
                           onChange={(e) => handleOrderStatus(o.id, e.target.value)}
-                          className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-maroon-500"
+                          className="text-xs border border-paper-edge rounded-sm px-2 py-1.5 bg-paper-bright focus:outline-none focus:ring-1 focus:ring-maroon-500"
                           title="Status only moves forward — Cancel is always available, but earlier stages disappear once passed"
                         >
                           {validNextStatuses(o.status).map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <button
                           onClick={() => openShipModal(o)}
-                          className="text-xs bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap"
+                          className="text-xs bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 rounded-sm px-2 py-1.5 transition-colors whitespace-nowrap"
                           title="Set AWB, location, delivery person"
                         >
                           📦 Ship Details
@@ -1247,7 +1252,7 @@ function AdminPageInner() {
                           <button
                             onClick={() => handleCreateDelhivery(o.id, o.order_number)}
                             disabled={creatingDelhivery === o.id}
-                            className="text-xs bg-green-50 border border-green-300 text-green-700 hover:bg-green-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
+                            className="text-xs bg-green-50 border border-green-300 text-green-700 hover:bg-green-100 rounded-sm px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
                             title="Marking the order Shipped now creates this automatically — use this only to retry after a failure, or to create it early"
                           >
                             {creatingDelhivery === o.id ? '⏳...' : '🚚 Delhivery (manual)'}
@@ -1256,7 +1261,7 @@ function AdminPageInner() {
                         {o.awb_code && (
                           <a href={o.tracking_url || `https://www.delhivery.com/track/package/${o.awb_code}`}
                             target="_blank" rel="noopener noreferrer"
-                            className="text-xs bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap"
+                            className="text-xs bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100 rounded-sm px-2 py-1.5 transition-colors whitespace-nowrap"
                             title={`Track AWB: ${o.awb_code}`}
                           >
                             📍 Track
@@ -1266,7 +1271,7 @@ function AdminPageInner() {
                           <button
                             onClick={() => handleSyncDelhivery(o.id)}
                             disabled={syncingDelhivery === o.id}
-                            className="text-xs bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
+                            className="text-xs bg-teal-50 border border-teal-200 text-teal-700 hover:bg-teal-100 rounded-sm px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
                             title="Pull this order's live status from Delhivery right now — the dashboard already syncs every time it loads, use this to force an immediate check"
                           >
                             {syncingDelhivery === o.id ? '⏳...' : '🔄 Sync'}
@@ -1277,7 +1282,7 @@ function AdminPageInner() {
                           <button
                             onClick={() => handleInitiateRefund(o.id, o.order_number, o.total)}
                             disabled={initiatingRefund === o.id}
-                            className="text-xs bg-maroon-50 border border-orange-300 text-orange-700 hover:bg-orange-100 rounded-lg px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
+                            className="text-xs bg-maroon-50 border border-orange-300 text-orange-700 hover:bg-orange-100 rounded-sm px-2 py-1.5 transition-colors whitespace-nowrap disabled:opacity-60"
                             title="Initiate Razorpay refund — customer gets email + WhatsApp notification"
                           >
                             {initiatingRefund === o.id ? '⏳...' : '💸 Initiate Refund'}
@@ -1285,14 +1290,14 @@ function AdminPageInner() {
                         )}
                         {/* Refund Initiated badge — auto-updates to Refunded via Razorpay webhook */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refund_initiated' && (
-                          <span className="text-[10px] bg-maroon-50 border border-orange-200 text-orange-600 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Razorpay is processing this refund. Status will automatically update to Refunded and customer will be notified once credited (5–7 business days).">
+                          <span className="text-[10px] bg-maroon-50 border border-orange-200 text-orange-600 rounded-sm px-2 py-1.5 font-medium whitespace-nowrap" title="Razorpay is processing this refund. Status will automatically update to Refunded and customer will be notified once credited (5–7 business days).">
                             🔄 Refund Initiated
                           </span>
                         )}
                         {/* Refunded badge — with reset option in case status was set prematurely */}
                         {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'refunded' && (
                           <div className="flex flex-col gap-1">
-                            <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-lg px-2 py-1.5 font-medium whitespace-nowrap" title="Razorpay has confirmed this refund. Customer's bank will credit within 1–5 business days.">
+                            <span className="text-[10px] bg-green-50 border border-green-200 text-green-700 rounded-sm px-2 py-1.5 font-medium whitespace-nowrap" title="Razorpay has confirmed this refund. Customer's bank will credit within 1–5 business days.">
                               ✅ Refunded
                             </span>
                             <button
@@ -1334,12 +1339,12 @@ function AdminPageInner() {
                 {loading ? null : users.map((u) => (
                   <tr key={u.id} className="hover:bg-maroon-50">
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">#{u.id}</span>
+                      <span className="font-mono text-xs bg-paper-shade text-graphite-muted px-2 py-0.5 rounded-full">#{u.id}</span>
                     </td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{u.full_name}</td>
-                    <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                    <td className="px-4 py-3 text-gray-600">{u.phone}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{new Date(u.created_at).toLocaleDateString('en-IN')}</td>
+                    <td className="px-4 py-3 font-medium text-graphite">{u.full_name}</td>
+                    <td className="px-4 py-3 text-graphite-muted">{u.email}</td>
+                    <td className="px-4 py-3 text-graphite-muted">{u.phone}</td>
+                    <td className="px-4 py-3 text-graphite-faint text-xs">{new Date(u.created_at).toLocaleDateString('en-IN')}</td>
                     <td className="px-4 py-3">
                       <span className={u.is_active ? 'badge-success' : 'badge-danger'}>{u.is_active ? 'Active' : 'Blocked'}</span>
                     </td>
@@ -1361,18 +1366,18 @@ function AdminPageInner() {
         <div>
           <div className="mb-4 flex items-center gap-3 flex-wrap">
             <Ban size={20} className="text-red-500" />
-            <h2 className="font-bold text-gray-800 text-lg">Cancelled Orders</h2>
+            <h2 className="font-normal text-graphite text-lg">Cancelled Orders</h2>
             <button onClick={loadOrders} className="ml-auto text-xs text-maroon-700 hover:underline">Refresh</button>
           </div>
           {loading ? (
-            <div className="text-center py-12 text-gray-400">Loading…</div>
+            <div className="text-center py-12 text-graphite-faint">Loading…</div>
           ) : orders.filter(o => o.status === 'cancelled').length === 0 ? (
-            <div className="text-center py-12 text-gray-400">No cancelled orders</div>
+            <div className="text-center py-12 text-graphite-faint">No cancelled orders</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-gray-500 border-b border-maroon-200 text-xs uppercase tracking-wide">
+                  <tr className="text-left text-graphite-faint border-b border-maroon-200 text-xs uppercase tracking-wide">
                     <th className="pb-3 pr-4">Order #</th>
                     <th className="pb-3 pr-4">Customer</th>
                     <th className="pb-3 pr-4">Date</th>
@@ -1391,20 +1396,20 @@ function AdminPageInner() {
                       <tr key={o.id} className="hover:bg-rose-50 transition-colors">
                         <td className="py-3 pr-4 font-mono font-semibold text-maroon-800">{o.order_number}</td>
                         <td className="py-3 pr-4">
-                          <p className="font-medium text-gray-900">{addr.full_name || '—'}</p>
-                          <p className="text-xs text-gray-400">{addr.phone}</p>
+                          <p className="font-medium text-graphite">{addr.full_name || '—'}</p>
+                          <p className="text-xs text-graphite-faint">{addr.phone}</p>
                         </td>
-                        <td className="py-3 pr-4 text-gray-500 text-xs">
+                        <td className="py-3 pr-4 text-graphite-faint text-xs">
                           {new Date(o.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
                         </td>
-                        <td className="py-3 pr-4 font-bold text-gray-900">&#8377;{o.total?.toLocaleString()}</td>
+                        <td className="py-3 pr-4 font-normal text-graphite">&#8377;{o.total?.toLocaleString()}</td>
                         <td className="py-3 pr-4">
-                          <span className="text-xs uppercase font-semibold text-gray-600">{o.payment_method}</span>
-                          <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-semibold ${refundDone ? 'bg-purple-100 text-purple-700' : needsRefund ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
+                          <span className="text-xs uppercase font-semibold text-graphite-muted">{o.payment_method}</span>
+                          <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-semibold ${refundDone ? 'bg-purple-100 text-purple-700' : needsRefund ? 'bg-red-100 text-red-700' : 'bg-paper-shade text-graphite-muted'}`}>
                             {o.payment_status?.replace(/_/g,' ')}
                           </span>
                         </td>
-                        <td className="py-3 pr-4 text-gray-500 text-xs max-w-[180px] truncate">{o.cancel_reason || '—'}</td>
+                        <td className="py-3 pr-4 text-graphite-faint text-xs max-w-[180px] truncate">{o.cancel_reason || '—'}</td>
                         <td className="py-3">
                           {needsRefund && (
                             <button
@@ -1417,7 +1422,7 @@ function AdminPageInner() {
                                   toast.error(e.response?.data?.detail || 'Refund failed');
                                 }
                               }}
-                              className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                              className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-600 text-white rounded-sm hover:bg-red-700 transition-colors font-semibold"
                             >
                               <RotateCcw size={12} /> Initiate Refund
                             </button>
@@ -1428,7 +1433,7 @@ function AdminPageInner() {
                             </span>
                           )}
                           {o.payment_method === 'cod' && (
-                            <span className="text-xs text-gray-400">COD — no refund needed</span>
+                            <span className="text-xs text-graphite-faint">COD — no refund needed</span>
                           )}
                         </td>
                       </tr>
@@ -1445,9 +1450,9 @@ function AdminPageInner() {
       {tab === 'returns' && (
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <h2 className="font-bold text-gray-800 text-lg">Return / Exchange / Replace Requests</h2>
+            <h2 className="font-normal text-graphite text-lg">Return / Exchange / Replace Requests</h2>
             {returns.length > 0 && (
-              <span className="ml-auto text-sm text-gray-500">{returns.length} total</span>
+              <span className="ml-auto text-sm text-graphite-faint">{returns.length} total</span>
             )}
           </div>
           <div className="card overflow-hidden">
@@ -1467,9 +1472,9 @@ function AdminPageInner() {
                 </thead>
                 <tbody className="divide-y divide-orange-50">
                   {loading ? Array(5).fill(0).map((_, i) => (
-                    <tr key={i}><td colSpan={8} className="px-4 py-4"><div className="h-4 bg-gray-100 rounded animate-pulse" /></td></tr>
+                    <tr key={i}><td colSpan={8} className="px-4 py-4"><div className="h-4 bg-paper-shade rounded animate-pulse" /></td></tr>
                   )) : returns.length === 0 ? (
-                    <tr><td colSpan={8} className="px-4 py-10 text-center text-gray-400">No return requests yet</td></tr>
+                    <tr><td colSpan={8} className="px-4 py-10 text-center text-graphite-faint">No return requests yet</td></tr>
                   ) : returns.map((r) => {
                     const typeBadge: Record<string,string> = {
                       exchange: 'bg-blue-100 text-blue-700 border-blue-200',
@@ -1486,7 +1491,7 @@ function AdminPageInner() {
                       replacement_shipped: 'bg-purple-100 text-purple-700',
                       refund_initiated:    'bg-amber-100 text-amber-700',
                       refunded:            'bg-green-100 text-green-700',
-                      completed:           'bg-gray-100 text-gray-700',
+                      completed:           'bg-paper-shade text-graphite-muted',
                     };
                     const typeLabel: Record<string,string> = { exchange: 'Exchange', return: 'Return' };
                     const reasonLabel: Record<string,string> = { size_issue: 'Size Issue', damage: 'Damage / Defective' };
@@ -1499,19 +1504,19 @@ function AdminPageInner() {
                             setReturnUpdateForm(prev => ({ ...prev, [r.id]: { status: r.status, admin_notes: r.admin_notes || '' } }));
                           }
                         }}>
-                          <td className="px-4 py-3 font-mono text-xs text-gray-400">#{r.id}</td>
+                          <td className="px-4 py-3 font-mono text-xs text-graphite-faint">#{r.id}</td>
                           <td className="px-4 py-3 font-mono font-medium text-maroon-800 text-xs">{r.order_id}</td>
-                          <td className="px-4 py-3 text-gray-700 text-xs">{r.user_id}</td>
+                          <td className="px-4 py-3 text-graphite-muted text-xs">{r.user_id}</td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${typeBadge[r.request_type] || 'bg-gray-100 text-gray-600'}`}>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${typeBadge[r.request_type] || 'bg-paper-shade text-graphite-muted'}`}>
                               {typeLabel[r.request_type] || r.request_type}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-600 text-xs max-w-[120px] truncate">{reasonLabel[r.reason] || r.reason}</td>
-                          <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString('en-IN')}</td>
+                          <td className="px-4 py-3 text-graphite-muted text-xs max-w-[120px] truncate">{reasonLabel[r.reason] || r.reason}</td>
+                          <td className="px-4 py-3 text-graphite-faint text-xs whitespace-nowrap">{new Date(r.created_at).toLocaleDateString('en-IN')}</td>
                           <td className="px-4 py-3">
                             <span
-                              className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadge[r.status] || 'bg-gray-100 text-gray-600'}`}
+                              className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusBadge[r.status] || 'bg-paper-shade text-graphite-muted'}`}
                               title={
                                 r.status === 'refund_initiated' ? 'Razorpay is processing this refund. Will auto-update to Refunded and notify the customer once confirmed.'
                                 : r.status === 'refunded' ? 'Razorpay has confirmed and sent this refund. The customer\'s bank may take 1–5 more business days to show it in their account.'
@@ -1534,21 +1539,21 @@ function AdminPageInner() {
                                 {/* Exchange details — what they want instead */}
                                 {r.new_product && (
                                   <div>
-                                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Wants to Exchange Into</p>
-                                    <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-3 py-2.5">
-                                      <div className="w-12 h-12 rounded-lg bg-maroon-50 overflow-hidden flex-shrink-0">
+                                    <p className="text-xs font-semibold text-graphite-muted uppercase tracking-wide mb-2">Wants to Exchange Into</p>
+                                    <div className="flex items-center gap-3 bg-paper-bright border border-paper-edge rounded-sm px-3 py-2.5">
+                                      <div className="w-12 h-12 rounded-sm bg-maroon-50 overflow-hidden flex-shrink-0">
                                         {r.new_product.images?.[0] && <img src={r.new_product.images[0]} alt={r.new_product.name} className="w-full h-full object-cover" />}
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-800 truncate">{r.new_product.name}</p>
-                                        <p className="text-xs text-gray-500">{r.new_size ? `Size ${r.new_size}` : ''}{r.new_size && r.new_color ? ' · ' : ''}{r.new_color || ''} · ₹{r.new_product.price?.toLocaleString()}</p>
+                                        <p className="text-sm font-medium text-graphite truncate">{r.new_product.name}</p>
+                                        <p className="text-xs text-graphite-faint">{r.new_size ? `Size ${r.new_size}` : ''}{r.new_size && r.new_color ? ' · ' : ''}{r.new_color || ''} · ₹{r.new_product.price?.toLocaleString()}</p>
                                       </div>
                                       {r.price_difference > 0 ? (
                                         <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded-full">
                                           ✓ Paid ₹{r.price_difference.toLocaleString()} diff
                                         </span>
                                       ) : (
-                                        <span className="text-xs text-gray-400">Same price</span>
+                                        <span className="text-xs text-graphite-faint">Same price</span>
                                       )}
                                     </div>
                                   </div>
@@ -1557,11 +1562,11 @@ function AdminPageInner() {
                                 {/* Photos */}
                                 {r.images && r.images.length > 0 && (
                                   <div>
-                                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Customer Photos</p>
+                                    <p className="text-xs font-semibold text-graphite-muted uppercase tracking-wide mb-2">Customer Photos</p>
                                     <div className="flex gap-2 flex-wrap">
                                       {r.images.map((url: string, i: number) => (
                                         <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                                          <img src={url} alt={`Return photo ${i+1}`} className="w-16 h-16 object-cover rounded-lg border-2 border-orange-200 hover:border-maroon-400 transition-colors" />
+                                          <img src={url} alt={`Return photo ${i+1}`} className="w-16 h-16 object-cover rounded-sm border-2 border-orange-200 hover:border-maroon-400 transition-colors" />
                                         </a>
                                       ))}
                                     </div>
@@ -1571,22 +1576,22 @@ function AdminPageInner() {
                                 {/* Description */}
                                 {r.description && (
                                   <div>
-                                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Customer Description</p>
-                                    <p className="text-sm text-gray-700 bg-white border border-gray-200 rounded-lg px-3 py-2">{r.description}</p>
+                                    <p className="text-xs font-semibold text-graphite-muted uppercase tracking-wide mb-1">Customer Description</p>
+                                    <p className="text-sm text-graphite-muted bg-paper-bright border border-paper-edge rounded-sm px-3 py-2">{r.description}</p>
                                   </div>
                                 )}
 
                                 {/* Current admin notes */}
                                 {r.admin_notes && (
                                   <div>
-                                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Previous Admin Note</p>
-                                    <p className="text-sm text-gray-700 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">{r.admin_notes}</p>
+                                    <p className="text-xs font-semibold text-graphite-muted uppercase tracking-wide mb-1">Previous Admin Note</p>
+                                    <p className="text-sm text-graphite-muted bg-yellow-50 border border-yellow-200 rounded-sm px-3 py-2">{r.admin_notes}</p>
                                   </div>
                                 )}
 
                                 {/* Pickup — real Delhivery AWB, only shown once Delhivery actually confirmed it. Applies to both return and exchange. */}
                                 {r.return_awb ? (
-                                  <div className="bg-teal-50 border border-teal-200 rounded-lg px-3 py-2 space-y-1.5">
+                                  <div className="bg-teal-50 border border-teal-200 rounded-sm px-3 py-2 space-y-1.5">
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs font-semibold text-teal-800">🚚 Pickup AWB:</span>
                                       <span className="font-mono text-xs text-teal-700">{r.return_awb}</span>
@@ -1616,7 +1621,7 @@ function AdminPageInner() {
                                           <button
                                             onClick={() => handleSyncReturnDelhivery(r.id)}
                                             disabled={syncingReturn === r.id}
-                                            className="text-xs bg-teal-100 border border-teal-300 text-teal-800 hover:bg-teal-200 rounded-lg px-2 py-1 transition-colors disabled:opacity-60"
+                                            className="text-xs bg-teal-100 border border-teal-300 text-teal-800 hover:bg-teal-200 rounded-sm px-2 py-1 transition-colors disabled:opacity-60"
                                           >
                                             {syncingReturn === r.id ? '⏳...' : '🔄 Sync'}
                                           </button>
@@ -1624,7 +1629,7 @@ function AdminPageInner() {
                                             onClick={() => handleMarkPickedUp(r.id)}
                                             disabled={savingReturn === r.id}
                                             title="Force this forward if you've confirmed the item is back, regardless of what Delhivery's tracking shows"
-                                            className="text-xs bg-cyan-100 border border-cyan-300 text-cyan-800 hover:bg-cyan-200 rounded-lg px-2 py-1 transition-colors disabled:opacity-60"
+                                            className="text-xs bg-cyan-100 border border-cyan-300 text-cyan-800 hover:bg-cyan-200 rounded-sm px-2 py-1 transition-colors disabled:opacity-60"
                                           >
                                             {savingReturn === r.id ? '⏳...' : '✅ Mark Picked Up'}
                                           </button>
@@ -1633,7 +1638,7 @@ function AdminPageInner() {
                                     )}
                                   </div>
                                 ) : ['return','exchange'].includes(r.request_type) && ['approved','pickup_scheduled','picked_up'].includes(r.status) && (
-                                  <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 space-y-1.5">
+                                  <div className="bg-orange-50 border border-orange-200 rounded-sm px-3 py-2 space-y-1.5">
                                     <p className="text-xs text-orange-700">
                                       ⚠️ {r.pickup_error
                                         ? <>Delhivery pickup failed: <span className="font-medium">{r.pickup_error}</span></>
@@ -1642,7 +1647,7 @@ function AdminPageInner() {
                                     <button
                                       onClick={() => handleRetryPickup(r.id)}
                                       disabled={retryingReturn === r.id}
-                                      className="text-xs bg-orange-100 border border-orange-300 text-orange-800 hover:bg-orange-200 rounded-lg px-2 py-1 transition-colors disabled:opacity-60"
+                                      className="text-xs bg-orange-100 border border-orange-300 text-orange-800 hover:bg-orange-200 rounded-sm px-2 py-1 transition-colors disabled:opacity-60"
                                     >
                                       {retryingReturn === r.id ? '⏳ Retrying...' : '🔄 Retry pickup'}
                                     </button>
@@ -1657,12 +1662,12 @@ function AdminPageInner() {
                                           value={attachAwbInput[r.id] || ''}
                                           onChange={e => setAttachAwbInput(f => ({ ...f, [r.id]: e.target.value }))}
                                           placeholder="Delhivery AWB number"
-                                          className="flex-1 text-xs border border-orange-300 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-orange-400"
+                                          className="flex-1 text-xs border border-orange-300 rounded-sm px-2 py-1 bg-paper-bright focus:outline-none focus:ring-1 focus:ring-orange-400"
                                         />
                                         <button
                                           onClick={() => handleAttachAwb(r.id)}
                                           disabled={attachingAwb === r.id}
-                                          className="text-xs bg-orange-100 border border-orange-300 text-orange-800 hover:bg-orange-200 rounded-lg px-2 py-1 transition-colors disabled:opacity-60 whitespace-nowrap"
+                                          className="text-xs bg-orange-100 border border-orange-300 text-orange-800 hover:bg-orange-200 rounded-sm px-2 py-1 transition-colors disabled:opacity-60 whitespace-nowrap"
                                         >
                                           {attachingAwb === r.id ? '⏳...' : '🔗 Link AWB'}
                                         </button>
@@ -1674,7 +1679,7 @@ function AdminPageInner() {
                                 {/* Replacement shipment — exchange only, created once the old item is picked up */}
                                 {r.request_type === 'exchange' && (
                                   r.replacement_awb ? (
-                                    <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-lg px-3 py-2">
+                                    <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-sm px-3 py-2">
                                       <span className="text-xs font-semibold text-purple-800">📦 Replacement AWB:</span>
                                       <span className="font-mono text-xs text-purple-700">{r.replacement_awb}</span>
                                       <a href={r.replacement_tracking_url || `https://www.delhivery.com/track/package/${r.replacement_awb}`}
@@ -1686,14 +1691,14 @@ function AdminPageInner() {
                                         <button
                                           onClick={() => handleSyncReturnDelhivery(r.id)}
                                           disabled={syncingReturn === r.id}
-                                          className="ml-auto text-xs bg-purple-100 border border-purple-300 text-purple-700 hover:bg-purple-200 rounded-lg px-2 py-1 transition-colors disabled:opacity-60"
+                                          className="ml-auto text-xs bg-purple-100 border border-purple-300 text-purple-700 hover:bg-purple-200 rounded-sm px-2 py-1 transition-colors disabled:opacity-60"
                                         >
                                           {syncingReturn === r.id ? '⏳...' : '🔄 Sync'}
                                         </button>
                                       )}
                                     </div>
                                   ) : r.status === 'picked_up' && (
-                                    <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 space-y-1.5">
+                                    <div className="bg-orange-50 border border-orange-200 rounded-sm px-3 py-2 space-y-1.5">
                                       <p className="text-xs text-orange-700">
                                         ⚠️ {r.replacement_error
                                           ? <>Replacement shipment failed: <span className="font-medium">{r.replacement_error}</span></>
@@ -1702,7 +1707,7 @@ function AdminPageInner() {
                                       <button
                                         onClick={() => handleRetryReplacement(r.id)}
                                         disabled={retryingReturn === r.id}
-                                        className="text-xs bg-orange-100 border border-orange-300 text-orange-800 hover:bg-orange-200 rounded-lg px-2 py-1 transition-colors disabled:opacity-60"
+                                        className="text-xs bg-orange-100 border border-orange-300 text-orange-800 hover:bg-orange-200 rounded-sm px-2 py-1 transition-colors disabled:opacity-60"
                                       >
                                         {retryingReturn === r.id ? '⏳ Retrying...' : '🔄 Retry shipment'}
                                       </button>
@@ -1769,9 +1774,9 @@ function AdminPageInner() {
       {tab === 'admins' && (
         <div className="space-y-6">
           {/* Current Admins List */}
-          <div className="bg-white rounded-2xl shadow-sm border border-maroon-200 overflow-hidden">
+          <div className="bg-paper-bright rounded-sm shadow-sm border border-maroon-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-orange-50 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-maroon-900">Current Admin Accounts ({admins.length})</h2>
+              <h2 className="text-lg font-normal text-maroon-900">Current Admin Accounts ({admins.length})</h2>
               <button onClick={loadAdmins} className="text-xs text-maroon-600 hover:underline">Refresh</button>
             </div>
             <div className="overflow-x-auto">
@@ -1787,33 +1792,33 @@ function AdminPageInner() {
                 </thead>
                 <tbody>
                   {admins.length === 0 && (
-                    <tr><td colSpan={5} className="px-5 py-8 text-center text-gray-400">No admin accounts found</td></tr>
+                    <tr><td colSpan={5} className="px-5 py-8 text-center text-graphite-faint">No admin accounts found</td></tr>
                   )}
                   {admins.map((a: any) => (
-                    <tr key={a.id} className="border-t border-gray-50 hover:bg-maroon-50/30">
-                      <td className="px-5 py-4 font-semibold text-gray-900">{a.full_name}</td>
-                      <td className="px-5 py-4 text-gray-600">{a.email}</td>
-                      <td className="px-5 py-4 text-gray-600">{a.phone}</td>
+                    <tr key={a.id} className="border-t border-paper-edge hover:bg-paper-shade">
+                      <td className="px-5 py-4 font-semibold text-graphite">{a.full_name}</td>
+                      <td className="px-5 py-4 text-graphite-muted">{a.email}</td>
+                      <td className="px-5 py-4 text-graphite-muted">{a.phone}</td>
                       <td className="px-5 py-4">
                         {a.is_primary
-                          ? <span className="px-2 py-1 bg-maroon-100 text-maroon-800 rounded-full text-xs font-bold">👑 Primary Admin</span>
-                          : <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">🔐 Admin</span>
+                          ? <span className="px-2 py-1 bg-maroon-100 text-maroon-800 rounded-full text-xs font-normal">👑 Primary Admin</span>
+                          : <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-normal">🔐 Admin</span>
                         }
                       </td>
                       <td className="px-5 py-4">
                         {a.is_primary
-                          ? <span className="text-xs text-gray-400">Protected</span>
+                          ? <span className="text-xs text-graphite-faint">Protected</span>
                           : user?.email === 'admin@ammalutex.com'
                           ? (
                             <button
                               onClick={() => revokeAdmin(a.id, a.email)}
                               disabled={adminActionLoading}
-                              className="text-xs bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:text-red-800 font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                              className="text-xs bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:text-red-800 font-semibold px-3 py-1.5 rounded-sm transition-colors disabled:opacity-50"
                             >
                               🗑️ Remove Admin
                             </button>
                           )
-                          : <span className="text-xs text-gray-400">—</span>
+                          : <span className="text-xs text-graphite-faint">—</span>
                         }
                       </td>
                     </tr>
@@ -1824,7 +1829,7 @@ function AdminPageInner() {
           </div>
 
           {/* Info box */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+          <div className="bg-amber-50 border border-amber-200 rounded-sm p-4 text-sm text-amber-800">
             <p className="font-semibold mb-1">ℹ️ How it works</p>
             <ul className="list-disc list-inside space-y-1 text-amber-700">
               <li>This store runs on a single admin account (<strong>admin@ammalutex.com</strong>) by design — there's no way to grant admin access from this dashboard</li>
@@ -1839,10 +1844,10 @@ function AdminPageInner() {
       {/* Product Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl my-4 shadow-2xl">
+          <div className="bg-paper-bright rounded-sm w-full max-w-2xl my-4 border border-paper-edge">
             <div className="flex items-center justify-between p-6 border-b border-maroon-200">
-              <h2 className="font-bold text-xl text-maroon-900">{editing ? 'Edit Product' : 'Add New Product'}</h2>
-              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
+              <h2 className="font-normal text-xl text-maroon-900">{editing ? 'Edit Product' : 'Add New Product'}</h2>
+              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-paper-shade rounded-sm"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               <div>
@@ -1891,7 +1896,7 @@ function AdminPageInner() {
                 <div className="flex flex-wrap gap-2 mt-1">
                   {SIZE_OPTIONS.map(s => (
                     <button key={s} type="button" onClick={() => toggleSize(s)}
-                      className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${form.size_options.includes(s) ? 'bg-maroon-800 border-maroon-800 text-white' : 'border-gray-200 text-gray-600 hover:border-maroon-400'}`}>
+                      className={`px-3 py-1.5 rounded-sm border text-sm font-medium transition-all ${form.size_options.includes(s) ? 'bg-maroon-800 border-maroon-800 text-white' : 'border-paper-edge text-graphite-muted hover:border-maroon-400'}`}>
                       {s}
                     </button>
                   ))}
@@ -1915,7 +1920,7 @@ function AdminPageInner() {
               {/* Image Upload — Amazon/Flipkart/Myntra-style image manager */}
               <div>
                 <label className="label">Product Images</label>
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-graphite-faint mb-2">
                   Drag photos in or click to browse — sideways or upside-down phone
                   photos are automatically straightened. Drag a thumbnail to reorder;
                   the first photo is the main listing image shown everywhere else.
@@ -1926,8 +1931,8 @@ function AdminPageInner() {
                   onDragLeave={() => setIsDraggingImages(false)}
                   onDrop={handleImageDrop}
                   onClick={() => !uploadingImage && imageInputRef.current?.click()}
-                  className={`rounded-xl border-2 border-dashed p-4 text-center cursor-pointer transition-colors ${
-                    isDraggingImages ? 'border-maroon-500 bg-maroon-50' : 'border-gray-300 hover:border-maroon-400 hover:bg-maroon-50/40'
+                  className={`rounded-sm border-2 border-dashed p-4 text-center cursor-pointer transition-colors ${
+                    isDraggingImages ? 'border-maroon-500 bg-maroon-50' : 'border-paper-edge hover:border-maroon-400 hover:bg-maroon-50/40'
                   } ${uploadingImage ? 'pointer-events-none opacity-70' : ''}`}
                 >
                   {uploadingImage ? (
@@ -1938,10 +1943,10 @@ function AdminPageInner() {
                       </span>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-1.5 py-2 text-gray-500">
+                    <div className="flex flex-col items-center gap-1.5 py-2 text-graphite-faint">
                       <ImagePlus size={22} className="text-maroon-400" />
-                      <span className="text-sm font-medium text-gray-600">Drag photos here, or click to upload</span>
-                      <span className="text-xs text-gray-400">JPEG, PNG or WebP · up to 10MB each · select multiple at once</span>
+                      <span className="text-sm font-medium text-graphite-muted">Drag photos here, or click to upload</span>
+                      <span className="text-xs text-graphite-faint">JPEG, PNG or WebP · up to 10MB each · select multiple at once</span>
                     </div>
                   )}
                 </div>
@@ -1968,8 +1973,8 @@ function AdminPageInner() {
                           setDragImageIdx(null);
                         }}
                         onDragEnd={() => setDragImageIdx(null)}
-                        className={`relative group w-20 h-20 rounded-lg border bg-gray-50 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-opacity ${
-                          dragImageIdx === idx ? 'opacity-40' : 'border-gray-200'
+                        className={`relative group w-20 h-20 rounded-sm border bg-paper-shade flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing transition-opacity ${
+                          dragImageIdx === idx ? 'opacity-40' : 'border-paper-edge'
                         }`}
                       >
                         <img
@@ -1982,7 +1987,7 @@ function AdminPageInner() {
                             <Star size={8} fill="currentColor" /> Main
                           </span>
                         )}
-                        <span className="absolute top-0.5 left-0.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="absolute top-0.5 left-0.5 text-graphite-faint opacity-0 group-hover:opacity-100 transition-opacity">
                           <GripVertical size={13} />
                         </span>
                         <button
@@ -2010,7 +2015,7 @@ function AdminPageInner() {
                   />
                   {(form as any).video_url && (
                     <button type="button" onClick={() => setForm(f => ({ ...f, video_url: '' } as any))}
-                      className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg border border-red-200 text-sm">Clear</button>
+                      className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-sm border border-red-200 text-sm">Clear</button>
                   )}
                 </div>
                 <div
@@ -2018,8 +2023,8 @@ function AdminPageInner() {
                   onDragLeave={() => setIsDraggingVideo(false)}
                   onDrop={handleVideoDrop}
                   onClick={() => !uploadingVideo && videoInputRef.current?.click()}
-                  className={`rounded-xl border-2 border-dashed p-3 flex items-center justify-center gap-2 cursor-pointer transition-colors ${
-                    isDraggingVideo ? 'border-maroon-500 bg-maroon-50' : 'border-gray-300 hover:border-maroon-400 hover:bg-maroon-50/40'
+                  className={`rounded-sm border-2 border-dashed p-3 flex items-center justify-center gap-2 cursor-pointer transition-colors ${
+                    isDraggingVideo ? 'border-maroon-500 bg-maroon-50' : 'border-paper-edge hover:border-maroon-400 hover:bg-maroon-50/40'
                   } ${uploadingVideo ? 'pointer-events-none opacity-70' : ''}`}
                 >
                   {uploadingVideo ? (
@@ -2030,8 +2035,8 @@ function AdminPageInner() {
                   ) : (
                     <>
                       <Upload size={16} className="text-maroon-400" />
-                      <span className="text-sm text-gray-600">Drag a video here, or click to upload</span>
-                      <span className="text-xs text-gray-400">· MP4, MOV, WebM · up to 100MB</span>
+                      <span className="text-sm text-graphite-muted">Drag a video here, or click to upload</span>
+                      <span className="text-xs text-graphite-faint">· MP4, MOV, WebM · up to 100MB</span>
                     </>
                   )}
                 </div>
@@ -2040,7 +2045,7 @@ function AdminPageInner() {
                 {/* Video orientation — controls how the video frames on the product page */}
                 <div className="mt-3">
                   <label className="label">Video Orientation</label>
-                  <div className="inline-flex rounded-lg border border-maroon-200 overflow-hidden">
+                  <div className="inline-flex rounded-sm border border-maroon-200 overflow-hidden">
                     {(['landscape', 'portrait'] as const).map(orient => (
                       <button
                         key={orient}
@@ -2049,14 +2054,14 @@ function AdminPageInner() {
                         className={`px-4 py-1.5 text-sm font-medium transition-colors ${
                           ((form as any).video_orientation || 'landscape') === orient
                             ? 'bg-maroon-800 text-white'
-                            : 'bg-white text-maroon-700 hover:bg-maroon-50'
+                            : 'bg-paper-bright text-maroon-700 hover:bg-maroon-50'
                         }`}
                       >
                         {orient === 'landscape' ? 'Landscape (16:9)' : 'Portrait (9:16)'}
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Landscape for studio/runway shots, portrait for reels-style try-on videos.</p>
+                  <p className="text-xs text-graphite-faint mt-1">Landscape for studio/runway shots, portrait for reels-style try-on videos.</p>
                 </div>
               </div>
 
@@ -2080,21 +2085,21 @@ function AdminPageInner() {
                   className="input-field resize-none" />
               </div>
 
-              <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-xl hover:bg-maroon-50">
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-paper-edge rounded-sm hover:bg-maroon-50">
                 <input type="checkbox" checked={form.is_featured} onChange={e => setForm(f => ({ ...f, is_featured: e.target.checked }))} className="w-4 h-4 accent-maroon-800" />
                 <div>
-                  <p className="font-medium text-sm text-gray-800">Mark as Featured</p>
-                  <p className="text-xs text-gray-500">Featured products appear on the homepage</p>
+                  <p className="font-medium text-sm text-graphite">Mark as Featured</p>
+                  <p className="text-xs text-graphite-faint">Featured products appear on the homepage</p>
                 </div>
               </label>
-              <label className="flex items-center gap-3 cursor-pointer p-3 border border-gray-200 rounded-xl hover:bg-maroon-50">
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-paper-edge rounded-sm hover:bg-maroon-50">
                 <input type="checkbox" checked={form.is_new_arrival} onChange={e => setForm(f => ({ ...f, is_new_arrival: e.target.checked }))} className="w-4 h-4 accent-maroon-800" />
                 <div>
-                  <p className="font-medium text-sm text-gray-800">Mark as New Arrival</p>
-                  <p className="text-xs text-gray-500">Shows a "New Arrival" badge on the product card</p>
+                  <p className="font-medium text-sm text-graphite">Mark as New Arrival</p>
+                  <p className="text-xs text-graphite-faint">Shows a "New Arrival" badge on the product card</p>
                 </div>
               </label>
-              <label className="flex items-center gap-3 cursor-pointer p-3 border border-red-200 rounded-xl hover:bg-red-50 bg-red-50/40">
+              <label className="flex items-center gap-3 cursor-pointer p-3 border border-red-200 rounded-sm hover:bg-red-50 bg-red-50/40">
                 <input type="checkbox" checked={!form.is_returnable} onChange={e => setForm(f => ({ ...f, is_returnable: !e.target.checked }))} className="w-4 h-4 accent-red-600" />
                 <div>
                   <p className="font-medium text-sm text-red-700">Mark as Non-Returnable</p>
@@ -2115,13 +2120,13 @@ function AdminPageInner() {
       {/* ── Shipping Details Modal ── */}
       {shipModal && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShipModal(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-paper-bright rounded-sm border border-paper-edge max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-bold text-gray-900 text-lg">📦 Ship Order Details</h3>
-                <p className="text-sm text-gray-500">{shipModal.order_number}</p>
+                <h3 className="font-normal text-graphite text-lg">📦 Ship Order Details</h3>
+                <p className="text-sm text-graphite-faint">{shipModal.order_number}</p>
               </div>
-              <button onClick={() => setShipModal(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+              <button onClick={() => setShipModal(null)} className="p-2 hover:bg-paper-shade rounded-sm"><X size={18} /></button>
             </div>
 
             <div className="space-y-4">
@@ -2169,7 +2174,7 @@ function AdminPageInner() {
 
               {/* Delivery Person (for Out for Delivery) */}
               {shipForm.status === 'out_for_delivery' && (
-                <div className="bg-maroon-50 border border-orange-200 rounded-xl p-4 space-y-3">
+                <div className="bg-maroon-50 border border-orange-200 rounded-sm p-4 space-y-3">
                   <p className="text-sm font-semibold text-orange-800">🚴 Delivery Agent (OTP will be auto-sent to customer)</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -2188,8 +2193,8 @@ function AdminPageInner() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setShipModal(null)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-medium text-sm hover:bg-gray-50">Cancel</button>
-              <button onClick={handleShipSave} disabled={shipSaving} className="flex-1 px-4 py-2.5 bg-maroon-800 text-white rounded-xl font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2">
+              <button onClick={() => setShipModal(null)} className="flex-1 px-4 py-2.5 border border-paper-edge rounded-sm text-graphite-muted font-medium text-sm hover:bg-paper-shade">Cancel</button>
+              <button onClick={handleShipSave} disabled={shipSaving} className="flex-1 px-4 py-2.5 bg-maroon-800 text-white rounded-sm font-semibold text-sm hover:bg-maroon-900 disabled:opacity-60 flex items-center justify-center gap-2">
                 {shipSaving ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Saving...</> : '✅ Save & Notify Customer'}
               </button>
             </div>

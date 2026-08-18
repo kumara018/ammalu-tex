@@ -126,19 +126,19 @@ export default function CartPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-3xl">
-                      {item.product.category === 'Lehenga' ? '👗' : item.product.category === 'Chudithar' ? '👘' : '👚'}
+                    <span className="text-rule uppercase text-graphite-faint">
+                      {item.product.category}
                     </span>
                   )}
                 </div>
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <Link href={`/products/${item.product_id}`} className="font-semibold text-graphite hover:text-maroon-800 line-clamp-2 text-sm leading-snug">
+                  <Link href={`/products/${item.product_id}`} className="line-clamp-2 font-display text-[1.05rem] leading-snug text-graphite transition-colors duration-500 hover:text-thread">
                     {item.product.name}
                   </Link>
-                  <p className="text-xs text-graphite-faint mt-1">{item.product.category}</p>
-                  <div className="flex gap-3 mt-1 text-xs text-graphite-faint">
+                  <p className="mt-1.5 text-rule uppercase text-graphite-faint">{item.product.category}</p>
+                  <div className="mt-2 flex flex-wrap gap-x-5 text-caption uppercase text-graphite-faint">
                     {item.size  && <span>Size: <b className="text-graphite-muted">{item.size}</b></span>}
                     {item.color && <span>Colour: <b className="text-graphite-muted">{item.color}</b></span>}
                   </div>
@@ -146,29 +146,29 @@ export default function CartPage() {
                   <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
                     {/* Price */}
                     <div>
-                      <span className="font-normal text-maroon-900">₹{(item.product.price * item.quantity).toLocaleString()}</span>
+                      <span className="font-display text-[1.25rem] tabular-nums text-graphite">₹{(item.product.price * item.quantity).toLocaleString('en-IN')}</span>
                       {item.quantity > 1 && (
-                        <span className="text-xs text-graphite-faint ml-1">₹{item.product.price.toLocaleString()} each</span>
+                        <span className="ml-2 text-caption uppercase tabular-nums text-graphite-faint">₹{item.product.price.toLocaleString('en-IN')} each</span>
                       )}
                     </div>
 
                     <div className="flex items-center gap-3">
                       {/* Qty control */}
-                      <div className="flex items-center border border-paper-edge rounded-sm overflow-hidden">
+                      <div className="inline-flex items-stretch border border-paper-edge">
                         <button
                           onClick={() => handleUpdate(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
-                          className="px-2.5 py-1.5 hover:bg-paper-shade disabled:opacity-40 transition-colors"
+                          className="px-3 py-2 text-graphite-muted transition-colors duration-500 hover:text-thread disabled:opacity-40"
                         >
                           <Minus size={14} />
                         </button>
-                        <span className="px-3 py-1.5 font-semibold text-sm min-w-[32px] text-center">
+                        <span className="flex min-w-[2.75rem] items-center justify-center border-x border-paper-edge font-display text-[1.05rem] tabular-nums text-graphite">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => handleUpdate(item.id, item.quantity + 1)}
                           disabled={item.quantity >= item.product.stock || item.quantity >= 10}
-                          className="px-2.5 py-1.5 hover:bg-paper-shade disabled:opacity-40 transition-colors"
+                          className="px-3 py-2 text-graphite-muted transition-colors duration-500 hover:text-thread disabled:opacity-40"
                         >
                           <Plus size={14} />
                         </button>
@@ -177,7 +177,7 @@ export default function CartPage() {
                       {/* Remove */}
                       <button
                         onClick={() => handleRemove(item.id, item.product.name)}
-                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-transparent rounded-sm transition-colors"
+                        className="p-1.5 text-graphite-faint transition-colors duration-500 hover:text-thread-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -196,7 +196,7 @@ export default function CartPage() {
               the totals. This is the page's own ground, so it stays one
               surface — it is opaque, not lighter. */}
           <div className="card bg-paper p-6 sticky top-28">
-            <h2 className="font-normal text-lg text-maroon-900 mb-5">Order Summary</h2>
+            <h2 className="mb-6 text-rule uppercase text-thread">What you owe</h2>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-graphite-muted">
@@ -207,23 +207,29 @@ export default function CartPage() {
                 <span>Shipping</span>
                 <span className="font-medium">₹{shipping}</span>
               </div>
-              <div className="border-t border-maroon-200 pt-3 flex justify-between font-normal text-lg">
-                <span className="text-maroon-900">Total</span>
-                <span className="text-maroon-900">₹{grandTotal.toLocaleString()}</span>
+              <div className="flex items-baseline justify-between border-t border-paper-edge pt-4">
+                <span className="text-rule uppercase text-graphite-faint">Total</span>
+                <span className="font-display text-band leading-none tabular-nums text-graphite">₹{grandTotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
-            <Link href="/checkout" className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 mt-6 text-base">
-              Proceed to Checkout <ArrowRight size={18} />
+            <Link
+              href="/checkout"
+              className="mt-8 flex w-full items-center justify-center gap-3 border border-graphite bg-graphite py-3.5 text-caption uppercase text-paper transition-colors duration-500 hover:bg-thread-deep hover:border-thread-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+            >
+              Go to checkout <ArrowRight size={16} />
             </Link>
 
-            <Link href="/products" className="block text-center text-sm text-maroon-700 hover:underline mt-4">
-              ← Continue Shopping
+            <Link
+              href="/products"
+              className="mt-5 block text-center text-caption uppercase text-graphite-faint transition-colors duration-500 hover:text-thread"
+            >
+              Keep looking
             </Link>
 
-            <div className="mt-5 pt-4 border-t border-maroon-200">
-              <p className="text-xs text-graphite-faint text-center">Secure checkout with SSL encryption</p>
-            </div>
+            <p className="mt-6 border-t border-paper-edge pt-4 text-center text-rule uppercase text-graphite-faint">
+              Payment handled by Razorpay
+            </p>
           </div>
         </div>
       </div>
