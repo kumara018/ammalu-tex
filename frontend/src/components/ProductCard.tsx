@@ -1,8 +1,11 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { ShoppingCart, Star, Heart, ChevronLeft, ChevronRight, Play } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Heart } from 'lucide-react';
+import {
+  motion, useMotionValue, useSpring, useTransform,
+  useReducedMotion, AnimatePresence,
+} from 'framer-motion';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -11,7 +14,49 @@ import { useWishlist } from '@/context/WishlistContext';
 import toast from 'react-hot-toast';
 import { mediaUrl } from '@/lib/media';
 
+/**
+ * A piece on the shelf.
+ *
+ * WHAT THIS REPLACES, AND WHY EACH PART HAD TO GO.
+ *
+ *   FOUR PILL BADGES stacked in the top-left corner — maroon for the
+ *   discount, gold for featured, one with the literal class `bg-transparent0`
+ *   (a typo that had been shipping, so "New Arrival" was white text on
+ *   nothing), grey for out of stock. Four colours, four radii, all shouting
+ *   over the photograph of the thing being sold. A garment does not need a
+ *   sticker to be interesting; the sticker is what you add when you have
+ *   stopped believing the photograph is enough.
+ *
+ *   AN EMOJI PLACEHOLDER — 👗 at 3.75rem when a product had no image. On a
+ *   shop whose whole promise is "the colour you see is the colour that
+ *   arrives", the fallback for a missing photograph was a cartoon.
+ *
+ *   YELLOW STARS. Five glyphs to encode one number, in a hue that appears
+ *   nowhere else in this palette. It is now written as the measurement it is.
+ *
+ *   COVERFLOW. Each slide entered on a 14° Y-rotation. That is a 2007 iTunes
+ *   effect, it fights the next card in the grid, and it tilts the garment —
+ *   which is the one thing on the card that must be shown flat and true.
+ *
+ *   A FILLED MAROON BUTTON on every single card. Twenty of them in a grid is
+ *   twenty demands, and none of them is the photograph.
+ *
+ * WHAT IT DOES INSTEAD. The plate holds the garment and nothing else. The
+ * card carries ONE piece of live 3D — a pointer-tracked tilt with a specular
+ * sheen that tracks the pointer across it — because a card that responds to
+ * where your hand is reads as an object under a light, and that is the whole
+ * difference between a catalogue and a showroom.
+ *
+ * The tilt is 5.5° at the extremes, spring-damped, and driven entirely by two
+ * motion values on the compositor — no React re-render per pointer move, no
+ * layout, no paint. It is off for touch (where there is no pointer to track)
+ * and off for anyone who asked for less motion, and in both cases the card is
+ * still a complete, clickable, keyboard-reachable product.
+ */
+
 interface Props { product: Product; }
+
+const TILT = 5.5;
 
 export default function ProductCard({ product }: Props) {
   const { addItem } = useCart();
@@ -20,8 +65,9 @@ export default function ProductCard({ product }: Props) {
   const { wishlistIds, toggle } = useWishlist();
   const isWishlisted = wishlistIds.includes(product.id);
   const [toggling, setToggling] = useState(false);
+  const reduced = useReducedMotion();
 
-  // ── Mini carousel state ──────────────────────────────────────────────────────
+  // ── Slides ────────────────────────────────────────────────────────────────
   const images = (product.images || []).filter(Boolean);
   const hasVideo = Boolean(product.video_url);
   const totalSlides = images.length + (hasVideo ? 1 : 0);
@@ -36,39 +82,69 @@ export default function ProductCard({ product }: Props) {
     setImgIdx((idx + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-scroll every 3.8s (slow, unhurried pace), pause on hover
+  /**
+   * The gallery advances only while the pointer is ON the card.
+   *
+   * It used to run continuously on a 3.8s timer and PAUSE on hover, which is
+   * backwards twice over: a grid of twenty cards all cross-fading on their
+   * own schedules is a wall of movement with no meaning, it costs an image
+   * decode per card per 3.8s forever, and it stops doing the one thing it is
+   * good for — showing you the other angles of the piece you are looking at.
+   */
   useEffect(() => {
-    if (totalSlides <= 1 || hovering) {
+    if (totalSlides <= 1 || !hovering || reduced) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
     intervalRef.current = setInterval(() => {
-      setImgIdx(i => (i + 1) % totalSlides);
-    }, 3800);
+      setImgIdx((i) => (i + 1) % totalSlides);
+    }, 1600);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [totalSlides, hovering]);
+  }, [totalSlides, hovering, reduced]);
 
-  // Reset to first slide on mouse leave
-  const handleMouseLeave = () => {
-    setHovering(false);
-    setImgIdx(0);
+  // ── The tilt ──────────────────────────────────────────────────────────────
+  const plate = useRef<HTMLDivElement>(null);
+  const px = useMotionValue(0.5);   // pointer position across the plate, 0..1
+  const py = useMotionValue(0.5);
+  const spring = { stiffness: 150, damping: 20, mass: 0.6 };
+  const sx = useSpring(px, spring);
+  const sy = useSpring(py, spring);
+
+  const rotateY = useTransform(sx, [0, 1], [-TILT, TILT]);
+  const rotateX = useTransform(sy, [0, 1], [TILT, -TILT]);
+  // The sheen follows the pointer, so the highlight is where the hand is.
+  const sheenX = useTransform(sx, [0, 1], ['22%', '78%']);
+  const sheenY = useTransform(sy, [0, 1], ['18%', '82%']);
+  const sheen = useTransform(
+    [sheenX, sheenY],
+    ([x, y]: string[]) =>
+      `radial-gradient(58% 46% at ${x} ${y}, rgba(255,253,251,0.42) 0%, rgba(255,253,251,0) 68%)`,
+  );
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (reduced || e.pointerType === 'touch') return;
+    const r = plate.current?.getBoundingClientRect();
+    if (!r) return;
+    px.set((e.clientX - r.left) / r.width);
+    py.set((e.clientY - r.top) / r.height);
   };
+  const rest = () => { px.set(0.5); py.set(0.5); };
 
-  // Touch swipe on card
+  // ── Touch swipe ───────────────────────────────────────────────────────────
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
-  const onTouchEnd   = (e: React.TouchEvent) => {
+  const onTouchEnd = (e: React.TouchEvent) => {
     const delta = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(delta) > 35) delta < 0 ? goCard(imgIdx + 1) : goCard(imgIdx - 1);
+    if (Math.abs(delta) > 35) goCard(delta < 0 ? imgIdx + 1 : imgIdx - 1);
   };
 
-  // ── Wishlist / cart ──────────────────────────────────────────────────────────
+  // ── Actions ───────────────────────────────────────────────────────────────
   const discount = product.compare_price
     ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
     : null;
 
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!user) { promptLogin('Sign in to save items to your wishlist.'); return; }
+    if (!user) { promptLogin('Sign in to save pieces.'); return; }
     if (toggling) return;
     setToggling(true);
     await toggle(product.id);
@@ -77,221 +153,199 @@ export default function ProductCard({ product }: Props) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!user) {
-      promptLogin('Sign in to add items to your cart and place orders.');
-      return;
-    }
+    if (!user) { promptLogin('Sign in to add pieces to your bag.'); return; }
     try {
       await addItem(product.id, 1);
-      toast.success(`${product.name} added to cart!`);
+      toast.success(`${product.name} — in your bag`);
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to add to cart');
+      toast.error(err.response?.data?.detail || 'Could not add to the bag');
     }
   };
 
-  const stars = Array.from({ length: 5 }, (_, i) => i < Math.round(product.rating_avg));
-
-  // ── Current slide content ────────────────────────────────────────────────────
   const isVideoSlide = hasVideo && imgIdx === images.length;
-  const currentImg = !isVideoSlide && images[imgIdx]
-    ? (mediaUrl(images[imgIdx]))
-    : null;
+  const currentImg = !isVideoSlide && images[imgIdx] ? mediaUrl(images[imgIdx]) : null;
+  const soldOut = product.stock === 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={reduced ? false : { opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.45, ease: 'easeOut' }}
-      whileHover={{ y: -6 }}
+      transition={{ duration: 0.7, ease: [0.22, 0.61, 0.24, 1] }}
       className="h-full"
     >
-    <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer" className="group block h-full">
-      <div className="card transition-colors duration-500 duration-300 h-full flex flex-col">
-
-        {/* ── Image / Carousel ───────────────────────────────────────────────── */}
-        <div
-          className="relative bg-paper-shade aspect-[3/4] overflow-hidden p-4"
-          style={{ perspective: 1200 }}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={handleMouseLeave}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          {/* Slide content — cross-fades with a subtle 3D coverflow tilt
-              instead of hard-cutting, so both auto-advance and manual swipe
-              feel smooth and give the gallery some depth. */}
-          <AnimatePresence mode="sync" initial={false}>
-            {isVideoSlide ? (
-              <motion.div
-                key="video"
-                initial={{ opacity: 0, rotateY: -14, scale: 0.94 }}
-                animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-                exit={{ opacity: 0, rotateY: 14, scale: 0.94 }}
-                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                style={{ transformStyle: 'preserve-3d' }}
-                className="absolute inset-0 bg-gray-900 rounded-sm flex items-center justify-center"
-              >
-                <Play size={40} className="text-white opacity-80" fill="white" />
-                <span className="absolute bottom-4 text-white text-xs font-medium bg-black/50 px-2 py-0.5 rounded-full">
-                  Watch Video
-                </span>
-              </motion.div>
-            ) : currentImg ? (
-              <motion.img
-                key={currentImg}
-                src={currentImg}
-                alt={product.name}
-                initial={{ opacity: 0, rotateY: -14, scale: 0.94 }}
-                animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-                exit={{ opacity: 0, rotateY: 14, scale: 0.94 }}
-                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                style={{ transformStyle: 'preserve-3d' }}
-                className="absolute inset-0 w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-500"
-              />
-            ) : (
-              <motion.div
-                key="placeholder"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="w-full h-full flex flex-col items-center justify-center text-maroon-200"
-              >
-                <div className="text-6xl mb-2">
-                  {product.category === 'Lehenga' ? '👗' :
-                   product.category === 'Chudithar' ? '👘' :
-                   product.category === 'Party Wears' ? '✨' :
-                   product.category === 'Crop Tops' ? '👚' : '👕'}
-                </div>
-                <span className="text-xs font-medium text-maroon-300">{product.category}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Prev / Next arrows — visible on hover when multiple slides */}
-          {totalSlides > 1 && hovering && (
-            <>
-              <button
-                onClick={e => { e.preventDefault(); goCard(imgIdx - 1); }}
-                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center text-graphite-muted hover:bg-white transition-all z-20"
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <button
-                onClick={e => { e.preventDefault(); goCard(imgIdx + 1); }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/85 shadow flex items-center justify-center text-graphite-muted hover:bg-white transition-all z-20"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </>
-          )}
-
-          {/* Dot indicators — always visible when multiple slides */}
-          {totalSlides > 1 && (
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10 pointer-events-none">
-              {Array.from({ length: totalSlides }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`rounded-full transition-all duration-300 ${
-                    i === imgIdx
-                      ? 'w-4 h-1.5 bg-white shadow'
-                      : 'w-1.5 h-1.5 bg-white/60'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-10">
-            {discount && (
-              <span className="bg-maroon-800 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
-                {discount}% OFF
-              </span>
-            )}
-            {product.is_featured && (
-              <span className="bg-gold-600 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
-                Featured
-              </span>
-            )}
-            {product.is_new_arrival && (
-              <span className="bg-transparent0 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
-                New Arrival
-              </span>
-            )}
-            {product.stock === 0 && (
-              <span className="bg-gray-700 text-white text-[11px] font-normal px-2 py-0.5 rounded-full">
-                Out of Stock
-              </span>
-            )}
-          </div>
-
-          {/* Wishlist button */}
-          <button
-            onClick={handleWishlist}
-            className={`absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm transition-all z-10 opacity-0 group-hover:opacity-100 ${isWishlisted ? 'opacity-100' : ''}`}
-            title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+      <Link href={`/products/${product.id}`} className="group flex h-full flex-col">
+        {/* ── The plate ────────────────────────────────────────────────────── */}
+        <div style={{ perspective: 1100 }}>
+          <motion.div
+            ref={plate}
+            onPointerMove={onPointerMove}
+            onPointerEnter={() => setHovering(true)}
+            onPointerLeave={() => { setHovering(false); setImgIdx(0); rest(); }}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+            className="relative aspect-[3/4] overflow-hidden border border-paper-edge bg-paper-shade transition-colors duration-500 group-hover:border-thread/50"
           >
-            <Heart
-              size={15}
-              className={isWishlisted ? 'text-red-500' : 'text-maroon-800'}
-              fill={isWishlisted ? '#ef4444' : 'none'}
-            />
-          </button>
+            <AnimatePresence mode="sync" initial={false}>
+              {isVideoSlide ? (
+                <motion.div
+                  key="video"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 0.61, 0.24, 1] }}
+                  className="absolute inset-0 flex items-center justify-center bg-graphite"
+                >
+                  {/* A play mark drawn as a rule and a triangle, in the
+                      shop's own colours — not a black slab with a white
+                      glyph borrowed from a video site. */}
+                  <span className="flex items-center gap-3 text-rule uppercase text-paper/80">
+                    <span aria-hidden="true" className="block h-0 w-0 border-y-[6px] border-l-[10px] border-y-transparent border-l-thread-pale" />
+                    On film
+                  </span>
+                </motion.div>
+              ) : currentImg ? (
+                <motion.img
+                  key={currentImg}
+                  src={currentImg}
+                  alt={product.name}
+                  loading="lazy"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 0.61, 0.24, 1] }}
+                  className="absolute inset-0 h-full w-full object-contain p-5 transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:scale-[1.045] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                />
+              ) : (
+                /* No photograph yet. Say so, in the shop's voice — the emoji
+                   that used to sit here promised a garment nobody had shot. */
+                <motion.div
+                  key="placeholder"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+                >
+                  <span aria-hidden="true" className="h-px w-10 bg-thread/50" />
+                  <span className="text-rule uppercase text-graphite-faint">{product.category}</span>
+                  <span className="text-caption uppercase text-graphite-faint/70">Photograph to come</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* The sheen. Sits above the garment at 42% white, which lifts the
+                plate under the pointer without washing out the cloth. */}
+            {!reduced && (
+              <motion.span
+                aria-hidden="true"
+                style={{ backgroundImage: sheen }}
+                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              />
+            )}
+
+            {/* Sold out states the fact across the plate rather than as a
+                grey pill in a corner — it changes whether you can buy it. */}
+            {soldOut && (
+              <span className="absolute inset-x-0 bottom-0 bg-graphite/85 py-2 text-center text-rule uppercase text-paper">
+                Sold out
+              </span>
+            )}
+
+            {/* Saving a piece: a hairline heart, no white disc, no shadow. */}
+            <button
+              onClick={handleWishlist}
+              aria-label={isWishlisted ? 'Remove from saved pieces' : 'Save this piece'}
+              className={`absolute right-3 top-3 z-10 transition-opacity duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${
+                isWishlisted ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+              }`}
+            >
+              <Heart
+                size={17}
+                className={isWishlisted ? 'text-thread-deep' : 'text-graphite-muted hover:text-thread'}
+                fill={isWishlisted ? 'currentColor' : 'none'}
+                strokeWidth={1.5}
+              />
+            </button>
+
+            {/**
+             * The slide indicator is a measure, not dots.
+             *
+             * One segment per slide, laid along the bottom edge, the current
+             * one in thread — the same instrument as the rule on the shelf
+             * and the thread on the rail. White dots on a photograph are the
+             * carousel every storefront ships.
+             */}
+            {totalSlides > 1 && (
+              <span aria-hidden="true" className="absolute inset-x-5 bottom-3 z-10 flex gap-1">
+                {Array.from({ length: totalSlides }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-px flex-1 transition-colors duration-300 ${
+                      i === imgIdx ? 'bg-thread' : 'bg-graphite/20'
+                    }`}
+                  />
+                ))}
+              </span>
+            )}
+          </motion.div>
         </div>
 
-        {/* ── Info ────────────────────────────────────────────────────────────── */}
-        <div className="p-3 flex flex-col flex-1">
-          <p className="text-xs text-maroon-600 font-medium mb-1">{product.category}</p>
-          <h3 className="text-sm font-semibold text-graphite line-clamp-2 mb-1.5 leading-snug">
+        {/* ── The caption ──────────────────────────────────────────────────── */}
+        <div className="flex flex-1 flex-col pt-4">
+          <p className="text-rule uppercase text-graphite-faint">{product.category}</p>
+
+          <h3 className="mt-2 line-clamp-2 font-display text-[1.15rem] leading-snug text-graphite transition-colors duration-500 group-hover:text-thread">
             {product.name}
           </h3>
 
-          {/* Stars */}
-          {product.rating_count > 0 && (
-            <div className="flex items-center gap-1 mb-2">
-              <div className="flex">
-                {stars.map((filled, i) => (
-                  <Star
-                    key={i}
-                    size={12}
-                    className={filled ? 'star-filled fill-yellow-400' : 'star-empty'}
-                    fill={filled ? '#facc15' : 'none'}
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-graphite-faint">({product.rating_count})</span>
-            </div>
-          )}
-
-          {product.fabric && (
-            <p className="text-xs text-graphite-faint mb-2">{product.fabric}</p>
-          )}
-
-          {/* Price + cart */}
-          <div className="mt-auto">
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-lg font-normal text-maroon-900">₹{product.price.toLocaleString()}</span>
-              {product.compare_price && (
-                <span className="text-sm text-graphite-faint line-through">
-                  ₹{product.compare_price.toLocaleString()}
+          {/* Fabric and rating on one ruled line — both are measurements of
+              the piece, and neither deserves its own row. */}
+          {(product.fabric || product.rating_count > 0) && (
+            <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-caption uppercase text-graphite-faint">
+              {product.fabric && <span>{product.fabric}</span>}
+              {product.rating_count > 0 && (
+                <span className="tabular-nums text-thread">
+                  {product.rating_avg.toFixed(1)}<span className="text-graphite-faint">/5 · {product.rating_count}</span>
                 </span>
               )}
+            </p>
+          )}
+
+          <div className="mt-auto pt-5">
+            <div className="flex items-baseline gap-3">
+              <span className="font-display text-[1.45rem] leading-none text-graphite tabular-nums">
+                ₹{product.price.toLocaleString('en-IN')}
+              </span>
+              {product.compare_price && (
+                <span className="text-caption text-graphite-faint line-through tabular-nums">
+                  ₹{product.compare_price.toLocaleString('en-IN')}
+                </span>
+              )}
+              {discount ? (
+                <span className="text-caption uppercase tabular-nums text-thread">−{discount}%</span>
+              ) : null}
             </div>
 
+            {/**
+             * The action is a ruled line that fills on hover.
+             *
+             * Twenty filled maroon rectangles in a grid is twenty things
+             * competing with twenty photographs, and the photograph is what
+             * sells the garment. This is present, unambiguous and the full
+             * width of the card, but it only becomes solid when you reach
+             * for it.
+             */}
             <button
               onClick={handleAddToCart}
-              disabled={product.stock === 0}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-sm bg-maroon-800 hover:bg-maroon-900 text-white text-sm font-semibold transition-all active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              disabled={soldOut}
+              className="mt-4 w-full border border-paper-edge py-2.5 text-caption uppercase text-graphite-muted transition-colors duration-500 hover:border-graphite hover:bg-graphite hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread disabled:cursor-not-allowed disabled:border-paper-edge disabled:bg-transparent disabled:text-graphite-faint motion-reduce:transition-none"
             >
-              <ShoppingCart size={15} />
-              {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              {soldOut ? 'Sold out' : 'Add to the bag'}
             </button>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
     </motion.div>
   );
 }

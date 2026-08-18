@@ -52,7 +52,50 @@ export default function AtelierFooter() {
   if (isAuthRoute(pathname)) return null;
 
   return (
-    <footer className="relative z-10 overflow-hidden bg-graphite px-6 pb-[7vh] pt-[9vh] text-paper/70 sm:px-10">
+    <footer className="relative z-10 overflow-hidden px-6 pb-[7vh] pt-[9vh] text-paper/75 sm:px-10">
+      {/**
+       * WHY THIS IS NOT A FLAT SLAB ANY MORE.
+       *
+       * It was one value — `bg-graphite`, #332722 — across the full width and
+       * the full height, with text at 45–70% over it. Flat dark plus faded
+       * text is the definition of dull: nothing in the whole block varies, so
+       * the eye has nowhere to go and the counter reads as the page having
+       * run out rather than as a room having an end.
+       *
+       * Three things fix it, and none of them is "use a brighter colour":
+       *
+       *   LIGHT. The ground is now lit from the top left, the way the shop is
+       *   — a warm #402C25 falling to #1B100D at the base. It is the same
+       *   family, so the palette is untouched; it simply has a direction now.
+       *
+       *   A GLOW. One very wide, very faint thread-coloured radial behind the
+       *   first column, where the name sits. It is the lamp over the counter.
+       *
+       *   AN EDGE. A thread hairline across the top, brightest in the middle
+       *   and fading at both ends — the woven edge where the paper stops and
+       *   the counter starts. A hard 1px line at full strength would read as
+       *   a border; this reads as light catching a fold.
+       *
+       * All three are painted, none animate, and the whole thing is two
+       * absolutely-positioned divs behind content that was already there.
+       */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(120% 90% at 18% 0%, rgba(193,135,111,0.16) 0%, rgba(193,135,111,0) 58%),' +
+            'linear-gradient(168deg, #402C25 0%, #2C1D18 46%, #1B100D 100%)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(to right, rgba(193,135,111,0) 0%, rgba(193,135,111,0.65) 30%, rgba(227,188,172,0.8) 50%, rgba(193,135,111,0.65) 70%, rgba(193,135,111,0) 100%)',
+        }}
+      />
       {/* The measure, in thread, across the top edge — the counter's own rule. */}
       <div aria-hidden="true" className="mx-auto mb-[7vh] w-full max-w-[104rem] opacity-30">
         <svg viewBox="0 0 400 14" preserveAspectRatio="none" className="h-3.5 w-full text-paper">
@@ -68,12 +111,12 @@ export default function AtelierFooter() {
 
         <div className="lg:col-span-4">
           <p className="font-display text-band font-normal text-paper">{STORE.name}</p>
-          <address className="mt-5 not-italic text-paper/70">
+          <address className="mt-5 not-italic text-paper/80">
             {STORE.shopNo}<br />
             {STORE.area}<br />
             {STORE.city}, {STORE.state} {STORE.pincode}
           </address>
-          <p className="mt-5 text-paper/45">
+          <p className="mt-5 text-paper/55">
             {STORE.weekdays}<br />{STORE.weekend}
           </p>
           {/* The map, under the address it belongs to.
@@ -93,13 +136,13 @@ export default function AtelierFooter() {
         </div>
 
         <div className="lg:col-span-3">
-          <h2 className="text-rule uppercase text-thread-pale">The shelf</h2>
+          <h2 className="text-rule uppercase text-thread-pale/90">The shelf</h2>
           <ul className="mt-5 space-y-2.5">
             {SHELF.map((name) => (
               <li key={name}>
                 <Link
                   href={`/products?category=${encodeURIComponent(name)}`}
-                  className="text-paper/70 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
+                  className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
                 >
                   {name}
                 </Link>
@@ -109,13 +152,13 @@ export default function AtelierFooter() {
         </div>
 
         <div className="lg:col-span-3">
-          <h2 className="text-rule uppercase text-thread-pale">Good to know</h2>
+          <h2 className="text-rule uppercase text-thread-pale/90">Good to know</h2>
           <ul className="mt-5 space-y-2.5">
             {POLICIES.map((p) => (
               <li key={p.href}>
                 <Link
                   href={p.href}
-                  className="text-paper/70 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
+                  className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
                 >
                   {p.label}
                 </Link>
@@ -125,20 +168,20 @@ export default function AtelierFooter() {
         </div>
 
         <div className="lg:col-span-2">
-          <h2 className="text-rule uppercase text-thread-pale">Speak to us</h2>
+          <h2 className="text-rule uppercase text-thread-pale/90">Speak to us</h2>
           <ul className="mt-5 space-y-2.5">
             <li>
-              <a href={`tel:${STORE.phone1}`} className="text-paper/70 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
+              <a href={`tel:${STORE.phone1}`} className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
                 {STORE.phone1}
               </a>
             </li>
             <li>
-              <a href={`tel:${STORE.phone2}`} className="text-paper/70 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
+              <a href={`tel:${STORE.phone2}`} className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
                 {STORE.phone2}
               </a>
             </li>
             <li>
-              <a href={`mailto:${STORE.email}`} className="break-all text-paper/70 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
+              <a href={`mailto:${STORE.email}`} className="break-all text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
                 {STORE.email}
               </a>
             </li>
@@ -147,7 +190,7 @@ export default function AtelierFooter() {
                 href={`https://wa.me/${STORE.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-paper/70 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
+                className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
               >
                 WhatsApp
               </a>
@@ -156,11 +199,11 @@ export default function AtelierFooter() {
         </div>
       </div>
 
-      <div className="mx-auto mt-[7vh] flex w-full max-w-[104rem] flex-wrap items-baseline justify-between gap-4 border-t border-paper/12 pt-7">
-        <p className="text-caption uppercase text-paper/45">
+      <div className="mx-auto mt-[7vh] flex w-full max-w-[104rem] flex-wrap items-baseline justify-between gap-4 border-t border-paper/15 pt-7">
+        <p className="text-caption uppercase text-paper/50">
           © {new Date().getFullYear()} {STORE.name}
         </p>
-        <p className="text-caption uppercase text-paper/45">
+        <p className="text-caption uppercase text-paper/50">
           {STORE.area}, {STORE.city}
         </p>
       </div>

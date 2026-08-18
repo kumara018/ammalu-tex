@@ -35,13 +35,25 @@ import { LogoMark } from '@/components/Logo';
  * against.
  */
 
-const BOLTS = [
-  'Chudithar',
-  'Lehenga',
-  'Half Saree',
-  'Party Wears',
-  'Tops',
-  'Crop Tops',
+/**
+ * WHY THE SIX CATEGORY NAMES ARE NOT HERE ANY MORE.
+ *
+ * They were, inline, on every page. On the shelf — the one page where a
+ * customer actually picks a category — the page ALSO renders those six names
+ * as its filter, with an "All" reset and a live active state the rail could
+ * never have. So the shelf showed Chudithar, Lehenga, Half Saree, Party
+ * Wears, Tops and Crop Tops twice, sixty pixels apart, and the copy that
+ * worked was the lower one.
+ *
+ * Duplicating a control does not make it twice as findable; it makes the page
+ * look unfinished and makes a visitor wonder whether the two lists do
+ * different things. The rail now carries the three destinations the site
+ * actually has, and the categories live on the page that filters by them.
+ */
+const RAIL = [
+  { href: '/products',  label: 'The shelf' },
+  { href: '/authentic', label: 'Our word' },
+  { href: '/support',   label: 'Help' },
 ];
 
 export default function AtelierRail() {
@@ -108,45 +120,49 @@ export default function AtelierRail() {
         aria-label="Main"
         className="mx-auto flex w-full max-w-[104rem] items-baseline gap-x-8 px-6 py-4 sm:px-10"
       >
-        {/* The mark. Set in the display face at a size that reads as a name
-            rather than a logo lockup — this shop signs its work. */}
+        {/**
+         * The stamp and the label.
+         *
+         * The name alone read as brand text — the lockup every storefront
+         * has, a glyph in a circle beside a word. What makes a garment's
+         * label an identity rather than a name is the second line: who made
+         * it, and where. So the mark is a stitched stamp (components/Logo.tsx)
+         * and the name carries "Texvalley · Erode" under it at rule size —
+         * true, specific to this shop, and not mistakable for anyone else's.
+         */}
         <Link
           href="/"
           aria-label={`${STORE.name} — home`}
-          className="group flex shrink-0 items-center gap-2.5 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+          className="group flex shrink-0 items-center gap-3 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
-          {/* The A mark, kept alongside the name. Swapping it for a real
-              logo file later is one component — see components/Logo.tsx. */}
-          <LogoMark size={28} className="shrink-0 transition-opacity duration-500 group-hover:opacity-80" />
-          <span className="font-display text-[1.35rem] leading-none tracking-tight">
-            {STORE.name}
+          <LogoMark size={30} className="shrink-0 text-thread transition-colors duration-500 group-hover:text-thread-deep" />
+          <span className="leading-none">
+            <span className="block font-display text-[1.3rem] leading-none tracking-tight">
+              {STORE.name}
+            </span>
+            <span className="mt-1.5 hidden text-rule uppercase text-graphite-faint transition-colors duration-500 group-hover:text-thread sm:block">
+              Texvalley · Erode
+            </span>
           </span>
         </Link>
 
-        {/* The shelf, inline. Six names, no dropdown — a dropdown hides six
-            items behind one click and buys nothing. Hidden below `lg` where
-            they would wrap into a second row; the bag and account stay. */}
-        <ul className="hidden flex-1 items-baseline gap-x-6 lg:flex">
-          {BOLTS.map((name) => (
-            <li key={name}>
+        {/* Three destinations, not six duplicated filters — see RAIL above. */}
+        <ul className="flex flex-1 items-baseline gap-x-7">
+          {RAIL.map(({ href, label }) => (
+            <li key={href}>
               <Link
-                href={`/products?category=${encodeURIComponent(name)}`}
-                className="text-caption uppercase text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+                href={href}
+                className={`border-b pb-1 text-caption uppercase transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread ${
+                  active(href)
+                    ? 'border-thread text-thread'
+                    : 'border-transparent text-graphite-muted hover:border-paper-edge hover:text-graphite'
+                }`}
               >
-                {name}
+                {label}
               </Link>
             </li>
           ))}
         </ul>
-
-        {/* On narrow screens the shelf collapses to one honest link rather
-            than a hamburger that opens a copy of this list. */}
-        <Link
-          href="/products"
-          className="flex-1 text-caption uppercase text-graphite-muted transition-colors duration-500 hover:text-thread lg:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
-        >
-          The shelf
-        </Link>
 
         <div className="flex shrink-0 items-baseline gap-x-6">
           <Link

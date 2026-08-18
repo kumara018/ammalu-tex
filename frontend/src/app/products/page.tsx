@@ -296,11 +296,11 @@ function ProductsContent() {
 
       {/* Fuzzy match banner */}
       {!loading && fuzzyMatch && filters.search && (
-        <div className="mb-4 flex items-center gap-2 bg-gold-50 border border-gold-200 rounded-sm px-4 py-3 text-sm">
-          <Search size={15} className="text-gold-600 flex-shrink-0" />
+        <div className="mb-6 flex items-center gap-2.5 border-l border-thread pl-4 py-1 text-sm">
+          <Search size={15} className="flex-shrink-0 text-thread" />
           <span className="text-graphite-muted">
             No exact results for <strong>&ldquo;{filters.search}&rdquo;</strong>. Showing results for{' '}
-            <span className="font-normal text-maroon-700">&ldquo;{fuzzyMatch}&rdquo;</span> instead.
+            <span className="text-graphite">&ldquo;{fuzzyMatch}&rdquo;</span> instead.
           </span>
         </div>
       )}
@@ -309,13 +309,15 @@ function ProductsContent() {
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array(12).fill(0).map((_, i) => (
-            <div key={i} className="card animate-pulse">
-              <div className="bg-paper-shade aspect-[3/4]" />
-              <div className="p-3 space-y-2">
-                <div className="h-3 bg-paper-shade rounded w-1/3" />
-                <div className="h-4 bg-paper-shade rounded" />
-                <div className="h-4 bg-paper-shade rounded w-2/3" />
-                <div className="h-9 bg-paper-shade rounded" />
+            // The skeleton has to be the shape of the thing arriving, or the
+            // grid jumps when it does. Plate, then caption — no card box.
+            <div key={i} className="animate-pulse">
+              <div className="aspect-[3/4] border border-paper-edge bg-paper-shade" />
+              <div className="space-y-2 pt-4">
+                <div className="h-2 w-1/3 bg-paper-shade" />
+                <div className="h-4 bg-paper-shade" />
+                <div className="h-4 w-2/3 bg-paper-shade" />
+                <div className="mt-5 h-10 bg-paper-shade" />
               </div>
             </div>
           ))}
@@ -337,7 +339,7 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{Array(12).fill(0).map((_, i) => <div key={i} className="card animate-pulse"><div className="bg-paper-shade aspect-[3/4]" /><div className="p-3 space-y-2"><div className="h-4 bg-paper-shade rounded" /><div className="h-9 bg-paper-shade rounded" /></div></div>)}</div></div>}>
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-8"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{Array(12).fill(0).map((_, i) => <div key={i} className="animate-pulse"><div className="aspect-[3/4] border border-paper-edge bg-paper-shade" /><div className="space-y-2 pt-4"><div className="h-4 bg-paper-shade" /><div className="mt-5 h-10 bg-paper-shade" /></div></div>)}</div></div>}>
       <ProductsContent />
     </Suspense>
   );

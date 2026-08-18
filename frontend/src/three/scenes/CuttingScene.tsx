@@ -86,36 +86,74 @@ export default function CuttingScene({
     [pieces],
   );
 
-  // Pattern paper: matte, warm, almost no specular. It must not look like
-  // fabric — the contrast with the organza elsewhere is the point.
-  const material = useMemo(
+  /**
+   * ONE MATERIAL PER PIECE, AND THAT IS THE WHOLE FIX.
+   *
+   * Every piece used to share a single material at `opacity 0.5`. Fourteen
+   * identical stencils at the same weight, on a paper ground, behind live
+   * copy — so the listing read as flat brown shapes lying ON TOP of the
+   * headline rather than a table lying behind it. Half-opacity is not
+   * atmosphere, it is a sticker.
+   *
+   * Depth is what was missing, and depth in a real image is carried by
+   * CONTRAST, not by position: things further away are fainter and cooler.
+   * A shared material cannot express that, because opacity and colour are
+   * properties of the material, not the mesh. Fourteen materials is fourteen
+   * uniform uploads a frame on a scene with no postprocessing — free — and it
+   * buys per-piece aerial perspective, which is the difference between a
+   * pattern and a photograph.
+   */
+  const materials = useMemo(
     () =>
-      new THREE.MeshStandardMaterial({
-        color: '#e3bcac',
-        roughness: 0.95,
-        metalness: 0,
-        transparent: true,
-        opacity: 0,
-        side: THREE.DoubleSide,
-      }),
-    [],
+      pieces.map(() =>
+        new THREE.MeshStandardMaterial({
+          color: '#e3bcac',
+          roughness: 0.95,
+          metalness: 0,
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide,
+          // The pieces overlap by design. Without this they sort against each
+          // other and edges pop as they settle.
+          depthWrite: false,
+        }),
+      ),
+    [pieces],
   );
 
   const group = useRef<THREE.Group>(null);
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
+  /** Scratch colours, so the loop allocates nothing per frame. */
+  const near = useMemo(() => new THREE.Color('#d9b3a2'), []);
+  const far = useMemo(() => new THREE.Color('#ecdcd4'), []);
+  const scratch = useMemo(() => new THREE.Color(), []);
 
   useEffect(() => () => geometries.forEach((g) => g.dispose()), [geometries]);
-  useEffect(() => () => material.dispose(), [material]);
+  useEffect(() => () => materials.forEach((m) => m.dispose()), [materials]);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     const { scroll } = useSceneStore.getState();
-    material.opacity = 0.5 * weightRef.current;
+    const w = weightRef.current;
+
+    /**
+     * The light sweep.
+     *
+     * A cutting table is lit from a strip overhead, and the one thing that
+     * makes a still surface cinematic rather than static is light moving
+     * across it. So a soft band travels down the table on a ~28s cycle,
+     * lifting each piece as it passes and letting it fall back. It is one
+     * gaussian per piece per frame — no postprocessing, no extra draw call,
+     * and it is the only thing on this page that moves at all once the
+     * pieces have settled.
+     */
+    const sweep = ((t * 0.036) % 1.5) - 0.25;
 
     for (let i = 0; i < meshes.current.length; i++) {
       const m = meshes.current[i];
       if (!m) continue;
       const p = pieces[i];
+      const mat = materials[i];
 
       /**
        * Settling motion: a decaying oscillation rather than a continuous
@@ -127,8 +165,30 @@ export default function CuttingScene({
       const cycle = (t * 0.18 + p.phase) % (Math.PI * 2);
       const settle = Math.exp(-cycle * 1.6) * Math.sin(cycle * 5.0);
 
-      m.position.set(p.x, settle * 0.06, p.z + scroll * 6.0);
+      // Pieces parallax against each other by depth — the far row travels
+      // less than the near one, which is what separates them into layers.
+      const layer = 0.72 + 0.5 * ((i % 3) / 2);
+      const z = p.z + scroll * 6.0 * layer;
+
+      m.position.set(p.x, settle * 0.06, z);
       m.rotation.z = p.rot + settle * 0.05;
+
+      /**
+       * Where this piece sits up the frame, 0 at the top edge and 1 at the
+       * bottom. The masthead and the standfirst live in the top third, so
+       * that is where the table has to disappear: a headline competing with
+       * a shape is the exact complaint this scene earned.
+       */
+      const up = THREE.MathUtils.clamp((z + 4.2) / 8.4, 0, 1);
+      const band = up * up;                       // strongest along the bottom
+      const d = up - sweep;
+      const lit = Math.exp(-(d * d) / 0.014);     // the passing light
+
+      mat.opacity = (0.035 + 0.105 * band + 0.11 * lit) * w;
+      // Aerial perspective: the far pieces are paler and cooler, the near
+      // ones warmer and denser. Same idea as the opacity ramp, in hue.
+      scratch.copy(far).lerp(near, band * 0.85 + lit * 0.15);
+      mat.color.copy(scratch);
     }
 
     if (group.current) group.current.position.y = -1.2;
@@ -141,7 +201,7 @@ export default function CuttingScene({
           key={i}
           ref={(el) => { meshes.current[i] = el; }}
           geometry={geometries[i]}
-          material={material}
+          material={materials[i]}
           scale={p.scale}
         />
       ))}
