@@ -32,6 +32,35 @@ module.exports = {
           deep:    '#A4664D',   // hover, pressed, the pulled stitch
           pale:    '#E3BCAC',   // tacking thread, dividers
         },
+        /**
+         * THE DYE BOX.
+         *
+         * The site had exactly one accent, and the criticism it earned was
+         * fair: six categories set as six identical ruled rows in one colour
+         * read as a table of contents, not a shelf. The instinct in that
+         * situation is to reach for a colour ramp — and that is how a design
+         * gets a rainbow that means nothing.
+         *
+         * So these are not decoration and they are not chosen for variety.
+         * They are the six natural dyes a South Indian textile shop actually
+         * works with, each assigned to the category it most often colours:
+         * indigo, madder, turmeric, lac, myrobalan, pomegranate rind. Every
+         * one is desaturated and earth-weighted, so they sit WITH the paper
+         * and the thread rather than shouting over them — the difference
+         * between a dye lot and a swatch fan.
+         *
+         * Because they carry meaning, they are used where the meaning lands:
+         * the selvedge edge of each row on the shelf, and nowhere else. A
+         * dye that turns up on a button has stopped being a dye.
+         */
+        dye: {
+          indigo:      '#2E4A62',   // Chudithar   — the everyday blue
+          madder:      '#9E3B35',   // Lehenga     — the wedding red
+          turmeric:    '#C68A1E',   // Half Saree  — the ceremony yellow
+          lac:         '#7C2E4A',   // Party Wears — the deep evening
+          myrobalan:   '#7C7A4E',   // Tops        — the quiet olive
+          pomegranate: '#B5643C',   // Crop Tops   — the newer rust
+        },
         graphite: {
           DEFAULT: '#332722',   // type — the tailor's pencil
           muted:   '#6F5F58',   // secondary

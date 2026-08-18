@@ -119,6 +119,12 @@ export default function AtelierFooter() {
           <p className="mt-5 text-paper/55">
             {STORE.weekdays}<br />{STORE.weekend}
           </p>
+          {/* Delivery was stated on the homepage's counter section, which was
+              otherwise a verbatim copy of this footer and has been removed. It
+              is the one fact from there that was not already here. */}
+          <p className="mt-5 text-paper/55">
+            Delivered across India · ₹{STORE.shippingFee} flat
+          </p>
           {/* The map, under the address it belongs to.
               The sister shop has carried this since its footer was rebuilt and
               this one never did — which meant the only shop with a real

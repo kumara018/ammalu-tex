@@ -52,13 +52,20 @@ const unwrap = (raw: unknown): Product[] =>
  * The shelf. Names are the shop's real categories — they must keep matching
  * what `/products?category=` filters on, so these strings are not decorative.
  */
+/**
+ * The shelf, and the dye each bolt is finished in.
+ *
+ * The dye is not chosen for contrast against the row above it — it is the
+ * colour that category is actually most often dyed. See the dye box in
+ * tailwind.config.js for why these six and no others.
+ */
 const BOLTS = [
-  { index: '01', name: 'Chudithar',   note: 'Every day',      copy: 'Cotton and silk, cut for a working day and a long evening. The set most often bought twice.' },
-  { index: '02', name: 'Lehenga',     note: 'The occasion',   copy: 'Weight, drape, and a hem that holds its line through a wedding. Kept, and worn again.' },
-  { index: '03', name: 'Half Saree',  note: 'The ceremony',   copy: 'For the day a girl is dressed as a woman for the first time, and photographed all afternoon.' },
-  { index: '04', name: 'Party Wears', note: 'For the room',   copy: 'Colour that survives a camera flash and still looks considered from an arm’s length away.' },
-  { index: '05', name: 'Tops',        note: 'The everyday',   copy: 'The pieces that do the quiet work — worn on their own, or under everything else.' },
-  { index: '06', name: 'Crop Tops',   note: 'Newer cuts',     copy: 'Shorter lines for younger customers, in the same cloth the rest of the shelf is cut from.' },
+  { index: '01', name: 'Chudithar',   note: 'Every day',      dye: 'bg-dye-indigo',      copy: 'Cotton and silk, cut for a working day and a long evening. The set most often bought twice.' },
+  { index: '02', name: 'Lehenga',     note: 'The occasion',   dye: 'bg-dye-madder',      copy: 'Weight, drape, and a hem that holds its line through a wedding. Kept, and worn again.' },
+  { index: '03', name: 'Half Saree',  note: 'The ceremony',   dye: 'bg-dye-turmeric',    copy: 'For the day a girl is dressed as a woman for the first time, and photographed all afternoon.' },
+  { index: '04', name: 'Party Wears', note: 'For the room',   dye: 'bg-dye-lac',         copy: 'Colour that survives a camera flash and still looks considered from an arm’s length away.' },
+  { index: '05', name: 'Tops',        note: 'The everyday',   dye: 'bg-dye-myrobalan',   copy: 'The pieces that do the quiet work — worn on their own, or under everything else.' },
+  { index: '06', name: 'Crop Tops',   note: 'Newer cuts',     dye: 'bg-dye-pomegranate', copy: 'Shorter lines for younger customers, in the same cloth the rest of the shelf is cut from.' },
 ];
 
 export default function HomePage() {
@@ -237,59 +244,64 @@ export default function HomePage() {
             Replaces a trust-badge row with the thing that actually
             reassures someone buying online: a real shop, at a real
             address, with someone who answers the phone. */}
-        <section aria-labelledby="counter-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
-          <div className="mx-auto grid w-full max-w-[104rem] gap-x-14 gap-y-9 lg:grid-cols-12">
-            <div className="lg:col-span-5">
+        <section
+          aria-labelledby="counter-heading"
+          className="relative overflow-hidden px-6 py-[14vh] sm:px-10"
+        >
+          {/* The light changes here. Same ground as the counter at the foot of
+              the page, lit from the same corner, so the two read as one room
+              ending rather than two dark blocks stacked. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(120% 110% at 22% 0%, rgba(193,135,111,0.18) 0%, rgba(193,135,111,0) 62%),' +
+                                // Ends on the exact tone the footer BEGINS on (#402C25), so
+                // the band and the counter read as one unbroken dark room
+                // rather than two blocks with a seam between them. Lands
+                // darkest in the middle, which is where the headline sits.
+                'linear-gradient(172deg, #3A2822 0%, #241713 52%, #402C25 100%)',
+            }}
+          />
+
+          <div className="relative mx-auto grid w-full max-w-[104rem] gap-x-14 gap-y-10 lg:grid-cols-12">
+            <div className="lg:col-span-6">
               <Reveal>
-                <h2 id="counter-heading" className="font-display text-chapter font-normal text-graphite">
+                <p className="mb-7 text-rule uppercase text-thread-pale">Ground floor, Texvalley</p>
+                <h2
+                  id="counter-heading"
+                  className="max-w-[16ch] font-display text-plate font-normal leading-[0.98] text-paper"
+                >
                   Come to the counter
                 </h2>
               </Reveal>
             </div>
 
-            <div className="lg:col-span-6 lg:col-start-7">
-              <Reveal delay={110}>
-                <p className="max-w-[46ch] text-lede text-graphite-muted">
-                  We are on the ground floor at Texvalley. Everything here is chosen by hand,
-                  checked by hand, and packed by someone who will answer the phone if it is wrong.
+            <div className="lg:col-span-5 lg:col-start-8 lg:self-end">
+              <Reveal delay={120}>
+                <p className="max-w-[42ch] text-lede text-paper/75">
+                  Everything here is chosen by hand, checked by hand, and packed by
+                  someone who will answer the phone if it is wrong.
                 </p>
-              </Reveal>
 
-              <Reveal delay={190}>
-                <dl className="mt-11 grid gap-x-10 gap-y-7 sm:grid-cols-2">
-                  <div>
-                    <dt className="text-rule uppercase text-graphite-faint">Find us</dt>
-                    <dd className="mt-2.5 text-graphite-muted">
-                      {STORE.shopNo}<br />{STORE.area}, {STORE.city}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-rule uppercase text-graphite-faint">Speak to us</dt>
-                    <dd className="mt-2.5 space-y-1">
-                      <a href={`tel:${STORE.phone1}`} className="block text-graphite-muted transition-colors hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread">
-                        {STORE.phone1}
-                      </a>
-                      <a href={`tel:${STORE.phone2}`} className="block text-graphite-muted transition-colors hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread">
-                        {STORE.phone2}
-                      </a>
-                      <a href={`mailto:${STORE.email}`} className="block text-graphite-muted transition-colors hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread">
-                        {STORE.email}
-                      </a>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-rule uppercase text-graphite-faint">Open</dt>
-                    <dd className="mt-2.5 text-graphite-muted">
-                      {STORE.weekdays}<br />{STORE.weekend}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-rule uppercase text-graphite-faint">Delivery</dt>
-                    <dd className="mt-2.5 text-graphite-muted">
-                      Across India · ₹{STORE.shippingFee} flat
-                    </dd>
-                  </div>
-                </dl>
+                {/* One action. The address, the numbers and the hours are all
+                    at the foot of this page already — printing them again
+                    here is what this section used to do. */}
+                <a
+                  href={STORE.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group mt-10 inline-flex items-baseline gap-4 border-b border-thread/60 pb-2 text-caption uppercase text-paper transition-colors duration-500 hover:border-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
+                >
+                  Find us on the map
+                  <span
+                    aria-hidden="true"
+                    className="transition-transform duration-500 group-hover:translate-x-1.5 motion-reduce:transition-none"
+                  >
+                    →
+                  </span>
+                </a>
               </Reveal>
             </div>
           </div>
