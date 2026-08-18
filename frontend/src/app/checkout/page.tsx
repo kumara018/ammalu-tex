@@ -267,31 +267,49 @@ export default function CheckoutPage() {
     await handleRazorpay();
   };
 
-  const StepDot = ({ n, label }: { n: number; label: string }) => (
-    <div className="flex flex-col items-center gap-1">
-      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-normal text-sm border-2 transition-all ${step >= n ? 'bg-maroon-800 border-maroon-800 text-white' : 'border-paper-edge text-graphite-faint'}`}>
-        {step > n ? <CheckCircle size={18} /> : n}
-      </div>
-      <span className={`text-xs font-medium ${step >= n ? 'text-maroon-800' : 'text-graphite-faint'}`}>{label}</span>
-    </div>
-  );
+  const STEPS = ['Where it goes', 'How you pay', 'Check and place'] as const;
 
   return (
     <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/cart" className="p-2 hover:bg-orange-100 rounded-sm"><ArrowLeft size={20} /></Link>
-        <h1 className="font-display text-band font-normal text-maroon-900">Secure Checkout</h1>
-        <Lock size={18} className="text-green-600" />
+      <Link
+        href="/cart"
+        className="group inline-flex items-baseline gap-3 text-rule uppercase text-graphite-faint transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+      >
+        <span aria-hidden="true" className="inline-block transition-transform duration-500 group-hover:-translate-x-1 motion-reduce:transition-none">&larr;</span>
+        Back to the bag
+      </Link>
+
+      {/* The operation count, the same instrument as the sign-in flow: the
+          current step in thread, the ones behind you struck through, the ones
+          ahead still pale. You can see how far in you are and how much is
+          left, which is the one thing a multi-step form usually refuses to
+          say. */}
+      <div className="mb-[clamp(2.5rem,7vh,4.5rem)] mt-8 flex items-center gap-5">
+        <ol className="flex items-baseline gap-x-6">
+          {STEPS.map((label, i) => {
+            const n = i + 1;
+            const done = n < step;
+            const now = n === step;
+            return (
+              <li
+                key={label}
+                aria-current={now ? 'step' : undefined}
+                className={`flex items-baseline gap-2.5 text-rule uppercase tabular-nums ${
+                  now ? 'text-thread'
+                  : done ? 'text-graphite-faint line-through decoration-thread/60'
+                  : 'text-paper-edge'
+                }`}
+              >
+                <span>{String(n).padStart(2, '0')}</span>
+                <span className={now ? '' : 'hidden sm:inline'}>{label}</span>
+              </li>
+            );
+          })}
+        </ol>
+        <span aria-hidden="true" className="h-px flex-1 bg-paper-edge" />
       </div>
 
-      {/* Steps */}
-      <div className="flex items-center justify-center gap-0 mb-8">
-        <StepDot n={1} label="Address" />
-        <div className={`h-0.5 w-20 sm:w-28 transition-colors ${step >= 2 ? 'bg-maroon-800' : 'bg-paper-shade'}`} />
-        <StepDot n={2} label="Payment" />
-        <div className={`h-0.5 w-20 sm:w-28 transition-colors ${step >= 3 ? 'bg-maroon-800' : 'bg-paper-shade'}`} />
-        <StepDot n={3} label="Confirm" />
-      </div>
+      <h1 className="sr-only">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -323,8 +341,8 @@ export default function CheckoutPage() {
                         <div className="flex-1 text-sm">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-graphite">{a.full_name}</span>
-                            {a.label && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">{a.label}</span>}
-                            {a.is_default && <span className="text-xs bg-maroon-100 text-maroon-700 px-2 py-0.5 rounded-full flex items-center gap-1"><Star size={10} /> Default</span>}
+                            {a.label && <span className="text-rule uppercase text-graphite-faint">{a.label}</span>}
+                            {a.is_default && <span className="text-rule uppercase text-thread">Default</span>}
                           </div>
                           <p className="text-graphite-faint mt-0.5">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ''}, {a.city}, {a.state} – {a.pincode}</p>
                           <p className="text-graphite-faint">{a.phone}</p>
@@ -405,8 +423,7 @@ export default function CheckoutPage() {
           {step === 2 && (
             <div className="card p-6">
               <h2 className="font-normal text-lg text-maroon-900 mb-5 flex items-center gap-2">
-                <Lock size={20} className="text-green-600" /> Payment Method
-                <span className="ml-auto text-xs text-green-600 flex items-center gap-1"><Lock size={11} /> 100% Secure</span>
+                How you pay
               </h2>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
@@ -426,34 +443,34 @@ export default function CheckoutPage() {
               {/* Razorpay info */}
               {payMethod === 'razorpay' && (
                 <div className="border-l-2 border-blue-700/50 pl-4 p-4 space-y-2">
-                  <p className="font-semibold text-blue-800 flex items-center gap-2"><CreditCard size={16} /> Razorpay Secure Payment</p>
-                  <p className="text-sm text-blue-700">You will be redirected to Razorpay's secure payment page. Accepts:</p>
-                  <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                  <p className="text-rule uppercase text-thread">Through Razorpay</p>
+                  <p className="text-graphite-muted">Razorpay takes the payment on its own page and hands us back a receipt. Accepted there:</p>
+                  <div className="flex flex-wrap gap-x-5 gap-y-2">
                     {['Credit Card','Debit Card','Net Banking','UPI','Wallets','EMI'].map(m => (
-                      <span key={m} className="bg-paper-bright border border-blue-200 px-2.5 py-1 rounded-full text-blue-700">{m}</span>
+                      <span key={m} className="text-caption uppercase text-graphite">{m}</span>
                     ))}
                   </div>
-                  <p className="text-xs text-blue-500 flex items-center gap-1"><Lock size={11} /> Your card details are handled by Razorpay — never stored on our servers.</p>
+                  <p className="text-caption uppercase text-graphite-faint">Your card never reaches us. Razorpay holds it.</p>
                 </div>
               )}
 
               {/* EMI info */}
               {payMethod === 'emi' && (
                 <div className="border-l-2 border-purple-700/50 pl-4 p-4 space-y-2">
-                  <p className="font-semibold text-purple-800 flex items-center gap-2"><CalendarDays size={16} /> EMI — Pay in Easy Instalments</p>
-                  <p className="text-sm text-purple-700">Split your payment into monthly instalments. Available on Credit Cards.</p>
-                  <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                  <p className="text-rule uppercase text-thread">In instalments</p>
+                  <p className="text-graphite-muted">Split the total across months. Credit cards only.</p>
+                  <div className="flex flex-wrap gap-x-5 gap-y-2">
                     {['3 months', '6 months', '9 months', '12 months', 'No-cost EMI'].map(m => (
-                      <span key={m} className="bg-paper-bright border border-purple-200 px-2.5 py-1 rounded-full text-purple-700">{m}</span>
+                      <span key={m} className="text-caption uppercase text-graphite">{m}</span>
                     ))}
                   </div>
                   {grandTotal < 1000 ? (
                     <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3">
-                      <p className="text-xs text-orange-700 font-semibold">Your order total is ₹{grandTotal}. EMI requires a minimum order of ₹1,000.</p>
-                      <p className="text-xs text-orange-600 mt-1">You can still pay via Card / UPI using the option above.</p>
+                      <p className="text-sm text-graphite">This order is ₹{grandTotal}. Instalments need a total of ₹1,000 or more.</p>
+                      <p className="mt-1 text-sm text-graphite-muted">Card or UPI above will work.</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-purple-500 flex items-center gap-1"><Lock size={11} /> EMI options will appear in the payment screen. Requires a Credit Card.</p>
+                    <p className="text-caption uppercase text-graphite-faint">The instalment plans appear on Razorpay's screen.</p>
                   )}
                 </div>
               )}
@@ -471,14 +488,14 @@ export default function CheckoutPage() {
           {step === 3 && (
             <div className="card p-6">
               <h2 className="font-normal text-lg text-maroon-900 mb-5 flex items-center gap-2">
-                <CheckCircle size={20} className="text-green-600" /> Review & Place Order
+                Check it over
               </h2>
 
               {/* Address summary */}
               <div className="bg-maroon-50 rounded-sm p-4 mb-4">
                 <div className="flex justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">Delivering to</p>
+                    <p className="text-rule uppercase text-graphite-faint mb-2">Delivering to</p>
                     <p className="font-semibold text-graphite">{addr.full_name}</p>
                     <p className="text-sm text-graphite-muted">{addr.address_line1}{addr.address_line2 ? `, ${addr.address_line2}` : ''}</p>
                     <p className="text-sm text-graphite-muted">{addr.city}, {addr.state} — {addr.pincode}</p>
@@ -492,7 +509,7 @@ export default function CheckoutPage() {
               <div className="bg-maroon-50 rounded-sm p-4 mb-4">
                 <div className="flex justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">Payment</p>
+                    <p className="text-rule uppercase text-graphite-faint mb-2">Payment</p>
                     <p className="font-semibold text-graphite flex items-center gap-2">
                       {payMethod === 'razorpay' && <><CreditCard size={16} /> Razorpay (Card / Net Banking / UPI)</>}
                       {payMethod === 'emi'      && <><CalendarDays size={16} /> EMI — Pay in Instalments</>}
@@ -504,7 +521,7 @@ export default function CheckoutPage() {
 
               {/* Items */}
               <div className="space-y-3 mb-5">
-                <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide">Items ({items.length})</p>
+                <p className="text-rule uppercase text-graphite-faint">Items ({items.length})</p>
                 {items.map(item => (
                   <div key={item.id} className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-sm bg-maroon-50 flex items-center justify-center text-xl flex-shrink-0">
@@ -520,12 +537,12 @@ export default function CheckoutPage() {
               </div>
 
               {/* Open Box Delivery option */}
-              <label className="flex items-start gap-3 p-4 border-l-2 border-blue-700/50 pl-4 cursor-pointer hover:bg-blue-100 transition-colors mb-4">
+              <label className="mb-4 flex cursor-pointer items-start gap-3 border-l border-thread py-1 pl-4 transition-colors duration-500">
                 <input type="checkbox" checked={openBox} onChange={e => setOpenBox(e.target.checked)}
                   className="mt-0.5 w-4 h-4 accent-blue-700 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-blue-900 text-sm">Request Open Box Delivery</p>
-                  <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
+                  <p className="text-graphite">Ask the agent to open the parcel with you</p>
+                  <p className="mt-1 text-sm leading-relaxed text-graphite-muted">
                     Inspect the package before accepting. If the product is damaged or doesn't match,
                     you can refuse delivery on the spot for a full refund.
                   </p>
@@ -572,7 +589,7 @@ export default function CheckoutPage() {
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-maroon-200 space-y-1.5">
-              <p className="text-xs text-graphite-faint flex items-center gap-1.5"><Lock size={11} className="text-green-500" /> SSL Secured Checkout</p>
+              <p className="text-rule uppercase text-graphite-faint">Payment handled by Razorpay</p>
               <p className="text-xs text-graphite-faint">↩️ 7-day easy returns</p>
               <p className="text-xs text-graphite-faint">✅ 100% Authentic Products</p>
             </div>

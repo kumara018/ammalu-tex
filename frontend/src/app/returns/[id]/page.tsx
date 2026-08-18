@@ -114,7 +114,7 @@ function ReturnDetailContent() {
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href={`/orders/${rr.order_id}`} className="p-2 hover:bg-orange-100 rounded-sm">
+        <Link href={`/orders/${rr.order_id}`} className="text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread">
           <ArrowLeft size={20} />
         </Link>
         <div>
@@ -169,8 +169,8 @@ function ReturnDetailContent() {
 
           {/* Progress bar */}
           <div className="relative mb-6">
-            <div className="w-full bg-paper-shade rounded-full h-1.5">
-              <div className="bg-maroon-800 h-1.5 rounded-full transition-all duration-700" style={{ width: `${progressPct}%` }} />
+            <div className="h-px w-full bg-paper-edge">
+              <div className="h-px bg-thread transition-all duration-700" style={{ width: `${progressPct}%` }} />
             </div>
           </div>
 
@@ -235,7 +235,7 @@ function ReturnDetailContent() {
 
       {/* Pickup OTP — give this to the courier when they arrive */}
       {rr.status === 'pickup_scheduled' && rr.pickup_otp && (
-        <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-sm p-6 mb-5">
+        <div className="mb-5 border-y border-thread py-7">
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck size={22} className="text-orange-700" />
             <h3 className="font-normal text-orange-900">Your Pickup OTP</h3>

@@ -71,21 +71,24 @@ export function LogoMark({ className = '', size = 32 }: { className?: string; si
 }
 
 /**
- * The full lockup: mark, name, and where the shop is.
+ * The lockup: the stamp and the name, and nothing else.
  *
- * A name on its own is brand text. A name with an address under it is a
- * label — the thing sewn into the garment, which says who made it and where.
- * That single extra line is what stops the header reading like every other
- * storefront, and it is true, which is the only reason it earns the space.
+ * A location line was set under the name for one pass — the thing sewn into a
+ * garment, saying who made it and where. It read as a caption, and a name that
+ * needs a caption to feel like a name is not yet a name. The address belongs
+ * in the footer, where somebody looking for the shop will go.
+ *
+ * So the identity is carried by the two things that are actually this shop's:
+ * the stitched stamp above, and the name set in the display face at a size
+ * that reads as a signature rather than a label.
  */
 export default function Logo({ className = '' }: { className?: string }) {
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <LogoMark className="text-thread flex-shrink-0" size={34} />
-      <div className="hidden sm:block leading-none">
-        <p className="font-display text-[1.25rem] tracking-tight text-graphite">Ammalu Tex</p>
-        <p className="mt-1.5 text-rule uppercase text-graphite-faint">Texvalley · Erode</p>
-      </div>
+      <p className="hidden font-display text-[1.4rem] leading-none tracking-tight text-graphite sm:block">
+        Ammalu Tex
+      </p>
     </div>
   );
 }

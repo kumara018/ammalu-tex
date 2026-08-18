@@ -222,7 +222,7 @@ export default function AccountPage() {
       </div>
 
       {/* ── Tabs ─────────────────────────────────────────────────────── */}
-      <div className="flex gap-1 mb-6 bg-paper-shade p-1 rounded-sm w-fit">
+      <div className="mb-8 flex gap-x-7 border-b border-paper-edge">
         {([
           { key: 'profile',  label: 'Profile Info',    icon: User },
           { key: 'password', label: 'Change Password', icon: Lock },
@@ -236,7 +236,7 @@ export default function AccountPage() {
             onClick={() => setTab(key)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-sm text-sm font-semibold transition-all ${
               tab === key
-                ? 'bg-paper-bright shadow text-maroon-800'
+                ? 'border-thread text-thread'
                 : 'text-graphite-faint hover:text-graphite-muted'
             }`}
           >
@@ -449,7 +449,7 @@ export default function AccountPage() {
                 const Icon = deviceIcon(s.device_type);
                 return (
                   <div key={s.id} className={`flex items-center gap-3 p-4 rounded-sm border ${s.is_current ? 'border-maroon-300 bg-maroon-50' : 'border-paper-edge'}`}>
-                    <div className="w-11 h-11 rounded-full bg-paper-bright border border-maroon-100 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center border border-paper-edge">
                       <Icon size={19} className="text-maroon-700" />
                     </div>
                     <div className="flex-1 min-w-0">

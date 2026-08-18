@@ -203,14 +203,14 @@ export default function OrdersPage() {
                       {items.slice(0, 4).map((item: any, idx: number) => (
                         <div
                           key={idx}
-                          className="w-9 h-9 rounded-sm bg-paper-shade border border-paper-edge flex items-center justify-center text-lg shadow-sm"
+                          className="flex h-9 w-9 items-center justify-center overflow-hidden border border-paper-edge bg-paper-shade"
                           title={item.name}
                         >
                           {getCategoryEmoji(item.category)}
                         </div>
                       ))}
                       {items.length > 4 && (
-                        <div className="w-9 h-9 rounded-sm bg-paper-shade border border-paper-edge flex items-center justify-center text-xs font-normal text-graphite-faint shadow-sm">
+                        <div className="flex h-9 w-9 items-center justify-center border border-paper-edge bg-paper-shade text-caption text-graphite-faint">
                           +{items.length - 4}
                         </div>
                       )}

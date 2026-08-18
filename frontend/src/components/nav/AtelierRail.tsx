@@ -135,14 +135,22 @@ export default function AtelierRail() {
           aria-label={`${STORE.name} — home`}
           className="group flex shrink-0 items-center gap-3 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
-          <LogoMark size={30} className="shrink-0 text-thread transition-colors duration-500 group-hover:text-thread-deep" />
-          <span className="leading-none">
-            <span className="block font-display text-[1.3rem] leading-none tracking-tight">
-              {STORE.name}
-            </span>
-            <span className="mt-1.5 hidden text-rule uppercase text-graphite-faint transition-colors duration-500 group-hover:text-thread sm:block">
-              Texvalley · Erode
-            </span>
+          <LogoMark size={32} className="shrink-0 text-thread transition-colors duration-500 group-hover:text-thread-deep" />
+          {/* The name, and nothing under it.
+              A strapline was tried here — the shop's location, set as a label
+              line beneath the name. It made the lockup taller than the rail
+              needed, it repeated what the footer already says, and a name that
+              needs a caption to feel like a name is not yet a name. The
+              distinctiveness has to live in the letterforms and the stamp, so
+              it does: the mark is stitched, and the name is set in Instrument
+              Serif at a size that reads as a signature rather than a label,
+              with a thread rule that draws itself under it on approach. */}
+          <span className="relative inline-block font-display text-[1.45rem] leading-none tracking-tight">
+            {STORE.name}
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-thread transition-transform duration-[520ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:scale-x-100 motion-reduce:transition-none"
+            />
           </span>
         </Link>
 

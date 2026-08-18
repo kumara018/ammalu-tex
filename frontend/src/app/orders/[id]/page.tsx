@@ -371,7 +371,7 @@ function OrderDetailContent() {
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6 flex-wrap">
-        <Link href="/orders" className="p-2 hover:bg-orange-100 rounded-sm"><ArrowLeft size={20} /></Link>
+        <Link href="/orders" className="text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"><ArrowLeft size={20} /></Link>
         <div>
           <h1 className="text-xl font-normal text-maroon-900">Order {order.order_number}</h1>
           <p className="text-sm text-graphite-faint">Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
@@ -489,7 +489,7 @@ function OrderDetailContent() {
                 {allEvents.slice(0, 12).map((ev: any, i: number) => (
                   <div key={i} className="flex gap-3 relative">
                     {i < allEvents.length - 1 && (
-                      <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-orange-100 z-0" />
+                      <div className="absolute left-[15px] top-8 bottom-0 z-0 w-px bg-paper-edge" />
                     )}
                     <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-paper-bright border-orange-300 text-orange-500'}`}>
                       <MapPin size={14} />
@@ -526,7 +526,7 @@ function OrderDetailContent() {
 
           {/* ── Delivery OTP ── */}
           {order.status === 'out_for_delivery' && order.delivery_otp && (
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-sm p-6">
+            <div className="border-y border-thread py-7">
               <div className="flex items-center gap-2 mb-4">
                 <ShieldCheck size={22} className="text-orange-700" />
                 <h3 className="font-normal text-orange-900">Your Delivery OTP</h3>
@@ -610,7 +610,7 @@ function OrderDetailContent() {
                 const imgSrc = item.image ? (mediaUrl(item.image)) : null;
                 const itemVisual = (
                   <>
-                    <div className="w-14 h-14 rounded-sm bg-gradient-to-br from-maroon-100 to-gold-50 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden border border-maroon-200">
+                    <div className="h-14 w-14 flex-shrink-0 overflow-hidden border border-paper-edge bg-paper-shade">
                       {imgSrc ? (
                         <img src={imgSrc} alt={item.name} className="w-full h-full object-cover"
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
@@ -804,7 +804,7 @@ function OrderDetailContent() {
       {/* ── Return / Exchange Request Modal ── */}
       {showReturnModal && (
         <div className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4" onClick={resetReturnModal}>
-          <div className="bg-paper-bright rounded-sm shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto border border-paper-edge bg-paper" onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-maroon-200">
               <div>
@@ -828,12 +828,12 @@ function OrderDetailContent() {
                   <p className="font-semibold text-graphite mb-4">What would you like to do?</p>
                   <div className="space-y-3">
                     <button onClick={() => afterKindChosen('return')}
-                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'return' ? 'border-red-400 bg-transparent' : 'border-paper-edge hover:border-maroon-300 bg-white'}`}>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'return' ? 'border-red-400 bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
                       <p className="font-semibold text-graphite text-sm">Return for a refund</p>
                       <p className="text-xs text-graphite-faint mt-0.5">Send the item back and get your money refunded to your original payment method. Window: {RETURN_WINDOW_HOURS} hours from delivery.</p>
                     </button>
                     <button onClick={() => afterKindChosen('exchange')}
-                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'exchange' ? 'border-blue-400 bg-transparent' : 'border-paper-edge hover:border-maroon-300 bg-white'}`}>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'exchange' ? 'border-blue-400 bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
                       <p className="font-semibold text-graphite text-sm">Exchange for another product</p>
                       <p className="text-xs text-graphite-faint mt-0.5">Swap for any product of the same or higher price — pay only the difference. Window: {EXCHANGE_WINDOW_HOURS} hours from delivery.</p>
                     </button>
@@ -1039,7 +1039,7 @@ function OrderDetailContent() {
                       <div key={idx} className="relative group">
                         <img src={url} alt={`Exchange photo ${idx+1}`} className="w-20 h-20 object-cover rounded-sm border-2 border-orange-200" />
                         <button onClick={() => setReturnImages(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-transparent0 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                          className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center bg-graphite text-xs text-paper opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus-visible:opacity-100">
                           <X size={10} />
                         </button>
                       </div>
@@ -1091,7 +1091,7 @@ function OrderDetailContent() {
       {/* ── Cancel Confirmation Modal ── */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setShowCancelModal(false)}>
-          <div className="bg-paper-bright rounded-sm shadow-2xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md border border-paper-edge bg-paper p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle size={20} className="text-red-600" />
