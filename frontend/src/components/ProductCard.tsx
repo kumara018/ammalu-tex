@@ -111,7 +111,7 @@ export default function ProductCard({ product }: Props) {
 
         {/* ── Image / Carousel ───────────────────────────────────────────────── */}
         <div
-          className="relative bg-gradient-to-br from-maroon-100 to-gold-50 aspect-[3/4] overflow-hidden p-4"
+          className="relative bg-paper-shade aspect-[3/4] overflow-hidden p-4"
           style={{ perspective: 1200 }}
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={handleMouseLeave}

@@ -118,7 +118,7 @@ export default function CartPage() {
             <div key={item.id} className="card p-4">
               <div className="flex gap-4">
                 {/* Image */}
-                <div className="w-24 h-24 rounded-sm bg-gradient-to-br from-maroon-100 to-gold-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="w-24 h-24 rounded-sm bg-paper-shade flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {item.product.images?.[0] && !item.product.images[0].includes('placeholder') ? (
                     <img
                       src={mediaUrl(item.product.images[0])}

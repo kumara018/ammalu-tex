@@ -168,7 +168,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
 
   if (slides.length === 0) {
     return (
-      <div className="aspect-square bg-gradient-to-br from-maroon-100 to-gold-50 rounded-sm flex items-center justify-center text-8xl">
+      <div className="aspect-square bg-paper-shade rounded-sm flex items-center justify-center">
         👗
       </div>
     );
@@ -181,7 +181,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
       {/* Main slide */}
       <div
         ref={trackRef}
-        className={`relative bg-gradient-to-br from-maroon-100 to-gold-50 rounded-sm overflow-hidden mb-3 mx-auto cursor-grab active:cursor-grabbing ${current.type === 'image' ? 'p-6' : ''}`}
+        className={`relative bg-paper-shade rounded-sm overflow-hidden mb-3 mx-auto cursor-grab active:cursor-grabbing ${current.type === 'image' ? 'p-6' : ''}`}
         style={{
           aspectRatio: current.type === 'video'
             ? (videoOrientation === 'portrait' ? '9/16' : '16/9')
@@ -212,13 +212,13 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
           <>
             <button
               onClick={e => { e.stopPropagation(); prev(); }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-paper/85 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={e => { e.stopPropagation(); next(); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-paper/85 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
             >
               <ChevronRight size={18} />
             </button>
@@ -227,14 +227,14 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
 
         {/* Slide counter */}
         {slides.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-medium px-2.5 py-1 rounded-full">
+          <div className="absolute bottom-3 right-3 bg-graphite/80 text-paper text-caption uppercase px-3 py-1 rounded-sm">
             {active + 1} / {slides.length}
           </div>
         )}
 
         {/* Video badge */}
         {current.type === 'video' && (
-          <div className="absolute top-3 left-3 bg-black/60 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+          <div className="absolute top-3 left-3 bg-graphite/80 text-paper text-caption uppercase px-3 py-1 rounded-sm flex items-center gap-1.5">
             <Play size={11} fill="white" /> Video
           </div>
         )}
@@ -247,7 +247,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
             <button
               key={i}
               onClick={() => go(i)}
-              className={`rounded-full transition-all ${i === active ? 'w-6 h-2 bg-maroon-800' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}`}
+              className={`rounded-full transition-all ${i === active ? 'w-6 h-1.5 bg-thread' : 'w-1.5 h-1.5 bg-paper-edge hover:bg-graphite-faint'}`}
             />
           ))}
         </div>
@@ -260,7 +260,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
             <button
               key={i}
               onClick={() => go(i)}
-              className={`relative flex-shrink-0 w-16 h-16 rounded-sm border-2 overflow-hidden bg-gradient-to-br from-maroon-50 to-gold-50 transition-all ${
+              className={`relative flex-shrink-0 w-16 h-16 rounded-sm border-2 overflow-hidden bg-paper-shade transition-colors duration-500 ${
                 i === active ? 'border-maroon-800 ring-2 ring-maroon-300' : 'border-paper-edge hover:border-maroon-400'
               }`}
             >
@@ -449,55 +449,59 @@ export default function ProductDetailPage() {
               <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
             </button>
           </div>
-          <h1 className="text-2xl md:font-display text-chapter font-normal text-graphite mb-3">{product.name}</h1>
+          <h1 className="font-display text-chapter font-normal leading-[1.04] text-graphite">{product.name}</h1>
 
           {/* Rating */}
           {product.rating_count > 0 && (
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1 bg-green-600 text-white text-sm px-2.5 py-0.5 rounded-full font-semibold">
-                <Star size={13} fill="white" /> {product.rating_avg.toFixed(1)}
-              </div>
-              <span className="text-graphite-faint text-sm">{product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}</span>
+              {/* A green pill with a white star is the marketplace's badge.
+                  A rating is a measurement, so it is set as one. */}
+              <span className="flex items-center gap-1.5 text-caption uppercase tabular-nums text-thread">
+                <Star size={12} className="fill-thread" /> {product.rating_avg.toFixed(1)}
+              </span>
+              <span className="text-caption uppercase text-graphite-faint">
+                {product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}
+              </span>
             </div>
           )}
 
           {/* Price */}
           <div className="flex items-baseline gap-3 mb-2">
-            <span className="font-display text-chapter font-normal text-maroon-900">₹{product.price.toLocaleString()}</span>
+            <span className="font-display text-chapter font-normal tabular-nums text-graphite">₹{product.price.toLocaleString()}</span>
             {product.compare_price && (
-              <span className="text-lg text-graphite-faint line-through">₹{product.compare_price.toLocaleString()}</span>
+              <span className="text-lg tabular-nums text-graphite-faint line-through">₹{product.compare_price.toLocaleString()}</span>
             )}
-            {discount && <span className="text-green-600 font-semibold text-sm">{discount}% off</span>}
+            {discount && <span className="text-caption uppercase text-thread">{discount}% off</span>}
           </div>
           <p className="text-xs text-graphite-faint mb-5">Inclusive of all taxes. Delivered to your doorstep</p>
 
-          <hr className="border-maroon-200 mb-5" />
+          <hr className="border-paper-edge mb-6" />
 
-          {/* Fabric / Fit / Material — visual highlight badges */}
+          {/**
+            * THE SPEC OF THE CLOTH.
+            *
+            * This was three tiles, each a different pastel gradient with a
+            * border and an emoji — thread, scissors, a leaf — above a tiny
+            * uppercase label. It is the most useful information on the page
+            * for someone deciding whether a garment will suit them, and it was
+            * dressed as party favours.
+            *
+            * A specification is a table. Label above value, ruled, aligned,
+            * nothing else.
+            */}
           {(product.fabric || product.fit || product.material) && (
-            <div className="grid grid-cols-3 gap-2 mb-5">
-              {product.fabric ? (
-                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-200 rounded-sm py-3 px-2 text-center">
-                  <span className="text-xl leading-none">🧵</span>
-                  <span className="text-[10px] font-normal text-amber-600 uppercase tracking-widest mt-0.5">Fabric</span>
-                  <span className="text-xs font-normal text-graphite leading-tight">{product.fabric}</span>
+            <dl className="mb-6 grid grid-cols-3 gap-x-6 border-t border-paper-edge pt-5">
+              {([
+                ['Fabric', product.fabric],
+                ['Fit', product.fit],
+                ['Material', product.material],
+              ] as const).map(([label, value]) => value ? (
+                <div key={label}>
+                  <dt className="text-rule uppercase text-graphite-faint">{label}</dt>
+                  <dd className="mt-2 text-graphite">{value}</dd>
                 </div>
-              ) : <div />}
-              {product.fit ? (
-                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-violet-50 to-purple-50 border border-violet-200 rounded-sm py-3 px-2 text-center">
-                  <span className="text-xl leading-none">✂️</span>
-                  <span className="text-[10px] font-normal text-violet-500 uppercase tracking-widest mt-0.5">Fit</span>
-                  <span className="text-xs font-normal text-graphite leading-tight">{product.fit}</span>
-                </div>
-              ) : <div />}
-              {product.material ? (
-                <div className="flex flex-col items-center justify-center gap-1 bg-gradient-to-b from-teal-50 to-emerald-50 border border-teal-200 rounded-sm py-3 px-2 text-center">
-                  <span className="text-xl leading-none">🌿</span>
-                  <span className="text-[10px] font-normal text-teal-600 uppercase tracking-widest mt-0.5">Material</span>
-                  <span className="text-xs font-normal text-graphite leading-tight">{product.material}</span>
-                </div>
-              ) : <div />}
-            </div>
+              ) : <div key={label} />)}
+            </dl>
           )}
 
           {/* Size */}

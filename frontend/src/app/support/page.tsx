@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { STORE, WHATSAPP_URL, MAIL_URL, CALL_URL } from '@/lib/config';
 import Link from 'next/link';
+import MeasureRule from '@/components/home/MeasureRule';
 import {
   Phone, Mail, MapPin, Clock, ChevronDown, ChevronUp,
   MessageCircle, Package, RotateCcw, Truck, Shield,
@@ -99,76 +100,51 @@ export default function SupportPage() {
   return (
     <div className="mx-auto w-full max-w-[84rem] px-6 py-[clamp(3rem,9vh,6rem)] sm:px-10">
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-maroon-50 text-maroon-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <MessageCircle size={15} /> Customer Support
-        </div>
-        <h1 className="font-display text-chapter font-normal text-graphite mb-4">How can we help you?</h1>
-        <p className="text-graphite-faint max-w-xl mx-auto text-sm">
-          Our support team at Ammalu Tex is here to help. Reach us through any of the
-          channels below, or find quick answers in our policy sections.
+      {/**
+        * WHAT WAS HERE. A centred pill badge, a centred title, then four
+        * bordered cards each with a differently-coloured icon tile — blue for
+        * phone, green for WhatsApp, orange for mail, purple for the map — and
+        * under them four more cards with maroon icons. Eight boxes and six
+        * colours to say "here is how to reach us", which is a table of four
+        * facts.
+        *
+        * A workroom answers the door. So the ways of reaching the shop are a
+        * ruled list in the order a customer would actually try them, with the
+        * thing they need — the number, the address — set as the largest thing
+        * in the row rather than as grey caption under an icon.
+        */}
+      <div className="mb-[clamp(2.5rem,7vh,4.5rem)]">
+        <p className="mb-4 text-rule uppercase text-thread">Someone will answer</p>
+        <h1 className="font-display text-chapter font-normal text-graphite">How can we help?</h1>
+        <p className="mt-6 max-w-[54ch] text-lede text-graphite-muted">
+          The shop is on the ground floor at Texvalley and the phone is answered by
+          the people who packed your order. Below that, the answers we give most often.
         </p>
       </div>
 
-      {/* ── Contact cards ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
-        <a href={CALL_URL}
-          className="card p-4 text-center transition-colors duration-500 group">
-          <div className="inline-flex p-2.5 bg-transparent rounded-sm mb-2 text-blue-700 group-hover:bg-blue-100 transition-colors">
-            <Phone size={20} />
-          </div>
-          <p className="font-normal text-graphite text-sm mb-0.5">Call Us</p>
-          <p className="text-xs text-graphite-muted">{STORE.phone1}</p>
-          <p className="text-xs text-graphite-muted">{STORE.phone2}</p>
-          <p className="text-xs text-graphite-faint mt-1">{STORE.weekdays}</p>
-        </a>
+      <MeasureRule className="mb-2" />
 
-        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-          className="card p-4 text-center transition-colors duration-500 group">
-          <div className="inline-flex p-2.5 bg-transparent rounded-sm mb-2 text-green-700 group-hover:bg-green-100 transition-colors">
-            <MessageCircle size={20} />
-          </div>
-          <p className="font-normal text-graphite text-sm mb-0.5">WhatsApp</p>
-          <p className="text-xs text-graphite-muted">{STORE.phone1}</p>
-          <p className="text-xs text-graphite-faint mt-1">Chat with us anytime</p>
-        </a>
-
-        <a href={MAIL_URL}
-          className="card p-4 text-center transition-colors duration-500 group">
-          <div className="inline-flex p-2.5 bg-maroon-50 rounded-sm mb-2 text-orange-700 group-hover:bg-orange-100 transition-colors">
-            <Mail size={20} />
-          </div>
-          <p className="font-normal text-graphite text-sm mb-0.5">Email Us</p>
-          <p className="text-xs text-graphite-muted break-all">{STORE.email}</p>
-          <p className="text-xs text-graphite-faint mt-1">Reply within 24 hours</p>
-        </a>
-
-        <a href={STORE.googleMapsUrl} target="_blank" rel="noopener noreferrer"
-          className="card p-4 text-center transition-colors duration-500 group">
-          <div className="inline-flex p-2.5 bg-transparent rounded-sm mb-2 text-purple-700 group-hover:bg-purple-100 transition-colors">
-            <MapPin size={20} />
-          </div>
-          <p className="font-normal text-graphite text-sm mb-0.5">Visit Store</p>
-          <p className="text-xs text-graphite-muted">{STORE.shopNo}</p>
-          <p className="text-xs text-graphite-muted">{STORE.area}</p>
-          <p className="text-xs text-graphite-faint mt-1">Open in Maps</p>
-        </a>
-      </div>
-
-      {/* ── Quick links ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+      <div className="mb-[clamp(3rem,10vh,7rem)]">
         {[
-          { icon: Package,   label: 'Track My Order',  href: '/orders'      },
-          { icon: RotateCcw, label: 'Return & Refund', href: '#returns'     },
-          { icon: Truck,     label: 'Shipping Info',   href: '#shipping'    },
-          { icon: Ruler,     label: 'Size Guide',      href: '#size-guide'  },
-        ].map(({ icon: Icon, label, href }) => (
-          <Link key={label} href={href}
-            className="card p-4 flex items-center gap-3 hover:border-maroon-200 border-2 border-transparent transition-all">
-            <Icon size={18} className="text-maroon-700 flex-shrink-0" />
-            <span className="text-sm font-semibold text-graphite-muted">{label}</span>
-          </Link>
+          { label: 'Call the shop',  value: `${STORE.phone1}`, note: STORE.weekdays,       href: CALL_URL,             external: false },
+          { label: 'WhatsApp',       value: STORE.phone1,      note: 'Any time — we reply when the shop opens', href: WHATSAPP_URL, external: true  },
+          { label: 'Email',          value: STORE.email,       note: 'Answered within a day', href: MAIL_URL,          external: false },
+          { label: 'Come in',        value: `${STORE.shopNo}, ${STORE.area}`, note: `${STORE.city} · open in maps`, href: STORE.googleMapsUrl, external: true },
+        ].map(({ label, value, note, href, external }) => (
+          <a
+            key={label}
+            href={href}
+            {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+            className="group grid grid-cols-[auto_1fr] items-baseline gap-x-6 border-b border-paper-edge py-7 transition-colors duration-500 hover:border-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread sm:gap-x-10"
+          >
+            <span className="text-rule uppercase text-graphite-faint transition-colors duration-500 group-hover:text-thread">
+              {label}
+            </span>
+            <div className="grid gap-y-1.5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-baseline lg:gap-x-10">
+              <span className="font-display text-band font-normal text-graphite">{value}</span>
+              <span className="text-caption uppercase text-graphite-faint">{note}</span>
+            </div>
+          </a>
         ))}
       </div>
 
