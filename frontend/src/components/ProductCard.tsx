@@ -13,6 +13,7 @@ import { useLoginPrompt } from '@/context/LoginPromptContext';
 import { useWishlist } from '@/context/WishlistContext';
 import toast from 'react-hot-toast';
 import { mediaUrl } from '@/lib/media';
+import { dyeFor, wovenGround } from '@/lib/dyes';
 
 /**
  * A piece on the shelf.
@@ -165,6 +166,8 @@ export default function ProductCard({ product }: Props) {
   const isVideoSlide = hasVideo && imgIdx === images.length;
   const currentImg = !isVideoSlide && images[imgIdx] ? mediaUrl(images[imgIdx]) : null;
   const soldOut = product.stock === 0;
+  /* The category's dye — read once, used only if there is no photograph. */
+  const dye = dyeFor(product.category);
 
   return (
     <motion.div
@@ -218,18 +221,51 @@ export default function ProductCard({ product }: Props) {
                   className="absolute inset-0 h-full w-full object-contain p-5 transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:scale-[1.045] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 />
               ) : (
-                /* No photograph yet. Say so, in the shop's voice — the emoji
-                   that used to sit here promised a garment nobody had shot. */
+                /**
+                 * NO PHOTOGRAPH — SHOWN AS THE CLOTH, NOT AS AN ABSENCE.
+                 *
+                 * Seventeen of this shop's nineteen products have no image in
+                 * the database. An emoji used to fill this plate, which hid
+                 * that; the words "Photograph to come" replaced it, which
+                 * revealed it and read as a broken page.
+                 *
+                 * A bolt of cloth on a shelf is known by its dye long before
+                 * anyone unfolds it. So the plate becomes the dye: a woven
+                 * ground in the category's own colour. See lib/dyes.ts.
+                 *
+                 * IT CARRIES ONLY THE DYE'S NAME, and that restraint is the
+                 * point. The first version of this repeated the piece's name on
+                 * the plate — but the caption sitting directly beneath already
+                 * gives category, name, fabric and price, so the name appeared
+                 * twice about 110px apart, which reads as a rendering bug
+                 * rather than as design. The plate's job is to be the cloth.
+                 * The caption's job is to say what it is. Neither does the
+                 * other's.
+                 */
                 <motion.div
                   key="placeholder"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+                  style={wovenGround(dye, product.id)}
+                  className="absolute inset-0 flex flex-col justify-between p-5"
                 >
-                  <span aria-hidden="true" className="h-px w-10 bg-thread/50" />
-                  <span className="text-rule uppercase text-graphite-faint">{product.category}</span>
-                  <span className="text-caption uppercase text-graphite-faint/70">Photograph to come</span>
+                  <span className="text-rule uppercase" style={{ color: dye.ink, opacity: 0.66 }}>
+                    {dye.name}
+                  </span>
+                  <span className="block">
+                    <span
+                      aria-hidden="true"
+                      className="mb-2.5 block h-px w-8"
+                      style={{ backgroundColor: dye.ink, opacity: 0.4 }}
+                    />
+                    <span
+                      className="block text-caption uppercase"
+                      style={{ color: dye.ink, opacity: 0.5 }}
+                    >
+                      Not yet photographed
+                    </span>
+                  </span>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -10,6 +10,7 @@ import ProductCard from '@/components/ProductCard';
 import Reveal from '@/components/home/Reveal';
 import BoltRow from '@/components/home/BoltRow';
 import MeasureRule from '@/components/home/MeasureRule';
+import { dyeFor } from '@/lib/dyes';
 
 /**
  * The Atelier — Ammalu Tex's homepage.
@@ -60,12 +61,12 @@ const unwrap = (raw: unknown): Product[] =>
  * tailwind.config.js for why these six and no others.
  */
 const BOLTS = [
-  { index: '01', name: 'Chudithar',   note: 'Every day',      dye: 'bg-dye-indigo',      copy: 'Cotton and silk, cut for a working day and a long evening. The set most often bought twice.' },
-  { index: '02', name: 'Lehenga',     note: 'The occasion',   dye: 'bg-dye-madder',      copy: 'Weight, drape, and a hem that holds its line through a wedding. Kept, and worn again.' },
-  { index: '03', name: 'Half Saree',  note: 'The ceremony',   dye: 'bg-dye-turmeric',    copy: 'For the day a girl is dressed as a woman for the first time, and photographed all afternoon.' },
-  { index: '04', name: 'Party Wears', note: 'For the room',   dye: 'bg-dye-lac',         copy: 'Colour that survives a camera flash and still looks considered from an arm’s length away.' },
-  { index: '05', name: 'Tops',        note: 'The everyday',   dye: 'bg-dye-myrobalan',   copy: 'The pieces that do the quiet work — worn on their own, or under everything else.' },
-  { index: '06', name: 'Crop Tops',   note: 'Newer cuts',     dye: 'bg-dye-pomegranate', copy: 'Shorter lines for younger customers, in the same cloth the rest of the shelf is cut from.' },
+  { index: '01', name: 'Chudithar',   note: 'Every day',      dye: dyeFor('Chudithar').band,      copy: 'Cotton and silk, cut for a working day and a long evening. The set most often bought twice.' },
+  { index: '02', name: 'Lehenga',     note: 'The occasion',   dye: dyeFor('Lehenga').band,      copy: 'Weight, drape, and a hem that holds its line through a wedding. Kept, and worn again.' },
+  { index: '03', name: 'Half Saree',  note: 'The ceremony',   dye: dyeFor('Half Saree').band,    copy: 'For the day a girl is dressed as a woman for the first time, and photographed all afternoon.' },
+  { index: '04', name: 'Party Wears', note: 'For the room',   dye: dyeFor('Party Wears').band,         copy: 'Colour that survives a camera flash and still looks considered from an arm’s length away.' },
+  { index: '05', name: 'Tops',        note: 'The everyday',   dye: dyeFor('Tops').band,   copy: 'The pieces that do the quiet work — worn on their own, or under everything else.' },
+  { index: '06', name: 'Crop Tops',   note: 'Newer cuts',     dye: dyeFor('Crop Tops').band, copy: 'Shorter lines for younger customers, in the same cloth the rest of the shelf is cut from.' },
 ];
 
 export default function HomePage() {
@@ -120,7 +121,7 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-[104rem]">
           <Reveal>
             <p className="mb-[clamp(1rem,2.4vh,1.75rem)] text-rule uppercase text-thread">
-              {STORE.area}&nbsp;·&nbsp;{STORE.city}&nbsp;·&nbsp;Sizes&nbsp;S–XXL
+              {STORE.area}&nbsp;·&nbsp;{STORE.city}&nbsp;·&nbsp;Sizes&nbsp;S–XXXL
             </p>
           </Reveal>
 

@@ -92,8 +92,26 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 /** Route → scene. Kept beside the store so the two cannot drift. */
 export function sceneForPath(pathname: string): SceneId {
   if (pathname === '/') return 'atelier';
-  if (pathname.startsWith('/products/')) return 'form';
-  if (pathname.startsWith('/products')) return 'cutting';
+  /**
+   * THE SHELF AND THE PIECE GET THE QUIET GROUND, NOT A SCENE.
+   *
+   * These two routes used to run `form` and `cutting`, and on both the scene
+   * drew large pale polygons that slid behind the grid. Behind a hero that is
+   * atmosphere; behind forty product plates it is a second set of rectangles
+   * competing with the merchandise, and on a phone the shapes cut across the
+   * cards badly enough to read as a rendering fault.
+   *
+   * The instinct when a shop asks for something cinematic is to put the
+   * cinema everywhere. Every storefront worth copying does the opposite: the
+   * spectacle lives on the way in, and the moment a customer is comparing
+   * things they might buy, the background stops asking for attention. The
+   * atelier scene still opens the homepage and still does the work.
+   *
+   * `muslin` is the quiet ground, and it is already in RESTRAINED below, so
+   * this also takes the effects budget off the two pages most likely to be
+   * open on a cheap phone with forty images loading.
+   */
+  if (pathname.startsWith('/products')) return 'muslin';
   if (pathname.startsWith('/cart') || pathname.startsWith('/wishlist')) return 'basket';
   if (pathname.startsWith('/checkout')) return 'ledger';
   if (

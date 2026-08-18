@@ -16,6 +16,7 @@ import { useLoginPrompt } from '@/context/LoginPromptContext';
 import { useWishlist } from '@/context/WishlistContext';
 import toast from 'react-hot-toast';
 import { mediaUrl } from '@/lib/media';
+import { dyeFor, wovenGround } from '@/lib/dyes';
 import { STORE } from '@/lib/config';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -148,7 +149,7 @@ function VideoSlide({ url }: { url: string }) {
  *   THE ARROWS ARE HAIRLINES. A white disc on a photograph is a hole punched
  *   in the product shot. These are chevrons in the shop's ink, on hover.
  */
-function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images: string[]; videoUrl?: string; videoOrientation?: string; name: string }) {
+function ProductCarousel({ images, videoUrl, videoOrientation, name, category, seed }: { images: string[]; videoUrl?: string; videoOrientation?: string; name: string; category?: string; seed?: number }) {
   const slides: Array<{ type: 'image' | 'video'; src: string }> = [
     ...images.map(img => ({ type: 'image' as const, src: resolveUrl(img) })),
     ...(videoUrl ? [{ type: 'video' as const, src: videoUrl }] : []),
@@ -213,9 +214,30 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
 
   if (slides.length === 0) {
     return (
-      <div className="flex aspect-square flex-col items-center justify-center gap-3 border border-paper-edge bg-paper-shade">
-        <span aria-hidden="true" className="h-px w-10 bg-thread/50" />
-        <span className="text-rule uppercase text-graphite-faint">Photograph to come</span>
+      /* The dye stands in for the photograph — see lib/dyes.ts. This screen
+         gets the full plate, because it is the one place a customer came
+         specifically to look at the piece. The piece's own name sits in the
+         column beside this, so the plate does not repeat it. */
+      <div
+        style={wovenGround(dyeFor(category), seed)}
+        className="flex aspect-square flex-col justify-between border border-paper-edge p-8"
+      >
+        <span className="text-rule uppercase" style={{ color: dyeFor(category).ink, opacity: 0.66 }}>
+          {dyeFor(category).name}
+        </span>
+        <span className="block">
+          <span
+            aria-hidden="true"
+            className="mb-4 block h-px w-14"
+            style={{ backgroundColor: dyeFor(category).ink, opacity: 0.4 }}
+          />
+          <span
+            className="block max-w-[34ch] text-caption uppercase"
+            style={{ color: dyeFor(category).ink, opacity: 0.55 }}
+          >
+            Not yet photographed &middot; call the counter and we will describe it
+          </span>
+        </span>
       </div>
     );
   }
@@ -480,6 +502,8 @@ export default function ProductDetailPage() {
             videoUrl={product.video_url}
             videoOrientation={product.video_orientation}
             name={product.name}
+            category={product.category}
+            seed={product.id}
           />
         </div>
 

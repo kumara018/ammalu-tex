@@ -116,9 +116,38 @@ export default function AtelierRail() {
         moved ? 'border-b border-thread/40' : 'border-b border-paper-edge/60'
       }`}
     >
+      {/**
+       * THE RAIL ON A NARROW WALL.
+       *
+       * This was one flex row with no responsive treatment of any kind, and on
+       * a phone it broke in the way that is easy to miss on a laptop: the mark
+       * and the actions are `shrink-0`, so the only thing that could give was
+       * the list of destinations. It gave by wrapping inside itself — "THE /
+       * SHELF", "OUR / WORD" stacked two words tall — and the row still
+       * overflowed, carrying SIGN IN and BAG off the right edge of the screen
+       * where nobody could reach them. The sister shop was fine because it
+       * hides its navigation behind an Index button; this one has none.
+       *
+       * The fix is not a hamburger. This file's first paragraph is a promise
+       * that the rail is always present and never opens a panel — a workroom
+       * wall where the tools stay in reach — and putting three links behind a
+       * button to save 90px would quietly break that promise on the one device
+       * most customers actually use.
+       *
+       * A narrow wall does not make a tailor hide the tools. It makes the rail
+       * two rows. So: the mark and the actions share the top row, the three
+       * destinations get their own row beneath, and everything stays visible
+       * and tappable. At `md` and up it collapses back to the single row it
+       * always was.
+       *
+       * `items-center` rather than `items-baseline` on that single row is the
+       * other half of this. Baseline alignment measured the small-caps links
+       * against the baseline of a 1.45rem wordmark, which sat them visibly low
+       * in the bar. Centred, they sit where the eye expects them.
+       */}
       <nav
         aria-label="Main"
-        className="mx-auto flex w-full max-w-[104rem] items-baseline gap-x-8 px-6 py-4 sm:px-10"
+        className="mx-auto flex w-full max-w-[104rem] flex-wrap items-center gap-x-8 gap-y-3 px-6 py-4 md:flex-nowrap sm:px-10"
       >
         {/**
          * The stamp and the label.
@@ -145,7 +174,9 @@ export default function AtelierRail() {
               it does: the mark is stitched, and the name is set in Instrument
               Serif at a size that reads as a signature rather than a label,
               with a thread rule that draws itself under it on approach. */}
-          <span className="relative inline-block font-display text-[1.45rem] leading-none tracking-tight">
+          {/* A shade smaller on a phone, so the top row has room for the
+              actions without the name reaching for the middle of the screen. */}
+          <span className="relative inline-block font-display text-[1.2rem] leading-none tracking-tight sm:text-[1.45rem]">
             {STORE.name}
             <span
               aria-hidden="true"
@@ -154,8 +185,11 @@ export default function AtelierRail() {
           </span>
         </Link>
 
-        {/* Three destinations, not six duplicated filters — see RAIL above. */}
-        <ul className="flex flex-1 items-baseline gap-x-7">
+        {/* Three destinations, not six duplicated filters — see RAIL above.
+            `order-last` puts this on the second row on a phone (it is the
+            widest of the three groups, so it is the one that gets the row);
+            `md:order-none` restores the middle position on a wide rail. */}
+        <ul className="order-last flex w-full flex-1 items-center gap-x-7 md:order-none md:w-auto">
           {RAIL.map(({ href, label }) => (
             <li key={href}>
               <Link
@@ -172,7 +206,9 @@ export default function AtelierRail() {
           ))}
         </ul>
 
-        <div className="flex shrink-0 items-baseline gap-x-6">
+        {/* `ml-auto` pins the actions to the right edge on the phone's top row,
+            where the destinations are no longer between them and the mark. */}
+        <div className="ml-auto flex shrink-0 items-center gap-x-6">
           <Link
             href={user ? '/account' : '/auth/login'}
             className="text-caption uppercase text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"

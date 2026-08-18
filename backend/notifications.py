@@ -157,15 +157,24 @@ _HEADER_HTML = f"""\
             <td style="padding:34px 36px 0;background:#FAF6F3;">
               <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                 <tr>
-                  <td valign="middle" style="padding-right:14px;">
-                    <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-                      <tr>
-                        <td width="42" height="42" align="center" valign="middle"
-                            style="width:42px;height:42px;border:1px solid #C1876F;
-                                   font-family:Georgia,'Times New Roman',Times,serif;font-size:21px;color:#C1876F;
-                                   line-height:42px;mso-line-height-rule:exactly;">A</td>
-                      </tr>
-                    </table>
+                  <!--
+                    THE MARK IS A LETTER, NOT A BOX.
+
+                    This was a 42px cell with a 1px border around a 21px "A",
+                    which read as a placeholder icon sitting next to the name
+                    rather than as part of it — a square where a logo has not
+                    arrived yet. The border is gone and the A is set in the
+                    wordmark's own face at the wordmark's own size, so the two
+                    read as one line of type.
+
+                    Deliberately a letterform rather than the site's stitched
+                    stamp: that mark is an SVG, and mail clients strip SVG.
+                    A real logo file replaces this later.
+                  -->
+                  <td valign="middle" style="padding-right:12px;">
+                    <p style="margin:0;padding:0;font-family:Georgia,'Times New Roman',Times,serif;
+                              font-size:26px;color:#C1876F;line-height:1.1;
+                              mso-line-height-rule:exactly;">A</p>
                   </td>
                   <td valign="middle" style="text-align:left;">
                     <p style="margin:0;padding:0;font-family:Georgia,'Times New Roman',Times,serif;font-size:24px;

@@ -310,21 +310,34 @@ function InvoiceContent() {
           </div>
         </div>
 
-        {/* ── Footer ── */}
-        <div className="bg-gradient-to-r from-maroon-900 to-maroon-800 px-8 py-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
+        {/**
+          * ── The foot of the document ──
+          *
+          * This was a maroon gradient band with white type, a gold line and a
+          * shopping-bag emoji, and it survived the sweep that turned the rest
+          * of this page into one ink on white — which made it the single
+          * loudest thing on a document otherwise designed for a printer. A
+          * full-bleed gradient is the worst case for print: it lays down a
+          * solid band of ink, drains a cartridge, and greys into mud on a
+          * photocopy, taking the white type with it.
+          *
+          * A rule does the same job. The emoji is gone because it renders as a
+          * black glyph or an empty box on most print drivers, and a tax
+          * document is not the place to find out which.
+          */}
+        <div className="border-t border-graphite/25 px-8 py-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <LogoMark size={30} className="text-white flex-shrink-0" />
-              <div>
-                <p className="text-white font-normal uppercase" style={{ letterSpacing: '0.03em' }}>Ammalu Tex</p>
-                <p className="text-white/60 text-xs">Shop Ground Floor No 129, Texvalley Gangapuram</p>
-                <p className="text-white/60 text-xs">ammalutex.com · support@ammalutex.com</p>
+              <LogoMark size={30} className="flex-shrink-0 text-graphite" />
+              <div className="text-[11px] leading-relaxed text-graphite/70">
+                <p className="uppercase tracking-[0.12em] text-graphite">Ammalu Tex</p>
+                <p>Shop Ground Floor No 129, Texvalley Gangapuram</p>
+                <p>ammalutex.com · support@ammalutex.com</p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-white/50 text-xs">Thank you for shopping with us! 🛍️</p>
-              <p className="text-gold-300 text-xs font-medium mt-1">© {new Date().getFullYear()} Ammalu Tex. All rights reserved.</p>
-            </div>
+            <p className="text-[11px] text-graphite/60">
+              © {new Date().getFullYear()} Ammalu Tex
+            </p>
           </div>
         </div>
       </div>
