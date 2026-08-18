@@ -9,6 +9,7 @@ import type { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import Reveal from '@/components/home/Reveal';
 import BoltRow from '@/components/home/BoltRow';
+import MeasureRule from '@/components/home/MeasureRule';
 
 /**
  * The Atelier — Ammalu Tex's homepage.
@@ -159,15 +160,18 @@ export default function HomePage() {
         <section aria-labelledby="shelf-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
           <div className="mx-auto w-full max-w-[104rem]">
             <Reveal>
-              <h2 id="shelf-heading" className="mb-[5vh] font-display text-chapter font-normal text-graphite">
-                On the shelf
-              </h2>
+              <div className="mb-[5vh]">
+                <MeasureRule label="Sizes S – XXL" className="mb-9" />
+                <h2 id="shelf-heading" className="font-display text-chapter font-normal text-graphite">
+                  On the shelf
+                </h2>
+              </div>
             </Reveal>
 
             {BOLTS.map((b, i) => (
               <BoltRow key={b.name} {...b} delay={i * 60} />
             ))}
-            <div className="border-t border-paper-edge" />
+            <MeasureRule className="mt-2" />
           </div>
         </section>
 

@@ -58,11 +58,40 @@ export default function AtelierRail() {
    * property.
    */
   const [moved, setMoved] = useState(false);
+  /**
+   * How far down the page we are, 0..1, drawn as a thread laid along the
+   * bottom edge of the rail.
+   *
+   * A tailor pins a thread along a seam to mark how far the work has got.
+   * That is the whole idea, and it is doing real work: on the long pages —
+   * the policies, a product, the shelf — there is otherwise nothing telling
+   * you whether you are near the end. A percentage would say the same thing
+   * and look like a dashboard; a thread says it and belongs to the shop.
+   *
+   * scaleX on a transform, so it never triggers layout.
+   */
+  const [progress, setProgress] = useState(0);
   useEffect(() => {
-    const onScroll = () => setMoved(window.scrollY > 8);
-    onScroll();
+    let pending = false;
+    const measure = () => {
+      pending = false;
+      const doc = document.documentElement;
+      const span = doc.scrollHeight - window.innerHeight;
+      setMoved(window.scrollY > 8);
+      setProgress(span > 0 ? Math.min(1, Math.max(0, window.scrollY / span)) : 0);
+    };
+    const onScroll = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(measure);
+    };
+    measure();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
   const active = (href: string) =>
@@ -136,6 +165,13 @@ export default function AtelierRail() {
           </Link>
         </div>
       </nav>
+
+      {/* The thread, pinned along the seam. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-px origin-left bg-thread transition-transform duration-150 ease-out"
+        style={{ transform: `scaleX(${progress})` }}
+      />
     </header>
   );
 }

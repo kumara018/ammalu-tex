@@ -55,61 +55,107 @@ body {
   min-height: 100vh;
 }
 
+/*
+ * THE ATELIER'S COMPONENTS.
+ *
+ * These five classes — button, field, label, card, section title — are used
+ * several hundred times across fourteen pages. They are why the site still
+ * looked like a stock storefront after the palette was remapped: recolouring
+ * `rounded-2xl` with a drop shadow gives you a beige SaaS card, not a workroom.
+ *
+ * Three changes do most of the work:
+ *
+ *   RADIUS. `rounded-2xl` and `rounded-lg` everywhere is the single loudest
+ *   signal of a template. A workroom is squared off — paper, rules, pattern
+ *   pieces. Everything here is 2px or nothing.
+ *
+ *   SHADOW. Gone. A drop shadow says "this card floats above the page", which
+ *   on a paper ground is exactly wrong: these are things ON the paper. A
+ *   hairline does the separating.
+ *
+ *   WEIGHT. `font-semibold` on every control is shouting. Buttons and labels
+ *   are now letter-spaced small caps — the register of a label stitched into a
+ *   garment, not a call to action on a landing page.
+ */
 @layer components {
+  /* The filled control. One per screen, at most — it is the thing being
+     asked for, and a page with three of them is asking for nothing. */
   .btn-primary {
-    @apply bg-maroon-800 hover:bg-maroon-900 text-white font-semibold py-2.5 px-6 rounded-lg
-           transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
-           shadow-sm hover:shadow-md;
+    @apply inline-flex items-center justify-center gap-2 bg-graphite text-paper
+           px-7 py-3 rounded-sm text-caption uppercase
+           transition-colors duration-500 hover:bg-thread-deep
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4
+           focus-visible:outline-thread
+           disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
+  /* The unfilled one. A hairline and the accent on hover — everything else
+     on the page is quiet, so this does not need to compete. */
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-maroon-800 font-semibold py-2.5 px-6 rounded-lg
-           border-2 border-maroon-800 transition-all duration-200 active:scale-95
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 bg-transparent text-graphite
+           px-7 py-3 rounded-sm text-caption uppercase
+           border border-paper-edge transition-colors duration-500
+           hover:border-thread hover:text-thread
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4
+           focus-visible:outline-thread
+           disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
+  /* Kept because pages reference it; it is now the accent-filled variant. */
   .btn-gold {
-    @apply bg-gold-600 hover:bg-gold-700 text-white font-semibold py-2.5 px-6 rounded-lg
-           transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
-           shadow-sm;
+    @apply inline-flex items-center justify-center gap-2 bg-thread text-paper
+           px-7 py-3 rounded-sm text-caption uppercase
+           transition-colors duration-500 hover:bg-thread-deep
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4
+           focus-visible:outline-thread
+           disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
+  /* A field is a ruled line to write on. The box is a hairline, the focus
+     state is the accent, and there is no glow. */
   .input-field {
-    @apply w-full px-4 py-3 rounded-lg border border-maroon-200 bg-white text-maroon-900
-           focus:outline-none focus:ring-2 focus:ring-maroon-800 focus:border-transparent
-           placeholder:text-maroon-400 transition-all duration-200;
+    @apply w-full px-4 py-3 rounded-sm border border-paper-edge bg-paper-bright
+           text-graphite placeholder:text-graphite-faint
+           transition-colors duration-300
+           focus:outline-none focus:border-thread;
   }
 
   .input-error {
-    @apply border-red-400 focus:ring-red-400;
+    @apply border-thread-deep focus:border-thread-deep;
   }
 
   .label {
-    @apply block text-sm font-semibold text-maroon-900 mb-1.5;
+    @apply block text-rule uppercase text-graphite-faint mb-2.5;
   }
 
+  /* On the paper, not above it. */
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-maroon-200 overflow-hidden;
+    @apply bg-paper-bright rounded-sm border border-paper-edge overflow-hidden;
   }
 
   .section-title {
-    @apply text-2xl md:text-3xl font-display font-bold text-maroon-900;
+    @apply font-display text-chapter font-normal text-graphite;
   }
 
   .error-msg {
-    @apply text-red-600 text-sm mt-1 flex items-center gap-1;
+    @apply text-thread-deep text-sm mt-2 flex items-center gap-1.5;
   }
 
+  /* Status reads as a small caps label with a rule under it rather than a
+     coloured pill. Semantic colour still separates good from bad — it is the
+     PILL that was decoration. */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    @apply inline-flex items-center gap-1.5 text-rule uppercase
+           border-b pb-0.5;
   }
 
-  .badge-success { @apply badge bg-green-100 text-green-800; }
-  .badge-warning { @apply badge bg-yellow-100 text-yellow-800; }
-  .badge-danger  { @apply badge bg-red-100 text-red-800; }
-  .badge-info    { @apply badge bg-blue-100 text-blue-800; }
-  .badge-default { @apply badge bg-gray-100 text-gray-800; }
+  .badge-success { @apply badge text-green-800  border-green-700/40; }
+  .badge-warning { @apply badge text-amber-800  border-amber-700/40; }
+  .badge-danger  { @apply badge text-red-800    border-red-700/40; }
+  .badge-info    { @apply badge text-graphite-muted border-paper-edge; }
+  .badge-default { @apply badge text-graphite-faint border-paper-edge; }
 }
+
 
 .star-filled { color: #eab308; }
 .star-empty  { color: #d1d5db; }

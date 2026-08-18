@@ -229,77 +229,55 @@ function LoginPageInner() {
   return (
     <div className="min-h-screen flex flex-col">
 
-      {/* Standalone header */}
-      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md gap-3">
-        {/* Left — Home when guest, Back to account when logged in */}
-        {user ? (
-          <Link
-            href="/"
-            className="flex flex-col items-start text-sm text-white/80 hover:text-white transition-colors leading-tight flex-shrink-0"
-          >
-            <span className="text-xs">← Back to</span>
-            <span className="font-semibold text-white truncate max-w-[110px]">
-              {user.full_name?.split(' ')[0] || 'Account'}
-            </span>
-          </Link>
-        ) : (
-          <Link
-            href="/"
-            className="flex flex-col items-start text-sm text-white/80 hover:text-white transition-colors leading-tight flex-shrink-0"
-          >
-            <span className="text-xs">←</span>
-            <span className="font-semibold text-white">Home</span>
-          </Link>
-        )}
-        <div className="flex-1 flex flex-col items-center leading-tight">
-          <Link href="/" className="flex items-center gap-2.5 leading-tight">
-            <LogoMark size={30} className="text-white flex-shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-white font-bold uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>Ammalu Tex</span>
-              <span className="text-gold-300 text-[9px] font-semibold tracking-widest uppercase">Premium Women&apos;s Textiles</span>
-            </div>
-          </Link>
-        </div>
-        {/* Right spacer always present to keep logo centered */}
-        <div className="w-14" />
-      </div>
+            {/* The mark, and the only way back.
+          This replaced a full-width `bg-brand-gradient` bar carrying a logo
+          lockup centred between a back-link and an empty spacer div that
+          existed only to balance it. On a page whose whole job is one form,
+          that bar was a second visual system competing with the thing being
+          asked for. Left-flushed needs no spacer. */}
+      <Link
+        href="/"
+        className="shrink-0 self-start px-6 pt-[clamp(2rem,6vh,3.5rem)] font-display text-[1.35rem] leading-none tracking-tight text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread sm:px-10"
+      >
+        Ammalu Tex
+      </Link>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
 
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="font-display text-band font-normal text-graphite">
             {step === 'credentials'
               ? (isAddMode ? 'Switch Account' : 'Sign in to your account')
               : 'Verify your identity'}
           </h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-graphite-faint text-sm mt-1">
             {step === 'credentials'
               ? (isAddMode ? 'Sign in with a different account or create a new one' : 'Enter your email or mobile number')
               : `OTP sent to ${emailHint}`}
           </p>
         </div>
 
-        <div className="card p-8 shadow-lg">
+        <div className="card p-8">
 
           {/* ── Retry countdown banner ───────────────────────────────── */}
           {retryIn > 0 && (
-            <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="mb-5 bg-paper-shade border border-paper-edge rounded-sm p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-amber-600 flex-shrink-0" />
-                  <p className="text-amber-800 text-sm">
+                  <Clock size={16} className="text-thread flex-shrink-0" />
+                  <p className="text-graphite-muted text-sm">
                     Server is starting up — retrying in <strong>{retryIn}s</strong>…
                   </p>
                 </div>
                 <button
                   onClick={() => { cancelPendingRetry(); retryCountRef.current = 1; }}
-                  className="text-xs text-amber-600 hover:text-amber-800 font-medium ml-2 flex-shrink-0"
+                  className="text-xs text-thread hover:text-graphite-muted font-medium ml-2 flex-shrink-0"
                 >
                   Cancel
                 </button>
               </div>
-              <p className="text-amber-600 text-xs mt-1 ml-6">
+              <p className="text-thread text-xs mt-1 ml-6">
                 This is a one-time delay while the server wakes up (Render free tier).
               </p>
             </div>
@@ -307,7 +285,7 @@ function LoginPageInner() {
 
           {/* ── Error banner (only shown when no countdown) ──────────── */}
           {error && retryIn === 0 && (
-            <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-sm p-4">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
               <p className="text-red-700 text-sm">{error}</p>
             </div>
@@ -346,7 +324,7 @@ function LoginPageInner() {
                     autoComplete="current-password"
                   />
                   <button type="button" onClick={() => setShowPass(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint hover:text-graphite-muted p-1">
                     {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -384,7 +362,7 @@ function LoginPageInner() {
                   autoComplete="one-time-code"
                   autoFocus
                 />
-                <p className="text-xs text-gray-500 mt-1.5">
+                <p className="text-xs text-graphite-faint mt-1.5">
                   Sent to <strong>{emailHint}</strong>. Check inbox + spam folder.
                 </p>
               </div>
@@ -401,7 +379,7 @@ function LoginPageInner() {
                   type="button"
                   onClick={handleResend}
                   disabled={timer > 0 || loading}
-                  className="flex items-center gap-1.5 font-medium text-maroon-700 hover:underline disabled:text-gray-400 disabled:no-underline"
+                  className="flex items-center gap-1.5 font-medium text-maroon-700 hover:underline disabled:text-graphite-faint disabled:no-underline"
                 >
                   <RefreshCw size={14} />
                   {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
@@ -409,7 +387,7 @@ function LoginPageInner() {
                 <button
                   type="button"
                   onClick={() => { setStep('credentials'); setOtp(''); setError(''); }}
-                  className="text-gray-500 hover:text-gray-700 hover:underline"
+                  className="text-graphite-faint hover:text-graphite-muted hover:underline"
                 >
                   ← Change email/password
                 </button>
@@ -418,7 +396,7 @@ function LoginPageInner() {
           )}
 
           <div className="mt-6 pt-5 border-t border-maroon-200 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-graphite-muted">
               Don&apos;t have an account?{' '}
               <Link
                 href={isAddMode ? '/auth/register?add=1' : '/auth/register'}

@@ -57,21 +57,21 @@ export default function ForgotPasswordPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-4">
             <LogoMark size={34} className="text-gold-500 flex-shrink-0" />
-            <h1 className="text-3xl font-display font-black text-maroon-900">Ammalu Tex</h1>
+            <h1 className="text-3xl font-display font-normal text-maroon-900">Ammalu Tex</h1>
           </Link>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="font-display text-band font-normal text-graphite">
             {step === 'request' ? 'Forgot Password?' : 'Enter OTP'}
           </h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-graphite-faint text-sm mt-1">
             {step === 'request'
               ? 'We\'ll send an OTP to your registered email'
               : `OTP sent to ${emailHint || 'your email'}`}
           </p>
         </div>
 
-        <div className="card p-8 shadow-lg">
+        <div className="card p-8">
           {error && (
-            <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-sm p-4">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
               <p className="text-red-700 text-sm">{error}</p>
             </div>
@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
                   value={form.otp}
                   onChange={(e) => { setForm({ ...form, otp: e.target.value.replace(/\D/, '') }); setError(''); }}
                   placeholder="Enter OTP from email"
-                  className="input-field text-center text-2xl tracking-widest font-bold"
+                  className="input-field text-center text-2xl tracking-widest font-normal"
                 />
               </div>
               <div>
@@ -119,11 +119,11 @@ export default function ForgotPasswordPage() {
                     className="input-field pr-12"
                   />
                   <button type="button" onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1 text-xs">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint hover:text-graphite-muted p-1 text-xs">
                     {showPass ? 'Hide' : 'Show'}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Min 8 chars · Uppercase · Number · Symbol (!@#$...)</p>
+                <p className="text-xs text-graphite-faint mt-1">Min 8 chars · Uppercase · Number · Symbol (!@#$...)</p>
               </div>
               <div>
                 <label className="label">Confirm New Password *</label>
@@ -148,7 +148,7 @@ export default function ForgotPasswordPage() {
           )}
 
           <div className="mt-6 pt-5 border-t border-maroon-200 text-center">
-            <Link href="/auth/login" className="flex items-center justify-center gap-1 text-sm text-gray-600 hover:text-maroon-800">
+            <Link href="/auth/login" className="flex items-center justify-center gap-1 text-sm text-graphite-muted hover:text-maroon-800">
               <ArrowLeft size={14} /> Back to Sign In
             </Link>
           </div>

@@ -319,78 +319,38 @@ function RegisterPageInner() {
   return (
     <div className="min-h-screen flex flex-col">
 
-      {/* Standalone header */}
-      <div className="bg-brand-gradient text-white py-4 px-6 flex items-center shadow-md gap-3">
-        {/* Left — Back to Login always; also Home when no account logged in */}
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Link
-            href="/auth/login?add=1"
-            className="flex flex-col items-start text-sm text-white/80 hover:text-white transition-colors leading-tight"
-          >
-            <span className="text-xs">← Back to</span>
-            <span className="font-semibold text-white">Login</span>
-          </Link>
-          {!user && (
-            <>
-              <span className="text-white/30 text-lg">|</span>
-              <Link
-                href="/"
-                className="flex flex-col items-start text-sm text-white/80 hover:text-white transition-colors leading-tight"
-              >
-                <span className="text-xs">←</span>
-                <span className="font-semibold text-white">Home</span>
-              </Link>
-            </>
-          )}
-          {user && (
-            <>
-              <span className="text-white/30 text-lg">|</span>
-              <Link
-                href="/"
-                className="flex flex-col items-start text-sm text-white/80 hover:text-white transition-colors leading-tight"
-              >
-                <span className="text-xs">← Back to</span>
-                <span className="font-semibold text-white truncate max-w-[110px]">
-                  {user.full_name?.split(' ')[0] || 'Account'}
-                </span>
-              </Link>
-            </>
-          )}
-        </div>
-
-        <div className="flex-1 flex flex-col items-center leading-tight">
-          <Link href="/" className="flex items-center gap-2.5 leading-tight">
-            <LogoMark size={30} className="text-white flex-shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-white font-bold uppercase leading-tight" style={{ fontSize: '15px', letterSpacing: '0.04em' }}>Ammalu Tex</span>
-              <span className="text-gold-300 text-[9px] font-semibold tracking-widest uppercase">Premium Women&apos;s Textiles</span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Right spacer to keep logo centered */}
-        <div className="w-14" />
-      </div>
+            {/* The mark, and the only way back.
+          This replaced a full-width `bg-brand-gradient` bar carrying a logo
+          lockup centred between a back-link and an empty spacer div that
+          existed only to balance it. On a page whose whole job is one form,
+          that bar was a second visual system competing with the thing being
+          asked for. Left-flushed needs no spacer. */}
+      <Link
+        href="/"
+        className="shrink-0 self-start px-6 pt-[clamp(2rem,6vh,3.5rem)] font-display text-[1.35rem] leading-none tracking-tight text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread sm:px-10"
+      >
+        Ammalu Tex
+      </Link>
 
       <div className="flex-1 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="font-display text-band font-normal text-graphite">
             {step === 'form' ? 'Create your account' : 'Verify your account'}
           </h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-graphite-faint text-sm mt-1">
             {step === 'form'
               ? 'Join thousands of happy customers at Ammalu Tex.'
               : `OTP sent to ${emailHint} and your mobile number.`}
           </p>
         </div>
 
-        <div className="card p-8 shadow-lg">
+        <div className="card p-8">
 
           {apiError && (
-            <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 rounded-sm p-4">
               <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
               <p className="text-red-700 text-sm">{apiError}</p>
             </div>
@@ -451,7 +411,7 @@ function RegisterPageInner() {
                   maxLength={15}
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-graphite-faint mt-1">
                 {countryCode === '+91'
                   ? 'Enter 10-digit number starting with 6–9'
                   : 'Enter number without country code'}
@@ -471,7 +431,7 @@ function RegisterPageInner() {
                   autoComplete="new-password"
                 />
                 <button type="button" onClick={() => setShowPass(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint hover:text-graphite-muted p-1">
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -481,7 +441,7 @@ function RegisterPageInner() {
                   {RULES.map(r => {
                     const ok = r.test(password);
                     return (
-                      <div key={r.label} className={`flex items-center gap-1.5 text-xs ${ok ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div key={r.label} className={`flex items-center gap-1.5 text-xs ${ok ? 'text-green-600' : 'text-graphite-faint'}`}>
                         <CheckCircle size={11} className={ok ? 'text-green-500' : 'text-gray-300'} />
                         {r.label}
                       </div>
@@ -504,7 +464,7 @@ function RegisterPageInner() {
                   autoComplete="new-password"
                 />
                 <button type="button" onClick={() => setShowConfirm(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-1">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-faint hover:text-graphite-muted p-1">
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
@@ -512,7 +472,7 @@ function RegisterPageInner() {
 
             {/* Terms checkbox */}
             <div>
-              <label className={`flex items-start gap-3 cursor-pointer group ${errors.terms ? 'text-red-600' : 'text-gray-700'}`}>
+              <label className={`flex items-start gap-3 cursor-pointer group ${errors.terms ? 'text-red-600' : 'text-graphite-muted'}`}>
                 <div className="relative mt-0.5 flex-shrink-0">
                   <input
                     type="checkbox"
@@ -523,7 +483,7 @@ function RegisterPageInner() {
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all
                     ${agreeTerms ? 'bg-maroon-800 border-maroon-800'
                       : errors.terms ? 'border-red-400'
-                      : 'border-gray-300 group-hover:border-maroon-400'}`}>
+                      : 'border-paper-edge group-hover:border-maroon-400'}`}>
                     {agreeTerms && <CheckCircle size={12} className="text-white" fill="white" />}
                   </div>
                 </div>
@@ -569,7 +529,7 @@ function RegisterPageInner() {
                   autoComplete="one-time-code"
                   autoFocus
                 />
-                <p className="text-xs text-gray-500 mt-1.5">
+                <p className="text-xs text-graphite-faint mt-1.5">
                   Sent to <strong>{emailHint}</strong> and your mobile via SMS/WhatsApp. Check inbox + spam folder.
                 </p>
               </div>
@@ -586,7 +546,7 @@ function RegisterPageInner() {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={timer > 0 || loading}
-                  className="flex items-center gap-1.5 font-medium text-maroon-700 hover:underline disabled:text-gray-400 disabled:no-underline"
+                  className="flex items-center gap-1.5 font-medium text-maroon-700 hover:underline disabled:text-graphite-faint disabled:no-underline"
                 >
                   <RefreshCw size={14} />
                   {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
@@ -594,7 +554,7 @@ function RegisterPageInner() {
                 <button
                   type="button"
                   onClick={() => { setStep('form'); setOtp(''); setApiError(''); }}
-                  className="text-gray-500 hover:text-gray-700 hover:underline"
+                  className="text-graphite-faint hover:text-graphite-muted hover:underline"
                 >
                   ← Edit details
                 </button>
@@ -603,7 +563,7 @@ function RegisterPageInner() {
           )}
 
           <div className="mt-6 pt-5 border-t border-maroon-200 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-graphite-muted">
               Already have an account?{' '}
               <Link href="/auth/login" className="text-maroon-800 font-semibold hover:underline">
                 Sign In
