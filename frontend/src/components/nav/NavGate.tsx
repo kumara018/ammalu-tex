@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import AtelierRail from './AtelierRail';
+import { isAuthRoute } from '@/lib/routes';
 
 /**
  * Decides whether the navigation appears at all.
@@ -18,13 +19,13 @@ import AtelierRail from './AtelierRail';
  */
 export default function NavGate() {
   const pathname = usePathname();
-  if (pathname.startsWith('/auth')) return null;
+  if (isAuthRoute(pathname)) return null;
   return <AtelierRail />;
 }
 
 /** The same rule for the ambient chrome (the sound toggle). */
 export function ChromeGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (pathname.startsWith('/auth')) return null;
+  if (isAuthRoute(pathname)) return null;
   return <>{children}</>;
 }

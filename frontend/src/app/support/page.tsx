@@ -27,7 +27,7 @@ function Accordion({
   id?: string;
   title: string;
   // React 19 infers `never` for ElementType props; name what we pass instead.
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   children: React.ReactNode;
   defaultOpen?: boolean;
   color?: string;
@@ -46,20 +46,21 @@ function Accordion({
     <div id={id} className="card overflow-hidden mb-4">
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex items-center justify-between gap-4 px-5 py-4 text-left transition-colors ${open ? 'bg-maroon-50' : 'bg-white hover:bg-paper'}`}
+        // Open/closed is carried by the accent and the chevron, not by a fill.
+        // Both fills were literal whites laid on the paper, which is the thing
+        // this page was asked to stop doing.
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-500"
       >
         <div className="flex items-center gap-3">
-          <span className="p-2 bg-maroon-100 rounded-sm text-maroon-800">
-            <Icon size={18} />
-          </span>
-          <span className="font-normal text-graphite text-base">{title}</span>
+          <Icon size={18} className={open ? 'text-thread' : 'text-graphite-faint'} />
+          <span className={`text-base ${open ? 'text-graphite' : 'text-graphite-muted'}`}>{title}</span>
         </div>
         {open
-          ? <ChevronUp size={20} className="text-maroon-700 flex-shrink-0" />
+          ? <ChevronUp size={20} className="text-thread flex-shrink-0" />
           : <ChevronDown size={20} className="text-graphite-faint flex-shrink-0" />}
       </button>
       {open && (
-        <div className="px-5 pb-6 pt-4 border-t border-maroon-200 bg-white">
+        <div className="px-5 pb-6 pt-4 border-t border-paper-edge">
           {children}
         </div>
       )}
@@ -71,18 +72,18 @@ function Accordion({
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-maroon-200 rounded-sm overflow-hidden mb-2">
+    <div className="border-b border-paper-edge">
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex justify-between items-start gap-4 px-4 py-3.5 text-left transition-colors ${open ? 'bg-maroon-50' : 'bg-white hover:bg-paper'}`}
+        className="w-full flex justify-between items-start gap-4 py-4 text-left transition-colors duration-500"
       >
-        <span className="font-semibold text-graphite text-sm leading-snug">{q}</span>
+        <span className={`text-sm leading-snug ${open ? 'text-graphite' : 'text-graphite-muted'}`}>{q}</span>
         {open
-          ? <ChevronUp size={17} className="text-maroon-700 flex-shrink-0 mt-0.5" />
+          ? <ChevronUp size={17} className="text-thread flex-shrink-0 mt-0.5" />
           : <ChevronDown size={17} className="text-graphite-faint flex-shrink-0 mt-0.5" />}
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-3 text-sm text-graphite-muted leading-relaxed border-t border-maroon-200 bg-white">
+        <div className="pb-5 text-sm text-graphite-muted leading-relaxed">
           {a}
         </div>
       )}
@@ -156,22 +157,22 @@ export default function SupportPage() {
         </p>
 
         <div className="mb-4">
-          <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">
+          <p className="text-rule uppercase text-graphite-faint mb-2">
             Tops &amp; Crop Tops — S to XXXL
           </p>
-          <div className="overflow-x-auto rounded-sm border border-maroon-200">
+          <div className="overflow-x-auto border-y border-paper-edge">
             <table className="w-full text-sm">
               <thead className="">
-                <tr className="text-maroon-800 font-semibold text-xs uppercase tracking-wide">
+                <tr className="text-rule uppercase text-thread">
                   <th className="px-4 py-3 text-left">Size</th>
                   <th className="px-4 py-3 text-left">Chest</th>
                   <th className="px-4 py-3 text-left">Waist</th>
                   <th className="px-4 py-3 text-left">Hip</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-orange-50">
+              <tbody className="divide-y divide-paper-edge">
                 {SIZE_ROWS.map((row) => (
-                  <tr key={row.size} className="hover:bg-maroon-50 transition-colors">
+                  <tr key={row.size} className="hover:bg-paper-shade transition-colors duration-500">
                     <td className="px-4 py-3 font-normal text-maroon-900">{row.size}</td>
                     <td className="px-4 py-3 text-graphite-muted">{row.chest}</td>
                     <td className="px-4 py-3 text-graphite-muted">{row.waist}</td>
@@ -184,22 +185,22 @@ export default function SupportPage() {
         </div>
 
         <div className="mb-4">
-          <p className="text-xs font-semibold text-maroon-700 uppercase tracking-wide mb-1">
+          <p className="text-rule uppercase text-graphite-faint mb-2">
             Chudithar, Lehenga, Half Saree &amp; Party Wears — L to XXXL
           </p>
-          <div className="overflow-x-auto rounded-sm border border-maroon-200">
+          <div className="overflow-x-auto border-y border-paper-edge">
             <table className="w-full text-sm">
               <thead className="">
-                <tr className="text-maroon-800 font-semibold text-xs uppercase tracking-wide">
+                <tr className="text-rule uppercase text-thread">
                   <th className="px-4 py-3 text-left">Size</th>
                   <th className="px-4 py-3 text-left">Chest</th>
                   <th className="px-4 py-3 text-left">Waist</th>
                   <th className="px-4 py-3 text-left">Hip</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-orange-50">
+              <tbody className="divide-y divide-paper-edge">
                 {SIZE_ROWS.filter((r) => ['L', 'XL', 'XXL', 'XXXL'].includes(r.size)).map((row) => (
-                  <tr key={row.size} className="hover:bg-maroon-50 transition-colors">
+                  <tr key={row.size} className="hover:bg-paper-shade transition-colors duration-500">
                     <td className="px-4 py-3 font-normal text-maroon-900">{row.size}</td>
                     <td className="px-4 py-3 text-graphite-muted">{row.chest}</td>
                     <td className="px-4 py-3 text-graphite-muted">{row.waist}</td>
@@ -211,8 +212,8 @@ export default function SupportPage() {
           </div>
         </div>
 
-        <div className="p-4 bg-transparent rounded-sm text-xs text-graphite-muted border border-amber-100">
-          💡 <b>Measurement Tips:</b> Use a soft measuring tape. Measure chest at the fullest
+        <div className="border-l border-thread/50 pl-5 text-sm text-graphite-muted">
+          <b className="font-normal text-graphite">How to measure.</b> Use a soft measuring tape. Measure chest at the fullest
           part, waist at the narrowest, and hips at the widest. For fitted styles (bodycon),
           choose your exact size. For flowing styles (lehenga, half saree), you can go one size
           down. When in doubt, size up.
@@ -447,9 +448,7 @@ export default function SupportPage() {
 
       {/* ── Store Timings card ─────────────────────────────────────────── */}
       <div className="card p-5 mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="p-3 bg-maroon-100 rounded-sm text-maroon-800 flex-shrink-0">
-          <Clock size={22} />
-        </div>
+        <Clock size={22} className="text-thread flex-shrink-0" />
         <div className="flex-1">
           <p className="font-normal text-graphite mb-1">Store Timings</p>
           <p className="text-sm text-graphite-muted">{STORE.weekdays}</p>

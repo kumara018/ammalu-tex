@@ -191,7 +191,11 @@ export default function CartPage() {
 
         {/* Order summary */}
         <div className="lg:col-span-1">
-          <div className="card p-6 sticky top-28">
+          {/* bg-paper, not bg-paper-bright: `.card` carries no fill any more,
+              and a sticky block with no fill lets the bag lines scroll through
+              the totals. This is the page's own ground, so it stays one
+              surface — it is opaque, not lighter. */}
+          <div className="card bg-paper p-6 sticky top-28">
             <h2 className="font-normal text-lg text-maroon-900 mb-5">Order Summary</h2>
 
             <div className="space-y-3 text-sm">

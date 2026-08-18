@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import type { Capabilities, QualityTier, TierBudget } from '@/three/core/capabilities';
 import { TIER_BUDGETS, withoutEffects, forReducedMotion } from '@/three/core/capabilities';
+import { isAuthRoute } from '@/lib/routes';
 
 /**
  * Ammalu Tex — the Couture Atelier.
@@ -100,7 +101,7 @@ export function sceneForPath(pathname: string): SceneId {
     pathname.startsWith('/account') ||
     pathname.startsWith('/returns')
   ) return 'archive';
-  if (pathname.startsWith('/auth')) return 'threshold';
+  if (isAuthRoute(pathname)) return 'threshold';
   return 'muslin';
 }
 

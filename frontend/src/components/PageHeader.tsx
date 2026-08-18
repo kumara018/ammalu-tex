@@ -23,12 +23,16 @@ export default function PageHeader({
   lede,
   align = 'left',
   className = '',
+  children,
 }: {
   eyebrow?: string;
   title: string;
-  lede?: string;
+  /** ReactNode rather than string: a standfirst may carry a link or emphasis. */
+  lede?: React.ReactNode;
   align?: 'left' | 'center';
   className?: string;
+  /** A date line, a count, an action — sits under the standfirst. */
+  children?: React.ReactNode;
 }) {
   const centered = align === 'center';
 
@@ -53,6 +57,12 @@ export default function PageHeader({
           <p className={`mt-6 max-w-[54ch] text-lede text-graphite-muted ${centered ? 'mx-auto' : ''}`}>
             {lede}
           </p>
+        </Reveal>
+      )}
+
+      {children && (
+        <Reveal delay={eyebrow ? 250 : 160}>
+          <div className="mt-8">{children}</div>
         </Reveal>
       )}
     </header>

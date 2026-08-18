@@ -549,7 +549,8 @@ export default function CheckoutPage() {
 
         {/* Order Summary sidebar */}
         <div className="lg:col-span-1">
-          <div className="card p-5 sticky top-28">
+          {/* Opaque because it is sticky — see the note on the bag's summary. */}
+          <div className="card bg-paper p-5 sticky top-28">
             <h3 className="font-normal text-maroon-900 mb-4">Price Details</h3>
             <div className="space-y-2.5 text-sm">
               {items.map(item => (

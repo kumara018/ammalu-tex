@@ -209,8 +209,12 @@ export default function AccountPage() {
           { icon: HelpCircle, label: 'Help & Policies', href: '/support'        },
           { icon: UserX,      label: 'Delete Account',  href: '/account/delete', danger: true },
         ].map(({ icon: Icon, label, href, danger }) => (
+          // The default border used to be transparent because the white fill
+          // was what made the tile visible. With `.card` carrying no fill, the
+          // hairline IS the tile — so it is drawn at rest and only changes
+          // colour on hover.
           <Link key={label} href={href}
-            className={`card p-4 flex flex-col items-center gap-2 text-center transition-colors duration-500 border-2 ${danger ? 'border-transparent hover:border-red-700/40' : 'border-transparent hover:border-thread/50'}`}>
+            className={`card p-4 flex flex-col items-center gap-2 text-center transition-colors duration-500 ${danger ? 'hover:border-red-700/40' : 'hover:border-thread/50'}`}>
             <Icon size={20} className={danger ? 'text-red-500' : 'text-maroon-700'} />
             <span className={`text-xs font-semibold ${danger ? 'text-red-500' : 'text-graphite-muted'}`}>{label}</span>
           </Link>

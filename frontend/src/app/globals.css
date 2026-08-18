@@ -128,9 +128,26 @@ body {
     @apply block text-rule uppercase text-graphite-faint mb-2.5;
   }
 
-  /* On the paper, not above it. */
+  /* ON the paper, not a sheet laid on top of it.
+   *
+   * This used to be `bg-paper-bright` — #FFFDFB on a #FAF6F3 page. Four points
+   * of lightness is not enough to read as a card and is far too much to read
+   * as nothing: what it actually produced was a faintly luminous rectangle on
+   * every route, so a policy looked like a form to fill in, an order looked
+   * like a receipt in a window, and the site's one continuous ground was
+   * interrupted on every page that had content.
+   *
+   * The fill is gone. What is left is the rule — one hairline, the same
+   * hairline that separates a clause from the next clause and the rail from
+   * the page — so a block is still bounded where boundary is information,
+   * and the paper runs underneath the whole site without a seam.
+   *
+   * Two places re-declare a background over this deliberately: the sticky
+   * order summaries on the bag and at checkout, where content scrolls
+   * underneath and needs to be hidden by something opaque. Both say `bg-paper`
+   * explicitly — the page's own ground, not a brighter one. */
   .card {
-    @apply bg-paper-bright rounded-sm border border-paper-edge overflow-hidden;
+    @apply rounded-sm border border-paper-edge overflow-hidden;
   }
 
   .section-title {

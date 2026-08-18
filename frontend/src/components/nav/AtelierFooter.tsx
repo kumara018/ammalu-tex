@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { STORE } from '@/lib/config';
+import { isAuthRoute } from '@/lib/routes';
 
 /**
  * The counter at the end of the room.
@@ -48,7 +49,7 @@ export default function AtelierFooter() {
   const pathname = usePathname();
   // Auth screens are one focused card on an otherwise empty page. A footer
   // full of links there is an invitation to abandon signing in.
-  if (pathname.startsWith('/auth')) return null;
+  if (isAuthRoute(pathname)) return null;
 
   return (
     <footer className="relative z-10 overflow-hidden bg-graphite px-6 pb-[7vh] pt-[9vh] text-paper/70 sm:px-10">
@@ -75,6 +76,20 @@ export default function AtelierFooter() {
           <p className="mt-5 text-paper/45">
             {STORE.weekdays}<br />{STORE.weekend}
           </p>
+          {/* The map, under the address it belongs to.
+              The sister shop has carried this since its footer was rebuilt and
+              this one never did — which meant the only shop with a real
+              counter in Texvalley was the one you could not find on a map. It
+              sits with the address rather than under "speak to us": it is a
+              location, not a way of reaching a person. */}
+          <a
+            href={STORE.googleMapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-block border-b border-paper/25 pb-0.5 text-paper/70 transition-colors duration-500 hover:border-thread-pale hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
+          >
+            Find us on the map
+          </a>
         </div>
 
         <div className="lg:col-span-3">
