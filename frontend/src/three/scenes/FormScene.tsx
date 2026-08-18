@@ -83,10 +83,28 @@ export default function FormScene({
     const { pointer } = useSceneStore.getState();
     const w = weightRef.current;
 
-    formMat.opacity = 0.92 * w;
+    /**
+     * WHY THESE NUMBERS CAME DOWN FROM 0.92 AND 0.85.
+     *
+     * The form was rendering at 92% opacity across the whole viewport, behind
+     * a page whose right-hand column is the product name, the price, the size
+     * and the colour. A near-opaque calico torso the height of the screen sat
+     * directly under all of it, so the headline was set on a moving surface
+     * and the price washed out wherever the shoulder passed behind it.
+     *
+     * That is not a lighting problem, it is a priority problem: on THIS route
+     * the garment being sold is the photograph in the gallery, and the form is
+     * the room it is being shown in. A room does not compete with the thing on
+     * the stand.
+     *
+     * So the form and its drape drop to a weight where copy stays black on
+     * paper, and the whole group moves left (below) so its mass sits behind
+     * the gallery — which is opaque — rather than behind the type.
+     */
+    formMat.opacity = 0.11 * w;
     drapeMats.forEach((m, i) => {
       m.uniforms.uTime.value = t + i * 5.1;
-      m.uniforms.uOpacity.value = 0.85 * w;
+      m.uniforms.uOpacity.value = 0.15 * w;
       // Moving the light rather than the cloth. On a transmissive material the
       // informative interaction is watching the glow travel *through* the
       // fabric as the source shifts — the opposite of the sister site, where
@@ -100,6 +118,10 @@ export default function FormScene({
       // A quarter-turn sway, not a rotation. A garment on a form is looked at,
       // not spun — continuous rotation makes a hem impossible to read.
       form.current.rotation.y = Math.sin(t * 0.12) * 0.3 + pointer.x * 0.18;
+      // Off to the left, behind the gallery. The copy column is to the right
+      // of centre on every width this route uses, and nothing that moves
+      // belongs underneath a price.
+      form.current.position.x = -2.6;
     }
   });
 

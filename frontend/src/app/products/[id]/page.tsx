@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -15,6 +16,7 @@ import { useLoginPrompt } from '@/context/LoginPromptContext';
 import { useWishlist } from '@/context/WishlistContext';
 import toast from 'react-hot-toast';
 import { mediaUrl } from '@/lib/media';
+import { STORE } from '@/lib/config';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 function getYouTubeId(url: string): string | null {
@@ -112,28 +114,70 @@ function VideoSlide({ url }: { url: string }) {
   return <CustomVideoPlayer url={url} />;
 }
 
-// ── Main carousel ─────────────────────────────────────────────────────────────
+/**
+ * The gallery.
+ *
+ * WHAT WAS HERE. A square plate with two white circular arrows floating on the
+ * garment, a dark pill counter, a row of dots, and a horizontal thumbnail
+ * strip underneath with a maroon ring around the active one. That is the
+ * marketplace carousel: the same object on every storefront, three separate
+ * indicators (dots, counter, thumbnails) saying one thing, and the widest part
+ * of the page spent on chrome rather than cloth.
+ *
+ * WHAT IT IS NOW, AND WHY EACH DECISION.
+ *
+ *   THE RAIL MOVED TO THE SIDE. Thumbnails run vertically down the left on a
+ *   wide screen. It is how a showroom presents a piece — the options beside
+ *   the thing, not stacked under it — and it gives the plate the full column
+ *   height instead of the height left over after a strip.
+ *
+ *   ONE INDICATOR, NOT THREE. The rail IS the indicator, so the dots are gone.
+ *   The counter stays, because it is the only thing that says how many more
+ *   there are before you start clicking, and it is set as a number (03 / 07)
+ *   rather than a dark pill laid over the garment.
+ *
+ *   ZOOM. Hold the pointer over the plate and the image magnifies 2x around
+ *   exactly the point you are on. This is the one interaction on the site
+ *   worth real engineering: someone deciding whether to spend two thousand
+ *   rupees on a garment wants to see the weave, the stitching and the
+ *   embroidery, and no amount of description substitutes for it. It is
+ *   `transform-origin` plus a scale on the compositor — no second image, no
+ *   canvas, no library — and it is off for touch, where a pointer position
+ *   does not exist, and off for reduced motion.
+ *
+ *   THE ARROWS ARE HAIRLINES. A white disc on a photograph is a hole punched
+ *   in the product shot. These are chevrons in the shop's ink, on hover.
+ */
 function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images: string[]; videoUrl?: string; videoOrientation?: string; name: string }) {
-  // Build slides: images first, then video if present
   const slides: Array<{ type: 'image' | 'video'; src: string }> = [
     ...images.map(img => ({ type: 'image' as const, src: resolveUrl(img) })),
     ...(videoUrl ? [{ type: 'video' as const, src: videoUrl }] : []),
   ];
 
   const [active, setActive] = useState(0);
-  const [dragging, setDragging] = useState(false);
+  const [zoom, setZoom] = useState(false);
+  const [origin, setOrigin] = useState('50% 50%');
   const dragStartX = useRef(0);
   const dragDeltaX = useRef(0);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const plate = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
   const go = useCallback((idx: number) => {
+    if (slides.length === 0) return;
     setActive((idx + slides.length) % slides.length);
   }, [slides.length]);
 
   const prev = () => go(active - 1);
   const next = () => go(active + 1);
 
-  // ── Touch ─────────────────────────────────────────────────────────────────
+  // Arrow keys move through the gallery once it has focus — a keyboard user
+  // should not have to tab through every thumbnail to see the second view.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+  };
+
   const onTouchStart = (e: React.TouchEvent) => {
     dragStartX.current = e.touches[0].clientX;
     dragDeltaX.current = 0;
@@ -142,139 +186,141 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name }: { images:
     dragDeltaX.current = e.touches[0].clientX - dragStartX.current;
   };
   const onTouchEnd = () => {
-    if (Math.abs(dragDeltaX.current) > 40) {
-      dragDeltaX.current < 0 ? next() : prev();
-    }
+    if (Math.abs(dragDeltaX.current) > 40) { if (dragDeltaX.current < 0) next(); else prev(); }
     dragDeltaX.current = 0;
   };
 
-  // ── Mouse drag ────────────────────────────────────────────────────────────
   const onMouseDown = (e: React.MouseEvent) => {
-    setDragging(true);
+    dragging.current = true;
     dragStartX.current = e.clientX;
     dragDeltaX.current = 0;
   };
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!dragging) return;
-    dragDeltaX.current = e.clientX - dragStartX.current;
-  };
   const onMouseUp = () => {
-    if (dragging && Math.abs(dragDeltaX.current) > 40) {
-      dragDeltaX.current < 0 ? next() : prev();
+    if (dragging.current && Math.abs(dragDeltaX.current) > 40) {
+      if (dragDeltaX.current < 0) next(); else prev();
     }
-    setDragging(false);
+    dragging.current = false;
     dragDeltaX.current = 0;
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (dragging.current) dragDeltaX.current = e.clientX - dragStartX.current;
+    if (reduced || e.pointerType === 'touch') return;
+    const r = plate.current?.getBoundingClientRect();
+    if (!r) return;
+    setOrigin(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`);
   };
 
   if (slides.length === 0) {
     return (
-      <div className="aspect-square bg-paper-shade rounded-sm flex items-center justify-center">
-        👗
+      <div className="flex aspect-square flex-col items-center justify-center gap-3 border border-paper-edge bg-paper-shade">
+        <span aria-hidden="true" className="h-px w-10 bg-thread/50" />
+        <span className="text-rule uppercase text-graphite-faint">Photograph to come</span>
       </div>
     );
   }
 
   const current = slides[active];
+  const isPortraitVideo = current.type === 'video' && videoOrientation === 'portrait';
 
   return (
-    <div className="select-none">
-      {/* Main slide */}
-      <div
-        ref={trackRef}
-        className={`relative bg-paper-shade rounded-sm overflow-hidden mb-3 mx-auto cursor-grab active:cursor-grabbing ${current.type === 'image' ? 'p-6' : ''}`}
-        style={{
-          aspectRatio: current.type === 'video'
-            ? (videoOrientation === 'portrait' ? '9/16' : '16/9')
-            : '1/1',
-          maxWidth: current.type === 'video' && videoOrientation === 'portrait' ? '420px' : undefined,
-        }}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-      >
-        {current.type === 'image' ? (
-          <img
-            src={current.src}
-            alt={`${name} — view ${active + 1}`}
-            className="w-full h-full object-contain"
-            draggable={false}
-          />
-        ) : (
-          <VideoSlide url={current.src} />
-        )}
-
-        {/* Prev / Next arrows */}
-        {slides.length > 1 && (
-          <>
-            <button
-              onClick={e => { e.stopPropagation(); prev(); }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-paper/85 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              onClick={e => { e.stopPropagation(); next(); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-paper/85 hover:bg-paper-bright flex items-center justify-center text-graphite-muted transition-all z-10"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </>
-        )}
-
-        {/* Slide counter */}
-        {slides.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-graphite/80 text-paper text-caption uppercase px-3 py-1 rounded-sm">
-            {active + 1} / {slides.length}
-          </div>
-        )}
-
-        {/* Video badge */}
-        {current.type === 'video' && (
-          <div className="absolute top-3 left-3 bg-graphite/80 text-paper text-caption uppercase px-3 py-1 rounded-sm flex items-center gap-1.5">
-            <Play size={11} fill="white" /> Video
-          </div>
-        )}
-      </div>
-
-      {/* Dot indicators */}
+    <div className="flex select-none flex-col-reverse gap-4 sm:flex-row sm:gap-5">
+      {/* The rail. Horizontal below `sm`, where a vertical one would eat the
+          screen; vertical above it, where the plate has height to spare. */}
       {slides.length > 1 && (
-        <div className="flex justify-center gap-1.5 mb-3">
+        <div className="flex shrink-0 gap-2 overflow-x-auto pb-1 sm:max-h-[34rem] sm:w-[4.5rem] sm:flex-col sm:overflow-x-visible sm:overflow-y-auto sm:pb-0">
           {slides.map((s, i) => (
             <button
               key={i}
               onClick={() => go(i)}
-              className={`rounded-full transition-all ${i === active ? 'w-6 h-1.5 bg-thread' : 'w-1.5 h-1.5 bg-paper-edge hover:bg-graphite-faint'}`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Thumbnail strip */}
-      {slides.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {slides.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => go(i)}
-              className={`relative flex-shrink-0 w-16 h-16 rounded-sm border-2 overflow-hidden bg-paper-shade transition-colors duration-500 ${
-                i === active ? 'border-maroon-800 ring-2 ring-maroon-300' : 'border-paper-edge hover:border-maroon-400'
+              aria-label={`View ${i + 1} of ${slides.length}`}
+              aria-current={i === active}
+              className={`relative aspect-square w-16 shrink-0 overflow-hidden border bg-paper-shade transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread sm:w-full ${
+                i === active ? 'border-thread' : 'border-paper-edge hover:border-thread/50'
               }`}
             >
               {s.type === 'image' ? (
-                <img src={s.src} alt="" className="w-full h-full object-contain p-1" />
+                <img src={s.src} alt="" className="h-full w-full object-contain p-1" />
               ) : (
-                <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                  <Play size={20} className="text-white" fill="white" />
-                </div>
+                <span className="flex h-full w-full items-center justify-center bg-graphite">
+                  <span aria-hidden="true" className="block h-0 w-0 border-y-[5px] border-l-[8px] border-y-transparent border-l-thread-pale" />
+                </span>
               )}
             </button>
           ))}
         </div>
       )}
+
+      {/* The plate. */}
+      <div
+        ref={plate}
+        tabIndex={0}
+        onKeyDown={onKeyDown}
+        role="group"
+        aria-label={`${name} — gallery`}
+        className={`group relative flex-1 overflow-hidden border border-paper-edge bg-paper-shade focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${
+          current.type === 'image' ? 'cursor-zoom-in' : ''
+        }`}
+        style={{
+          aspectRatio: current.type === 'video' ? (isPortraitVideo ? '9/16' : '16/9') : '1/1',
+          maxWidth: isPortraitVideo ? '420px' : undefined,
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onPointerMove={onPointerMove}
+        onPointerEnter={() => { if (current.type === 'image') setZoom(true); }}
+        onPointerLeave={() => { setZoom(false); onMouseUp(); }}
+      >
+        {current.type === 'image' ? (
+          <img
+            key={current.src}
+            src={current.src}
+            alt={`${name} — view ${active + 1} of ${slides.length}`}
+            draggable={false}
+            style={{ transformOrigin: origin, transform: zoom && !reduced ? 'scale(2)' : 'scale(1)' }}
+            className="h-full w-full object-contain p-6 transition-transform duration-[600ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] motion-reduce:transition-none"
+          />
+        ) : (
+          <VideoSlide url={current.src} />
+        )}
+
+        {slides.length > 1 && (
+          <>
+            <button
+              onClick={e => { e.stopPropagation(); prev(); }}
+              aria-label="Previous view"
+              className="absolute left-4 top-1/2 z-10 -translate-y-1/2 p-2 text-graphite opacity-0 transition-opacity duration-500 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread group-hover:opacity-100"
+            >
+              <ChevronLeft size={22} strokeWidth={1.25} />
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); next(); }}
+              aria-label="Next view"
+              className="absolute right-4 top-1/2 z-10 -translate-y-1/2 p-2 text-graphite opacity-0 transition-opacity duration-500 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread group-hover:opacity-100"
+            >
+              <ChevronRight size={22} strokeWidth={1.25} />
+            </button>
+
+            {/* The count, as a number. */}
+            <span className="absolute bottom-4 right-5 z-10 text-rule uppercase tabular-nums text-graphite-faint">
+              {String(active + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
+            </span>
+          </>
+        )}
+
+        {current.type === 'image' && !reduced && (
+          <span className="pointer-events-none absolute bottom-4 left-5 z-10 hidden text-rule uppercase text-graphite-faint transition-opacity duration-500 group-hover:opacity-0 sm:block">
+            Hover to inspect
+          </span>
+        )}
+
+        {current.type === 'video' && (
+          <span className="absolute left-5 top-4 z-10 text-rule uppercase text-paper/80">On film</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -415,15 +461,16 @@ export default function ProductDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-graphite-faint mb-6">
-        <Link href="/" className="hover:text-maroon-800">Home</Link>
-        <ChevronRight size={14} />
-        <Link href="/products" className="hover:text-maroon-800">Products</Link>
-        <ChevronRight size={14} />
-        <Link href={`/products?category=${product.category}`} className="hover:text-maroon-800">{product.category}</Link>
-        <ChevronRight size={14} />
-        <span className="text-maroon-800 font-medium truncate max-w-[200px]">{product.name}</span>
-      </nav>
+      {/* One way back, to the shelf you came from. The four-link breadcrumb
+          with three chevrons that used to be here ended in the name of the
+          page you are already on. */}
+      <Link
+        href={`/products?category=${encodeURIComponent(product.category)}`}
+        className="group mb-[clamp(2rem,5vh,3.5rem)] inline-flex items-baseline gap-3 text-rule uppercase text-graphite-faint transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+      >
+        <span aria-hidden="true" className="inline-block transition-transform duration-500 group-hover:-translate-x-1 motion-reduce:transition-none">&larr;</span>
+        All {product.category}
+      </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* ── Image/Video Carousel ── */}
@@ -443,10 +490,10 @@ export default function ProductDetailPage() {
             {/* Wishlist */}
             <button
               onClick={() => { if (!user) { promptLogin('Sign in to save products to your wishlist.'); return; } toggleWishlist(product.id); }}
-              className={`p-2 rounded-full border-2 transition-all ${isWishlisted ? 'border-red-400 bg-transparent text-red-500' : 'border-paper-edge text-graphite-faint hover:border-red-300 hover:text-red-400'}`}
+              className={`transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread ${isWishlisted ? 'text-thread-deep' : 'text-graphite-faint hover:text-thread'}`}
               title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
-              <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
+              <Heart size={19} strokeWidth={1.5} fill={isWishlisted ? 'currentColor' : 'none'} />
             </button>
           </div>
           <h1 className="font-display text-chapter font-normal leading-[1.04] text-graphite">{product.name}</h1>
@@ -475,7 +522,7 @@ export default function ProductDetailPage() {
           </div>
           <p className="text-xs text-graphite-faint mb-5">Inclusive of all taxes. Delivered to your doorstep</p>
 
-          <hr className="border-paper-edge mb-6" />
+
 
           {/**
             * THE SPEC OF THE CLOTH.
@@ -508,13 +555,13 @@ export default function ProductDetailPage() {
           {product.size_options && product.size_options.length > 0 && (
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
-                <label className="label mb-0">Select Size *</label>
-                {sizeErr && <span className="text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />Required</span>}
+                <label className="label mb-0">Size</label>
+                {sizeErr && <span className="text-caption uppercase text-thread-deep">Choose one</span>}
               </div>
               <div className="flex flex-wrap gap-2">
                 {product.size_options.map((size) => (
                   <button key={size} onClick={() => { setSelectedSize(size); setSizeErr(false); }}
-                    className={`px-4 py-2 rounded-sm border-2 text-sm font-semibold transition-all ${selectedSize === size ? 'border-maroon-800 bg-maroon-800 text-white' : 'border-paper-edge text-graphite-muted hover:border-maroon-400'}`}>
+                    className={`min-w-[3.25rem] border px-4 py-2.5 text-caption uppercase transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${selectedSize === size ? 'border-graphite bg-graphite text-paper' : 'border-paper-edge text-graphite-muted hover:border-thread hover:text-thread'}`}>
                     {size}
                   </button>
                 ))}
@@ -526,13 +573,13 @@ export default function ProductDetailPage() {
           {product.colors && product.colors.length > 0 && (
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
-                <label className="label mb-0">Select Colour *</label>
-                {colorErr && <span className="text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />Required</span>}
+                <label className="label mb-0">Colour</label>
+                {colorErr && <span className="text-caption uppercase text-thread-deep">Choose one</span>}
               </div>
               <div className="flex flex-wrap gap-2">
                 {product.colors.map((color) => (
                   <button key={color} onClick={() => { setSelectedColor(color); setColorErr(false); }}
-                    className={`px-4 py-2 rounded-sm border-2 text-sm font-medium transition-all ${selectedColor === color ? 'border-maroon-800 bg-maroon-50 text-maroon-800' : 'border-paper-edge text-graphite-muted hover:border-maroon-400'}`}>
+                    className={`border px-4 py-2.5 text-caption uppercase transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${selectedColor === color ? 'border-graphite bg-graphite text-paper' : 'border-paper-edge text-graphite-muted hover:border-thread hover:text-thread'}`}>
                     {color}
                   </button>
                 ))}
@@ -543,11 +590,31 @@ export default function ProductDetailPage() {
           {/* Quantity */}
           <div className="mb-6">
             <label className="label">Quantity</label>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-10 rounded-sm border-2 border-paper-edge hover:border-maroon-400 font-normal text-lg flex items-center justify-center">-</button>
-              <span className="text-lg font-normal w-8 text-center">{quantity}</span>
-              <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="w-10 h-10 rounded-sm border-2 border-paper-edge hover:border-maroon-400 font-normal text-lg flex items-center justify-center">+</button>
-              <span className="text-sm text-graphite-faint ml-1">{product.stock} available</span>
+            {/* One ruled control, not two boxes and a number floating between
+                them. The count is set in the display face because it is the
+                number, and the two steppers are hairline-divided cells of the
+                same object. */}
+            <div className="flex items-center gap-5">
+              <div className="inline-flex items-stretch border border-paper-edge">
+                <button
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  aria-label="One fewer"
+                  className="w-11 py-2 text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-thread"
+                >
+                  &minus;
+                </button>
+                <span className="flex w-12 items-center justify-center border-x border-paper-edge font-display text-[1.15rem] tabular-nums text-graphite">
+                  {quantity}
+                </span>
+                <button
+                  onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                  aria-label="One more"
+                  className="w-11 py-2 text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-thread"
+                >
+                  +
+                </button>
+              </div>
+              <span className="text-caption uppercase tabular-nums text-graphite-faint">{product.stock} on the shelf</span>
             </div>
           </div>
 
@@ -557,9 +624,9 @@ export default function ProductDetailPage() {
               This product is currently out of stock. Check back later.
             </div>
           ) : product.stock <= 5 ? (
-            <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3 mb-4 text-orange-700 text-sm">
-              Only {product.stock} left in stock — order soon!
-            </div>
+            <p className="mb-4 border-l border-thread pl-4 text-sm text-graphite-muted">
+              Only {product.stock} left on the shelf.
+            </p>
           ) : null}
 
           {/* Buttons */}
@@ -577,160 +644,122 @@ export default function ProductDetailPage() {
 
           {/* Non-returnable banner */}
           {product.is_returnable === false && (
-            <div className="flex items-start gap-2.5 p-3.5 mb-4 border-l-2 border-red-700/50 pl-4">
-              <XCircle size={18} className="text-red-500 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-red-700">Non-Returnable Product</p>
-                <p className="text-xs text-red-600 mt-0.5">This item is not eligible for return, exchange, or replacement once delivered.</p>
-              </div>
+            <div className="mb-4 border-l border-thread-deep pl-4">
+              <p className="text-rule uppercase text-thread-deep">Non-returnable</p>
+              <p className="mt-2 text-sm text-graphite-muted">
+                Once delivered, this piece cannot be returned, exchanged or replaced.
+              </p>
             </div>
           )}
 
           {/* Trust badges */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <dl className="mb-6 border-t border-paper-edge">
             {[
-              { icon: Truck, text: 'Fast Delivery' },
-              {
-                icon: product.is_returnable === false ? XCircle : RotateCcw,
-                text: product.is_returnable === false ? 'Non-Returnable' : '7-day Easy Returns',
-                red: product.is_returnable === false,
-              },
-              { icon: Shield, text: '100% Authentic' },
-            ].map(({ icon: Icon, text, red }) => (
-              <div key={text} className={`flex flex-col items-center gap-1.5 p-3 rounded-sm text-center ${red ? 'bg-transparent' : 'bg-maroon-50'}`}>
-                <Icon size={18} className={red ? 'text-red-500' : 'text-maroon-700'} />
-                <span className={`text-xs leading-tight ${red ? 'text-red-600 font-medium' : 'text-graphite-muted'}`}>{text}</span>
-              </div>
+              { term: 'Delivery', value: `5–7 business days, ₹${STORE.shippingFee} flat`, href: '/shipping' },
+              product.is_returnable === false
+                ? { term: 'Returns', value: 'This piece cannot be returned or exchanged', href: '/cancellation' }
+                : { term: 'Returns', value: 'Return within 4 hours of delivery, exchange within 12', href: '/cancellation' },
+              { term: 'The cloth', value: 'Sourced direct from the weaver, checked before dispatch', href: '/authentic' },
+            ].map(({ term, value, href }) => (
+              <Link
+                key={term}
+                href={href}
+                className="group grid grid-cols-[7rem_1fr] items-baseline gap-x-4 border-b border-paper-edge py-3.5 transition-colors duration-500 hover:border-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread"
+              >
+                <dt className="text-rule uppercase text-graphite-faint transition-colors duration-500 group-hover:text-thread">{term}</dt>
+                <dd className="text-sm text-graphite-muted">{value}</dd>
+              </Link>
             ))}
-          </div>
+          </dl>
         </div>
       </div>
 
       {/* ── Tabs ── */}
-      <div id="reviews" className="mt-12 card overflow-hidden">
-        <div className="flex border-b border-maroon-200 overflow-x-auto">
+      {/* No box around the tabs, and no tinted active tab. The rule under the
+          selected label is the whole indicator — the same rule the shelf
+          filter and the rail use, so selection reads one way site-wide. */}
+      <div id="reviews" className="mt-[clamp(3rem,9vh,6rem)] scroll-mt-28">
+        <div className="flex gap-8 overflow-x-auto border-b border-paper-edge">
           {TABS.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
-              className={`flex-1 min-w-[120px] py-4 text-sm font-semibold transition-colors whitespace-nowrap ${tab === t.key ? 'text-maroon-800 border-b-2 border-maroon-800 bg-maroon-50' : 'text-graphite-faint hover:text-maroon-700'}`}>
+              className={`-mb-px whitespace-nowrap border-b py-4 text-caption uppercase transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${tab === t.key ? 'border-thread text-thread' : 'border-transparent text-graphite-faint hover:text-graphite'}`}>
               {t.label}
             </button>
           ))}
         </div>
 
-        <div className="p-6">
+        <div className="pt-9">
           {/* Description tab */}
           {tab === 'desc' && (
-            <div className="prose prose-sm max-w-none text-graphite-muted">
-              <p className="leading-relaxed">{product.description}</p>
-              <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {product.fabric && (
-                  <div className="bg-maroon-50 rounded-sm p-4">
-                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Fabric</p>
-                    <p className="font-semibold text-maroon-900 mt-1">{product.fabric}</p>
+            <div className="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+              <p className="max-w-[68ch] text-lede leading-relaxed text-graphite-muted lg:col-span-7">
+                {product.description}
+              </p>
+
+              {/* The rest of the specification, in the same register as the
+                  one beside the price — a ruled definition list, not seven
+                  tinted tiles restating three facts you have already read. */}
+              <dl className="lg:col-span-4 lg:col-start-9">
+                {([
+                  ['Category', product.category],
+                  ['Sizes', product.size_options?.length ? product.size_options.join(', ') : null],
+                  ['Colours', product.colors?.length ? product.colors.join(', ') : null],
+                  ['On the shelf', product.stock > 0 ? `${product.stock}` : 'Sold out'],
+                ] as const).filter(([, v]) => v).map(([label, value]) => (
+                  <div key={label} className="grid grid-cols-[8rem_1fr] items-baseline gap-x-4 border-b border-paper-edge py-3.5 first:border-t">
+                    <dt className="text-rule uppercase text-graphite-faint">{label}</dt>
+                    <dd className="text-sm text-graphite">{value}</dd>
                   </div>
-                )}
-                {product.material && (
-                  <div className="bg-maroon-50 rounded-sm p-4">
-                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Material</p>
-                    <p className="font-semibold text-maroon-900 mt-1">{product.material}</p>
-                  </div>
-                )}
-                {product.fit && (
-                  <div className="bg-maroon-50 rounded-sm p-4">
-                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Fit</p>
-                    <p className="font-semibold text-maroon-900 mt-1">{product.fit}</p>
-                  </div>
-                )}
-                {product.size_options?.length > 0 && (
-                  <div className="bg-maroon-50 rounded-sm p-4">
-                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Sizes</p>
-                    <p className="font-semibold text-maroon-900 mt-1">{product.size_options.join(', ')}</p>
-                  </div>
-                )}
-                {product.colors?.length > 0 && (
-                  <div className="bg-maroon-50 rounded-sm p-4">
-                    <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Colours</p>
-                    <p className="font-semibold text-maroon-900 mt-1">{product.colors.join(', ')}</p>
-                  </div>
-                )}
-                <div className="bg-maroon-50 rounded-sm p-4">
-                  <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Category</p>
-                  <p className="font-semibold text-maroon-900 mt-1">{product.category}</p>
-                </div>
-                <div className="bg-maroon-50 rounded-sm p-4">
-                  <p className="text-xs text-graphite-faint font-medium uppercase tracking-wide">Stock</p>
-                  <p className={`font-semibold mt-1 ${product.stock > 0 ? 'text-maroon-900' : 'text-red-600'}`}>{product.stock > 0 ? `${product.stock} available` : 'Out of stock'}</p>
-                </div>
-              </div>
+                ))}
+              </dl>
             </div>
           )}
 
           {/* Fit & Care tab */}
           {tab === 'care' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {product.fit && (
-                  <div className="bg-maroon-50 rounded-sm p-5 border border-maroon-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-2xl">👗</span>
-                      <p className="font-normal text-maroon-900 text-sm uppercase tracking-wide">Fit</p>
-                    </div>
-                    <p className="text-graphite-muted font-medium">{product.fit}</p>
+            <div className="grid gap-x-16 gap-y-10 lg:grid-cols-12">
+              <dl className="lg:col-span-5">
+                {([
+                  ['Fit', product.fit],
+                  ['Fabric', product.fabric],
+                  ['Composition', product.material],
+                ] as const).filter(([, v]) => v).map(([label, value]) => (
+                  <div key={label} className="border-b border-paper-edge py-5 first:border-t">
+                    <dt className="text-rule uppercase text-graphite-faint">{label}</dt>
+                    <dd className="mt-2 text-lede text-graphite">{value}</dd>
                   </div>
-                )}
-                {product.fabric && (
-                  <div className="bg-maroon-50 rounded-sm p-5 border border-maroon-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-2xl">🧵</span>
-                      <p className="font-normal text-maroon-900 text-sm uppercase tracking-wide">Fabric</p>
-                    </div>
-                    <p className="text-graphite-muted font-medium">{product.fabric}</p>
-                  </div>
-                )}
-                {product.material && (
-                  <div className="bg-maroon-50 rounded-sm p-5 border border-maroon-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-2xl">🔬</span>
-                      <p className="font-normal text-maroon-900 text-sm uppercase tracking-wide">Material / Composition</p>
-                    </div>
-                    <p className="text-graphite-muted font-medium">{product.material}</p>
-                  </div>
-                )}
-              </div>
+                ))}
+              </dl>
 
-              {product.care_instructions && (
-                <div className="bg-transparent rounded-sm p-5 border border-blue-100">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-2xl">🧺</span>
-                    <p className="font-normal text-blue-900 text-sm uppercase tracking-wide">Care Instructions</p>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {product.care_instructions.split(/[.\n]+/).filter(s => s.trim()).map((instruction, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm text-graphite-muted">
-                        <CheckCircle size={15} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                        <span>{instruction.trim()}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="lg:col-span-6 lg:col-start-7">
+                {product.care_instructions && (
+                  <>
+                    <h3 className="text-rule uppercase text-thread">Caring for this piece</h3>
+                    <ul className="mt-5 space-y-3">
+                      {product.care_instructions.split(/[.\n]+/).filter(x => x.trim()).map((instruction, i) => (
+                        <li key={i} className="relative pl-6 text-graphite-muted before:absolute before:left-0 before:top-[0.8em] before:h-px before:w-3 before:bg-thread/70">
+                          {instruction.trim()}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
 
-              {/* General care tips */}
-              <div className="bg-paper rounded-sm p-5 border border-paper-edge">
-                <p className="font-normal text-graphite-muted text-sm uppercase tracking-wide mb-3">General Tips</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-graphite-muted">
+                <h3 className={`text-rule uppercase text-graphite-faint ${product.care_instructions ? 'mt-10' : ''}`}>
+                  True of everything we sell
+                </h3>
+                <ul className="mt-5 space-y-3">
                   {[
-                    'Wash dark colours separately for first few washes',
-                    'Turn inside out before washing to preserve colour',
-                    'Avoid soaking for extended periods',
-                    'Store in a cool, dry place away from direct sunlight',
-                  ].map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-orange-400 mt-0.5">•</span>
-                      <span>{tip}</span>
-                    </div>
+                    'Wash dark colours separately for the first few washes.',
+                    'Turn the garment inside out before washing to keep the colour.',
+                    'Do not soak for long periods.',
+                    'Store cool and dry, out of direct sunlight.',
+                  ].map((tip) => (
+                    <li key={tip} className="relative pl-6 text-graphite-muted before:absolute before:left-0 before:top-[0.8em] before:h-px before:w-3 before:bg-paper-edge">
+                      {tip}
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             </div>
           )}
@@ -739,17 +768,20 @@ export default function ProductDetailPage() {
           {tab === 'reviews' && (
             <div className="space-y-6">
               {!user && (
-                <div className="bg-maroon-50 border border-orange-200 rounded-sm p-4 text-center">
-                  <p className="text-sm text-graphite-muted mb-2">Sign in to write a review</p>
-                  <Link href="/auth/login" className="btn-primary inline-flex items-center gap-2 py-2 px-5 text-sm">Sign In</Link>
+                <div className="border-l border-paper-edge pl-5">
+                  <p className="text-graphite-muted">
+                    Bought this piece?{' '}
+                    <Link href="/auth/login" className="text-graphite underline decoration-thread/50 underline-offset-4 transition-colors duration-500 hover:decoration-thread">
+                      Sign in
+                    </Link>{' '}
+                    to say how it wore.
+                  </p>
                 </div>
               )}
 
               {user && canReview && (
-                <div className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-sm p-6">
-                  <h3 className="font-normal text-maroon-900 mb-4 flex items-center gap-2">
-                    <Star size={18} className="text-yellow-500 fill-yellow-500" /> Rate this product
-                  </h3>
+                <div className="border-l border-thread pl-5 sm:pl-7">
+                  <h3 className="text-rule uppercase text-thread">How did it wear?</h3>
                   <form onSubmit={handleSubmitReview} className="space-y-4">
                     <div>
                       <p className="text-sm text-graphite-muted mb-2">Your rating *</p>
@@ -761,7 +793,7 @@ export default function ProductDetailPage() {
                             onClick={() => setMyRating(n)}
                             className="focus:outline-none"
                           >
-                            <Star size={32} className={(hoverRating || myRating) >= n ? 'text-yellow-400 fill-yellow-400' : 'text-paper-edge'} />
+                            <Star size={30} strokeWidth={1.25} className={(hoverRating || myRating) >= n ? 'fill-thread text-thread' : 'text-paper-edge'} />
                           </button>
                         ))}
                         {myRating > 0 && (
@@ -810,28 +842,32 @@ export default function ProductDetailPage() {
               {reviews.length > 0 ? (
                 <div className="space-y-4">
                   {product && product.rating_count > 0 && (
-                    <div className="flex items-center gap-4 bg-maroon-50 rounded-sm p-4 mb-6">
-                      <div className="text-center flex-shrink-0">
-                        <p className="text-4xl font-normal text-maroon-900">{product.rating_avg.toFixed(1)}</p>
-                        <div className="flex gap-0.5 justify-center mt-1">
-                          {[1,2,3,4,5].map(i => (
-                            <Star key={i} size={14} className={i <= Math.round(product.rating_avg) ? 'text-yellow-400 fill-yellow-400' : 'text-paper-edge'} />
-                          ))}
-                        </div>
-                        <p className="text-xs text-graphite-faint mt-1">{product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}</p>
+                    <div className="mb-10 grid gap-x-14 gap-y-8 border-y border-paper-edge py-8 sm:grid-cols-[auto_1fr]">
+                      <div>
+                        <p className="font-display text-chapter leading-none tabular-nums text-graphite">
+                          {product.rating_avg.toFixed(1)}
+                          <span className="text-band text-graphite-faint">/5</span>
+                        </p>
+                        <p className="mt-3 text-rule uppercase tabular-nums text-graphite-faint">
+                          {product.rating_count} rating{product.rating_count !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                      <div className="flex-1 space-y-1">
+
+                      {/* The distribution, so an average cannot hide a tail. */}
+                      <div className="flex flex-col justify-center gap-2">
                         {[5,4,3,2,1].map(star => {
                           const cnt = reviews.filter(r => r.rating === star).length;
                           const pct = reviews.length ? Math.round((cnt / reviews.length) * 100) : 0;
                           return (
-                            <div key={star} className="flex items-center gap-2 text-xs">
-                              <span className="w-4 text-graphite-muted text-right">{star}</span>
-                              <Star size={10} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />
-                              <div className="flex-1 bg-paper-shade rounded-full h-1.5">
-                                <div className="bg-yellow-400 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
-                              </div>
-                              <span className="w-6 text-graphite-faint">{cnt}</span>
+                            <div key={star} className="grid grid-cols-[1.5rem_1fr_2rem] items-center gap-3">
+                              <span className="text-rule tabular-nums text-graphite-faint">{star}</span>
+                              <span className="h-px bg-paper-edge">
+                                <span
+                                  className="block h-px bg-thread transition-[width] duration-700 ease-out"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </span>
+                              <span className="text-rule tabular-nums text-graphite-faint">{cnt}</span>
                             </div>
                           );
                         })}
@@ -839,34 +875,25 @@ export default function ProductDetailPage() {
                     </div>
                   )}
                   {reviews.map((r) => (
-                    <div key={r.id} className="border-b border-orange-50 pb-5 last:border-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-full bg-maroon-100 flex items-center justify-center text-maroon-800 font-normal text-sm flex-shrink-0">
-                          {r.user.full_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-sm text-graphite">{r.user.full_name}</p>
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Verified Buyer</span>
-                          </div>
-                          <div className="flex gap-0.5 mt-0.5">
-                            {Array.from({ length: 5 }, (_, i) => (
-                              <Star key={i} size={12} fill={i < r.rating ? '#facc15' : 'none'} className={i < r.rating ? 'text-yellow-400' : 'text-paper-edge'} />
-                            ))}
-                          </div>
-                        </div>
-                        <span className="text-xs text-graphite-faint flex-shrink-0">{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    <div key={r.id} className="grid gap-x-10 gap-y-3 border-b border-paper-edge py-7 last:border-0 sm:grid-cols-[12rem_1fr]">
+                      <div>
+                        <p className="text-graphite">{r.user.full_name}</p>
+                        <p className="mt-1.5 text-rule uppercase tabular-nums text-thread">{r.rating}/5</p>
+                        <p className="mt-1.5 text-rule uppercase text-graphite-faint">
+                          {new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
                       </div>
-                      {r.title && <p className="font-semibold text-sm text-graphite mb-1">{r.title}</p>}
-                      {r.comment && <p className="text-sm text-graphite-muted leading-relaxed">{r.comment}</p>}
+                      <div>
+                        {r.title && <p className="font-display text-[1.1rem] text-graphite">{r.title}</p>}
+                        {r.comment && <p className="mt-2 max-w-[68ch] leading-relaxed text-graphite-muted">{r.comment}</p>}
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 text-graphite-faint">
-                  <Star size={40} className="mx-auto mb-3 text-paper-edge" />
-                  <p className="font-medium">No reviews yet</p>
-                  <p className="text-sm mt-1">Be the first verified buyer to review this product</p>
+                <div className="py-10 text-graphite-faint">
+                  <p className="text-rule uppercase text-graphite-faint">Nothing written yet</p>
+                  <p className="mt-3 max-w-[52ch] text-graphite-muted">When someone who bought this piece writes about how it wore, it appears here.</p>
                 </div>
               )}
             </div>
