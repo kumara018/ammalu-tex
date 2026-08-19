@@ -162,7 +162,7 @@ export default function AtelierRail() {
         <Link
           href="/"
           aria-label={`${STORE.name} — home`}
-          className="group flex shrink-0 items-center gap-3 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+          className="group order-1 flex shrink-0 items-center gap-3 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
           <LogoMark size={32} className="shrink-0 text-thread transition-colors duration-500 group-hover:text-thread-deep" />
           {/* The name, and nothing under it.
@@ -189,7 +189,13 @@ export default function AtelierRail() {
             `order-last` puts this on the second row on a phone (it is the
             widest of the three groups, so it is the one that gets the row);
             `md:order-none` restores the middle position on a wide rail. */}
-        <ul className="order-last flex w-full flex-1 items-center gap-x-7 md:order-none md:w-auto">
+        {/* `basis-full`, not `w-full`. `flex-1` is shorthand for
+            `flex: 1 1 0%` — it sets flex-basis to 0, which overrides `w-full`
+            for a flex item, so the row never actually broke. It only LOOKED
+            right on a narrow phone, where the row was overflowing and wrapped
+            for a different reason entirely. `basis-full` is flex-basis:100%,
+            which genuinely forces its own line. */}
+        <ul className="order-3 flex basis-full items-center gap-x-7 md:order-2 md:flex-1 md:basis-auto">
           {RAIL.map(({ href, label }) => (
             <li key={href}>
               <Link
@@ -206,9 +212,23 @@ export default function AtelierRail() {
           ))}
         </ul>
 
-        {/* `ml-auto` pins the actions to the right edge on the phone's top row,
-            where the destinations are no longer between them and the mark. */}
-        <div className="ml-auto flex shrink-0 items-center gap-x-6">
+        {/**
+          * EXPLICIT ORDER ON ALL THREE, NOT `order-last` PLUS AN OVERRIDE.
+          *
+          * The first version gave the destinations `order-last md:order-none`
+          * and left the mark and actions unordered. On a phone that worked; at
+          * tablet width the override did not take, and the rail rendered as
+          * mark → SIGN IN, BAG → THE SHELF, OUR WORD, HELP, with the
+          * navigation stranded to the right of the actions.
+          *
+          * Numbering all three removes the guess. 1-3-2 on a phone puts the
+          * destinations on their own second row; 1-2-3 from `md` up is the
+          * single row reading mark, destinations, actions.
+          *
+          * `ml-auto` still pins the actions right on the phone's top row,
+          * where nothing sits between them and the mark.
+          */}
+        <div className="order-2 ml-auto flex shrink-0 items-center gap-x-6 md:order-3">
           {/* The glass is the field — see components/nav/RailSearch.tsx. */}
           <RailSearch />
 
