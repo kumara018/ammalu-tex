@@ -282,9 +282,6 @@ export default function ProductCard({ product }: Props) {
                   style={wovenGround(dye, product.id)}
                   className="absolute inset-0 flex flex-col justify-between p-5"
                 >
-                  <span className="text-rule uppercase" style={{ color: dye.ink, opacity: 0.66 }}>
-                    {dye.name}
-                  </span>
                   <span className="block">
                     <span
                       aria-hidden="true"

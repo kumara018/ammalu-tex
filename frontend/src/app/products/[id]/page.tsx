@@ -222,9 +222,6 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
         style={wovenGround(dyeFor(category), seed)}
         className="flex aspect-square flex-col justify-between p-8"
       >
-        <span className="text-rule uppercase" style={{ color: dyeFor(category).ink, opacity: 0.66 }}>
-          {dyeFor(category).name}
-        </span>
         <span className="block">
           <span
             aria-hidden="true"

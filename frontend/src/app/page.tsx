@@ -105,7 +105,22 @@ export default function HomePage() {
       {/* A BAND, NOT A SCREEN. This filled the viewport, so a customer met a
           sentence and had to scroll before seeing anything they could buy —
           "product should be visible in homepage mainly not down". */}
-      <section className="relative flex min-h-[46svh] flex-col justify-end px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(2rem,6vh,3.5rem)] sm:px-10">
+      {/**
+        * NO RESERVED EMPTY SPACE ON A PHONE.
+        *
+        * The hero holds its copy at the BOTTOM (`justify-end`) against a
+        * minimum height, because the atelier scene used to fill the space
+        * above it. The scene no longer loads on a phone — it was three
+        * quarters of a megabyte for a background — so that space became
+        * exactly what the screenshot showed: four hundred pixels of nothing
+        * between the header and the first words, with the products below it.
+        *
+        * On a phone the section is now content-height and the copy sits at the
+        * top, so the shop starts immediately. The reserved height and the
+        * bottom alignment return at `md`, which is where the scene actually
+        * renders and where there is something in that space to look at.
+        */}
+      <section className="relative flex flex-col justify-start px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(1.25rem,4vh,2.25rem)] sm:px-10 md:min-h-[46svh] md:justify-end md:pt-[clamp(2rem,6vh,3.5rem)]">
         {/**
           * A soft wash under the copy only.
           *
@@ -194,7 +209,7 @@ export default function HomePage() {
                 </div>
               </Reveal>
 
-              <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 lg:grid-cols-4">
                 {recentItems.slice(0, 6).map((p, i) => (
                   <Reveal key={p.id} delay={i * 70}>
                     <ProductCard product={p} />
@@ -244,7 +259,7 @@ export default function HomePage() {
                 </div>
               </Reveal>
 
-              <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 lg:grid-cols-4">
                 {featuredItems.slice(0, 6).map((p, i) => (
                   <Reveal key={p.id} delay={i * 70}>
                     <ProductCard product={p} />

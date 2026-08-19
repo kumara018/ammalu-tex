@@ -43,38 +43,56 @@ export interface Dye {
   ink: string;
 }
 
-const INDIGO: Dye      = { name: 'Indigo',          band: 'bg-dye-indigo',      from: '#2E4A62', to: '#243A4E', ink: '#EAF0F4' };
-const MADDER: Dye      = { name: 'Madder',          band: 'bg-dye-madder',      from: '#9E3B35', to: '#7C2C28', ink: '#FAEDEB' };
-const TURMERIC: Dye    = { name: 'Turmeric',        band: 'bg-dye-turmeric',    from: '#C68A1E', to: '#A06E14', ink: '#FFF7E6' };
-const LAC: Dye         = { name: 'Lac',             band: 'bg-dye-lac',         from: '#7C2E4A', to: '#5F2239', ink: '#FBEBF1' };
-const MYROBALAN: Dye   = { name: 'Myrobalan',       band: 'bg-dye-myrobalan',   from: '#7C7A4E', to: '#5F5D3A', ink: '#F7F7EC' };
-const POMEGRANATE: Dye = { name: 'Pomegranate',     band: 'bg-dye-pomegranate', from: '#B5643C', to: '#8F4C2C', ink: '#FDF0E9' };
+/**
+ * ONE QUIET GROUND, NOT SIX DYES.
+ *
+ * This was six natural dyes — indigo, madder, turmeric, lac, myrobalan,
+ * pomegranate — one per category, so an unphotographed piece showed as the
+ * cloth it would be cut from. Honest, and rejected on sight: "that dark
+ * colours rose, green, yellow and don't want this type". On a shelf where most
+ * stock has no photograph yet, six strong colours stop reading as cloth and
+ * start reading as a paint chart — and they shout over the few pieces that DO
+ * have a photograph beside them.
+ *
+ * So the placeholder gets out of the way: one tone off the shop's own paper, a
+ * half-step darker so the plate keeps an edge, with the weave kept because
+ * that is what stops it looking like a failed image. The photograph is the
+ * point; a placeholder only has to hold the space without competing.
+ *
+ * The six dyes survive where they were always right — the homepage shelf, one
+ * per category, as a selvedge on a row. `band` is still exported for that.
+ */
+const CALICO: Dye = { name: 'Unphotographed', band: 'bg-paper-shade', from: '#F1E7E1', to: '#E7D9D2', ink: '#6F5F58' };
 
 /**
  * Category to dye. Keyed loosely on purpose: the admin form lets a shopkeeper
  * type a category, so this has to survive "Half Saree", "half saree" and
  * "Half-Saree" without a migration.
  */
-const BY_CATEGORY: Record<string, Dye> = {
-  chudithar: INDIGO,
-  lehenga: MADDER,
-  'half saree': TURMERIC,
-  halfsaree: TURMERIC,
-  'party wears': LAC,
-  'party wear': LAC,
-  tops: MYROBALAN,
-  'crop tops': POMEGRANATE,
-  'crop top': POMEGRANATE,
-};
+
 
 /**
  * The dye for a category. Anything unrecognised gets myrobalan — the quietest
  * of the six, so a category nobody planned for still looks deliberate rather
  * than defaulting to the loudest colour on the shelf.
  */
+const BANDS: Record<string, string> = {
+  chudithar: 'bg-dye-indigo',
+  lehenga: 'bg-dye-madder',
+  'half saree': 'bg-dye-turmeric',
+  'party wears': 'bg-dye-lac',
+  tops: 'bg-dye-myrobalan',
+  'crop tops': 'bg-dye-pomegranate',
+};
+
+/**
+ * The plate colour for an unphotographed piece — always the quiet one now.
+ * `band` still varies by category, because on the homepage shelf a coloured
+ * selvedge on a row is a label, not a wall of colour behind merchandise.
+ */
 export function dyeFor(category?: string | null): Dye {
-  if (!category) return MYROBALAN;
-  return BY_CATEGORY[category.trim().toLowerCase().replace(/[-_]+/g, ' ')] ?? MYROBALAN;
+  const key = (category ?? '').trim().toLowerCase().replace(/[-_]+/g, ' ');
+  return { ...CALICO, band: BANDS[key] ?? 'bg-paper-shade' };
 }
 
 /**
