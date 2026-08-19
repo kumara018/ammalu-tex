@@ -38,7 +38,6 @@ import LoginPromptModal from '@/components/LoginPromptModal';
 import PageTransition from '@/components/PageTransition';
 import QueryProvider from '@/components/QueryProvider';
 import ThreeProvider from '@/three/ThreeProvider';
-import SoundToggle from '@/components/SoundToggle';
 import { Toaster } from 'react-hot-toast';
 import { STORE } from '@/lib/config';
 
@@ -112,7 +111,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* Cinematic overlays. Both sit above the canvas and below the
                   modals, and neither takes pointer events — the path to
                   checkout is never behind them. */}
-                    <ChromeGate><SoundToggle /></ChromeGate>
+                    {/* The ambient sound toggle is unmounted — see the
+                        sister shop's layout for the reasoning. Short version:
+                        a fixed bottom-left control on z-30 covers the footer's
+                        first column on a phone, and a shop where somebody is
+                        deciding whether to spend money does not open with
+                        sound. The component stays in the tree so the decision
+                        is one line to reverse. */}
               <LoginPromptModal />
               <Toaster
                 position="top-right"
