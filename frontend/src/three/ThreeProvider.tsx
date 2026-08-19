@@ -29,7 +29,10 @@ export default function ThreeProvider() {
   const pathname = usePathname();
   /* The one route that draws. Kept beside `sceneForPath` in spirit: if a
      second scene ever returns, this is the single line that has to change. */
-  const showsScene = pathname === '/';
+  /* Ask the route map rather than restating its rule. The sister repo kept a
+     second copy of this and the two disagreed: the map said "no scene" and the
+     canvas mounted anyway, because this line had never heard about it. */
+  const showsScene = sceneForPath(pathname) !== 'muslin';
   const setCapabilities = useSceneStore((s) => s.setCapabilities);
   const goToScene = useSceneStore((s) => s.goToScene);
   const capabilities = useSceneStore((s) => s.capabilities);

@@ -8,6 +8,7 @@ import { STORE } from '@/lib/config';
 import { LogoMark } from '@/components/Logo';
 import AccountMenu from '@/components/nav/AccountMenu';
 import RailSearch from '@/components/nav/RailSearch';
+import DeliverTo from '@/components/home/DeliverTo';
 
 /**
  * The rail — Ammalu Tex's navigation, and the structural opposite of the
@@ -252,6 +253,25 @@ export default function AtelierRail() {
           </Link>
         </div>
       </nav>
+
+      {/**
+        * WHERE THIS ORDER IS GOING, IN THE HEADER.
+        *
+        * It sat in the homepage hero, which meant it existed on exactly one
+        * page — and the question "do you deliver to me" is one a customer has
+        * on the shelf and at the product just as much as at the door. Amazon
+        * keeps it in the header for that reason, and it was asked for there.
+        *
+        * Its own thin line under the rail rather than crammed into the row
+        * above: that row is already carrying the mark, three destinations, the
+        * glass, the account and the bag, and on a phone it is two rows before
+        * this is added.
+        */}
+      <div className="border-t border-paper-edge/60 bg-paper/90">
+        <div className="mx-auto flex w-full max-w-[104rem] px-6 py-1.5 sm:px-10">
+          <DeliverTo />
+        </div>
+      </div>
 
       {/* The thread, pinned along the seam. */}
       <div

@@ -11,7 +11,7 @@ import Reveal from '@/components/home/Reveal';
 import BoltRow from '@/components/home/BoltRow';
 import MeasureRule from '@/components/home/MeasureRule';
 import { dyeFor } from '@/lib/dyes';
-import DeliverTo from '@/components/home/DeliverTo';
+import PaperDrift from '@/components/home/PaperDrift';
 
 /**
  * The Atelier — Ammalu Tex's homepage.
@@ -121,6 +121,7 @@ export default function HomePage() {
         * renders and where there is something in that space to look at.
         */}
       <section className="relative flex flex-col justify-start px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(1.25rem,4vh,2.25rem)] sm:px-10 md:min-h-[46svh] md:justify-end md:pt-[clamp(2rem,6vh,3.5rem)]">
+        <PaperDrift />
         {/**
           * A soft wash under the copy only.
           *
@@ -146,11 +147,6 @@ export default function HomePage() {
               {STORE.area}&nbsp;·&nbsp;{STORE.city}&nbsp;·&nbsp;Sizes&nbsp;S–XXXL
             </p>
 
-            {/* Where this order is going. Directly under the line that says
-                where the shop IS — the two halves of the same question. */}
-            <div className="mt-4">
-              <DeliverTo />
-            </div>
           </Reveal>
 
           <Reveal delay={110}>
@@ -168,12 +164,9 @@ export default function HomePage() {
                 See the whole shelf
                 <span aria-hidden="true" className="transition-transform duration-500 group-hover:translate-x-1.5">→</span>
               </Link>
-              <a
-                href={`tel:${STORE.phone1}`}
-                className="text-caption uppercase text-graphite-faint transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
-              >
-                Ask us anything · {STORE.phone1}
-              </a>
+              {/* "Ask us anything · <number>" was removed on request. The number
+                  is in the footer on every page, and a phone number beside the
+                  one button that starts a purchase competes with it. */}
             </div>
           </Reveal>
         </div>

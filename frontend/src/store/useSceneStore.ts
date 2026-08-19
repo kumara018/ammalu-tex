@@ -91,26 +91,25 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
 /** Route → scene. Kept beside the store so the two cannot drift. */
 export function sceneForPath(pathname: string): SceneId {
-  if (pathname === '/') return 'atelier';
   /**
-   * THE SCENE IS THE ATELIER, AND NOWHERE ELSE.
+   * NO SCENE — THE COMPOSITION IS CSS NOW.
    *
-   * Every route used to run its own scene, and each drew large pale polygons
-   * that slid behind the page. Behind the opening that is atmosphere; behind
-   * forty product plates it is a second set of rectangles competing with the
-   * merchandise, and on a phone the shapes cut across the cards badly enough
-   * to read as a rendering fault.
+   * The atelier scene drew translucent panels turning in window light. That
+   * look was asked to be KEPT, on phones and on desktop, and asked not to lag.
+   * Those two things only conflict if the panels have to be WebGL, and they do
+   * not: components/home/PaperDrift.tsx draws the same composition with six
+   * transformed divs on the compositor.
    *
-   * The instinct when a shop asks for something cinematic is to put the cinema
-   * everywhere. Every storefront worth copying does the opposite: a film has
-   * one title sequence, not one per scene. The spectacle lives on the way in,
-   * and the moment a customer is comparing things they might buy, paying, or
-   * reading their own records, the background stops asking for attention.
+   * So the engine goes and the design stays. It costs no JavaScript, runs
+   * identically in portrait and landscape because it is layout rather than a
+   * render target that must be sized and resized, and it appears on every
+   * device instead of only the ones with memory to spare — which is the
+   * opposite of the trade I made last time, and the better one.
    *
-   * `muslin` is the quiet ground and is already in RESTRAINED below, so this
-   * also takes the effects budget off every page that is not the homepage —
-   * which is most of the time a phone spends on this site.
+   * The three/ tree stays intact. Returning a real scene from here is all it
+   * takes to bring it back.
    */
+  void pathname;
   return 'muslin';
 }
 
