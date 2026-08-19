@@ -60,7 +60,7 @@ export default function ContactMenu() {
     { label: 'Find us on the map', detail: `${STORE.area}, ${STORE.city}`, href: STORE.googleMapsUrl, icon: 'pin' },
   ];
 
-  const ico = 'mt-0.5 h-4 w-4 shrink-0 text-thread';
+  const ico = 'mt-[0.28em] h-4 w-4 shrink-0 text-thread';
   const Icon = ({ kind }: { kind: string }) => {
     if (kind === 'phone') return (
       <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={ico}>

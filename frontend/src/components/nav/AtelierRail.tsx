@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import HelpMenu from '@/components/nav/HelpMenu';
 import { useCart } from '@/context/CartContext';
 import { STORE } from '@/lib/config';
 import { LogoMark } from '@/components/Logo';
@@ -53,10 +54,13 @@ import ContactMenu from '@/components/nav/ContactMenu';
  * different things. The rail now carries the three destinations the site
  * actually has, and the categories live on the page that filters by them.
  */
+/* Help has left this list — it is a dropdown now (nav/HelpMenu.tsx), because
+   it pointed at one long document and a customer wanting the postage charge
+   had to load it and hunt for the line. The two that remain are single
+   destinations, which is what a rail link should be. */
 const RAIL = [
   { href: '/products',  label: 'The shelf' },
   { href: '/authentic', label: 'Our word' },
-  { href: '/support',   label: 'Help' },
 ];
 
 export default function AtelierRail() {
@@ -212,6 +216,8 @@ export default function AtelierRail() {
               </Link>
             </li>
           ))}
+          {/* Same row, same type, but a control rather than a destination. */}
+          <li><HelpMenu /></li>
         </ul>
 
         {/**
