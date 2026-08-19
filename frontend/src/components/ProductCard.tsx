@@ -404,7 +404,13 @@ export default function ProductCard({ product }: Props) {
             <button
               onClick={handleAddToCart}
               disabled={soldOut}
-              className="mt-4 w-full border border-paper-edge py-2.5 text-caption uppercase text-graphite-muted transition-colors duration-500 hover:border-graphite hover:bg-graphite hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread disabled:cursor-not-allowed disabled:border-paper-edge disabled:bg-transparent disabled:text-graphite-faint motion-reduce:transition-none"
+              /* FILLED, NOT OUTLINED. An outline button on a pale ground is the
+                 quietest thing on the card — quieter than the price above it —
+                 and it is the control the whole card exists to offer. The
+                 sister shop's is filled and converts on sight; this is the
+                 same decision in thread rather than cerise. White on #A4664D
+                 measures 5.31:1. */
+              className="mt-4 w-full bg-thread-deep py-2.5 text-caption uppercase text-white transition-colors duration-500 hover:bg-graphite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread disabled:cursor-not-allowed disabled:bg-paper-edge disabled:text-graphite-faint motion-reduce:transition-none"
             >
               {soldOut ? 'Sold out' : 'Add to the bag'}
             </button>

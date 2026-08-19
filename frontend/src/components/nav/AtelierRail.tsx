@@ -9,6 +9,7 @@ import { LogoMark } from '@/components/Logo';
 import AccountMenu from '@/components/nav/AccountMenu';
 import RailSearch from '@/components/nav/RailSearch';
 import DeliverTo from '@/components/home/DeliverTo';
+import ContactMenu from '@/components/nav/ContactMenu';
 
 /**
  * The rail — Ammalu Tex's navigation, and the structural opposite of the
@@ -268,8 +269,12 @@ export default function AtelierRail() {
         * this is added.
         */}
       <div className="border-t border-paper-edge/60 bg-paper/90">
-        <div className="mx-auto flex w-full max-w-[104rem] px-6 py-1.5 sm:px-10">
+        <div className="mx-auto flex w-full max-w-[104rem] items-center justify-between gap-6 px-6 py-1.5 sm:px-10">
           <DeliverTo />
+          {/* Contact us, on every page — see nav/ContactMenu.tsx. The numbers
+              were only in the footer, several screens down, which is where a
+              question that could have become an order goes to die. */}
+          <ContactMenu />
         </div>
       </div>
 

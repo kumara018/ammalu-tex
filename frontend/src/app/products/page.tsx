@@ -47,6 +47,7 @@ function ProductsContent() {
     minPrice: searchParams.get('min_price') || '',
     maxPrice: searchParams.get('max_price') || '',
     featured: searchParams.get('featured')  || '',
+    size:     searchParams.get('size')      || '',
     sort:     searchParams.get('sort')      || 'created_at:desc',
   };
 
@@ -64,6 +65,7 @@ function ProductsContent() {
       if (filters.minPrice) params.min_price = Number(filters.minPrice);
       if (filters.maxPrice) params.max_price = Number(filters.maxPrice);
       if (filters.featured) params.featured  = true;
+      if (filters.size)     params.size      = filters.size;
 
       try {
         const res = await productsAPI.getAll(params);
@@ -218,6 +220,43 @@ function ProductsContent() {
       {/* Filters panel */}
       {filtersOpen && (
         <div className="card p-5 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/**
+            * SIZE — the filter this shop most needed and did not have.
+            *
+            * Everything is cut S to XXXL and a customer is buying for one
+            * body, so "which of these comes in XL" is the first question,
+            * ahead of price and ahead of order. There was no way to ask it:
+            * no control, and no `size` parameter on the API.
+            *
+            * Buttons rather than a select — six sizes is short enough to show,
+            * one tap instead of two, and the chosen one stays visible. It
+            * reads and writes the URL like every other filter here, so a
+            * size-filtered shelf can be sent to somebody as a link.
+            */}
+          <div className="sm:col-span-2 lg:col-span-4">
+            <span className="label text-xs">Size</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {SIZES.map((sz) => {
+                const on = filters.size === sz;
+                return (
+                  <button
+                    key={sz}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setF('size', on ? '' : sz)}
+                    className={`min-w-[3.25rem] border px-3 py-2 text-caption uppercase transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${
+                      on
+                        ? 'border-thread-deep bg-thread-deep text-white'
+                        : 'border-paper-edge text-graphite-muted hover:border-thread hover:text-thread'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Search */}
           <div>
             <label className="label text-xs">Search</label>
@@ -381,6 +420,10 @@ function ProductsContent() {
     </PageShell>
   );
 }
+
+/* The six the shop cuts — same list as components/system/SizeGuide.tsx, so
+   the filter can never offer a size the guide does not describe. */
+const SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
 export default function ProductsPage() {
   return (
