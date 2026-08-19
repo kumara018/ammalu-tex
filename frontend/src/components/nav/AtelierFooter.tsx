@@ -188,7 +188,23 @@ export default function AtelierFooter() {
           <Link
             href="/"
             aria-label={`${STORE.name} — back to the front page`}
-            className="group inline-flex items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
+            /* THE LOCK-UP RIDES UP BY THE MEASURED CAP-HEIGHT DIFFERENCE.
+               `leading-none` alone was not enough and I said it was — the
+               honest number, taken by rasterising both strings and finding the
+               first row of real ink rather than trusting font-metric APIs, is
+               that the wordmark's cap-top still sat 6.4px below the column
+               headings' cap-top.
+               The reason is this face's ascent: 38.0 for a 38.4px size, almost
+               the entire em. So even with the line box collapsed to the font
+               size, the baseline lands 38px down and the cap-top 10px below the
+               box top, while the 10.5px heading's cap-top is only 3.6px down.
+               Boxes aligned; letters did not.
+               6.4 / 38.4 = 0.167em, and `text-band` is clamp(1.5rem, 3.2vw,
+               2.4rem), so the same fraction of it is the clamp below — correct
+               at every width rather than tuned to 1440. It is on the LINK so
+               the mark and the name rise together and the lock-up stays
+               intact. */
+            className="group -mt-[clamp(0.25rem,0.533vw,0.4rem)] inline-flex items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
           >
             <LogoMark
               size={34}
