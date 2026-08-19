@@ -404,13 +404,21 @@ export default function ProductCard({ product }: Props) {
             <button
               onClick={handleAddToCart}
               disabled={soldOut}
-              /* FILLED, NOT OUTLINED. An outline button on a pale ground is the
-                 quietest thing on the card — quieter than the price above it —
-                 and it is the control the whole card exists to offer. The
-                 sister shop's is filled and converts on sight; this is the
-                 same decision in thread rather than cerise. White on #A4664D
-                 measures 5.31:1. */
-              className="mt-4 w-full bg-thread-deep py-2.5 text-caption uppercase text-white transition-colors duration-500 hover:bg-graphite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread disabled:cursor-not-allowed disabled:bg-paper-edge disabled:text-graphite-faint motion-reduce:transition-none"
+              /* FILLED, BUT LIGHT — WHICH IS NOT THE SAME AS OUTLINED.
+                 It was a solid #A4664D slab with white on it. Solid enough to
+                 find, and the note that came back three times was that a dark
+                 block on a pale card is the first thing the eye lands on, so
+                 the card reads as the button rather than as the cloth.
+                 A bare outline overcorrects — that was the version before, and
+                 it was the quietest thing on the card.
+                 So it stays filled and the fill goes pale: #E3BCAC ground with
+                 the deep tone moved into the type and a hairline edge. It is
+                 still a solid object, still full width, and the contrast goes
+                 UP rather than down — graphite on thread-pale measures 8.29:1
+                 against 4.58:1 for the white-on-deep it replaces, and the
+                 #A4664D hairline is 4.26:1 against the page ground, so the
+                 control edge clears WCAG 1.4.11 on its own. */
+              className="mt-4 w-full border border-thread-deep bg-thread-pale py-2.5 text-caption uppercase text-graphite transition-colors duration-500 hover:bg-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread disabled:cursor-not-allowed disabled:border-paper-edge disabled:bg-paper-shade disabled:text-graphite-faint motion-reduce:transition-none"
             >
               {soldOut ? 'Sold out' : 'Add to the bag'}
             </button>

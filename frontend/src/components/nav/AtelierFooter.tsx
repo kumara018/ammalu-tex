@@ -46,6 +46,74 @@ const POLICIES = [
   { href: '/support',      label: 'Help' },
 ];
 
+/**
+ * THE MARKS.
+ *
+ * This footer had no symbols at all: four columns of identically-weighted
+ * links, so "which of these is the phone number" could only be answered by
+ * reading every line. A handset, an envelope, a shop and a pin sort that
+ * before a word is read, which is the whole job of a footer.
+ *
+ * Drawn inline at one hairline weight rather than pulled from an icon set —
+ * five shapes do not justify a dependency, and these match the weight of the
+ * rules already on the page. In thread-pale, the footer's only accent, so
+ * nothing here introduces a second colour.
+ *
+ * ALIGNMENT IS `mt-[0.28em]`, NOT A PIXEL GUESS. The line box beside these is
+ * 1.5em and the mark is 1em, so (1.5 − 1) / 2 centres it on the FIRST line —
+ * in em, so it stays centred wherever the type scale moves, and on the
+ * three-line address it sits against the first line rather than the middle
+ * of the block.
+ *
+ * `aria-hidden` on every one: the link text beside each already says what it
+ * is, and "phone icon, phone, +91…" is worse than no icon.
+ */
+const fico = 'mt-[0.28em] h-4 w-4 shrink-0 text-thread-pale';
+
+function Handset() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
+      <path d="M6.4 3.5 8 6.6 6.4 8.3a10 10 0 0 0 5.3 5.3l1.7-1.6 3.1 1.6v2.6c0 .6-.5 1.1-1.1 1.1A13.6 13.6 0 0 1 2.6 3.6c0-.6.5-1.1 1.1-1.1h2.7Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Envelope() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
+      <rect x="2.5" y="4.5" width="15" height="11" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <path d="m3 5.5 7 5 7-5" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Chat() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
+      <path d="M17 9.5c0 3.3-3.1 6-7 6a8 8 0 0 1-2.3-.3L4 16.5l1.1-2.8A5.7 5.7 0 0 1 3 9.5c0-3.3 3.1-6 7-6s7 2.7 7 6Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Shop() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
+      <path d="M3 8v8.5h14V8" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M2.5 8 4 3.5h12L17.5 8a2.4 2.4 0 0 1-4.8 0 2.4 2.4 0 0 1-4.9 0 2.4 2.4 0 0 1-4.8 0Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M8 16.5v-4h4v4" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Pin() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
+      <path d="M10 18s6-5.3 6-9.4a6 6 0 1 0-12 0C4 12.7 10 18 10 18Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <circle cx="10" cy="8.4" r="2.1" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
 export default function AtelierFooter() {
   const pathname = usePathname();
   // Auth screens are one focused card on an otherwise empty page. A footer
@@ -108,9 +176,9 @@ export default function AtelierFooter() {
         </svg>
       </div>
 
-      <div className="mx-auto grid w-full max-w-[104rem] gap-x-12 gap-y-12 lg:grid-cols-12">
+      <div className="mx-auto grid w-full max-w-[104rem] gap-x-8 gap-y-12 lg:grid-cols-12 xl:gap-x-12">
 
-        <div className="lg:col-span-4">
+        <div className="min-w-0 lg:col-span-4">
           {/* THE MARK, AND A WAY HOME.
               This was a `<p>`: the shop's name set at the head of the footer,
               with no mark beside it and nothing clickable about it. Every
@@ -130,10 +198,13 @@ export default function AtelierFooter() {
               {STORE.name}
             </span>
           </Link>
-          <address className="mt-5 not-italic text-paper/80">
+          <address className="mt-5 flex gap-2.5 not-italic text-paper/80">
+            <Shop />
+            <span>
             {STORE.shopNo}<br />
             {STORE.area}<br />
             {STORE.city}, {STORE.state} {STORE.pincode}
+            </span>
           </address>
           <p className="mt-5 text-paper/55">
             {STORE.weekdays}<br />{STORE.weekend}
@@ -154,13 +225,14 @@ export default function AtelierFooter() {
             href={STORE.googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-block border-b border-paper/25 pb-0.5 text-paper/70 transition-colors duration-500 hover:border-thread-pale hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
+            className="mt-5 inline-flex gap-2.5 border-b border-paper/25 pb-0.5 text-paper/70 transition-colors duration-500 hover:border-thread-pale hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
           >
+            <Pin />
             Find us on the map
           </a>
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="min-w-0 lg:col-span-2">
           <h2 className="text-rule uppercase text-thread-pale/90">The shelf</h2>
           <ul className="mt-5 space-y-2.5">
             {SHELF.map((name) => (
@@ -176,7 +248,7 @@ export default function AtelierFooter() {
           </ul>
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="min-w-0 lg:col-span-3">
           <h2 className="text-rule uppercase text-thread-pale/90">Good to know</h2>
           <ul className="mt-5 space-y-2.5">
             {POLICIES.map((p) => (
@@ -192,25 +264,29 @@ export default function AtelierFooter() {
           </ul>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="min-w-0 lg:col-span-3">
           <h2 className="text-rule uppercase text-thread-pale/90">Speak to us</h2>
           <ul className="mt-5 space-y-2.5">
-            <li>
+            <li className="flex gap-2.5">
+              <Handset />
               <a href={`tel:${STORE.phone1}`} className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
                 {STORE.phone1}
               </a>
             </li>
-            <li>
+            <li className="flex gap-2.5">
+              <Handset />
               <a href={`tel:${STORE.phone2}`} className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
                 {STORE.phone2}
               </a>
             </li>
-            <li>
+            <li className="flex min-w-0 gap-2.5">
+              <Envelope />
               <a href={`mailto:${STORE.email}`} className="break-all text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
                 {STORE.email}
               </a>
             </li>
-            <li>
+            <li className="flex gap-2.5">
+              <Chat />
               <a
                 href={`https://wa.me/${STORE.whatsapp}`}
                 target="_blank"
