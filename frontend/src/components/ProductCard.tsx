@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import {
   motion, useMotionValue, useSpring, useTransform,
   useReducedMotion, AnimatePresence,
@@ -333,50 +333,15 @@ export default function ProductCard({ product }: Props) {
               />
             </button>
 
-            {/**
-              * PREV / NEXT, ADDED TO MATCH THE SISTER SHOP.
-              *
-              * This card advances itself every 3.2s and had no way to hurry
-              * it: on a phone a swipe already worked, but on a pointer device
-              * there is no swipe, so somebody who wanted the back of a
-              * garment simply waited for it to come round. The arrows are the
-              * desktop half of a control this card already had on touch,
-              * which is why they appear on hover and nowhere else — two small
-              * targets stacked on the card's own link is the wrong trade on a
-              * phone.
-              *
-              * TRANSPARENT, AND MEASURED AT BOTH EXTREMES. A control on an
-              * unknown photograph has two worst cases: the picture behind it
-              * is white, or it is black. At 55% the ground is genuinely
-              * see-through and the chevron still measures 14.34:1 over a
-              * white photo and 4.25:1 over a black one, clearing the 3:1
-              * WCAG 1.4.11 asks of a control in both. `backdrop-blur`
-              * separates it from busy print without hiding it.
-              *
-              * `stopPropagation` as well as `preventDefault`: the whole plate
-              * is inside a Link, and without both, changing the picture
-              * navigates to the product instead.
-              */}
-            {totalSlides > 1 && hovering && (
-              <>
-                <button
-                  type="button"
-                  aria-label="Previous image"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); goCard(imgIdx - 1); }}
-                  className="absolute left-2 top-1/2 z-20 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-paper-bright/55 text-graphite ring-1 ring-paper-edge/70 backdrop-blur-[3px] transition-colors duration-200 hover:bg-paper-bright/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread"
-                >
-                  <ChevronLeft size={15} />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next image"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); goCard(imgIdx + 1); }}
-                  className="absolute right-2 top-1/2 z-20 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-paper-bright/55 text-graphite ring-1 ring-paper-edge/70 backdrop-blur-[3px] transition-colors duration-200 hover:bg-paper-bright/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread"
-                >
-                  <ChevronRight size={15} />
-                </button>
-              </>
-            )}
+            {/* NO PREV / NEXT ARROWS.
+                They were added to match the sister shop and are removed from
+                both on the shop's call. The reasoning holds up: on a phone the
+                control is a SWIPE, which this card handles at a 35px
+                threshold, and the gallery already advances itself every 3.2s.
+                The arrows only ever added two more objects on top of the
+                photograph the card exists to sell. The measure along the
+                bottom edge still says how many pictures there are, and the
+                product page carries the full gallery. */}
 
             {/**
              * The slide indicator is a measure, not dots.
