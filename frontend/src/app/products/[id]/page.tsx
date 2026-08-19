@@ -668,7 +668,7 @@ export default function ProductDetailPage() {
 
           {/* Stock warnings */}
           {product.stock === 0 ? (
-            <div className="border-l-2 border-red-700/50 pl-4 p-4 mb-4 text-red-700 text-sm font-medium">
+            <div className="border-l-2 border-critical/50 pl-4 p-4 mb-4 text-critical text-sm font-medium">
               This product is currently out of stock. Check back later.
             </div>
           ) : product.stock <= 5 ? (
@@ -880,8 +880,8 @@ export default function ProductDetailPage() {
                 </div>
               )}
               {user && !canReview && reviewReason === 'already_reviewed' && (
-                <div className="border-l-2 border-green-700/50 pl-4 p-4">
-                  <p className="text-sm text-green-700 flex items-center gap-2">
+                <div className="border-l-2 border-positive/50 pl-4 p-4">
+                  <p className="text-sm text-positive flex items-center gap-2">
                     <CheckCircle size={16} /> You have already reviewed this product. Thank you!
                   </p>
                 </div>

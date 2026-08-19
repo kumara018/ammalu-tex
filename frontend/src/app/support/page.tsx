@@ -230,23 +230,23 @@ export default function SupportPage() {
       {/* ── Cancellation, Return & Exchange ────────────────────────────── */}
       <Accordion id="returns" title="Cancellation, Return & Exchange Policy" icon={RotateCcw}>
         <div className="grid md:grid-cols-3 gap-4 mb-5">
-          <div className="p-4 bg-transparent rounded-sm border border-red-100">
-            <h3 className="font-normal text-red-700 mb-1.5 text-sm">Cancel</h3>
+          <div className="p-4 bg-transparent rounded-sm border border-critical">
+            <h3 className="font-normal text-critical mb-1.5 text-sm">Cancel</h3>
             <p className="text-xs text-graphite-muted">Within <b>1 hour</b> of purchase. Instant, automatic — no reason needed, refund auto-initiated if paid.</p>
           </div>
-          <div className="p-4 bg-transparent rounded-sm border border-blue-100">
-            <h3 className="font-normal text-blue-700 mb-1.5 text-sm">↩️ Return</h3>
+          <div className="p-4 bg-transparent rounded-sm border border-paper-edge">
+            <h3 className="font-normal text-graphite mb-1.5 text-sm">↩️ Return</h3>
             <p className="text-xs text-graphite-muted">Within <b>4 hours</b> of delivery. Size issue or damage only, with photo proof — admin-approved, then refunded via Razorpay after pickup.</p>
           </div>
-          <div className="p-4 bg-transparent rounded-sm border border-green-100">
-            <h3 className="font-normal text-green-700 mb-1.5 text-sm">Exchange</h3>
+          <div className="p-4 bg-transparent rounded-sm border border-positive">
+            <h3 className="font-normal text-positive mb-1.5 text-sm">Exchange</h3>
             <p className="text-xs text-graphite-muted">Within <b>12 hours</b> of delivery. Size issue or damage only — swap for any product of equal or higher value (pay the difference if higher).</p>
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-5">
           <div>
-            <h3 className="font-normal text-green-700 mb-3 text-sm">Eligible</h3>
+            <h3 className="font-normal text-positive mb-3 text-sm">Eligible</h3>
             <ul className="space-y-2 text-sm text-graphite-muted">
               {[
                 'Cancel any order within 1 hour of purchase — no reason required',
@@ -254,13 +254,13 @@ export default function SupportPage() {
                 'Exchange within 12 hours of delivery for a size issue or damage — choose any replacement of equal or higher value',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
-                  <span className="text-green-500 font-normal mt-0.5">✓</span> {item}
+                  <span className="text-positive font-normal mt-0.5">✓</span> {item}
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <h3 className="font-normal text-red-700 mb-3 text-sm">NOT Available</h3>
+            <h3 className="font-normal text-critical mb-3 text-sm">NOT Available</h3>
             <ul className="space-y-2 text-sm text-graphite-muted">
               {[
                 'Cancellation after 1 hour of purchase',
@@ -272,14 +272,14 @@ export default function SupportPage() {
                 'Items marked Non-Returnable (unless genuinely damaged)',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
-                  <span className="text-red-500 font-normal mt-0.5">✗</span> {item}
+                  <span className="text-critical font-normal mt-0.5">✗</span> {item}
                 </li>
               ))}
             </ul>
           </div>
         </div>
 
-        <div className="p-4 bg-transparent rounded-sm text-sm text-graphite-muted border border-blue-100 mb-3">
+        <div className="p-4 bg-transparent rounded-sm text-sm text-graphite-muted border border-paper-edge mb-3">
           <b className="text-graphite">How to Request:</b> Go to My Orders → Select the
           order → Cancel, Return or Exchange (only options still inside their window will show). Or contact us on WhatsApp at{' '}
           <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="text-maroon-700 font-medium hover:underline">
@@ -288,7 +288,7 @@ export default function SupportPage() {
           and we will guide you through.
         </div>
 
-        <div className="p-4 bg-transparent rounded-sm text-sm text-graphite-muted border border-green-100">
+        <div className="p-4 bg-transparent rounded-sm text-sm text-graphite-muted border border-positive">
           <b className="text-graphite">Return refund timeline:</b> Once your returned item is picked up and confirmed,
           a refund is automatically initiated with Razorpay to your original payment method — you'll get an email/WhatsApp
           with the exact expected credit date. See the full{' '}

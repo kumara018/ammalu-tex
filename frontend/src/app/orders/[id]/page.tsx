@@ -23,13 +23,13 @@ declare global {
 const STATUS_STEPS = ['pending', 'confirmed', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string; ring: string }> = {
-  pending:          { label: 'Order Placed',      icon: Clock,        color: 'text-yellow-700', bg: 'bg-transparent',  ring: 'border-yellow-400' },
-  confirmed:        { label: 'Confirmed',          icon: CheckCircle,  color: 'text-blue-700',   bg: 'bg-transparent',    ring: 'border-blue-400' },
-  processing:       { label: 'Being Packed',       icon: Package,      color: 'text-purple-700', bg: 'bg-transparent',  ring: 'border-purple-400' },
-  shipped:          { label: 'Shipped',            icon: Truck,        color: 'text-indigo-700', bg: 'bg-transparent',  ring: 'border-indigo-400' },
-  out_for_delivery: { label: 'Out for Delivery',   icon: Truck,        color: 'text-orange-700', bg: 'bg-maroon-50',  ring: 'border-orange-400' },
-  delivered:        { label: 'Delivered',          icon: CheckCircle,  color: 'text-green-700',  bg: 'bg-transparent',   ring: 'border-green-400' },
-  cancelled:        { label: 'Cancelled',          icon: XCircle,      color: 'text-red-700',    bg: 'bg-transparent',     ring: 'border-red-400' },
+  pending:          { label: 'Order Placed',      icon: Clock,        color: 'text-caution', bg: 'bg-transparent',  ring: 'border-caution' },
+  confirmed:        { label: 'Confirmed',          icon: CheckCircle,  color: 'text-graphite',   bg: 'bg-transparent',    ring: 'border-paper-edge' },
+  processing:       { label: 'Being Packed',       icon: Package,      color: 'text-graphite', bg: 'bg-transparent',  ring: 'border-paper-edge' },
+  shipped:          { label: 'Shipped',            icon: Truck,        color: 'text-graphite', bg: 'bg-transparent',  ring: 'border-paper-edge' },
+  out_for_delivery: { label: 'Out for Delivery',   icon: Truck,        color: 'text-caution', bg: 'bg-maroon-50',  ring: 'border-caution' },
+  delivered:        { label: 'Delivered',          icon: CheckCircle,  color: 'text-positive',  bg: 'bg-transparent',   ring: 'border-positive' },
+  cancelled:        { label: 'Cancelled',          icon: XCircle,      color: 'text-critical',    bg: 'bg-transparent',     ring: 'border-critical' },
 };
 
 const CANCEL_REASONS = [
@@ -54,17 +54,17 @@ const RETURN_WINDOW_HOURS   = 4;
 const EXCHANGE_WINDOW_HOURS = 12;
 
 const RETURN_STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  pending:             { label: 'Pending Review',       color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  under_review:        { label: 'Under Review',         color: 'bg-blue-100 text-blue-700 border-blue-300'       },
-  approved:            { label: 'Approved',             color: 'bg-green-100 text-green-700 border-green-300'    },
-  rejected:            { label: 'Rejected',             color: 'bg-red-100 text-red-700 border-red-300'          },
-  pickup_scheduled:    { label: 'Pickup Scheduled',     color: 'bg-purple-100 text-purple-700 border-purple-300' },
-  picked_up:           { label: 'Picked Up',            color: 'bg-cyan-100 text-cyan-700 border-cyan-300'       },
-  processing:          { label: 'Processing',           color: 'bg-indigo-100 text-indigo-700 border-indigo-300' },
-  replacement_shipped: { label: 'Replacement Shipped',  color: 'bg-purple-100 text-purple-700 border-purple-300' },
-  refund_initiated:    { label: 'Refund Initiated',     color: 'bg-amber-100 text-amber-700 border-amber-300'    },
-  refunded:            { label: 'Refund Credited',      color: 'bg-green-100 text-green-700 border-green-300'    },
-  completed:           { label: 'Completed',            color: 'bg-green-100 text-green-700 border-green-300'    },
+  pending:             { label: 'Pending Review',       color: 'bg-caution-soft text-caution border-caution' },
+  under_review:        { label: 'Under Review',         color: 'bg-paper-shade text-graphite border-paper-edge'       },
+  approved:            { label: 'Approved',             color: 'bg-positive-soft text-positive border-positive'    },
+  rejected:            { label: 'Rejected',             color: 'bg-critical-soft text-critical border-critical'          },
+  pickup_scheduled:    { label: 'Pickup Scheduled',     color: 'bg-paper-shade text-graphite border-paper-edge' },
+  picked_up:           { label: 'Picked Up',            color: 'bg-paper-shade text-graphite border-paper-edge'       },
+  processing:          { label: 'Processing',           color: 'bg-paper-shade text-graphite border-paper-edge' },
+  replacement_shipped: { label: 'Replacement Shipped',  color: 'bg-paper-shade text-graphite border-paper-edge' },
+  refund_initiated:    { label: 'Refund Initiated',     color: 'bg-caution-soft text-caution border-caution'    },
+  refunded:            { label: 'Refund Credited',      color: 'bg-positive-soft text-positive border-positive'    },
+  completed:           { label: 'Completed',            color: 'bg-positive-soft text-positive border-positive'    },
 };
 
 function OrderDetailContent() {
@@ -361,11 +361,11 @@ function OrderDetailContent() {
 
       {/* Success banner for new orders */}
       {isNew && (
-        <div className="border-l-2 border-green-700/50 pl-4 p-6 mb-6 text-center">
-          <Sparkles size={40} className="mx-auto text-green-600 mb-3" />
-          <h2 className="text-xl font-normal text-green-800 mb-1">Order Placed Successfully! 🎉</h2>
-          <p className="text-green-700 text-sm">Thank you for shopping at Ammalu Tex! Your order <b>{order.order_number}</b> has been confirmed.</p>
-          <p className="text-green-600 text-xs mt-2">You will receive a confirmation via Email, SMS & WhatsApp shortly.</p>
+        <div className="border-l-2 border-positive/50 pl-4 p-6 mb-6 text-center">
+          <Sparkles size={40} className="mx-auto text-positive mb-3" />
+          <h2 className="text-xl font-normal text-positive-deep mb-1">Order Placed Successfully! 🎉</h2>
+          <p className="text-positive text-sm">Thank you for shopping at Ammalu Tex! Your order <b>{order.order_number}</b> has been confirmed.</p>
+          <p className="text-positive text-xs mt-2">You will receive a confirmation via Email, SMS & WhatsApp shortly.</p>
         </div>
       )}
 
@@ -379,7 +379,7 @@ function OrderDetailContent() {
         {canCancel && (
           <button
             onClick={() => setShowCancelModal(true)}
-            className="ml-auto text-sm text-red-600 hover:text-red-800 border border-red-300 hover:border-red-500 px-4 py-2 rounded-sm transition-colors"
+            className="ml-auto text-sm text-critical hover:text-critical-deep border border-critical hover:border-critical px-4 py-2 rounded-sm transition-colors"
           >
             Cancel Order
           </button>
@@ -414,8 +414,8 @@ function OrderDetailContent() {
                       <div key={s} className="flex flex-col items-center gap-2 z-10">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all
                           ${done
-                            ? (s === 'out_for_delivery' ? 'bg-orange-600 border-orange-600 text-white' :
-                               s === 'delivered' ? 'bg-green-600 border-green-600 text-white' :
+                            ? (s === 'out_for_delivery' ? 'bg-caution border-caution text-white' :
+                               s === 'delivered' ? 'bg-positive border-positive text-white' :
                                'bg-maroon-800 border-maroon-800 text-white')
                             : 'bg-paper-bright border-paper-edge text-graphite-faint'}
                           ${active ? 'ring-4 ring-offset-2 ring-maroon-200 scale-110' : ''}`}>
@@ -432,9 +432,9 @@ function OrderDetailContent() {
 
               {/* Current location badge */}
               {currentLocation && (
-                <div className="mt-5 flex items-center gap-2 border-l-2 border-blue-700/50 pl-4 px-4 py-2.5">
-                  <Navigation size={15} className="text-blue-600 flex-shrink-0" />
-                  <span className="text-sm text-blue-800 font-medium">{currentLocation}</span>
+                <div className="mt-5 flex items-center gap-2 border-l-2 border-paper-edge/50 pl-4 px-4 py-2.5">
+                  <Navigation size={15} className="text-graphite flex-shrink-0" />
+                  <span className="text-sm text-graphite font-medium">{currentLocation}</span>
                 </div>
               )}
 
@@ -449,7 +449,7 @@ function OrderDetailContent() {
                   </p>
                   {order.estimated_delivery && (
                     <p className="text-sm text-graphite-muted">
-                      Estimated Delivery: <span className="font-semibold text-green-700">{order.estimated_delivery}</span>
+                      Estimated Delivery: <span className="font-semibold text-positive">{order.estimated_delivery}</span>
                     </p>
                   )}
                   <div className="flex gap-3 flex-wrap mt-2">
@@ -470,9 +470,9 @@ function OrderDetailContent() {
 
               {/* Estimated delivery banner for pre-ship statuses */}
               {['confirmed', 'processing'].includes(order.status) && (
-                <div className="mt-4 border-l-2 border-blue-700/50 pl-4 p-3 flex items-center gap-2">
-                  <Truck size={16} className="text-blue-600 flex-shrink-0" />
-                  <p className="text-sm text-blue-700 font-medium">Estimated Delivery: 3–7 Business Days</p>
+                <div className="mt-4 border-l-2 border-paper-edge/50 pl-4 p-3 flex items-center gap-2">
+                  <Truck size={16} className="text-graphite flex-shrink-0" />
+                  <p className="text-sm text-graphite font-medium">Estimated Delivery: 3–7 Business Days</p>
                 </div>
               )}
             </div>
@@ -491,7 +491,7 @@ function OrderDetailContent() {
                     {i < allEvents.length - 1 && (
                       <div className="absolute left-[15px] top-8 bottom-0 z-0 w-px bg-paper-edge" />
                     )}
-                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-paper-bright border-orange-300 text-orange-500'}`}>
+                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center z-10 border-2 ${i === 0 ? 'bg-maroon-800 border-maroon-800 text-white' : 'bg-paper-bright border-caution text-caution'}`}>
                       <MapPin size={14} />
                     </div>
                     <div className="pb-5 flex-1">
@@ -515,11 +515,11 @@ function OrderDetailContent() {
 
           {/* ── Open Box Delivery ── */}
           {order.open_box_delivery && (
-            <div className="border-l-2 border-blue-700/50 pl-4 p-4 flex items-center gap-3">
-              <PackageOpen size={24} className="text-blue-600 flex-shrink-0" />
+            <div className="border-l-2 border-paper-edge/50 pl-4 p-4 flex items-center gap-3">
+              <PackageOpen size={24} className="text-graphite flex-shrink-0" />
               <div>
-                <p className="font-semibold text-blue-800 text-sm">Open Box Delivery Requested</p>
-                <p className="text-xs text-blue-600 mt-0.5">You can inspect the package before accepting delivery.</p>
+                <p className="font-semibold text-graphite text-sm">Open Box Delivery Requested</p>
+                <p className="text-xs text-graphite mt-0.5">You can inspect the package before accepting delivery.</p>
               </div>
             </div>
           )}
@@ -528,16 +528,16 @@ function OrderDetailContent() {
           {order.status === 'out_for_delivery' && order.delivery_otp && (
             <div className="border-y border-thread py-7">
               <div className="flex items-center gap-2 mb-4">
-                <ShieldCheck size={22} className="text-orange-700" />
-                <h3 className="font-normal text-orange-900">Your Delivery OTP</h3>
+                <ShieldCheck size={22} className="text-caution" />
+                <h3 className="font-normal text-caution-deep">Your Delivery OTP</h3>
               </div>
               <p className="text-sm text-graphite-muted mb-4">Your order is out for delivery! Share this OTP with the delivery agent when they arrive.</p>
-              <div className="bg-paper-bright border-2 border-orange-300 rounded-sm p-4 text-center mb-4">
+              <div className="bg-paper-bright border-2 border-caution rounded-sm p-4 text-center mb-4">
                 <p className="text-xs text-graphite-faint uppercase tracking-widest mb-2">Delivery OTP</p>
-                <p className="text-5xl font-normal tracking-[0.4em] font-mono text-orange-700">{order.delivery_otp}</p>
+                <p className="text-5xl font-normal tracking-[0.4em] font-mono text-caution">{order.delivery_otp}</p>
               </div>
               {(order.delivery_person_name || order.delivery_person_phone) && (
-                <div className="bg-paper-bright border border-orange-200 rounded-sm p-4">
+                <div className="bg-paper-bright border border-caution rounded-sm p-4">
                   <p className="text-xs font-semibold text-graphite-faint uppercase tracking-wide mb-2">Your Delivery Agent</p>
                   {order.delivery_person_name && <p className="text-sm font-semibold text-graphite">{order.delivery_person_name}</p>}
                   {order.delivery_person_phone && (
@@ -548,29 +548,29 @@ function OrderDetailContent() {
                   )}
                 </div>
               )}
-              <p className="text-xs text-orange-700 mt-3 font-medium">Never share this OTP via phone call or message. Only share it in person at your door.</p>
+              <p className="text-xs text-caution mt-3 font-medium">Never share this OTP via phone call or message. Only share it in person at your door.</p>
             </div>
           )}
 
           {/* ── Cancelled ── */}
           {isCancelled && (
-            <div className="border-l-2 border-red-700/50 pl-4 p-5">
+            <div className="border-l-2 border-critical/50 pl-4 p-5">
               <div className="flex items-center gap-4 mb-3">
-                <XCircle size={32} className="text-red-500 flex-shrink-0" />
+                <XCircle size={32} className="text-critical flex-shrink-0" />
                 <div>
-                  <p className="font-normal text-red-800">Order Cancelled</p>
-                  <p className="text-sm text-red-600 mt-0.5">
+                  <p className="font-normal text-critical-deep">Order Cancelled</p>
+                  <p className="text-sm text-critical mt-0.5">
                     {order.cancelled_by === 'user' ? 'Cancelled by you.' : 'Cancelled by store.'}
                     {order.cancel_reason ? ` Reason: ${order.cancel_reason}` : ''}
                   </p>
                 </div>
               </div>
               {order.rto_pending && (
-                <div className="flex items-start gap-3 border-l-2 border-orange-700/50 pl-4 px-4 py-3 mb-3">
-                  <AlertCircle size={18} className="text-orange-600 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 border-l-2 border-caution/50 pl-4 px-4 py-3 mb-3">
+                  <AlertCircle size={18} className="text-caution flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-normal text-orange-800">This order was already with our courier</p>
-                    <p className="text-xs text-orange-700 mt-0.5">
+                    <p className="text-sm font-normal text-caution-deep">This order was already with our courier</p>
+                    <p className="text-xs text-caution mt-0.5">
                       Please do not accept the package if a delivery agent arrives — we're arranging its return to us.
                       Any refund will be processed once we receive it back.
                     </p>
@@ -578,23 +578,23 @@ function OrderDetailContent() {
                 </div>
               )}
               {order.payment_status === 'refunded' ? (
-                <div className="flex items-center gap-3 border-l-2 border-green-700/50 pl-4 px-4 py-3">
-                  <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
+                <div className="flex items-center gap-3 border-l-2 border-positive/50 pl-4 px-4 py-3">
+                  <CheckCircle size={18} className="text-positive flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-normal text-green-800">Refund Processed ✅</p>
-                    <p className="text-xs text-green-600 mt-0.5">₹{order.total.toLocaleString()} refund has been processed by Razorpay. It will appear in your account within 1–3 business days depending on your bank.</p>
+                    <p className="text-sm font-normal text-positive-deep">Refund Processed ✅</p>
+                    <p className="text-xs text-positive mt-0.5">₹{order.total.toLocaleString()} refund has been processed by Razorpay. It will appear in your account within 1–3 business days depending on your bank.</p>
                   </div>
                 </div>
               ) : order.payment_status === 'refund_initiated' ? (
-                <div className="flex items-center gap-3 bg-maroon-50 border border-orange-200 rounded-sm px-4 py-3">
-                  <RotateCcw size={18} className="text-orange-600 flex-shrink-0 animate-spin" style={{animationDuration:'3s'}} />
+                <div className="flex items-center gap-3 bg-maroon-50 border border-caution rounded-sm px-4 py-3">
+                  <RotateCcw size={18} className="text-caution flex-shrink-0 animate-spin" style={{animationDuration:'3s'}} />
                   <div>
-                    <p className="text-sm font-normal text-orange-800">Refund Initiated 🔄</p>
-                    <p className="text-xs text-orange-600 mt-0.5">Your refund of ₹{order.total.toLocaleString()} has been initiated with Razorpay and is being processed. Will be credited to your original payment method within <b>5–7 business days</b>.</p>
+                    <p className="text-sm font-normal text-caution-deep">Refund Initiated 🔄</p>
+                    <p className="text-xs text-caution mt-0.5">Your refund of ₹{order.total.toLocaleString()} has been initiated with Razorpay and is being processed. Will be credited to your original payment method within <b>5–7 business days</b>.</p>
                   </div>
                 </div>
               ) : order.payment_method !== 'cod' && (
-                <p className="text-sm text-orange-700 bg-maroon-50 border border-orange-200 rounded-sm px-4 py-2.5">
+                <p className="text-sm text-caution bg-maroon-50 border border-caution rounded-sm px-4 py-2.5">
                   Refund will be initiated within 24 hours and credited within 5–7 business days.
                 </p>
               )}
@@ -629,7 +629,7 @@ function OrderDetailContent() {
                   </>
                 );
                 return (
-                  <div key={i} className="pb-4 border-b border-orange-50 last:border-0 last:pb-0">
+                  <div key={i} className="pb-4 border-b border-caution last:border-0 last:pb-0">
                     {/* Clicking a purchased item opens its product page in a new tab — like
                         Amazon's order-history "buy it again" — so shopping again or just
                         re-checking the product never loses your place in this order. */}
@@ -667,16 +667,16 @@ function OrderDetailContent() {
               <div className="flex justify-between text-graphite-muted"><span>Subtotal</span><span>₹{order.subtotal.toLocaleString()}</span></div>
               <div className="flex justify-between text-graphite-muted">
                 <span>Shipping</span>
-                <span className={order.shipping_fee === 0 ? 'text-green-600' : ''}>{order.shipping_fee === 0 ? 'FREE' : `₹${order.shipping_fee}`}</span>
+                <span className={order.shipping_fee === 0 ? 'text-positive' : ''}>{order.shipping_fee === 0 ? 'FREE' : `₹${order.shipping_fee}`}</span>
               </div>
               {order.discount > 0 && (
-                <div className="flex justify-between text-green-600"><span>Discount</span><span>-₹{order.discount.toLocaleString()}</span></div>
+                <div className="flex justify-between text-positive"><span>Discount</span><span>-₹{order.discount.toLocaleString()}</span></div>
               )}
               <div className="border-t border-maroon-200 pt-2.5 flex justify-between font-normal text-base">
                 <span>Total Paid</span><span className="text-maroon-900">₹{order.total.toLocaleString()}</span>
               </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-orange-50 space-y-2">
+            <div className="mt-4 pt-3 border-t border-caution space-y-2">
               <p className="text-xs text-graphite-faint flex items-center gap-1.5">
                 <CreditCard size={12} />
                 Mode: <b className="capitalize">
@@ -686,27 +686,27 @@ function OrderDetailContent() {
               </p>
               <p className="text-xs flex items-center gap-1.5">
                 <span className={`inline-block font-normal px-2 py-0.5 rounded-full text-[10px] border
-                  ${order.payment_status === 'paid'             ? 'text-green-700 bg-transparent border-green-300'     :
-                    order.payment_status === 'refund_initiated' ? 'text-orange-700 bg-maroon-50 border-orange-300'  :
-                    order.payment_status === 'refunded'         ? 'text-purple-700 bg-transparent border-purple-300'  :
-                    'text-amber-700 bg-transparent border-amber-300'}`}>
+                  ${order.payment_status === 'paid'             ? 'text-positive bg-transparent border-positive'     :
+                    order.payment_status === 'refund_initiated' ? 'text-caution bg-maroon-50 border-caution'  :
+                    order.payment_status === 'refunded'         ? 'text-graphite bg-transparent border-paper-edge'  :
+                    'text-caution bg-transparent border-caution'}`}>
                   {order.payment_status === 'paid'             ? 'PAID'                 :
                    order.payment_status === 'refund_initiated' ? 'REFUND INITIATED'     :
                    order.payment_status === 'refunded'         ? 'REFUND PROCESSED'     : '⏳ PENDING'}
                 </span>
               </p>
               {order.payment_status === 'refund_initiated' && (
-                <p className="text-[10px] text-orange-600 bg-maroon-50 border border-maroon-200 rounded-sm px-2 py-1.5 mt-1">
+                <p className="text-[10px] text-caution bg-maroon-50 border border-maroon-200 rounded-sm px-2 py-1.5 mt-1">
                   ⏱️ Refund initiated — will be credited to your account within <b>5–7 business days</b>.
                 </p>
               )}
               {order.payment_status === 'refunded' && (
-                <p className="text-[10px] text-green-600 bg-transparent border border-green-100 rounded-sm px-2 py-1.5 mt-1">
+                <p className="text-[10px] text-positive bg-transparent border border-positive rounded-sm px-2 py-1.5 mt-1">
                   Refund processed by Razorpay — will appear in your bank account within <b>1–3 business days</b>.
                 </p>
               )}
               {order.payment_transaction_id && order.payment_method !== 'cod' && (
-                <div className="mt-2 pt-2 border-t border-orange-50">
+                <div className="mt-2 pt-2 border-t border-caution">
                   <p className="text-[10px] text-graphite-faint mb-1">Transaction ID</p>
                   <p className="font-mono text-[10px] text-graphite-muted bg-paper border border-paper-edge rounded-sm px-2 py-1.5 break-all leading-relaxed">
                     {order.payment_transaction_id}
@@ -733,11 +733,11 @@ function OrderDetailContent() {
                 <RotateCcw size={16} /> Return / Exchange
               </h3>
               {hasNonReturnableItem ? (
-                <div className="flex items-start gap-2 p-3 border-l-2 border-red-700/50 pl-4">
-                  <XCircle size={16} className="text-red-500 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 p-3 border-l-2 border-critical/50 pl-4">
+                  <XCircle size={16} className="text-critical mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs font-semibold text-red-700">Non-Returnable Order</p>
-                    <p className="text-xs text-red-600 mt-0.5">This order contains a non-returnable item and is not eligible for return or exchange.</p>
+                    <p className="text-xs font-semibold text-critical">Non-Returnable Order</p>
+                    <p className="text-xs text-critical mt-0.5">This order contains a non-returnable item and is not eligible for return or exchange.</p>
                   </div>
                 </div>
               ) : existingReturn ? (
@@ -747,7 +747,7 @@ function OrderDetailContent() {
                     {RETURN_STATUS_LABEL[existingReturn.status]?.label || existingReturn.status}
                   </div>
                   {existingReturn.admin_notes && (
-                    <p className="text-xs text-graphite-muted border-l-2 border-yellow-700/50 pl-4 px-3 py-2 mb-3">
+                    <p className="text-xs text-graphite-muted border-l-2 border-caution/50 pl-4 px-3 py-2 mb-3">
                       Note: {existingReturn.admin_notes}
                     </p>
                   )}
@@ -790,7 +790,7 @@ function OrderDetailContent() {
 
           {canCancel && (
             <button onClick={() => setShowCancelModal(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-red-600 border border-red-300 hover:bg-transparent rounded-sm transition-colors">
+              className="w-full flex items-center justify-center gap-2 py-3 text-sm font-medium text-critical border border-critical hover:bg-transparent rounded-sm transition-colors">
               <XCircle size={16} /> Cancel This Order
             </button>
           )}
@@ -828,12 +828,12 @@ function OrderDetailContent() {
                   <p className="font-semibold text-graphite mb-4">What would you like to do?</p>
                   <div className="space-y-3">
                     <button onClick={() => afterKindChosen('return')}
-                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'return' ? 'border-red-400 bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'return' ? 'border-critical bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
                       <p className="font-semibold text-graphite text-sm">Return for a refund</p>
                       <p className="text-xs text-graphite-faint mt-0.5">Send the item back and get your money refunded to your original payment method. Window: {RETURN_WINDOW_HOURS} hours from delivery.</p>
                     </button>
                     <button onClick={() => afterKindChosen('exchange')}
-                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'exchange' ? 'border-blue-400 bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
+                      className={`w-full text-left p-4 rounded-sm border-2 transition-all ${returnKind === 'exchange' ? 'border-paper-edge bg-transparent' : 'border-paper-edge hover:border-thread'}`}>
                       <p className="font-semibold text-graphite text-sm">Exchange for another product</p>
                       <p className="text-xs text-graphite-faint mt-0.5">Swap for any product of the same or higher price — pay only the difference. Window: {EXCHANGE_WINDOW_HOURS} hours from delivery.</p>
                     </button>
@@ -930,7 +930,7 @@ function OrderDetailContent() {
                             </div>
                             <p className="text-xs font-medium text-graphite truncate">{p.name}</p>
                             <p className="text-xs font-semibold text-maroon-800">₹{p.price.toLocaleString()}</p>
-                            {tooCheap && <p className="text-[10px] text-red-500 mt-0.5">Too low — pick ₹{selectedItem?.price.toLocaleString()}+</p>}
+                            {tooCheap && <p className="text-[10px] text-critical mt-0.5">Too low — pick ₹{selectedItem?.price.toLocaleString()}+</p>}
                           </button>
                         );
                       })}
@@ -938,7 +938,7 @@ function OrderDetailContent() {
                   )}
 
                   {newProduct && (
-                    <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3 mb-4 space-y-3">
+                    <div className="bg-maroon-50 border border-caution rounded-sm p-3 mb-4 space-y-3">
                       <p className="text-sm font-semibold text-graphite">Selected: {newProduct.name}</p>
                       {newProduct.size_options?.length > 0 && (
                         <div>
@@ -962,7 +962,7 @@ function OrderDetailContent() {
                           </div>
                         </div>
                       )}
-                      <div className="border-t border-orange-200 pt-2 text-xs text-graphite-muted space-y-0.5">
+                      <div className="border-t border-caution pt-2 text-xs text-graphite-muted space-y-0.5">
                         <p>Original: ₹{selectedItem?.price.toLocaleString()}</p>
                         <p>Replacement: ₹{newProduct.price.toLocaleString()}</p>
                         <p className="font-semibold text-maroon-800">
@@ -988,16 +988,16 @@ function OrderDetailContent() {
               {/* Step 5: Pay the difference (only when replacement costs more) */}
               {returnStep === 5 && (
                 <div>
-                  <p className="font-semibold text-graphite mb-1 flex items-center gap-2"><Lock size={16} className="text-green-600" /> Pay Price Difference</p>
+                  <p className="font-semibold text-graphite mb-1 flex items-center gap-2"><Lock size={16} className="text-positive" /> Pay Price Difference</p>
                   <p className="text-xs text-graphite-faint mb-4">Your replacement costs more than the original item. This must be paid upfront before your exchange request is submitted.</p>
-                  <div className="bg-maroon-50 border border-orange-200 rounded-sm p-4 mb-4 text-center">
+                  <div className="bg-maroon-50 border border-caution rounded-sm p-4 mb-4 text-center">
                     <p className="text-xs text-graphite-faint uppercase tracking-wide">Amount Due</p>
                     <p className="font-display text-band font-normal text-maroon-800">₹{priceDifference.toLocaleString()}</p>
                   </div>
                   {paymentProof ? (
-                    <div className="flex items-center gap-2 p-3 border-l-2 border-green-700/50 pl-4 mb-4">
-                      <CheckCircle size={18} className="text-green-600" />
-                      <p className="text-sm text-green-700 font-medium">Payment received — ready to submit</p>
+                    <div className="flex items-center gap-2 p-3 border-l-2 border-positive/50 pl-4 mb-4">
+                      <CheckCircle size={18} className="text-positive" />
+                      <p className="text-sm text-positive font-medium">Payment received — ready to submit</p>
                     </div>
                   ) : (
                     <button onClick={handlePayDifference} disabled={payingDiff}
@@ -1023,7 +1023,7 @@ function OrderDetailContent() {
                   <p className="text-xs text-graphite-faint mb-4">At least 2 photos are required as proof. Max 3.</p>
 
                   {/* Summary */}
-                  <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3 mb-4 text-xs text-graphite-muted space-y-0.5">
+                  <div className="bg-maroon-50 border border-caution rounded-sm p-3 mb-4 text-xs text-graphite-muted space-y-0.5">
                     <p><span className="font-semibold">Type:</span> {returnKind === 'return' ? 'Return (Refund)' : 'Exchange'}</p>
                     <p><span className="font-semibold">Item:</span> {selectedItem?.name}</p>
                     <p><span className="font-semibold">Reason:</span> {EXCHANGE_REASONS.find(r => r.value === returnReason)?.label}</p>
@@ -1037,7 +1037,7 @@ function OrderDetailContent() {
                   <div className="flex flex-wrap gap-3 mb-2">
                     {returnImages.map((url, idx) => (
                       <div key={idx} className="relative group">
-                        <img src={url} alt={`Exchange photo ${idx+1}`} className="w-20 h-20 object-cover rounded-sm border-2 border-orange-200" />
+                        <img src={url} alt={`Exchange photo ${idx+1}`} className="w-20 h-20 object-cover rounded-sm border-2 border-caution" />
                         <button onClick={() => setReturnImages(prev => prev.filter((_, i) => i !== idx))}
                           className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center bg-graphite text-xs text-paper opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus-visible:opacity-100">
                           <X size={10} />
@@ -1056,7 +1056,7 @@ function OrderDetailContent() {
                     )}
                   </div>
                   <input ref={returnImgRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleReturnImageUpload} />
-                  <p className="text-xs text-graphite-faint mb-4">JPEG, PNG or WebP · Max 10MB each {returnImages.length < 2 && <span className="text-red-500 font-medium">· {2 - returnImages.length} more required</span>}</p>
+                  <p className="text-xs text-graphite-faint mb-4">JPEG, PNG or WebP · Max 10MB each {returnImages.length < 2 && <span className="text-critical font-medium">· {2 - returnImages.length} more required</span>}</p>
 
                   {/* Checklist */}
                   <div className="space-y-2 mb-5">
@@ -1093,8 +1093,8 @@ function OrderDetailContent() {
         <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onClick={() => setShowCancelModal(false)}>
           <div className="w-full max-w-md border border-paper-edge bg-paper p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle size={20} className="text-red-600" />
+              <div className="w-11 h-11 rounded-full bg-critical-soft flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={20} className="text-critical" />
               </div>
               <div>
                 <h3 className="font-normal text-graphite text-lg">Cancel Order?</h3>
@@ -1104,7 +1104,7 @@ function OrderDetailContent() {
 
             <p className="text-sm text-graphite-muted mb-4">
               Please tell us why you want to cancel. This helps us improve.
-              {order.payment_method !== 'cod' && <span className="block mt-1 text-orange-600 font-medium">Your payment will be refunded within 5–7 business days.</span>}
+              {order.payment_method !== 'cod' && <span className="block mt-1 text-caution font-medium">Your payment will be refunded within 5–7 business days.</span>}
             </p>
 
             {/* Reason selector */}
@@ -1134,7 +1134,7 @@ function OrderDetailContent() {
                 Keep Order
               </button>
               <button onClick={handleCancelConfirm} disabled={cancelling || !cancelReason}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-sm font-semibold text-sm hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                className="flex-1 px-4 py-2.5 bg-critical text-white rounded-sm font-semibold text-sm hover:bg-critical transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                 {cancelling ? <><RefreshCw size={14} className="animate-spin" /> Cancelling...</> : <><XCircle size={14} /> Yes, Cancel</>}
               </button>
             </div>

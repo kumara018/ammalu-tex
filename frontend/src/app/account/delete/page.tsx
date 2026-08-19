@@ -113,7 +113,7 @@ export default function DeleteAccountPage() {
             {/* Option 1 — Deactivate */}
             <button
               onClick={() => { setMode('deactivate'); setStep('warning'); }}
-              className="w-full mb-4 p-5 rounded-sm border-2 border-orange-200 hover:border-orange-400 hover:bg-maroon-50 text-left transition-all group"
+              className="w-full mb-4 p-5 rounded-sm border-2 border-caution hover:border-caution hover:bg-maroon-50 text-left transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 pt-0.5">
@@ -135,7 +135,7 @@ export default function DeleteAccountPage() {
             {/* Option 2 — Permanent delete */}
             <button
               onClick={() => { setMode('delete'); setStep('warning'); }}
-              className="w-full p-5 rounded-sm border-2 border-red-200 hover:border-red-400 hover:bg-transparent text-left transition-all group"
+              className="w-full p-5 rounded-sm border-2 border-critical hover:border-critical hover:bg-transparent text-left transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 pt-0.5">
@@ -186,24 +186,24 @@ export default function DeleteAccountPage() {
             {/* What happens */}
             <div className={`rounded-sm p-4 mb-5 border ${
               mode === 'deactivate'
-                ? 'bg-maroon-50 border-orange-200'
-                : 'border-l-2 border-red-700/50 bg-transparent'
+                ? 'bg-maroon-50 border-caution'
+                : 'border-l-2 border-critical/50 bg-transparent'
             }`}>
               <p className={`font-semibold flex items-center gap-2 mb-2 ${
-                mode === 'deactivate' ? 'text-orange-700' : 'text-red-700'
+                mode === 'deactivate' ? 'text-caution' : 'text-critical'
               }`}>
                 <AlertTriangle size={15} />
                 {mode === 'deactivate' ? 'During deactivation:' : 'What will be deleted:'}
               </p>
               {mode === 'deactivate' ? (
-                <ul className="text-orange-700 text-sm space-y-1 ml-5 list-disc">
+                <ul className="text-caution text-sm space-y-1 ml-5 list-disc">
                   <li>You cannot log in or place orders</li>
                   <li>Your cart, orders and addresses are preserved</li>
                   <li>Log back in anytime within 7 days to reactivate instantly</li>
                   <li>After 7 days the account is permanently deleted</li>
                 </ul>
               ) : (
-                <ul className="text-red-600 text-sm space-y-1 ml-5 list-disc">
+                <ul className="text-critical text-sm space-y-1 ml-5 list-disc">
                   <li>Your account and profile</li>
                   <li>All saved addresses</li>
                   <li>Order history and reviews</li>
@@ -213,11 +213,11 @@ export default function DeleteAccountPage() {
             </div>
 
             {mode === 'deactivate' && (
-              <div className="border-l-2 border-green-700/50 pl-4 p-4 mb-5">
-                <p className="text-green-800 text-sm font-medium flex items-center gap-2">
+              <div className="border-l-2 border-positive/50 pl-4 p-4 mb-5">
+                <p className="text-positive-deep text-sm font-medium flex items-center gap-2">
                   <Clock size={14} /> 7-day reactivation window
                 </p>
-                <p className="text-green-700 text-xs mt-1">
+                <p className="text-positive text-xs mt-1">
                   Simply sign in within 7 days and your account will be instantly restored —
                   orders, addresses, reviews all intact.
                 </p>
@@ -225,20 +225,20 @@ export default function DeleteAccountPage() {
             )}
 
             {mode === 'delete' && (
-              <div className="border-l-2 border-amber-700/50 pl-4 p-4 mb-5">
-                <p className="text-amber-800 text-sm font-medium">
+              <div className="border-l-2 border-caution/50 pl-4 p-4 mb-5">
+                <p className="text-caution-deep text-sm font-medium">
                   ⏳ 24-hour cancellation window
                 </p>
-                <p className="text-amber-700 text-xs mt-1">
+                <p className="text-caution text-xs mt-1">
                   Sign in within 24 hours to cancel the deletion and keep your account.
                 </p>
               </div>
             )}
 
             {error && (
-              <div className="mb-4 flex items-center gap-2 border-l-2 border-red-700/50 pl-4 p-3">
-                <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
-                <p className="text-red-700 text-sm">{error}</p>
+              <div className="mb-4 flex items-center gap-2 border-l-2 border-critical/50 pl-4 p-3">
+                <AlertCircle size={16} className="text-critical flex-shrink-0" />
+                <p className="text-critical text-sm">{error}</p>
               </div>
             )}
 
@@ -254,8 +254,8 @@ export default function DeleteAccountPage() {
                 disabled={loading}
                 className={`flex-1 py-3 rounded-sm text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
                   mode === 'deactivate'
-                    ? 'bg-orange-600 hover:bg-orange-700'
-                    : 'bg-red-600 hover:bg-red-700'
+                    ? 'bg-caution hover:bg-caution'
+                    : 'bg-critical hover:bg-critical'
                 }`}
               >
                 {loading
@@ -270,8 +270,8 @@ export default function DeleteAccountPage() {
         {step === 'otp' && (
           <div className="card p-8">
             <div className="flex justify-center mb-5">
-              <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
-                <ShieldCheck size={30} className="text-orange-600" />
+              <div className="w-16 h-16 rounded-full bg-caution-soft flex items-center justify-center">
+                <ShieldCheck size={30} className="text-caution" />
               </div>
             </div>
             <h1 className="text-xl font-normal text-center text-graphite mb-2">
@@ -282,16 +282,16 @@ export default function DeleteAccountPage() {
             </p>
 
             {devOtp && (
-              <div className="border-l-2 border-amber-700/50 pl-4 p-4 mb-4">
-                <p className="text-amber-800 text-xs font-semibold mb-1">Dev mode</p>
-                <p className="text-amber-900 text-sm">OTP: <span className="font-mono font-normal text-lg tracking-widest">{devOtp}</span></p>
+              <div className="border-l-2 border-caution/50 pl-4 p-4 mb-4">
+                <p className="text-caution-deep text-xs font-semibold mb-1">Dev mode</p>
+                <p className="text-caution-deep text-sm">OTP: <span className="font-mono font-normal text-lg tracking-widest">{devOtp}</span></p>
               </div>
             )}
 
             {error && (
-              <div className="mb-4 flex items-center gap-2 border-l-2 border-red-700/50 pl-4 p-3">
-                <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
-                <p className="text-red-700 text-sm">{error}</p>
+              <div className="mb-4 flex items-center gap-2 border-l-2 border-critical/50 pl-4 p-3">
+                <AlertCircle size={16} className="text-critical flex-shrink-0" />
+                <p className="text-critical text-sm">{error}</p>
               </div>
             )}
 
@@ -313,8 +313,8 @@ export default function DeleteAccountPage() {
                 disabled={loading || otp.length !== 6}
                 className={`w-full py-3 rounded-sm text-white text-sm font-medium flex items-center justify-center gap-2 mb-4 disabled:opacity-60 ${
                   mode === 'deactivate'
-                    ? 'bg-orange-600 hover:bg-orange-700'
-                    : 'bg-red-600 hover:bg-red-700'
+                    ? 'bg-caution hover:bg-caution'
+                    : 'bg-critical hover:bg-critical'
                 }`}
               >
                 {loading
@@ -342,8 +342,8 @@ export default function DeleteAccountPage() {
         {step === 'done' && (
           <div className="card p-8 text-center">
             <div className="flex justify-center mb-5">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                <ShieldCheck size={30} className="text-green-600" />
+              <div className="w-16 h-16 rounded-full bg-positive-soft flex items-center justify-center">
+                <ShieldCheck size={30} className="text-positive" />
               </div>
             </div>
             {mode === 'deactivate' ? (
@@ -352,11 +352,11 @@ export default function DeleteAccountPage() {
                 <p className="text-graphite-faint text-sm mb-4">
                   Your account has been temporarily suspended.
                 </p>
-                <div className="bg-maroon-50 border border-orange-200 rounded-sm p-4 mb-4">
-                  <p className="text-orange-800 text-sm font-medium">
+                <div className="bg-maroon-50 border border-caution rounded-sm p-4 mb-4">
+                  <p className="text-caution-deep text-sm font-medium">
                     You have <strong>7 days</strong> to reactivate.
                   </p>
-                  <p className="text-orange-700 text-xs mt-1">
+                  <p className="text-caution text-xs mt-1">
                     Simply log in with your email and password to instantly restore your account.
                     After 7 days, the account will be permanently deleted.
                   </p>
@@ -368,8 +368,8 @@ export default function DeleteAccountPage() {
                 <p className="text-graphite-faint text-sm mb-4">
                   Your account will be permanently deleted in <strong>24 hours</strong>.
                 </p>
-                <div className="border-l-2 border-green-700/50 pl-4 p-4 mb-4">
-                  <p className="text-green-800 text-sm font-medium">
+                <div className="border-l-2 border-positive/50 pl-4 p-4 mb-4">
+                  <p className="text-positive-deep text-sm font-medium">
                     Changed your mind? Simply log in within 24 hours to cancel.
                   </p>
                 </div>

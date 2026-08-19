@@ -320,7 +320,7 @@ function ProductsContent() {
               <span className="text-sm font-medium text-graphite-muted">Featured only</span>
             </label>
             {hasFilters && (
-              <button onClick={clearFilters} className="flex items-center gap-1.5 text-sm text-red-600 hover:text-red-800 font-medium">
+              <button onClick={clearFilters} className="flex items-center gap-1.5 text-sm text-critical hover:text-critical-deep font-medium">
                 <X size={14} /> Clear Filters
               </button>
             )}

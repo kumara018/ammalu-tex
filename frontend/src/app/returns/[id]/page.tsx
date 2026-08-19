@@ -11,8 +11,8 @@ import { ReturnRequest } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
 const TYPE_INFO = {
-  return:   { label: 'Return',   color: 'text-red-700',  bg: 'bg-transparent',  border: 'border-red-200'  },
-  exchange: { label: 'Exchange', color: 'text-blue-700', bg: 'bg-transparent', border: 'border-blue-200' },
+  return:   { label: 'Return',   color: 'text-critical',  bg: 'bg-transparent',  border: 'border-critical'  },
+  exchange: { label: 'Exchange', color: 'text-graphite', bg: 'bg-transparent', border: 'border-paper-edge' },
 } as const;
 
 const REASON_LABELS: Record<string, string> = {
@@ -56,17 +56,17 @@ const STATUS_MSG: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  pending:             'text-yellow-700 bg-transparent border-yellow-300',
-  under_review:        'text-blue-700 bg-transparent border-blue-300',
-  approved:            'text-green-700 bg-transparent border-green-300',
-  rejected:            'text-red-700 bg-transparent border-red-300',
-  pickup_scheduled:    'text-purple-700 bg-transparent border-purple-300',
-  picked_up:           'text-cyan-700 bg-cyan-50 border-cyan-300',
-  processing:          'text-indigo-700 bg-transparent border-indigo-300',
-  replacement_shipped: 'text-purple-700 bg-transparent border-purple-300',
-  refund_initiated:    'text-amber-700 bg-transparent border-amber-300',
-  refunded:             'text-green-700 bg-transparent border-green-300',
-  completed:            'text-green-700 bg-transparent border-green-300',
+  pending:             'text-caution bg-transparent border-caution',
+  under_review:        'text-graphite bg-transparent border-paper-edge',
+  approved:            'text-positive bg-transparent border-positive',
+  rejected:            'text-critical bg-transparent border-critical',
+  pickup_scheduled:    'text-graphite bg-transparent border-paper-edge',
+  picked_up:           'text-graphite bg-paper-shade border-paper-edge',
+  processing:          'text-graphite bg-transparent border-paper-edge',
+  replacement_shipped: 'text-graphite bg-transparent border-paper-edge',
+  refund_initiated:    'text-caution bg-transparent border-caution',
+  refunded:             'text-positive bg-transparent border-positive',
+  completed:            'text-positive bg-transparent border-positive',
 };
 
 function ReturnDetailContent() {
@@ -156,7 +156,7 @@ function ReturnDetailContent() {
           {rr.price_difference > 0 && (
             <div className="mt-3 pt-3 border-t border-maroon-200 flex justify-between text-sm">
               <span className="text-graphite-faint">Price difference paid</span>
-              <span className="font-semibold text-green-700">₹{rr.price_difference.toLocaleString()} ✓</span>
+              <span className="font-semibold text-positive">₹{rr.price_difference.toLocaleString()} ✓</span>
             </div>
           )}
         </div>
@@ -207,29 +207,29 @@ function ReturnDetailContent() {
 
       {/* Rejected state */}
       {isRejected && (
-        <div className="border-l-2 border-red-700/50 pl-4 p-5 mb-5 flex items-start gap-4">
-          <XCircle size={28} className="text-red-500 flex-shrink-0 mt-0.5" />
+        <div className="border-l-2 border-critical/50 pl-4 p-5 mb-5 flex items-start gap-4">
+          <XCircle size={28} className="text-critical flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-normal text-red-800 mb-1">Request Rejected</p>
-            <p className="text-sm text-red-600">{STATUS_MSG.rejected}</p>
-            {rr.admin_notes && <p className="text-sm text-red-700 mt-2 font-medium">Reason: {rr.admin_notes}</p>}
+            <p className="font-normal text-critical-deep mb-1">Request Rejected</p>
+            <p className="text-sm text-critical">{STATUS_MSG.rejected}</p>
+            {rr.admin_notes && <p className="text-sm text-critical mt-2 font-medium">Reason: {rr.admin_notes}</p>}
           </div>
         </div>
       )}
 
       {/* Current status message card */}
       {!isRejected && (
-        <div className="border-l-2 border-blue-700/50 pl-4 p-4 mb-5 flex items-start gap-3">
-          <AlertCircle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-800">{STATUS_MSG[rr.status] || ''}</p>
+        <div className="border-l-2 border-paper-edge/50 pl-4 p-4 mb-5 flex items-start gap-3">
+          <AlertCircle size={18} className="text-graphite flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-graphite">{STATUS_MSG[rr.status] || ''}</p>
         </div>
       )}
 
       {/* Admin notes */}
       {rr.admin_notes && !isRejected && (
-        <div className="border-l-2 border-yellow-700/50 pl-4 p-4 mb-5">
-          <p className="text-xs font-semibold text-yellow-700 uppercase tracking-wide mb-1">Note from our team</p>
-          <p className="text-sm text-yellow-800">{rr.admin_notes}</p>
+        <div className="border-l-2 border-caution/50 pl-4 p-4 mb-5">
+          <p className="text-xs font-semibold text-caution uppercase tracking-wide mb-1">Note from our team</p>
+          <p className="text-sm text-caution-deep">{rr.admin_notes}</p>
         </div>
       )}
 
@@ -237,28 +237,28 @@ function ReturnDetailContent() {
       {rr.status === 'pickup_scheduled' && rr.pickup_otp && (
         <div className="mb-5 border-y border-thread py-7">
           <div className="flex items-center gap-2 mb-4">
-            <ShieldCheck size={22} className="text-orange-700" />
-            <h3 className="font-normal text-orange-900">Your Pickup OTP</h3>
+            <ShieldCheck size={22} className="text-caution" />
+            <h3 className="font-normal text-caution-deep">Your Pickup OTP</h3>
           </div>
           <p className="text-sm text-graphite-muted mb-4">Our courier is on the way to collect your item! Give this OTP to the pickup agent when they arrive.</p>
-          <div className="bg-paper-bright border-2 border-orange-300 rounded-sm p-4 text-center">
+          <div className="bg-paper-bright border-2 border-caution rounded-sm p-4 text-center">
             <p className="text-xs text-graphite-faint uppercase tracking-widest mb-2">Pickup OTP</p>
-            <p className="text-5xl font-normal tracking-[0.4em] font-mono text-orange-700">{rr.pickup_otp}</p>
+            <p className="text-5xl font-normal tracking-[0.4em] font-mono text-caution">{rr.pickup_otp}</p>
           </div>
-          <p className="text-xs text-orange-700 mt-3 font-medium">Never share this OTP via phone call or message. Only give it to the agent in person.</p>
+          <p className="text-xs text-caution mt-3 font-medium">Never share this OTP via phone call or message. Only give it to the agent in person.</p>
         </div>
       )}
 
       {/* Pickup tracking — only shown once Delhivery has actually confirmed a pickup */}
       {rr.return_awb && (
-        <div className="border-l-2 border-teal-700/50 pl-4 p-4 mb-5 flex items-center justify-between gap-3">
+        <div className="border-l-2 border-positive/50 pl-4 p-4 mb-5 flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Pickup Tracking</p>
-            <p className="text-sm text-teal-800 font-mono">{rr.return_awb}</p>
+            <p className="text-xs font-semibold text-positive uppercase tracking-wide mb-1">Pickup Tracking</p>
+            <p className="text-sm text-positive-deep font-mono">{rr.return_awb}</p>
           </div>
           <a href={rr.return_tracking_url || `https://www.delhivery.com/track/package/${rr.return_awb}`}
             target="_blank" rel="noopener noreferrer"
-            className="text-xs font-semibold text-teal-700 hover:text-teal-900 border border-teal-300 hover:border-teal-500 rounded-sm px-3 py-1.5 transition-colors whitespace-nowrap">
+            className="text-xs font-semibold text-positive hover:text-positive-deep border border-positive hover:border-positive rounded-sm px-3 py-1.5 transition-colors whitespace-nowrap">
             Track Pickup
           </a>
         </div>
@@ -266,14 +266,14 @@ function ReturnDetailContent() {
 
       {/* Replacement shipment tracking — exchange only */}
       {rr.replacement_awb && (
-        <div className="border-l-2 border-purple-700/50 pl-4 p-4 mb-5 flex items-center justify-between gap-3">
+        <div className="border-l-2 border-paper-edge/50 pl-4 p-4 mb-5 flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Replacement Shipment</p>
-            <p className="text-sm text-purple-800 font-mono">{rr.replacement_awb}</p>
+            <p className="text-xs font-semibold text-graphite uppercase tracking-wide mb-1">Replacement Shipment</p>
+            <p className="text-sm text-graphite font-mono">{rr.replacement_awb}</p>
           </div>
           <a href={rr.replacement_tracking_url || `https://www.delhivery.com/track/package/${rr.replacement_awb}`}
             target="_blank" rel="noopener noreferrer"
-            className="text-xs font-semibold text-purple-700 hover:text-purple-900 border border-purple-300 hover:border-purple-500 rounded-sm px-3 py-1.5 transition-colors whitespace-nowrap">
+            className="text-xs font-semibold text-graphite hover:text-graphite border border-paper-edge hover:border-paper-edge rounded-sm px-3 py-1.5 transition-colors whitespace-nowrap">
             Track Replacement
           </a>
         </div>
@@ -281,14 +281,14 @@ function ReturnDetailContent() {
 
       {/* Refund info */}
       {rr.refund_id && (
-        <div className="border-l-2 border-green-700/50 pl-4 p-4 mb-5">
-          <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">Refund Information</p>
-          <p className="text-sm text-green-800">
+        <div className="border-l-2 border-positive/50 pl-4 p-4 mb-5">
+          <p className="text-xs font-semibold text-positive uppercase tracking-wide mb-1">Refund Information</p>
+          <p className="text-sm text-positive-deep">
             {rr.status === 'refunded'
               ? 'Refund credited to your original payment method.'
               : 'Refund initiated — it will be credited within 5–7 business days.'}
           </p>
-          <p className="text-xs font-mono text-green-600 mt-1">Refund ID: {rr.refund_id}</p>
+          <p className="text-xs font-mono text-positive mt-1">Refund ID: {rr.refund_id}</p>
         </div>
       )}
 

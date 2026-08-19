@@ -103,7 +103,7 @@ export default function CartPage() {
         </div>
         <button
           onClick={handleClear}
-          className="flex items-center gap-2 text-caption uppercase text-graphite-faint transition-colors duration-500 hover:text-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+          className="flex items-center gap-2 text-caption uppercase text-graphite-faint transition-colors duration-500 hover:text-critical-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
           <Trash2 size={14} /> Empty the bag
         </button>

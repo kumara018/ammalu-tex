@@ -60,7 +60,7 @@ export default function SupportRatePage() {
           {error ? (
             /* Error / Already rated */
             <div>
-              <XCircle size={48} className="text-red-400 mx-auto mb-4" />
+              <XCircle size={48} className="text-critical mx-auto mb-4" />
               <h2 className="text-lg font-normal text-graphite mb-2">Link Unavailable</h2>
               <p className="text-graphite-faint text-sm">{error}</p>
             </div>
@@ -68,12 +68,12 @@ export default function SupportRatePage() {
             /* Thank-you */
             <div>
               <div className="text-6xl mb-3">{EMOJIS[selected]}</div>
-              <CheckCircle size={32} className="text-green-500 mx-auto mb-3" />
+              <CheckCircle size={32} className="text-positive mx-auto mb-3" />
               <h2 className="text-xl font-normal text-graphite mb-1">Thank you, {info?.customer_name?.split(' ')[0]}!</h2>
               <p className="text-graphite-faint text-sm mb-4">Your feedback has been recorded and shared with our team.</p>
               <div className="flex justify-center gap-1 mb-2">
                 {[1,2,3,4,5].map(i => (
-                  <Star key={i} size={28} fill={i <= selected ? '#facc15' : 'none'} className={i <= selected ? 'text-yellow-400' : 'text-gray-200'} />
+                  <Star key={i} size={28} fill={i <= selected ? '#facc15' : 'none'} className={i <= selected ? 'text-caution' : 'text-graphite-muted'} />
                 ))}
               </div>
               <p className="text-sm font-semibold text-maroon-700">{LABELS[selected]}</p>
@@ -108,7 +108,7 @@ export default function SupportRatePage() {
                     <Star
                       size={52}
                       fill={(hover || selected) >= star ? '#facc15' : 'none'}
-                      className={(hover || selected) >= star ? 'text-yellow-400 drop-shadow' : 'text-paper-edge'}
+                      className={(hover || selected) >= star ? 'text-caution drop-shadow' : 'text-paper-edge'}
                     />
                   </button>
                 ))}

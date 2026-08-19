@@ -442,7 +442,7 @@ export default function CheckoutPage() {
 
               {/* Razorpay info */}
               {payMethod === 'razorpay' && (
-                <div className="border-l-2 border-blue-700/50 pl-4 p-4 space-y-2">
+                <div className="border-l-2 border-paper-edge/50 pl-4 p-4 space-y-2">
                   <p className="text-rule uppercase text-thread">Through Razorpay</p>
                   <p className="text-graphite-muted">Razorpay takes the payment on its own page and hands us back a receipt. Accepted there:</p>
                   <div className="flex flex-wrap gap-x-5 gap-y-2">
@@ -456,7 +456,7 @@ export default function CheckoutPage() {
 
               {/* EMI info */}
               {payMethod === 'emi' && (
-                <div className="border-l-2 border-purple-700/50 pl-4 p-4 space-y-2">
+                <div className="border-l-2 border-paper-edge/50 pl-4 p-4 space-y-2">
                   <p className="text-rule uppercase text-thread">In instalments</p>
                   <p className="text-graphite-muted">Split the total across months. Credit cards only.</p>
                   <div className="flex flex-wrap gap-x-5 gap-y-2">
@@ -465,7 +465,7 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                   {grandTotal < 1000 ? (
-                    <div className="bg-maroon-50 border border-orange-200 rounded-sm p-3">
+                    <div className="bg-maroon-50 border border-caution rounded-sm p-3">
                       <p className="text-sm text-graphite">This order is ₹{grandTotal}. Instalments need a total of ₹1,000 or more.</p>
                       <p className="mt-1 text-sm text-graphite-muted">Card or UPI above will work.</p>
                     </div>
@@ -539,7 +539,7 @@ export default function CheckoutPage() {
               {/* Open Box Delivery option */}
               <label className="mb-4 flex cursor-pointer items-start gap-3 border-l border-thread py-1 pl-4 transition-colors duration-500">
                 <input type="checkbox" checked={openBox} onChange={e => setOpenBox(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-blue-700 flex-shrink-0" />
+                  className="mt-0.5 w-4 h-4 accent-thread flex-shrink-0" />
                 <div>
                   <p className="text-graphite">Ask the agent to open the parcel with you</p>
                   <p className="mt-1 text-sm leading-relaxed text-graphite-muted">

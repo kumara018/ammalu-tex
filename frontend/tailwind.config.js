@@ -61,6 +61,33 @@ module.exports = {
           myrobalan:   '#7C7A4E',   // Tops        — the quiet olive
           pomegranate: '#B5643C',   // Crop Tops   — the newer rust
         },
+        /**
+         * THE THREE SEMANTIC TONES.
+         *
+         * Customer-facing pages carried 586 references to Tailwind's default
+         * ramps across SIXTEEN hue families — red, green, blue, purple, teal,
+         * cyan, indigo, orange, amber, yellow, rose, emerald and more. The
+         * return-status map alone spent EIGHT hues on eleven states, which is
+         * not information design: nobody learns eight hues, and the label
+         * beside the chip already says which state it is.
+         *
+         * A status colour only has to answer one question at a glance — is
+         * this good, bad, needs-attention, or simply in flight. So there are
+         * three tones plus the neutral, and every state maps onto one of them.
+         * The eleven labels keep saying the eleven things.
+         *
+         * Chosen inside this shop's warm family rather than borrowed from a
+         * generic ramp — desaturated, warm-biased, so a "delivered" chip sits
+         * on the paper ground instead of shouting off it. All three measure
+         * AA or better on all three grounds (paper 5.68/5.59/6.45:1) and each
+         * `deep` on its own `soft` clears AAA.
+         *
+         * `soft` is only ~1.1:1 against the page ground, so anything using it
+         * as a chip ground takes the matching border to carry the edge.
+         */
+        positive: { soft: '#EDF1E7', DEFAULT: '#55683F', deep: '#3E4C2E' },
+        caution:  { soft: '#F7EFE0', DEFAULT: '#7D5E23', deep: '#5E461A' },
+        critical: { soft: '#F9E9E5', DEFAULT: '#94402E', deep: '#6F2F22' },
         graphite: {
           DEFAULT: '#332722',   // type — the tailor's pencil
           muted:   '#6F5F58',   // secondary

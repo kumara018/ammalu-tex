@@ -18,9 +18,9 @@ const PAY_LABEL: Record<string, string> = {
 };
 
 const PAY_STATUS_COLOR: Record<string, string> = {
-  paid:     'text-green-700 bg-green-50 border-green-300',
-  pending:  'text-amber-700  bg-amber-50  border-amber-300',
-  refunded: 'text-purple-700 bg-purple-50 border-purple-300',
+  paid:     'text-positive bg-positive-soft border-positive',
+  pending:  'text-caution  bg-caution-soft  border-caution',
+  refunded: 'text-graphite bg-paper-shade border-paper-edge',
 };
 
 function InvoiceContent() {
@@ -87,11 +87,11 @@ function InvoiceContent() {
         </Link>
         <div className="ml-auto flex gap-2 flex-wrap">
           <button onClick={handleEmail} disabled={sending}
-            className="flex items-center gap-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-none font-medium transition-colors disabled:opacity-60">
+            className="flex items-center gap-1.5 text-sm bg-paper-shade hover:bg-paper-shade text-white px-4 py-2 rounded-none font-medium transition-colors disabled:opacity-60">
             <Mail size={15} /> {sending ? 'Sending...' : 'Email Invoice'}
           </button>
           <button onClick={handleWhatsApp}
-            className="flex items-center gap-1.5 text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-none font-medium transition-colors">
+            className="flex items-center gap-1.5 text-sm bg-positive hover:bg-positive text-white px-4 py-2 rounded-none font-medium transition-colors">
             <Share2 size={15} /> WhatsApp
           </button>
           <button onClick={handlePrint}
@@ -173,7 +173,7 @@ function InvoiceContent() {
               <p className="text-sm text-graphite/70">{user?.phone}</p>
             </div>
             <div className="bg-transparent border border-graphite/20 rounded-none p-4">
-              <p className="text-xs font-normal text-orange-700 uppercase tracking-wider mb-3">Ship To</p>
+              <p className="text-xs font-normal text-caution uppercase tracking-wider mb-3">Ship To</p>
               <p className="font-normal text-graphite">{addr.full_name}</p>
               <p className="text-sm text-graphite/70 mt-0.5">{addr.address_line1}</p>
               {addr.address_line2 && <p className="text-sm text-graphite/70">{addr.address_line2}</p>}
@@ -238,12 +238,12 @@ function InvoiceContent() {
               </div>
               <div className="flex justify-between text-graphite/70">
                 <span>Shipping</span>
-                <span className={`font-medium ${order.shipping_fee === 0 ? 'text-green-600' : ''}`}>
+                <span className={`font-medium ${order.shipping_fee === 0 ? 'text-positive' : ''}`}>
                   {order.shipping_fee === 0 ? 'FREE' : `₹${order.shipping_fee}`}
                 </span>
               </div>
               {order.discount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-positive">
                   <span>Discount</span>
                   <span className="font-medium">-₹{order.discount.toLocaleString()}</span>
                 </div>
@@ -256,8 +256,8 @@ function InvoiceContent() {
           </div>
 
           {/* ── Payment Details ── */}
-          <div className="bg-blue-50 border border-blue-100 rounded-none p-5">
-            <p className="text-xs font-normal text-blue-700 uppercase tracking-wider mb-3">Payment Details</p>
+          <div className="bg-paper-shade border border-paper-edge rounded-none p-5">
+            <p className="text-xs font-normal text-graphite uppercase tracking-wider mb-3">Payment Details</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div>
                 <p className="text-graphite/60 text-xs mb-1">Mode of Payment</p>
@@ -280,14 +280,14 @@ function InvoiceContent() {
               )}
               {isCod && (
                 <div className="sm:col-span-2">
-                  <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-none px-3 py-2">
+                  <p className="text-xs text-caution bg-caution-soft border border-caution rounded-none px-3 py-2">
                     Cash on Delivery — Payment collected at the time of delivery.
                   </p>
                 </div>
               )}
               {order.payment_status === 'refunded' && (
                 <div className="sm:col-span-2">
-                  <p className="text-xs text-purple-700 bg-purple-50 border border-purple-200 rounded-none px-3 py-2">
+                  <p className="text-xs text-graphite bg-paper-shade border border-paper-edge rounded-none px-3 py-2">
                     Refund initiated — Amount will be credited within 5–7 business days.
                   </p>
                 </div>
@@ -300,9 +300,9 @@ function InvoiceContent() {
             <div className="flex items-center gap-2 text-sm text-graphite/70">
               <span>Order Status:</span>
               <span className={`font-normal capitalize px-3 py-1 rounded-none text-xs border
-                ${order.status === 'delivered' ? 'bg-green-50 text-green-700 border-green-300' :
-                  order.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-300' :
-                  'bg-blue-50 text-blue-700 border-blue-300'}`}>
+                ${order.status === 'delivered' ? 'bg-positive-soft text-positive border-positive' :
+                  order.status === 'cancelled' ? 'bg-critical-soft text-critical border-critical' :
+                  'bg-paper-shade text-graphite border-paper-edge'}`}>
                 {order.status.replace('_', ' ')}
               </span>
             </div>

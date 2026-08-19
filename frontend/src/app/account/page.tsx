@@ -130,7 +130,7 @@ export default function AccountPage() {
 
         <Link
           href="/account/delete"
-          className="border-b border-red-700/30 pb-1 text-caption uppercase text-red-700 transition-colors duration-500 hover:border-red-700"
+          className="border-b border-critical/30 pb-1 text-caption uppercase text-critical transition-colors duration-500 hover:border-critical"
         >
           Delete my account →
         </Link>
