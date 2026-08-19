@@ -84,24 +84,49 @@ export default function ProductCard({ product }: Props) {
   }, [totalSlides]);
 
   /**
-   * The gallery advances only while the pointer is ON the card.
+   * THE GALLERY SLIDES ON ITS OWN, AND ONLY WHERE IT CAN BE SEEN.
    *
-   * It used to run continuously on a 3.8s timer and PAUSE on hover, which is
-   * backwards twice over: a grid of twenty cards all cross-fading on their
-   * own schedules is a wall of movement with no meaning, it costs an image
-   * decode per card per 3.8s forever, and it stops doing the one thing it is
-   * good for — showing you the other angles of the piece you are looking at.
+   * It advanced only on hover, which I argued for and which is wrong for this
+   * shop. Hover does not exist on a phone, so on the device most customers use
+   * the extra photographs were unreachable — a piece with four angles showed
+   * one, forever. The shop asked for automatic sliding and the customers are
+   * right: on a listing page the second photograph is what sells the piece.
+   *
+   * Two things keep it from becoming the wall of movement I was worried about:
+   *
+   *   IT ONLY RUNS WHEN THE CARD IS ON SCREEN. An IntersectionObserver stops
+   *   every card the customer has scrolled past, so twenty cards never animate
+   *   at once — usually two or three do, and the rest cost nothing.
+   *
+   *   IT SLOWS DOWN, IT DOES NOT SPEED UP. 3.2s per slide reads as a garment
+   *   turning; the old 1.6s hover rate reads as a flicker. Hovering still
+   *   quickens it to 1.6s, because someone pointing at a card has asked to see
+   *   the rest now.
+   *
+   * Off entirely for reduced-motion, where the first photograph simply stays.
    */
+  const [onScreen, setOnScreen] = useState(false);
   useEffect(() => {
-    if (totalSlides <= 1 || !hovering || reduced) {
+    const el = plate.current;
+    if (!el || typeof IntersectionObserver === 'undefined') { setOnScreen(true); return; }
+    const io = new IntersectionObserver(
+      ([e]) => setOnScreen(e.isIntersecting),
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.35 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (totalSlides <= 1 || reduced || !onScreen) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       return;
     }
     intervalRef.current = setInterval(() => {
       setImgIdx((i) => (i + 1) % totalSlides);
-    }, 1600);
+    }, hovering ? 1600 : 3200);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [totalSlides, hovering, reduced]);
+  }, [totalSlides, hovering, reduced, onScreen]);
 
   // ── The tilt ──────────────────────────────────────────────────────────────
   const plate = useRef<HTMLDivElement>(null);
@@ -184,7 +209,7 @@ export default function ProductCard({ product }: Props) {
             ref={plate}
             onPointerMove={onPointerMove}
             onPointerEnter={() => setHovering(true)}
-            onPointerLeave={() => { setHovering(false); setImgIdx(0); rest(); }}
+            onPointerLeave={() => { setHovering(false); rest(); }}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
             style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}

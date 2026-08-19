@@ -99,7 +99,10 @@ export default function HomePage() {
           navigation is IN FLOW here, not fixed, so `100svh` pushed the closing
           call to action below the fold — the screenshot showed the headline
           running off the bottom edge with nothing under it. */}
-      <section className="relative flex min-h-[calc(100svh-8.5rem)] flex-col justify-end px-6 pb-[clamp(3rem,9vh,5.5rem)] pt-[clamp(3rem,10vh,7rem)] sm:px-10">
+      {/* A BAND, NOT A SCREEN. This filled the viewport, so a customer met a
+          sentence and had to scroll before seeing anything they could buy —
+          "product should be visible in homepage mainly not down". */}
+      <section className="relative flex min-h-[46svh] flex-col justify-end px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(2rem,6vh,3.5rem)] sm:px-10">
         {/**
           * A soft wash under the copy only.
           *
@@ -169,27 +172,7 @@ export default function HomePage() {
         */}
       <div className="relative z-10 bg-paper">
 
-        {/* ═══ II. The shelf ═════════════════════════════════════════════
-            Six bolts of cloth. Replaces the icon grid — a family does not
-            shop by taxonomy, they shop by the day that is coming. */}
-        <section aria-labelledby="shelf-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
-          <div className="mx-auto w-full max-w-[104rem]">
-            <Reveal>
-              <div className="mb-[5vh]">
-                <MeasureRule label="Sizes S – XXL" className="mb-9" />
-                <h2 id="shelf-heading" className="font-display text-chapter font-normal text-graphite">
-                  On the shelf
-                </h2>
-              </div>
-            </Reveal>
-
-            {BOLTS.map((b, i) => (
-              <BoltRow key={b.name} {...b} delay={i * 60} />
-            ))}
-            <MeasureRule className="mt-2" />
-          </div>
-        </section>
-
+        {/* Stock first. Everything below is context; this is the shop. */}
         {/* ═══ III. Just finished ════════════════════════════════════════ */}
         {recentItems.length > 0 && (
           <section aria-labelledby="recent-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
@@ -218,6 +201,27 @@ export default function HomePage() {
             </div>
           </section>
         )}
+
+        {/* ═══ II. The shelf ═════════════════════════════════════════════
+            Six bolts of cloth. Replaces the icon grid — a family does not
+            shop by taxonomy, they shop by the day that is coming. */}
+        <section aria-labelledby="shelf-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
+          <div className="mx-auto w-full max-w-[104rem]">
+            <Reveal>
+              <div className="mb-[5vh]">
+                <MeasureRule label="Sizes S – XXXL" className="mb-9" />
+                <h2 id="shelf-heading" className="font-display text-chapter font-normal text-graphite">
+                  On the shelf
+                </h2>
+              </div>
+            </Reveal>
+
+            {BOLTS.map((b, i) => (
+              <BoltRow key={b.name} {...b} delay={i * 60} />
+            ))}
+            <MeasureRule className="mt-2" />
+          </div>
+        </section>
 
         {/* ═══ IV. Chosen by us ══════════════════════════════════════════ */}
         {featuredItems.length > 0 && (
