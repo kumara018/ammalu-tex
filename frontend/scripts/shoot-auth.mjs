@@ -36,6 +36,11 @@ const WIDTH = Number(arg('width', 1440));
 const HEIGHT = Number(arg('height', 900));
 const Y = Number(arg('y', 0));
 const NAME = arg('name', 'auth');
+/* Optional: a JS expression run after load and before the shot, for states
+   that only exist behind an interaction — an overlay, a menu, a dialog. The
+   Browser pane cannot composite in this environment, so a headless click is
+   the only way to photograph one. */
+const CLICK = arg('click', '');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -46,9 +51,17 @@ async function main() {
     body: JSON.stringify({ identifier: IDENT, password: PASSWORD }),
   });
   const body = await res.json();
-  if (!body.access_token) throw new Error(`login failed: ${JSON.stringify(body).slice(0, 200)}`);
-  const { access_token, user } = body;
-  console.log(`  signed in as ${user?.email ?? IDENT}${user?.is_admin ? ' (admin)' : ''}`);
+  /* A failed sign-in is not always fatal. Public pages — the shelf, a piece,
+     search — photograph perfectly well signed out, and refusing to run because
+     the auth rate limiter (correctly) throttled a scripted login would mean the
+     tool blocks on a system working as designed. Signed-in-only pages still
+     report the bounce further down. */
+  const { access_token, user } = body ?? {};
+  if (!access_token) {
+    console.log(`  NOT signed in (${body?.detail ?? 'no token'}) — continuing signed out`);
+  } else {
+    console.log(`  signed in as ${user?.email ?? IDENT}${user?.is_admin ? ' (admin)' : ''}`);
+  }
 
   mkdirSync(OUT, { recursive: true });
   const origin = new URL(URL_TARGET).origin;
@@ -117,14 +130,30 @@ async function main() {
        page on the origin is enough to own its localStorage. */
     await send('Page.navigate', { url: `${origin}/favicon.ico` });
     await sleep(1200);
-    await send('Runtime.evaluate', {
-      expression: `localStorage.setItem('token', ${JSON.stringify(access_token)});
-                   localStorage.setItem('user', ${JSON.stringify(JSON.stringify(user))});
-                   document.cookie = 'auth_token=' + ${JSON.stringify(access_token)} + '; path=/';`,
-    });
+    if (access_token) {
+      await send('Runtime.evaluate', {
+        expression: `localStorage.setItem('token', ${JSON.stringify(access_token)});
+                     localStorage.setItem('user', ${JSON.stringify(JSON.stringify(user))});
+                     document.cookie = 'auth_token=' + ${JSON.stringify(access_token)} + '; path=/';`,
+      });
+    }
 
     await send('Page.navigate', { url: URL_TARGET });
     await sleep(9000);
+
+    if (CLICK) {
+      /* Report failures. This swallowed them, so a selector that matched
+         nothing produced a screenshot of the un-clicked page and a run that
+         claimed success — the same class of lying gate as a warning that
+         cries wolf. */
+      const r = await send('Runtime.evaluate', { expression: CLICK, returnByValue: true, awaitPromise: true });
+      if (r.exceptionDetails) {
+        console.log('  CLICK FAILED: ' + (r.exceptionDetails.exception?.description || r.exceptionDetails.text));
+      } else {
+        console.log('  click ok' + (r.result?.value !== undefined ? ` -> ${JSON.stringify(r.result.value)}` : ''));
+      }
+      await sleep(2600);
+    }
 
     if (Y > 0) {
       await send('Input.dispatchMouseEvent', {

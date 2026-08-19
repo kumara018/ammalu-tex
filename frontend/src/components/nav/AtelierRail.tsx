@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { STORE } from '@/lib/config';
 import { LogoMark } from '@/components/Logo';
 import AccountMenu from '@/components/nav/AccountMenu';
+import RailSearch from '@/components/nav/RailSearch';
 
 /**
  * The rail — Ammalu Tex's navigation, and the structural opposite of the
@@ -208,6 +209,9 @@ export default function AtelierRail() {
         {/* `ml-auto` pins the actions to the right edge on the phone's top row,
             where the destinations are no longer between them and the mark. */}
         <div className="ml-auto flex shrink-0 items-center gap-x-6">
+          {/* The glass is the field — see components/nav/RailSearch.tsx. */}
+          <RailSearch />
+
           {/* The name was a plain link to /account. It opens a menu now —
               see components/nav/AccountMenu.tsx. */}
           <AccountMenu />
