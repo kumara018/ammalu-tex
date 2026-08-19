@@ -194,7 +194,17 @@ export default function AtelierFooter() {
               size={34}
               className="shrink-0 text-thread-pale transition-colors duration-500 group-hover:text-paper"
             />
-            <span className="font-display text-band font-normal text-paper transition-colors duration-500 group-hover:text-thread-pale">
+            {/* `leading-none` is doing alignment work, not typography.
+                Measured against the three column headings beside it: their
+                cap-tops sit at the same y, but the wordmark's sat 3.7px lower,
+                which is what reads as the brand name hanging below the rest of
+                the row. The cause is half-leading — `text-band` puts a 43px
+                line box around a 38.4px face, and half of that 4.6px gap sits
+                ABOVE the letterforms. Collapsing the line box to the font size
+                removes it. Expressed this way rather than as a negative margin
+                because `text-band` is a clamp() that scales with the viewport,
+                so a fixed -4px nudge would only be correct at one width. */}
+            <span className="font-display text-band font-normal leading-none text-paper transition-colors duration-500 group-hover:text-thread-pale">
               {STORE.name}
             </span>
           </Link>
