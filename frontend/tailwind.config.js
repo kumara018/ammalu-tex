@@ -126,6 +126,24 @@ module.exports = {
         'plate':   ['clamp(2.4rem, min(7.2vw, 10vh), 6.4rem)', { lineHeight: '0.98', letterSpacing: '-0.025em' }],
         'chapter': ['clamp(1.9rem, 5vw, 3.6rem)', { lineHeight: '1.04', letterSpacing: '-0.02em' }],
         'band':    ['clamp(1.5rem, 3.2vw, 2.4rem)', { lineHeight: '1.12', letterSpacing: '-0.01em' }],
+        /**
+         * DOCUMENT SCALE — for pages that are read rather than looked at.
+         *
+         * The policy pages were set in `chapter` and `band`, the display
+         * steps: at a 1280px window that is a 58px title and a 38px section
+         * heading. Measured first, because the complaint was "too much text":
+         * no paragraph on /cancellation, /terms, /privacy, /shipping or
+         * /authentic exceeds 38 words, and each page is a short opening plus a
+         * list. There was no prose to cut. What made them feel long was that
+         * every heading was sized to be LOOKED at, so a page with 60 words on
+         * it filled two screens and the answer sat below the fold.
+         *
+         * 34px and 22px at 1280px — unmistakably headings, and nothing more.
+         * Kept a step below the sister shop's equivalents, which is the same
+         * relationship the two display scales already have.
+         */
+        'doc':     ['clamp(1.6rem, 2.7vw, 2.15rem)', { lineHeight: '1.12', letterSpacing: '-0.015em' }],
+        'doc-head':['clamp(1.1rem, 1.7vw, 1.38rem)', { lineHeight: '1.25', letterSpacing: '-0.005em' }],
         'lede':    ['clamp(1rem, 1.35vw, 1.18rem)', { lineHeight: '1.68', letterSpacing: '0' }],
         'caption': ['0.76rem', { lineHeight: '1.5', letterSpacing: '0.12em' }],
         'rule':    ['0.66rem', { lineHeight: '1.3', letterSpacing: '0.24em' }],

@@ -16,12 +16,18 @@ import Reveal from './home/Reveal';
  *
  * `align` exists for the two auth routes, where the content is a narrow column
  * and a left-flushed title next to a centred form reads as a mistake.
+ *
+ * `scale` exists because a title page and a document are not the same object.
+ * `display` is the editorial step the shelf and the front page want. `doc` is
+ * for pages somebody opens with a question — the policies, the help page —
+ * where the heading is the thing standing between them and the answer.
  */
 export default function PageHeader({
   eyebrow,
   title,
   lede,
   align = 'left',
+  scale = 'display',
   className = '',
   children,
 }: {
@@ -30,31 +36,46 @@ export default function PageHeader({
   /** ReactNode rather than string: a standfirst may carry a link or emphasis. */
   lede?: React.ReactNode;
   align?: 'left' | 'center';
+  /** `display` for editorial routes, `doc` for pages that answer a question. */
+  scale?: 'display' | 'doc';
   className?: string;
   /** A date line, a count, an action — sits under the standfirst. */
   children?: React.ReactNode;
 }) {
   const centered = align === 'center';
+  const doc = scale === 'doc';
 
   return (
     <header
-      className={`${centered ? 'mx-auto max-w-[56ch] text-center' : ''} mb-[clamp(2.5rem,7vh,5rem)] ${className}`}
+      className={`${centered ? 'mx-auto max-w-[56ch] text-center' : ''} ${
+        doc ? 'mb-[clamp(1.5rem,4vh,2.75rem)]' : 'mb-[clamp(2.5rem,7vh,5rem)]'
+      } ${className}`}
     >
       {eyebrow && (
         <Reveal>
-          <p className="mb-4 text-rule uppercase text-thread">{eyebrow}</p>
+          <p className={`text-rule uppercase text-thread ${doc ? 'mb-2.5' : 'mb-4'}`}>{eyebrow}</p>
         </Reveal>
       )}
 
       <Reveal delay={eyebrow ? 90 : 0}>
-        <h1 className="text-balance font-display text-chapter font-normal text-graphite">
+        <h1
+          className={`text-balance font-display font-normal text-graphite ${
+            doc ? 'max-w-[34ch] text-doc' : 'text-chapter'
+          }`}
+        >
           {title}
         </h1>
       </Reveal>
 
       {lede && (
         <Reveal delay={eyebrow ? 180 : 90}>
-          <p className={`mt-6 max-w-[54ch] text-lede text-graphite-muted ${centered ? 'mx-auto' : ''}`}>
+          {/* On a document the standfirst carries the ANSWER, so it gets a
+              reading measure rather than a narrow editorial column. */}
+          <p
+            className={`text-lede text-graphite-muted ${centered ? 'mx-auto' : ''} ${
+              doc ? 'mt-3.5 max-w-[72ch]' : 'mt-6 max-w-[54ch]'
+            }`}
+          >
             {lede}
           </p>
         </Reveal>
@@ -62,7 +83,7 @@ export default function PageHeader({
 
       {children && (
         <Reveal delay={eyebrow ? 250 : 160}>
-          <div className="mt-8">{children}</div>
+          <div className={doc ? 'mt-5' : 'mt-8'}>{children}</div>
         </Reveal>
       )}
     </header>

@@ -105,12 +105,18 @@ export default function SupportPage() {
         * thing they need — the number, the address — set as the largest thing
         * in the row rather than as grey caption under an icon.
         */}
-      <div className="mb-[clamp(2.5rem,7vh,4.5rem)]">
-        <p className="mb-4 text-rule uppercase text-thread">Someone will answer</p>
-        <h1 className="font-display text-chapter font-normal text-graphite">How can we help?</h1>
-        <p className="mt-6 max-w-[54ch] text-lede text-graphite-muted">
-          The shop is on the ground floor at Texvalley and the phone is answered by
-          the people who packed your order. Below that, the answers we give most often.
+      {/* Document scale, not display: this page is opened with a question,
+          and at `chapter` the title alone was 58px and the numbers below it
+          — the actual answer — started below the first screen on a phone.
+          The standfirst said who answers the phone and where the shop is
+          before saying what the page contains; both facts are already on the
+          page (the numbers are directly beneath, the address is in the
+          footer), so it now points at what is here. */}
+      <div className="mb-[clamp(1.5rem,4vh,2.75rem)]">
+        <p className="mb-2.5 text-rule uppercase text-thread">Someone will answer</p>
+        <h1 className="max-w-[34ch] font-display text-doc font-normal text-graphite">How can we help?</h1>
+        <p className="mt-3.5 max-w-[72ch] text-lede text-graphite-muted">
+          Call the shop, or read the answers we give most often.
         </p>
       </div>
 
