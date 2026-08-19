@@ -93,7 +93,7 @@ export default function WishlistPage() {
 
       {/* Empty state */}
       {items.length === 0 && (
-        <div className="border-t border-paper-edge py-[10vh]">
+        <div className="border-t border-paper-edge py-[5vh]">
           <p className="mb-6 text-rule uppercase text-graphite-faint">Nothing put by</p>
           <h2 className="max-w-[20ch] font-display text-band font-normal text-graphite">
             You have not put anything aside yet

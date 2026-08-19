@@ -193,10 +193,10 @@ export default function HomePage() {
         {/* Stock first. Everything below is context; this is the shop. */}
         {/* ═══ III. Just finished ════════════════════════════════════════ */}
         {recentItems.length > 0 && (
-          <section aria-labelledby="recent-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
+          <section aria-labelledby="recent-heading" className="border-t border-paper-edge px-6 py-[5vh] sm:px-10">
             <div className="mx-auto w-full max-w-[104rem]">
               <Reveal>
-                <div className="mb-[5vh] flex flex-wrap items-baseline justify-between gap-4">
+                <div className="mb-[3vh] flex flex-wrap items-baseline justify-between gap-4">
                   <h2 id="recent-heading" className="font-display text-chapter font-normal text-graphite">
                     Just finished
                   </h2>
@@ -223,30 +223,52 @@ export default function HomePage() {
         {/* ═══ II. The shelf ═════════════════════════════════════════════
             Six bolts of cloth. Replaces the icon grid — a family does not
             shop by taxonomy, they shop by the day that is coming. */}
-        <section aria-labelledby="shelf-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
-          <div className="mx-auto w-full max-w-[104rem]">
-            <Reveal>
-              <div className="mb-[5vh]">
-                <MeasureRule label="Sizes S – XXXL" className="mb-9" />
-                <h2 id="shelf-heading" className="font-display text-chapter font-normal text-graphite">
-                  On the shelf
-                </h2>
-              </div>
-            </Reveal>
+        {/**
+          * ═══ The shelf, folded away ════════════════════════════════════
+          *
+          * Six bolts, each a row with a line of copy, sat open on the homepage
+          * below the products. Asked for directly: make it a dropdown, so a
+          * customer who wants to browse by category can open it and everybody
+          * else scrolls past one line instead of six rows.
+          *
+          * Native <details>/<summary> — keyboard operable, announced as a
+          * disclosure, and no JavaScript, which matters on a page that just
+          * had three quarters of a megabyte taken off it. A hand-built
+          * accordion would need state, ARIA, focus handling and an animation,
+          * and would be worse at all four.
+          */}
+        <section aria-labelledby="shelf-heading" className="border-t border-paper-edge px-6 py-[5vh] sm:px-10">
+          <details className="group mx-auto w-full max-w-[104rem]">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread">
+              <h2 id="shelf-heading" className="font-display text-[clamp(1.35rem,2.4vw,1.9rem)] font-normal text-graphite">
+                Shop by category
+              </h2>
+              <span className="flex items-center gap-3 text-rule uppercase text-thread">
+                <span className="hidden sm:inline">Six bolts · Sizes S–XXXL</span>
+                <span
+                  aria-hidden="true"
+                  className="text-lg leading-none transition-transform duration-300 group-open:rotate-45 motion-reduce:transition-none"
+                >
+                  +
+                </span>
+              </span>
+            </summary>
 
-            {BOLTS.map((b, i) => (
-              <BoltRow key={b.name} {...b} delay={i * 60} />
-            ))}
-            <MeasureRule className="mt-2" />
-          </div>
+            <div className="pt-[3vh]">
+              {BOLTS.map((b, i) => (
+                <BoltRow key={b.name} {...b} delay={i * 60} />
+              ))}
+              <MeasureRule className="mt-2" />
+            </div>
+          </details>
         </section>
 
         {/* ═══ IV. Chosen by us ══════════════════════════════════════════ */}
         {featuredItems.length > 0 && (
-          <section aria-labelledby="featured-heading" className="border-t border-paper-edge px-6 py-[10vh] sm:px-10">
+          <section aria-labelledby="featured-heading" className="border-t border-paper-edge px-6 py-[5vh] sm:px-10">
             <div className="mx-auto w-full max-w-[104rem]">
               <Reveal>
-                <div className="mb-[5vh] flex flex-wrap items-baseline justify-between gap-4">
+                <div className="mb-[3vh] flex flex-wrap items-baseline justify-between gap-4">
                   <h2 id="featured-heading" className="font-display text-chapter font-normal text-graphite">
                     Chosen by us
                   </h2>

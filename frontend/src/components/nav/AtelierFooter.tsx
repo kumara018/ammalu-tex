@@ -53,7 +53,7 @@ export default function AtelierFooter() {
   if (isAuthRoute(pathname)) return null;
 
   return (
-    <footer className="relative z-10 overflow-hidden px-6 pb-[7vh] pt-[9vh] text-paper/75 sm:px-10">
+    <footer className="relative z-10 overflow-hidden px-6 pb-[4vh] pt-[4.5vh] text-paper/75 sm:px-10">
       {/**
        * WHY THIS IS NOT A FLAT SLAB ANY MORE.
        *
