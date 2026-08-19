@@ -11,6 +11,7 @@ import Reveal from '@/components/home/Reveal';
 import BoltRow from '@/components/home/BoltRow';
 import MeasureRule from '@/components/home/MeasureRule';
 import { dyeFor } from '@/lib/dyes';
+import DeliverTo from '@/components/home/DeliverTo';
 
 /**
  * The Atelier — Ammalu Tex's homepage.
@@ -123,6 +124,12 @@ export default function HomePage() {
             <p className="mb-[clamp(1rem,2.4vh,1.75rem)] text-rule uppercase text-thread">
               {STORE.area}&nbsp;·&nbsp;{STORE.city}&nbsp;·&nbsp;Sizes&nbsp;S–XXXL
             </p>
+
+            {/* Where this order is going. Directly under the line that says
+                where the shop IS — the two halves of the same question. */}
+            <div className="mt-4">
+              <DeliverTo />
+            </div>
           </Reveal>
 
           <Reveal delay={110}>

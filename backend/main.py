@@ -20,7 +20,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import TimeoutError as SATimeoutError
 from logging_setup import RequestContextMiddleware, log
-from routers import auth, products, cart, orders, admin, payments, addresses, support, returns, wishlist, webhooks
+from routers import auth, products, cart, orders, admin, payments, addresses, support, returns, wishlist, webhooks, shipping
 
 
 os.makedirs(os.getenv("UPLOAD_DIR", "uploads/products"), exist_ok=True)
@@ -819,6 +819,7 @@ app.include_router(support.router)
 app.include_router(returns.router)
 app.include_router(wishlist.router)
 app.include_router(webhooks.router)
+app.include_router(shipping.router)
 # Tracking is wired into orders router (/api/orders/{id}/track)
 
 
