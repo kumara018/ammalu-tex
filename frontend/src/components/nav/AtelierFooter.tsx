@@ -73,7 +73,7 @@ const fico = 'mt-[0.28em] h-4 w-4 shrink-0 text-thread-pale';
 function Handset() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
-      <path d="M6.4 3.5 8 6.6 6.4 8.3a10 10 0 0 0 5.3 5.3l1.7-1.6 3.1 1.6v2.6c0 .6-.5 1.1-1.1 1.1A13.6 13.6 0 0 1 2.6 3.6c0-.6.5-1.1 1.1-1.1h2.7Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M6.8 3.2 8.3 6.2 6.8 7.8a9.8 9.8 0 0 0 5.2 5.2l1.6-1.5 2.9 1.5v2.5c0 .6-.5 1.1-1.1 1.1A13.3 13.3 0 0 1 3 4.3c0-.6.5-1.1 1.1-1.1h2.7Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -81,8 +81,8 @@ function Handset() {
 function Envelope() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
-      <rect x="2.5" y="4.5" width="15" height="11" rx="1" stroke="currentColor" strokeWidth="1.3" />
-      <path d="m3 5.5 7 5 7-5" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <rect x="2.5" y="4.4" width="15" height="11.2" rx="1" stroke="currentColor" strokeWidth="1.3" />
+      <path d="m3.1 5.2 6.9 5 6.9-5" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -98,9 +98,9 @@ function Chat() {
 function Shop() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
-      <path d="M3 8v8.5h14V8" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M2.5 8 4 3.5h12L17.5 8a2.4 2.4 0 0 1-4.8 0 2.4 2.4 0 0 1-4.9 0 2.4 2.4 0 0 1-4.8 0Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M8 16.5v-4h4v4" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M3.4 8.4v8.2h13.2V8.4" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M2.5 8.4 4 3.4h12l1.5 5a2.4 2.4 0 0 1-4.75 0 2.4 2.4 0 0 1-4.85 0 2.4 2.4 0 0 1-4.75 0Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M8.2 16.6v-4.1h3.6v4.1" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -108,8 +108,8 @@ function Shop() {
 function Pin() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
-      <path d="M8.2 17s5.6-4.9 5.6-8.4a5.6 5.6 0 1 0-11.2 0C2.6 12.1 8.2 17 8.2 17Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-      <circle cx="8.2" cy="8.6" r="2" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M10 17.3s5.7-5.2 5.7-8.7a5.7 5.7 0 1 0-11.4 0c0 3.5 5.7 8.7 5.7 8.7Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <circle cx="10" cy="8.6" r="2" stroke="currentColor" strokeWidth="1.3" />
     </svg>
   );
 }
