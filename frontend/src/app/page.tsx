@@ -61,13 +61,16 @@ const unwrap = (raw: unknown): Product[] =>
  * colour that category is actually most often dyed. See the dye box in
  * tailwind.config.js for why these six and no others.
  */
+/* One line per bolt. These were 80–92 characters of prose each, six of them
+   stacked down the homepage — a paragraph per category between a customer and
+   the shelf. The names and the dyes carry it. */
 const BOLTS = [
-  { index: '01', name: 'Chudithar',   note: 'Every day',      dye: dyeFor('Chudithar').band,      copy: 'Cotton and silk, cut for a working day and a long evening. The set most often bought twice.' },
-  { index: '02', name: 'Lehenga',     note: 'The occasion',   dye: dyeFor('Lehenga').band,      copy: 'Weight, drape, and a hem that holds its line through a wedding. Kept, and worn again.' },
-  { index: '03', name: 'Half Saree',  note: 'The ceremony',   dye: dyeFor('Half Saree').band,    copy: 'For the day a girl is dressed as a woman for the first time, and photographed all afternoon.' },
-  { index: '04', name: 'Party Wears', note: 'For the room',   dye: dyeFor('Party Wears').band,         copy: 'Colour that survives a camera flash and still looks considered from an arm’s length away.' },
-  { index: '05', name: 'Tops',        note: 'The everyday',   dye: dyeFor('Tops').band,   copy: 'The pieces that do the quiet work — worn on their own, or under everything else.' },
-  { index: '06', name: 'Crop Tops',   note: 'Newer cuts',     dye: dyeFor('Crop Tops').band, copy: 'Shorter lines for younger customers, in the same cloth the rest of the shelf is cut from.' },
+  { index: '01', name: 'Chudithar',   note: 'Every day',      dye: dyeFor('Chudithar').band,      copy: 'Cotton and silk, for a working day.' },
+  { index: '02', name: 'Lehenga',     note: 'The occasion',   dye: dyeFor('Lehenga').band,      copy: 'Weight, drape, and a hem that holds its line.' },
+  { index: '03', name: 'Half Saree',  note: 'The ceremony',   dye: dyeFor('Half Saree').band,    copy: 'For the ceremony, and the photographs after it.' },
+  { index: '04', name: 'Party Wears', note: 'For the room',   dye: dyeFor('Party Wears').band,         copy: 'Colour that survives a camera flash.' },
+  { index: '05', name: 'Tops',        note: 'The everyday',   dye: dyeFor('Tops').band,   copy: 'Worn on their own, or under everything else.' },
+  { index: '06', name: 'Crop Tops',   note: 'Newer cuts',     dye: dyeFor('Crop Tops').band, copy: 'Shorter lines, same cloth as the rest of the shelf.' },
 ];
 
 export default function HomePage() {
