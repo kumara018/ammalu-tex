@@ -141,8 +141,38 @@ export default function CheckoutPage() {
         } catch { toast.error('Could not fetch address from location'); }
         finally { setGpsLoading(false); }
       },
-      () => { toast.error('Location access denied. Please allow location.'); setGpsLoading(false); },
-      { timeout: 10000 }
+      /**
+       * SAY WHAT ACTUALLY WENT WRONG.
+       *
+       * This reported "Location access denied. Please allow location." for
+       * EVERY failure, including the two that have nothing to do with
+       * permission — so somebody who had already granted access was told to
+       * grant it again, and went looking in browser settings for a problem
+       * that was not there.
+       *
+       * GeolocationPositionError carries a code: 1 is a real refusal, 2 means
+       * the device could not get a fix, 3 means it ran out of time. On a
+       * desktop without GPS the browser resolves position over Wi-Fi, which
+       * regularly needs more than the 10s this allowed — a TIMEOUT reported as
+       * a denial.
+       *
+       * The options are wrong for that case too. `maximumAge: 300000` accepts
+       * a fix the browser already has, which is usually instant and is exactly
+       * what you want when someone is filling in a delivery address they have
+       * not moved from. The timeout goes to 20s so a genuine Wi-Fi lookup can
+       * finish.
+       */
+      (err) => {
+        const msg =
+          err.code === err.PERMISSION_DENIED
+            ? 'Location permission is off for this site. Allow it in your browser, then try again.'
+            : err.code === err.POSITION_UNAVAILABLE
+            ? 'Your device could not get a location fix. Please type the address instead.'
+            : 'Finding your location took too long. Try again, or type the address.';
+        toast.error(msg);
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 300000 }
     );
   };
 
