@@ -124,7 +124,13 @@ const nextConfig = {
       "img-src 'self' data: blob: " + api + ' ' + local + ' ' + media + ' https://*.razorpay.com',
       "media-src 'self' data: blob: " + media,
       "font-src 'self' data:",
-      "connect-src 'self' " + api + ' ' + local + ' https://*.razorpay.com https://lumberjack.razorpay.com',
+      /* nominatim.openstreetmap.org is checkout's reverse geocoder: it turns the
+         coordinates from "Use my current location" into a street, city, state
+         and pincode. Without it here the browser BLOCKS that request, so the
+         feature finds the customer and then fails with "could not turn that
+         into an address" — the same shape of bug as geolocation=() in
+         Permissions-Policy, our own header saying no. */
+      "connect-src 'self' " + api + ' ' + local + ' https://*.razorpay.com https://lumberjack.razorpay.com https://nominatim.openstreetmap.org',
       'frame-src https://api.razorpay.com https://*.razorpay.com',
       "worker-src 'self' blob:",
       'upgrade-insecure-requests',
