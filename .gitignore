@@ -43,3 +43,8 @@ frontend/tsconfig.tsbuildinfo
 
 # Local tooling (dev-server launch config)
 .claude/
+
+# The filled-in production environment and any database dump —
+# these hold live secrets and customer data and must never be committed.
+deploy/.env
+backend/backups/
