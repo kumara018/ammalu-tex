@@ -120,7 +120,17 @@ export default function HomePage() {
         * bottom alignment return at `md`, which is where the scene actually
         * renders and where there is something in that space to look at.
         */}
-      <section className="relative flex flex-col justify-start px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(1.25rem,4vh,2.25rem)] sm:px-10 md:min-h-[46svh] md:justify-end md:pt-[clamp(2rem,6vh,3.5rem)]">
+      {/* THE OPENING IS CAPPED, NOT JUST PROPORTIONAL.
+          `min-h-[46svh]` with `justify-end` means the content is pinned to the
+          BOTTOM of a box sized to the viewport — so the taller the viewport,
+          the more empty space opens above the headline. On a phone asked to
+          "request desktop site" the CSS viewport is 980 wide and very tall, and
+          that gap measured 111px above the h1 with nothing in it.
+          `min(46svh, 22rem)` keeps the proportion on ordinary screens and stops
+          it growing without limit on tall ones. Same failure the hero line had
+          before it was given min(9.4vw, 12.2vh): a single-axis viewport unit
+          has no idea what shape the screen actually is. */}
+      <section className="relative flex flex-col justify-start px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(1.25rem,4vh,2.25rem)] sm:px-10 md:min-h-[min(46svh,22rem)] md:justify-end md:pt-[clamp(2rem,6vh,3.5rem)]">
         <PaperDrift />
         {/**
           * A soft wash under the copy only.

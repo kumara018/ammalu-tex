@@ -176,9 +176,9 @@ export default function AtelierFooter() {
         </svg>
       </div>
 
-      <div className="mx-auto grid w-full max-w-[104rem] gap-x-8 gap-y-12 lg:grid-cols-12 xl:gap-x-12">
+      <div className="mx-auto grid w-full max-w-[104rem] gap-x-8 gap-y-12 sm:grid-cols-2 min-[900px]:grid-cols-12 xl:gap-x-12">
 
-        <div className="min-w-0 lg:col-span-4">
+        <div className="min-w-0 min-[900px]:col-span-3">
           {/* THE MARK, AND A WAY HOME.
               This was a `<p>`: the shop's name set at the head of the footer,
               with no mark beside it and nothing clickable about it. Every
@@ -258,7 +258,7 @@ export default function AtelierFooter() {
           </a>
         </div>
 
-        <div className="min-w-0 lg:col-span-2">
+        <div className="min-w-0 min-[900px]:col-span-2">
           <h2 className="text-rule uppercase text-thread-pale/90">The shelf</h2>
           <ul className="mt-5 space-y-2.5">
             {SHELF.map((name) => (
@@ -274,7 +274,7 @@ export default function AtelierFooter() {
           </ul>
         </div>
 
-        <div className="min-w-0 lg:col-span-3">
+        <div className="min-w-0 min-[900px]:col-span-3">
           <h2 className="text-rule uppercase text-thread-pale/90">Good to know</h2>
           <ul className="mt-5 space-y-2.5">
             {POLICIES.map((p) => (
@@ -290,7 +290,7 @@ export default function AtelierFooter() {
           </ul>
         </div>
 
-        <div className="min-w-0 lg:col-span-3">
+        <div className="min-w-0 min-[900px]:col-span-4">
           <h2 className="text-rule uppercase text-thread-pale/90">Speak to us</h2>
           <ul className="mt-5 space-y-2.5">
             <li className="flex gap-2.5">
