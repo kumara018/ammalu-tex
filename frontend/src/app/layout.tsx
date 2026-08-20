@@ -38,7 +38,7 @@ import LoginPromptModal from '@/components/LoginPromptModal';
 import PageTransition from '@/components/PageTransition';
 import QueryProvider from '@/components/QueryProvider';
 import ThreeProvider from '@/three/ThreeProvider';
-import { Toaster } from 'react-hot-toast';
+import SiteToaster from '@/components/system/SiteToaster';
 import { STORE } from '@/lib/config';
 
 export const metadata: Metadata = {
@@ -119,22 +119,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         sound. The component stays in the tree so the decision
                         is one line to reverse. */}
               <LoginPromptModal />
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 3000,
-                  style: {
-                    background: '#fff',
-                    color: '#1a0800',
-                    border: '1px solid #f0e0d4',
-                    borderRadius: '12px',
-                    padding: '12px 16px',
-                    boxShadow: '0 4px 20px rgba(139,21,56,0.12)',
-                  },
-                  success: { iconTheme: { primary: '#8b1538', secondary: '#fff' } },
-                  error:   { iconTheme: { primary: '#c62828', secondary: '#fff' } },
-                }}
-              />
+              <SiteToaster />
             </LoginPromptProvider>
             </WishlistProvider>
           </CartProvider>
