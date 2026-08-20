@@ -25,11 +25,39 @@ import {
  * A 4xx is an answer, not a failure to deliver one. Retrying a 401, 403 or 404
  * cannot change the outcome and — on the 401 path specifically — would fire
  * the interceptor's /api/auth/me re-check several times over.
+ *
+ * 502, 503 and 504 ARE WORTH WAITING OUT, and get their own budget. Those are
+ * the codes a sleeping Render instance returns while it wakes, and a cold
+ * start there takes thirty to sixty seconds. Two attempts on the default
+ * backoff gave up about three seconds in — well inside the cold start — so
+ * the customer was shown a failure for a server that was simply not up yet.
+ *
+ * That matters most for the FIRST visitor after a quiet spell, since the free
+ * instance sleeps after 15 minutes idle. Being patient for them is the
+ * difference between a shop that looks broken and one that takes a moment to
+ * open.
  */
 function retryPolicy(failureCount: number, error: unknown): boolean {
   const status = (error as AxiosError)?.response?.status;
   if (status && status >= 400 && status < 500) return false;
-  return failureCount < 2;
+  const waking = !status || status === 502 || status === 503 || status === 504;
+  return failureCount < (waking ? 8 : 3);
+}
+
+/**
+ * Exponential backoff with jitter, capped at 15s a step: roughly 0.6, 1.2,
+ * 2.4, 4.8, 9.6, then 15s — about 65 seconds of total patience, which
+ * outlasts a cold start.
+ *
+ * The jitter matters because this app fires several queries at once on most
+ * routes (products + cart + wishlist). Without it they retry in lockstep and
+ * hit the waking server as a burst, which is the load pattern most likely to
+ * knock it over again.
+ */
+function retryDelay(attemptIndex: number): number {
+  const base = 600 * 2 ** attemptIndex;
+  const jitter = base * 0.25 * (Math.random() * 2 - 1);
+  return Math.min(base + jitter, 15000);
 }
 
 export function createQueryClient(): QueryClient {
@@ -37,6 +65,7 @@ export function createQueryClient(): QueryClient {
     defaultOptions: {
       queries: {
         retry: retryPolicy,
+        retryDelay,
         // The backend runs on Render, where a cold start can take up to 60s.
         // Serving a slightly stale list instantly beats blocking on that, and
         // it is the whole reason a route change should not refetch a product
