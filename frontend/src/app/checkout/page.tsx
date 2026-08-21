@@ -7,6 +7,9 @@ import {
   Lock, Package, ArrowLeft, MapPin, Navigation, Plus, Star, CalendarDays,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+
+/** One piece bought without going through the bag — mirrors schemas.BuyNowItem. */
+interface BuyNowItem { product_id: number; quantity: number; size?: string | null; color?: string | null; }
 import { useAuth } from '@/context/AuthContext';
 import { ordersAPI, addressAPI } from '@/lib/api';
 import api from '@/lib/api';
@@ -36,6 +39,23 @@ declare global {
 
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart();
+
+  /**
+   * A direct purchase shows and charges for ONE piece. Buy Now used to add to
+   * the bag first, and this page orders the whole bag and empties it — so
+   * buying one piece charged for everything saved.
+   */
+  const [buyNow, setBuyNow] = useState<BuyNowItem | null>(null);
+  const isDirect = buyNow !== null;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (new URLSearchParams(window.location.search).get('buy') !== '1') return;
+    try {
+      const raw = sessionStorage.getItem('buyNow');
+      const parsed = raw ? JSON.parse(raw) as BuyNowItem : null;
+      if (parsed?.product_id) setBuyNow(parsed);
+    } catch { /* fall through to the bag */ }
+  }, []);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -52,6 +72,8 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (authLoading || !user) return;
     if (orderPlacedRef.current) return;
+    if (typeof window !== 'undefined'
+        && new URLSearchParams(window.location.search).get('buy') === '1') return;
     if (items.length === 0) { router.push('/cart'); return; }
     // Load Razorpay script
     const script = document.createElement('script');
@@ -214,6 +236,7 @@ export default function CheckoutPage() {
     setPlacing(true);
     try {
       const res = await ordersAPI.place({
+        ...(buyNow ? { buy_now: buyNow } : {}),
         shipping_address: {
           full_name:    addr.full_name.trim(),
           phone:        addr.phone.replace(/\s|-/g, ''),
@@ -227,7 +250,8 @@ export default function CheckoutPage() {
         open_box_delivery: openBox,
       });
       orderPlacedRef.current = true;
-      await clearCart();
+      if (isDirect) sessionStorage.removeItem('buyNow');   // the bag was never ordered
+      else await clearCart();
       toast.success('Order placed successfully!');
       router.push(`/orders/${res.data.id}?new=1`);
     } catch (err: any) {

@@ -422,7 +422,30 @@ export default function ProductDetailPage() {
     } finally { setAdding(false); }
   };
 
-  const handleBuyNow = async () => { await handleAddToCart(); router.push('/cart'); };
+  /**
+   * BUY NOW CARRIES ONE PIECE, AND LEAVES THE BAG ALONE.
+   *
+   * It used to add the piece to the cart and send the customer to /cart —
+   * and checkout orders the WHOLE cart and deletes every row in it. So
+   * buying one piece charged for everything the customer had been saving and
+   * emptied the bag. The single piece travels in sessionStorage instead (not
+   * the URL, so size and colour cannot be edited in the address bar), and the
+   * backend takes it as `buy_now` and never reads the cart.
+   */
+  const handleBuyNow = () => {
+    if (!user) { promptLogin('Sign in to buy this piece.'); return; }
+    let hasErr = false;
+    if (product!.size_options?.length > 0 && !selectedSize) { setSizeErr(true); hasErr = true; }
+    if (product!.colors?.length > 0 && !selectedColor) { setColorErr(true); hasErr = true; }
+    if (hasErr) { toast.error('Please select size and colour first'); return; }
+    sessionStorage.setItem('buyNow', JSON.stringify({
+      product_id: product!.id,
+      quantity,
+      size: selectedSize || null,
+      color: selectedColor || null,
+    }));
+    router.push('/checkout?buy=1');
+  };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
