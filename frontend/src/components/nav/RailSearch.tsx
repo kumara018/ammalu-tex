@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchHistory } from '@/lib/searchHistory';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { productsAPI } from '@/lib/api';
@@ -42,6 +43,7 @@ export default function RailSearch() {
   const [results, setResults] = useState<Product[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [active, setActive] = useState(0);
+  const { terms, record, remove, clear } = useSearchHistory();
 
   const router = useRouter();
   const wrap = useRef<HTMLDivElement>(null);
@@ -103,6 +105,7 @@ export default function RailSearch() {
       e.preventDefault();
       const p = results[active];
       close();
+      record(q);
       router.push(`/products/${p.id}`);
     }
   };
@@ -142,6 +145,53 @@ export default function RailSearch() {
             autoComplete="off"
             className="w-[13rem] bg-transparent text-caption uppercase text-graphite placeholder:text-graphite-faint focus:outline-none sm:w-[17rem]"
           />
+        </div>
+      )}
+
+      {/* Recent searches, shown when the field is empty. Each line carries its
+          own remove button as well as the clear-all: a search history is
+          personal, and dropping ONE line must not cost the whole list. The ×
+          is a sibling of the link, not nested inside it, so it is reachable by
+          keyboard. */}
+      {open && q.trim().length === 0 && terms.length > 0 && (
+        <div className="absolute right-0 top-9 z-50 w-[min(92vw,26rem)] border border-paper-edge bg-paper-bright">
+          <div className="flex items-baseline justify-between gap-4 border-b border-paper-edge/60 px-4 py-2.5">
+            <span className="text-rule uppercase text-graphite-faint">Recent searches</span>
+            <button
+              type="button"
+              onClick={clear}
+              className="text-caption uppercase text-graphite-muted transition-colors duration-300 hover:text-thread-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread"
+            >
+              Clear all
+            </button>
+          </div>
+          <ul>
+            {terms.map((term) => (
+              <li key={term} className="flex items-center gap-2 transition-colors duration-300 hover:bg-paper-shade">
+                <button
+                  type="button"
+                  onClick={() => { record(term); close(); router.push(`/products?search=${encodeURIComponent(term)}`); }}
+                  className="flex min-w-0 flex-1 items-center gap-3 px-4 py-2.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-thread"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="h-4 w-4 shrink-0 text-graphite-faint">
+                    <circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M10 6.2V10l2.6 1.6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                  <span className="truncate text-sm text-graphite">{term}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(term)}
+                  aria-label={`Remove ${term} from recent searches`}
+                  className="mr-2 grid h-7 w-7 shrink-0 place-items-center text-graphite-faint transition-colors duration-300 hover:text-graphite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="h-3.5 w-3.5">
+                    <path d="m5.5 5.5 9 9m0-9-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -204,7 +254,7 @@ export default function RailSearch() {
               </ul>
               <button
                 type="button"
-                onClick={() => { const term = q.trim(); close(); router.push(`/products?search=${encodeURIComponent(term)}`); }}
+                onClick={() => { const term = q.trim(); record(term); close(); router.push(`/products?search=${encodeURIComponent(term)}`); }}
                 className="block w-full border-t border-paper-edge px-4 py-3 text-left text-caption uppercase text-graphite-muted transition-colors duration-300 hover:bg-paper-shade hover:text-thread"
               >
                 See every match &rarr;
