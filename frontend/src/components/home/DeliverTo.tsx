@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import api, { addressAPI } from '@/lib/api';
-import { STORE } from '@/lib/config';
 
 /**
  * Where this order is going — the line Amazon puts in its header.
@@ -35,7 +34,7 @@ import { STORE } from '@/lib/config';
 
 const KEY = 'delivery_pincode';
 
-interface Known { pincode: string; city?: string; name?: string; assumed?: boolean }
+interface Known { pincode?: string; city?: string; name?: string; assumed?: boolean; unknown?: boolean }
 
 export default function DeliverTo() {
   const { user } = useAuth();
@@ -62,21 +61,32 @@ export default function DeliverTo() {
       }
       if (cancelled) return;
       const saved = typeof window !== 'undefined' ? localStorage.getItem(KEY) : null;
+      if (saved) { setKnown({ pincode: saved }); return; }
+
       /**
-       * A DEFAULT, NOT A BLANK PROMPT.
+       * NOT SIGNED IN AND NOTHING TYPED: ASK THE CONNECTION, NOT THE SHOP.
        *
-       * This showed "Set your delivery pincode" to anybody who had not typed
-       * one — which is everybody on their first visit. Amazon never shows an
-       * empty slot: it shows a place, and lets you change it. An empty prompt
-       * is a chore handed to a customer before they have seen a single piece.
+       * This fell back to the SHOP'S own pincode, which reads to a customer
+       * anywhere else as a statement about where THEY are, and it is false.
+       * /api/geo resolves it from the IP at Vercel's edge — no permission
+       * prompt, no third-party call. GPS is not used on arrival on purpose:
+       * a location prompt before a customer has seen anything is an
+       * interruption most people dismiss, and the dismissal sticks. GPS
+       * belongs at checkout, and that is where it is.
        *
-       * With nothing saved it shows the SHOP'S OWN city, marked as an
-       * assumption rather than a fact. That is honest — it is genuinely where
-       * the order ships from and the default most of this shop's customers
-       * are in — and it turns the control from a task into a correction,
-       * which people actually do.
+       * If the edge cannot place the IP the control asks instead of
+       * inventing a pincode.
        */
-      setKnown(saved ? { pincode: saved } : { pincode: STORE.pincode, city: STORE.city, assumed: true });
+      try {
+        const res = await fetch('/api/geo');
+        const geo = await res.json();
+        if (cancelled) return;
+        if (geo?.found && (geo.city || geo.pincode)) {
+          setKnown({ pincode: geo.pincode ?? undefined, city: geo.city ?? undefined, assumed: true });
+          return;
+        }
+      } catch { /* offline or blocked — fall through to asking */ }
+      if (!cancelled) setKnown({ unknown: true });
     })();
     return () => { cancelled = true; };
   }, [user]);
@@ -145,12 +155,34 @@ export default function DeliverTo() {
           className="group flex items-center gap-2 text-caption uppercase text-graphite-muted transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
           <span className="text-thread"><Pin /></span>
-          {known?.assumed ? 'Deliver to' : 'Deliver to'}{' '}
-          <span className="text-graphite group-hover:text-thread">
-            {known?.city ? `${known.city} ${known.pincode}` : known?.pincode}
-          </span>
-          <span className="text-thread" aria-hidden="true">&middot;</span>
-          <span className="text-thread">Change</span>
+          {/**
+            * THREE STATES, AND THEY MUST NOT LOOK ALIKE.
+            *
+            *   known      a saved address or a pincode the customer typed —
+            *              stated plainly, because it is a fact.
+            *   detected   resolved from the connection — shown, but the
+            *              control reads "Change" so it is clearly a starting
+            *              point rather than a record of anything they said.
+            *   unknown    the edge could not place the IP. It asks instead of
+            *              inventing a pincode. Showing the shop's own city
+            *              here, which is what it used to do, tells a customer
+            *              in Chennai they are in Erode.
+            */}
+          {known?.unknown ? (
+            <span className="text-graphite group-hover:text-thread">Choose your location</span>
+          ) : (
+            <>
+              Deliver to{' '}
+              <span className="text-graphite group-hover:text-thread">
+                {/* Signed in, the name comes first — it is how a customer
+                    recognises WHICH of their addresses this is, and it is the
+                    only visible sign the shop knows who they are. */}
+                {[known?.name?.split(' ')[0], known?.city, known?.pincode].filter(Boolean).join(' ')}
+              </span>
+              <span className="text-thread" aria-hidden="true">&middot;</span>
+              <span className="text-thread">Change</span>
+            </>
+          )}
         </button>
       )}
 
