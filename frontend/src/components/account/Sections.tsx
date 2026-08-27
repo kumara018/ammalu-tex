@@ -211,6 +211,8 @@ export function Devices({ onSignOutSelf }: { onSignOutSelf: () => void }) {
    */
   const [error, setError] = useState(false);
   const [revokingId, setRevokingId] = useState<number | null>(null);
+  const [confirmingAll, setConfirmingAll] = useState(false);
+  const [revokingAll, setRevokingAll] = useState(false);
 
   const load = async () => {
     setLoading(true); setError(false);
@@ -237,6 +239,39 @@ export function Devices({ onSignOutSelf }: { onSignOutSelf: () => void }) {
       toast.error(err.response?.data?.detail || 'Could not sign out that device.');
     } finally {
       setRevokingId(null);
+    }
+  };
+
+  /**
+   * Sign out everywhere — ONE transaction on the server, not a loop.
+   *
+   * A loop over `revoke` would look identical and be wrong for the only case
+   * this control exists to serve: somebody who believes their account is
+   * compromised. It is not atomic, it races the sliding-session refresh in
+   * api.ts, and a partial failure leaves them believing they are safe while an
+   * attacker still holds a live token.
+   *
+   * Two presses, because it is destructive and cannot be undone from here —
+   * the first arms it, the second commits. Nobody should log their family out
+   * of a shared tablet with one stray tap.
+   */
+  const revokeAll = async () => {
+    if (!confirmingAll) { setConfirmingAll(true); return; }
+    setConfirmingAll(false);
+    setRevokingAll(true);
+    try {
+      const res = await authAPI.revokeAllSessions(true);
+      const n = res.data?.revoked ?? 0;
+      await load();
+      toast.success(
+        n === 0
+          ? 'No other devices were signed in.'
+          : `${n} other ${n === 1 ? 'device was' : 'devices were'} signed out. This one is still signed in.`,
+      );
+    } catch {
+      toast.error('Could not sign the other devices out. Please try again.');
+    } finally {
+      setRevokingAll(false);
     }
   };
 
@@ -278,6 +313,28 @@ export function Devices({ onSignOutSelf }: { onSignOutSelf: () => void }) {
           </li>
         );
       })}
+      {/**
+        * Only offered when there is something to do. A button whose honest
+        * outcome is "no other devices were signed in" should not have been
+        * shown in the first place.
+        */}
+      {sessions.filter((x) => !x.is_current).length > 0 && (
+        <li className="border-t border-paper-edge pt-4">
+          <button
+            type="button"
+            onClick={revokeAll}
+            onBlur={() => setConfirmingAll(false)}
+            disabled={revokingAll}
+            className="text-caption uppercase text-graphite-faint underline decoration-thread/50 underline-offset-4 transition-colors duration-500 hover:text-graphite disabled:opacity-50"
+          >
+            {revokingAll
+              ? 'Signing out…'
+              : confirmingAll
+                ? 'Tap again to confirm'
+                : 'Sign out of every other device'}
+          </button>
+        </li>
+      )}
     </ul>
   );
 }

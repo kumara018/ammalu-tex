@@ -11,6 +11,7 @@ import models, schemas, auth as auth_utils
 from rate_limit import (
     enforce_ip_limit, enforce_identifier_limit,
     SEND_CODE, VERIFY_CODE, REGISTER, SESSION_SWAP,
+    BEGIN_PER_IP, BEGIN_PER_IDENTIFIER,
 )
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -39,6 +40,27 @@ def _normalize_phone(v: str) -> str:
         v = v[1:]
     # International numbers (e.g. "+14155551234") stored as-is
     return v
+
+def _identifier_hint(identifier: str) -> str:
+    """
+    A masked echo of what the caller typed. Never of what is stored.
+
+    This is the part that has to be got right for the whole design to hold. A
+    hint built from a found user's record would differ — in length, in masking,
+    in the domain — between an account that exists and one that does not, and
+    the endpoint would be right back to answering the question it exists to
+    refuse. Everything here is derived from the submitted string.
+    """
+    value = (identifier or "").strip()
+    if _is_email(value):
+        local, _, domain = value.partition("@")
+        head = local[:2] if len(local) > 2 else local[:1]
+        return f"{head}***@{domain}" if domain else f"{head}***"
+    digits = re.sub(r"\D", "", value)
+    if len(digits) >= 4:
+        return f"{digits[:2]}***{digits[-2:]}"
+    return "***"
+
 
 def _find_user(db: Session, identifier: str):
     """Find user by email or phone."""
@@ -623,6 +645,92 @@ def confirm_deactivate_account(
     }
 
 
+@router.post("/begin", response_model=schemas.AuthBeginOut)
+def auth_begin(request: Request, payload: schemas.AuthBeginIn, db: Session = Depends(get_db)):
+    """
+    Step one: send a code to whatever was typed. Answer the same way every time.
+
+    THERE IS DELIBERATELY NO USER LOOKUP IN THIS FUNCTION. Not a lookup whose
+    result is ignored, not a lookup behind a constant-time compare — none at
+    all. A lookup that does not happen cannot leak through timing, through an
+    error path, through a log line, or through a future edit by someone who does
+    not know why the branch was written the way it was. The response is built
+    from the submitted identifier and nothing else, so "byte-identical whether
+    or not the account exists" is a property of the code's shape rather than
+    something maintained by care.
+    """
+    enforce_ip_limit(db, request, "auth-begin", BEGIN_PER_IP)
+    enforce_identifier_limit(db, payload.identifier, BEGIN_PER_IDENTIFIER)
+
+    raw = (payload.identifier or "").strip()
+    if not raw:
+        raise HTTPException(400, "Enter your mobile number or email address.")
+
+    if _is_email(raw):
+        key, channel = raw.lower(), "email"
+    else:
+        key, channel = _normalize_phone(raw), "sms"
+        if not key:
+            raise HTTPException(400, "That does not look like a mobile number or an email address.")
+
+    otp = _create_otp(db, key, otp_type="begin")
+
+    # Best-effort delivery, exactly like every other send on this router: a
+    # failed SMS gateway must not turn into a 500 that tells the caller
+    # something about this particular identifier.
+    try:
+        if channel == "email":
+            _send_otp_email(key, otp, purpose="Sign in")
+        else:
+            notifications.send_otp_sms(key, otp, "Sign in")
+    except Exception:
+        pass
+
+    return {"sent": True, "channel": channel, "hint": _identifier_hint(raw)}
+
+
+@router.post("/continue", response_model=schemas.AuthContinueOut)
+def auth_continue(request: Request, payload: schemas.AuthContinueIn, db: Session = Depends(get_db)):
+    """
+    Step two: the branch, taken only after control of the identifier is proven.
+
+    By the time this returns anything about an account, the caller has entered a
+    code that was sent to that address or number. Telling them at that point
+    whether it is registered is not a leak — they own it.
+
+    A wrong or expired code gets one 401 with one wording, whether the account
+    exists or not. That matters: an attacker who could distinguish "bad code for
+    a real account" from "bad code for no account" would have the oracle back
+    one step later.
+    """
+    enforce_ip_limit(db, request, "auth-continue", VERIFY_CODE)
+
+    raw = (payload.identifier or "").strip()
+    key = raw.lower() if _is_email(raw) else _normalize_phone(raw)
+    if not key or not _verify_otp(db, key, payload.otp, otp_type="begin"):
+        raise HTTPException(401, "That code is not right or has expired.")
+
+    user = _find_user(db, raw)
+
+    if user:
+        return {
+            "next": "password",
+            "user_hint": {"full_name": user.full_name, "hint": _identifier_hint(raw)},
+            "registration_token": None,
+        }
+
+    # No account. Hand back a short-lived, purpose-scoped token so the
+    # create-account form does not make them prove the same number twice —
+    # the same pattern as the `device_evict` token issued at the 4-device cap.
+    return {
+        "next": "register",
+        "user_hint": None,
+        "registration_token": auth_utils.create_action_token(
+            "registration", identifier=key, channel="email" if _is_email(raw) else "sms",
+        ),
+    }
+
+
 # ── LINKED DEVICES ─────────────────────────────────────────────────────────────
 
 def _current_session_token(request: Request) -> str | None:
@@ -736,3 +844,54 @@ def evict_and_login(payload: schemas.DeviceEvictLogin, request: Request, db: Ses
     session_token = _create_session_or_409(db, user, request)
     token = auth_utils.create_access_token({"sub": user.id, "sid": session_token})
     return {"access_token": token, "token_type": "bearer", "user": user}
+
+
+@router.post("/sessions/revoke-all", response_model=schemas.RevokeAllOut)
+def revoke_all_sessions(
+    request: Request,
+    payload: schemas.RevokeAllIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user),
+):
+    """
+    Sign out everywhere.  (AUTH-SPEC.md R5, §3.3)
+
+    WHY THIS IS NOT N DELETE CALLS FROM THE BROWSER. The devices dashboard could
+    loop over the list and revoke each id, and for the ordinary case — tidying
+    up an old tablet — that would be fine. It is wrong for the one case this
+    exists to serve: a customer who believes their account is compromised.
+
+    Three reasons, all of which only bite in exactly that case. It is not
+    atomic, so a session created between the list and the last DELETE survives.
+    It races the sliding-session refresh in the frontend's api.ts, which can
+    extend a session's expiry while the loop is walking past it. And a partial
+    failure — the fourth call times out on a phone with two bars — leaves the
+    customer looking at a UI that says they are safe when an attacker still
+    holds a live token.
+
+    One statement, one transaction. Either every session named here is revoked
+    or none is.
+
+    `except_current` defaults to true, which is what the button in the dashboard
+    means: get everyone else out, leave me signed in. Passing false must also
+    invalidate the caller's own token, so the response is the last thing that
+    token is good for.
+    """
+    now = datetime.now(timezone.utc)
+    current_token = _current_session_token(request)
+
+    q = db.query(models.UserSession).filter(
+        models.UserSession.user_id == current_user.id,
+        models.UserSession.revoked_at.is_(None),
+    )
+    # Only exclude the current session when we can actually identify it. A token
+    # with no `sid` claim (issued before device tracking) would otherwise make
+    # `except_current` silently mean "revoke everything", which is the opposite
+    # of what the caller asked for on the safer of the two options.
+    if payload.except_current and current_token:
+        q = q.filter(models.UserSession.session_token != current_token)
+
+    revoked = q.update({models.UserSession.revoked_at: now}, synchronize_session=False)
+    db.commit()
+
+    return {"revoked": int(revoked or 0), "current_session_kept": bool(payload.except_current and current_token)}

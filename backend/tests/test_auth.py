@@ -144,3 +144,98 @@ class TestR1RateLimiting:
             client.post("/api/auth/forgot-password", json={"identifier": f"durable{i}@test.local"})
         rows = db.query(models.RateLimitHit).count()
         assert rows >= 3, "attempts were not recorded anywhere a new process could find them"
+
+
+class TestR6ProgressiveSignIn:
+    """AUTH-SPEC R6, Option B — the blind branch."""
+
+    def test_begin_answers_identically_for_existing_and_new(self, client, make_user):
+        # Identical SHAPE so any difference in the reply is behaviour, not input.
+        # Same first two characters and same domain, so both mask to
+        # "aa***@test.local". Anything that still differs is the endpoint
+        # behaving differently, which is the whole thing being tested. The
+        # first version used aaaaa/bbbbb and failed on the hint — correctly,
+        # because the hint is derived from the input and the inputs differed.
+        user, _ = make_user(email="aaaaa@test.local", phone="9000009991")
+        real = client.post("/api/auth/begin", json={"identifier": "aaaaa@test.local"})
+        fake = client.post("/api/auth/begin", json={"identifier": "aabbb@test.local"})
+        assert real.status_code == fake.status_code == 200, (real.text, fake.text)
+        assert real.json() == fake.json(), (
+            "/auth/begin distinguishes an existing account from a new one — "
+            "the endpoint exists precisely so it cannot"
+        )
+
+    def test_continue_branches_only_after_the_code_is_right(self, client, make_user, db):
+        import models
+        user, _ = make_user(email="branch@test.local", phone="9000009992")
+
+        client.post("/api/auth/begin", json={"identifier": "branch@test.local"})
+        otp = (db.query(models.OTPStore)
+                 .filter(models.OTPStore.identifier == "branch@test.local",
+                         models.OTPStore.otp_type == "begin")
+                 .order_by(models.OTPStore.id.desc()).first())
+        assert otp is not None, "/auth/begin did not create a code"
+
+        r = client.post("/api/auth/continue",
+                        json={"identifier": "branch@test.local", "otp": otp.otp_code})
+        assert r.status_code == 200, r.text
+        assert r.json()["next"] == "password"
+        assert r.json()["registration_token"] is None
+
+    def test_wrong_code_is_the_same_401_either_way(self, client, make_user):
+        make_user(email="known@test.local", phone="9000009993")
+        client.post("/api/auth/begin", json={"identifier": "known@test.local"})
+        client.post("/api/auth/begin", json={"identifier": "unknown@test.local"})
+        a = client.post("/api/auth/continue", json={"identifier": "known@test.local", "otp": "000000"})
+        b = client.post("/api/auth/continue", json={"identifier": "unknown@test.local", "otp": "000000"})
+        assert a.status_code == b.status_code == 401
+        assert a.json() == b.json(), "a wrong code reveals whether the account exists"
+
+
+class TestR5RevokeAll:
+    """AUTH-SPEC R5. One transaction, and the caller's own choice honoured."""
+
+    def _sign_in(self, client, user, ua):
+        r = client.post("/api/auth/login",
+                        json={"identifier": user.email, "password": "Customer@2026"},
+                        headers={"User-Agent": ua})
+        assert r.status_code == 200, r.text
+        return {"Authorization": f"Bearer {r.json()['access_token']}", "User-Agent": ua}
+
+    UAS = [
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1.15 Mobile/15E148",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 Version/17.0",
+    ]
+
+    def test_revokes_every_other_device_and_keeps_this_one(self, client, make_user, db):
+        import models
+        user, _ = make_user(email="devices@test.local", phone="9000009994")
+        headers = [self._sign_in(client, user, ua) for ua in self.UAS]
+
+        me = headers[-1]
+        before = client.get("/api/auth/sessions", headers=me)
+        assert before.status_code == 200
+        assert len(before.json()) >= 2, "the test needs more than one device to be meaningful"
+
+        r = client.post("/api/auth/sessions/revoke-all", json={"except_current": True}, headers=me)
+        assert r.status_code == 200, r.text
+        assert r.json()["revoked"] >= 1
+        assert r.json()["current_session_kept"] is True
+
+        after = client.get("/api/auth/sessions", headers=me)
+        assert after.status_code == 200, "the caller was signed out despite except_current"
+        assert len(after.json()) == 1
+
+        for old in headers[:-1]:
+            assert client.get("/api/auth/sessions", headers=old).status_code == 401, (
+                "a revoked device can still use its token"
+            )
+
+    def test_except_current_false_signs_the_caller_out_too(self, client, make_user):
+        user, _ = make_user(email="devices2@test.local", phone="9000009995")
+        me = self._sign_in(client, user, self.UAS[0])
+        r = client.post("/api/auth/sessions/revoke-all", json={"except_current": False}, headers=me)
+        assert r.status_code == 200, r.text
+        assert r.json()["current_session_kept"] is False
+        assert client.get("/api/auth/sessions", headers=me).status_code == 401

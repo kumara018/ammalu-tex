@@ -197,6 +197,26 @@ body {
 .logo-mark:hover .logo-stitch {
   stroke-dashoffset: -9;
 }
+/* ── Decorative loading motion, stopped once rather than per-component ──
+   The keyboard gate found twelve pulsing skeletons still animating on
+   /products under `prefers-reduced-motion: reduce`, and there are eighteen
+   `animate-pulse` usages across this app — every one of them relying on
+   somebody having remembered a utility class. Stating it once, here, means a
+   spinner or a pulse cannot escape the preference no matter where it is
+   written.
+
+   Scoped to the decorative loading animations on purpose. A blanket
+   `* { animation: none }` also kills animations whose `animationend` fires
+   application logic, which trades a motion bug for a stuck interface. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce,
+  .animate-ping {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .logo-stitch { transition: none; }
   .group:hover .logo-stitch,

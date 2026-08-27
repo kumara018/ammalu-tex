@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "check:csp": "node scripts/check-csp.mjs",
-    "check:api-base": "node scripts/check-api-base.mjs"
+    "check:api-base": "node scripts/check-api-base.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "a11y": "node scripts/a11y-pass.mjs",
+    "check:tailwind": "node scripts/check-tailwind-config.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.8.0",
@@ -47,6 +51,7 @@
     "eslint-config-next": "^15.3.2",
     "postcss": "^8.5.26",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
