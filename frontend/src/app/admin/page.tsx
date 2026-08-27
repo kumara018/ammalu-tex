@@ -82,6 +82,165 @@ const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree'
  * An empty table is genuinely good news, and is worded that way rather than as
  * missing data — otherwise it reads as "reporting is broken".
  */
+/**
+ * What is actually switched on, in production, right now.
+ *
+ * WHY THIS SCREEN EXISTS. Every integration in this shop fails SOFTLY and on
+ * purpose: an unconfigured SMS gateway prints to a log nobody reads and
+ * returns as though it sent, an unconfigured courier answers "we will confirm
+ * when you order", an unconfigured mailer walks its fallback chain and gives
+ * up quietly. Each of those is right on its own - a customer must never see a
+ * crash because a third party is down - but together they mean the shop can be
+ * half-dead and look completely normal from the counter.
+ *
+ * That is not hypothetical. The courier token was never set on either shop, so
+ * for the entire life of the delivery-location feature the pincode check never
+ * once actually checked, and nothing anywhere said so.
+ *
+ * CONFIGURED IS NOT THE SAME AS PROVEN, and the wording keeps them apart. Most
+ * rows can only report that credentials are present and a client builds - that
+ * is a real check, it is what every soft failure is gated on, but it cannot
+ * promise the next message will be accepted. The database row IS proven,
+ * because answering this request required running a statement.
+ */
+function SystemHealthTab() {
+  const [data, setData]       = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed]   = useState(false);
+
+  const load = async () => {
+    setLoading(true); setFailed(false);
+    try { const r = await adminAPI.getIntegrations(); setData(r.data); }
+    catch { setFailed(true); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  /* Three states, not two. "Off" is not always bad - SMS is optional if
+     WhatsApp carries the OTPs - so the amber tier exists to say "absent, and
+     that may be deliberate" without either alarming or reassuring falsely. */
+  const Dot = ({ tone }: { tone: 'on' | 'off' | 'warn' }) => (
+    <span
+      aria-hidden="true"
+      className={`inline-block h-2 w-2 shrink-0 rounded-full ${
+        tone === 'on' ? 'bg-green-600' : tone === 'warn' ? 'bg-amber-500' : 'bg-red-600'
+      }`}
+    />
+  );
+
+  const Row = ({ label, tone, value, note }: {
+    label: string; tone: 'on' | 'off' | 'warn'; value: string; note?: string;
+  }) => (
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-paper-edge/60 py-3">
+      <Dot tone={tone} />
+      <span className="min-w-[9rem] text-graphite">{label}</span>
+      <span className={`text-sm ${tone === 'on' ? 'text-graphite-muted' : tone === 'warn' ? 'text-amber-700' : 'text-red-700'}`}>
+        {value}
+      </span>
+      {note && <span className="w-full pl-5 text-xs text-graphite-faint sm:w-auto sm:pl-0">{'·'} {note}</span>}
+    </div>
+  );
+
+  if (loading) return <p className="text-graphite-faint">Checking...</p>;
+  if (failed || !data) {
+    return (
+      <p className="text-graphite-muted">
+        Could not reach the diagnostics.{' '}
+        <button onClick={load} className="underline underline-offset-4">Try again</button>
+      </p>
+    );
+  }
+
+  const d = data;
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <CheckCircle size={20} className="text-thread" />
+        <h2 className="font-normal text-graphite text-lg">System Health</h2>
+        <span className="text-sm text-graphite-faint">
+          checked {d.checked_at ? new Date(d.checked_at).toLocaleString() : '-'}
+        </span>
+        <button onClick={load} disabled={loading}
+          className="ml-auto text-sm text-graphite-muted underline underline-offset-4 hover:text-graphite disabled:opacity-50">
+          Re-check
+        </button>
+      </div>
+
+      <div className="max-w-[54rem]">
+        <Row
+          label="Database"
+          tone={d.database?.reachable ? 'on' : 'off'}
+          value={d.database?.reachable ? 'Reachable' : `Unreachable (${d.database?.error ?? 'unknown'})`}
+          note="proven - this page ran a query to answer"
+        />
+        <Row
+          label="Payments"
+          tone={!d.payments?.configured ? 'off' : d.payments.mode === 'live' ? 'on' : 'warn'}
+          value={
+            !d.payments?.configured ? 'Not configured - customers cannot pay'
+              : d.payments.mode === 'live' ? 'Live keys - real money'
+              : d.payments.mode === 'test' ? 'TEST keys - no real money moves'
+              : 'Configured, key format unrecognised'
+          }
+          note={d.payments?.configured && !d.payments.webhook
+            ? 'no webhook secret - refunds and out-of-session payments will not reach the shop'
+            : undefined}
+        />
+        <Row
+          label="Email"
+          tone={d.email?.configured ? 'on' : 'off'}
+          value={d.email?.configured ? `Sending via ${d.email.active}` : 'Not configured - no order confirmations, no OTPs by email'}
+          note={d.email?.configured && !d.email.reply_to ? 'no support address - customer replies go nowhere' : undefined}
+        />
+        <Row
+          label="Courier"
+          tone={d.courier?.configured ? 'on' : 'off'}
+          value={d.courier?.configured
+            ? `Delhivery (${d.courier.mode})`
+            : 'Not configured - pincode checks never check, no labels, no tracking'}
+          note={d.courier?.configured && !d.courier.return_address
+            ? 'no return address - reverse pickups will fail'
+            : undefined}
+        />
+        <Row
+          label="WhatsApp"
+          tone={d.messaging?.whatsapp ? 'on' : 'warn'}
+          value={d.messaging?.whatsapp ? 'Sending' : 'Not configured'}
+        />
+        <Row
+          label="SMS"
+          tone={d.messaging?.sms ? 'on' : 'warn'}
+          value={d.messaging?.sms ? 'Sending' : 'Not configured'}
+          note={!d.messaging?.sms && d.messaging?.whatsapp
+            ? 'fine if WhatsApp carries your OTPs - a customer without WhatsApp gets nothing'
+            : undefined}
+        />
+        <Row
+          label="Images"
+          tone={d.media?.configured ? 'on' : 'off'}
+          value={d.media?.configured ? 'Cloudinary connected' : 'Not configured - new product images cannot be uploaded'}
+        />
+        <Row
+          label="Security"
+          tone={d.security?.secret_key && d.security?.admin_password ? 'on' : 'off'}
+          value={d.security?.secret_key && d.security?.admin_password
+            ? 'Signing key and admin password set'
+            : 'Missing a signing key or admin password'}
+          note={!d.security?.frontend_url ? 'no frontend URL - links in emails may point nowhere' : undefined}
+        />
+      </div>
+
+      <p className="mt-5 max-w-[62ch] text-xs text-graphite-faint">
+        Every row except the database reports that credentials are present and the client builds.
+        That is the same check each integration silently fails on, so it catches the real problem -
+        but it cannot promise the next message will be accepted. No key or secret is ever sent to
+        this page.
+      </p>
+    </div>
+  );
+}
+
 function BrowserErrorsTab() {
   const [rows, setRows]       = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -385,7 +544,7 @@ function AdminPageInner() {
   // on another device) can briefly read is_admin:false before the background
   // refresh catches up, which was bouncing real admins to the customer site.
   const [confirmedFresh, setConfirmedFresh] = useState(false);
-  type TabKey = 'dash'|'products'|'orders'|'cancellations'|'users'|'ratings'|'returns'|'admins'|'errors';
+  type TabKey = 'dash'|'products'|'orders'|'cancellations'|'users'|'ratings'|'returns'|'admins'|'errors'|'health';
   const [tab, setTab] = useState<TabKey>('dash');
 
   // A specific nav link (e.g. "Manage Products") always wins over whatever
@@ -1018,6 +1177,7 @@ function AdminPageInner() {
     { key: 'ratings',       label: 'Support Ratings'   },
     { key: 'admins',        label: 'Admin Accounts' },
     { key: 'errors',        label: 'Browser Errors'  },
+    { key: 'health',        label: 'System Health'   },
   ] as const;
 
   const NOTIF_ICONS: Record<string, string> = {
@@ -1612,6 +1772,10 @@ function AdminPageInner() {
 
       {tab === 'errors' && (
         <BrowserErrorsTab />
+      )}
+
+      {tab === 'health' && (
+        <SystemHealthTab />
       )}
 
       {/* Cancellations */}
