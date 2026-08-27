@@ -39,6 +39,7 @@ import PageTransition from '@/components/PageTransition';
 import QueryProvider from '@/components/QueryProvider';
 import ThreeProvider from '@/three/ThreeProvider';
 import SiteToaster from '@/components/system/SiteToaster';
+import ErrorReporting from '@/components/ErrorReporting';
 import { STORE } from '@/lib/config';
 
 export const metadata: Metadata = {
@@ -87,6 +88,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/favicon.svg?v=3" />
       </head>
       <body className="bg-paper text-graphite min-h-screen flex flex-col font-sans antialiased">
+        {/* Notices what the React boundaries cannot: throws outside render —
+            rejected promises from handlers, failed dynamic imports, anything
+            that happens after the tree has already rendered. Until now this
+            shop had no error boundary at all, so a crash showed the browser's
+            own page and nobody here ever heard about it. */}
+        <ErrorReporting />
         {/* The single persistent 3D canvas. Sits outside the providers and
             outside PageTransition so a route change never remounts it — the
             GL context, compiled shaders and uploaded textures survive

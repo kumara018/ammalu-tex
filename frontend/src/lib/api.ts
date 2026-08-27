@@ -181,6 +181,8 @@ export const addressAPI = {
 };
 
 export const adminAPI = {
+  /** What actually broke, in real customers' browsers. Admin-only. */
+  getClientErrors:     ()             => api.get('/api/client-errors/recent'),
   dashboard:          ()                           => api.get('/api/admin/dashboard'),
   getProducts:        ()                           => api.get('/api/admin/products'),
   createProduct:      (data: object)               => api.post('/api/admin/products', data),

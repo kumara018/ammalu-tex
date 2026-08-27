@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import { useState, useEffect, useRef, useMemo, Suspense, Fragment } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Package, ShoppingBag, Users, TrendingUp, Plus, Pencil,
@@ -65,6 +65,133 @@ const RETURN_STATUS_BADGE: Record<string, string> = {
 const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
 
 // ── CS Interactions Tab ───────────────────────────────────────────────────────
+/**
+ * What actually broke, in real customers' browsers.
+ *
+ * Reports arrive from `lib/errorReporter` and land in `client_errors`. This
+ * shop had no error boundary and no reporting at all until now, which meant
+ * the only way a breakage reached the counter was somebody telephoning about
+ * it — and most people do not telephone, they leave.
+ *
+ * GROUPED BY MESSAGE, MOST FREQUENT FIRST. Fifty rows of the same TypeError is
+ * one bug that fifty people hit, not fifty bugs, and the count is the useful
+ * number: it separates "an edge case on one phone" from "checkout is down in
+ * Safari". The most recent occurrence keeps its stack, because the oldest is
+ * the least likely to still be reproducible.
+ *
+ * An empty table is genuinely good news, and is worded that way rather than as
+ * missing data — otherwise it reads as "reporting is broken".
+ */
+function BrowserErrorsTab() {
+  const [rows, setRows]       = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed]   = useState(false);
+  const [open, setOpen]       = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true); setFailed(false);
+    try { const r = await adminAPI.getClientErrors(); setRows(r.data ?? []); }
+    catch { setFailed(true); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const grouped = useMemo(() => {
+    const byKey = new Map<string, { key: string; name: string; message: string; count: number; latest: any }>();
+    for (const r of rows) {
+      const key = `${r.name}:${r.message}`;
+      const hit = byKey.get(key);
+      // rows arrive newest-first, so the first one seen is already the latest.
+      if (hit) hit.count += 1;
+      else byKey.set(key, { key, name: r.name, message: r.message, count: 1, latest: r });
+    }
+    return [...byKey.values()].sort((a, b) => b.count - a.count);
+  }, [rows]);
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center gap-3 flex-wrap">
+        <AlertCircle size={20} className="text-thread" />
+        <h2 className="font-normal text-graphite text-lg">Browser Errors</h2>
+        {!loading && !failed && rows.length > 0 && (
+          <span className="text-sm text-graphite-muted">
+            {grouped.length} distinct {grouped.length === 1 ? 'problem' : 'problems'} across{' '}
+            {rows.length} {rows.length === 1 ? 'report' : 'reports'}
+          </span>
+        )}
+        <button onClick={load} disabled={loading}
+          className="ml-auto text-sm text-graphite-muted underline underline-offset-4 hover:text-graphite disabled:opacity-50">
+          {loading ? 'Loading…' : 'Refresh'}
+        </button>
+      </div>
+
+      {failed ? (
+        <p className="text-graphite-muted">Could not load the reports. <button onClick={load} className="underline underline-offset-4">Try again</button></p>
+      ) : loading ? (
+        <p className="text-graphite-faint">Looking…</p>
+      ) : rows.length === 0 ? (
+        <p className="max-w-[60ch] text-graphite-muted">
+          No errors have been reported. That is the state you want this page in — it means no
+          customer&rsquo;s browser has thrown since the last clear-out, not that reporting is
+          switched off.
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <caption className="sr-only">Browser errors, most frequent first</caption>
+            <thead>
+              <tr className="border-b border-paper-edge text-left text-graphite-faint">
+                <th scope="col" className="py-2 pr-4 text-right font-normal">Count</th>
+                <th scope="col" className="py-2 pr-4 font-normal">Error</th>
+                <th scope="col" className="py-2 pr-4 font-normal">Where</th>
+                <th scope="col" className="py-2 font-normal">Last seen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {grouped.map((g) => (
+                <Fragment key={g.key}>
+                  <tr className="border-b border-paper-edge/60 align-baseline">
+                    <td className="py-3 pr-4 text-right tabular-nums text-thread">{g.count}</td>
+                    <th scope="row" className="py-3 pr-4 text-left font-normal">
+                      <button
+                        onClick={() => setOpen(open === g.key ? null : g.key)}
+                        aria-expanded={open === g.key}
+                        className="text-left text-graphite underline decoration-paper-edge underline-offset-4 hover:decoration-thread"
+                      >
+                        <span className="text-graphite-muted">{g.name}:</span> {g.message}
+                      </button>
+                    </th>
+                    <td className="py-3 pr-4 break-all text-graphite-muted">{g.latest.url}</td>
+                    <td className="py-3 whitespace-nowrap text-graphite-muted">
+                      {g.latest.created_at ? new Date(g.latest.created_at).toLocaleString() : '—'}
+                    </td>
+                  </tr>
+                  {open === g.key && (
+                    <tr className="border-b border-paper-edge/60">
+                      <td colSpan={4} className="py-3">
+                        <dl className="grid gap-x-6 gap-y-1 sm:grid-cols-[10rem_1fr]">
+                          {g.latest.request_id && (<><dt className="text-graphite-faint">Request id</dt><dd className="select-all font-mono text-xs text-graphite">{g.latest.request_id}</dd></>)}
+                          {g.latest.digest &&     (<><dt className="text-graphite-faint">Digest</dt><dd className="select-all font-mono text-xs text-graphite">{g.latest.digest}</dd></>)}
+                          {g.latest.viewport &&   (<><dt className="text-graphite-faint">Viewport</dt><dd className="text-graphite">{g.latest.viewport}</dd></>)}
+                          {g.latest.user_agent && (<><dt className="text-graphite-faint">Browser</dt><dd className="break-all text-graphite">{g.latest.user_agent}</dd></>)}
+                        </dl>
+                        {g.latest.stack && (
+                          <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap break-all bg-paper-shade p-3 font-mono text-xs text-graphite-muted">{g.latest.stack}</pre>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CSInteractionsTab() {
   const [interactions, setInteractions] = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
@@ -258,7 +385,7 @@ function AdminPageInner() {
   // on another device) can briefly read is_admin:false before the background
   // refresh catches up, which was bouncing real admins to the customer site.
   const [confirmedFresh, setConfirmedFresh] = useState(false);
-  type TabKey = 'dash'|'products'|'orders'|'cancellations'|'users'|'ratings'|'returns'|'admins';
+  type TabKey = 'dash'|'products'|'orders'|'cancellations'|'users'|'ratings'|'returns'|'admins'|'errors';
   const [tab, setTab] = useState<TabKey>('dash');
 
   // A specific nav link (e.g. "Manage Products") always wins over whatever
@@ -890,6 +1017,7 @@ function AdminPageInner() {
     { key: 'users',         label: 'Customers'         },
     { key: 'ratings',       label: 'Support Ratings'   },
     { key: 'admins',        label: 'Admin Accounts' },
+    { key: 'errors',        label: 'Browser Errors'  },
   ] as const;
 
   const NOTIF_ICONS: Record<string, string> = {
@@ -1480,6 +1608,10 @@ function AdminPageInner() {
       {/* Support Ratings — CS Interactions */}
       {tab === 'ratings' && (
         <CSInteractionsTab />
+      )}
+
+      {tab === 'errors' && (
+        <BrowserErrorsTab />
       )}
 
       {/* Cancellations */}
