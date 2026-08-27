@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { ordersAPI, addressAPI } from '@/lib/api';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import PaymentOutcome, { type Outcome, isMoneyAtRisk } from './PaymentOutcome';
 
 const INDIA_STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh',
@@ -62,6 +63,15 @@ export default function CheckoutPage() {
   // Declare state first so useEffect hooks below can reference them
   const [step,    setStep]    = useState<1 | 2 | 3>(1);
   const [placing, setPlacing] = useState(false);
+  /**
+   * How the payment ended. Null while nothing has been attempted.
+   *
+   * Every ending used to be a toast that re-enabled the pay button — including
+   * the two where the customer's money may already have gone. See
+   * ./PaymentOutcome for why each ending has to be told apart.
+   */
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const outcomeRef = useRef<HTMLDivElement>(null);
   const [openBox, setOpenBox] = useState(false);
 
   // Set synchronously the instant an order is confirmed — clearCart() empties
@@ -79,9 +89,19 @@ export default function CheckoutPage() {
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
+    // A blocked or failed script is indistinguishable from a dead pay button
+    // unless it is said out loud.
+    script.onerror = () => setOutcome({ kind: 'offline' });
     document.body.appendChild(script);
     return () => { document.body.removeChild(script); };
   }, [user, items, authLoading]);
+
+  // Any outcome replaces the task the customer was doing, so move focus to it.
+  // A screen reader user who pressed Pay and heard nothing has no way to find
+  // out what happened.
+  useEffect(() => {
+    if (outcome) outcomeRef.current?.focus();
+  }, [outcome]);
 
   // Warn user before refresh / tab close while on checkout or during payment
   useEffect(() => {
@@ -256,7 +276,21 @@ export default function CheckoutPage() {
       router.push(`/orders/${res.data.id}?new=1`);
     } catch (err: any) {
       const d = err.response?.data?.detail;
-      toast.error(Array.isArray(d) ? d.map((x: any) => x.msg).join('. ') : (d || 'Failed to place order'));
+      const detail = Array.isArray(d) ? d.map((x: any) => x.msg).join('. ') : (d || undefined);
+      /**
+       * THE WORST CASE, AND IT USED TO BE A TOAST.
+       *
+       * Reaching here on a card payment means Razorpay took the money AND the
+       * signature verified — and then the order failed to save. Saying
+       * "Failed to place order" and putting the pay button back invites a
+       * second charge on top of a first that already succeeded. Cash on
+       * delivery has no proof and nothing has moved, so that stays a toast.
+       */
+      if (paymentProof?.razorpay_payment_id) {
+        setOutcome({ kind: 'orphaned', paymentId: paymentProof.razorpay_payment_id, detail });
+      } else {
+        toast.error(detail || 'Failed to place order');
+      }
     } finally { setPlacing(false); }
   };
 
@@ -293,17 +327,42 @@ export default function CheckoutPage() {
             // re-verifies the same signature before writing anything to the DB.
             await finalizeOrder(isEmi ? 'emi' : 'razorpay', paymentProof);
           } catch {
-            toast.error('Payment verification failed. Contact support.');
+            // The charge may well have succeeded — we simply could not confirm
+            // it. Offering a retry here is how a customer pays twice.
+            setOutcome({ kind: 'unverified', paymentId: paymentProof.razorpay_payment_id });
             setPlacing(false);
           }
         },
-        modal: { ondismiss: () => { setPlacing(false); toast.error('Payment cancelled'); } },
+        modal: { ondismiss: () => { setPlacing(false); setOutcome({ kind: 'dismissed' }); } },
       };
 
       // For EMI: open standard Razorpay modal (EMI tab appears automatically inside)
       // No custom config — Razorpay shows EMI for eligible credit cards automatically
 
       const rzp = new window.Razorpay(options);
+
+      /**
+       * A DECLINED CARD USED TO PRODUCE NO RESPONSE AT ALL.
+       *
+       * Without this subscription the Razorpay window just closes on a
+       * decline and the page sits exactly as it was. The customer cannot tell
+       * whether they were charged, so they either pay again or abandon the
+       * order. Nothing has been charged in this state, so it is safe — and it
+       * is the one failure where offering another attempt is the right answer.
+       */
+      rzp.on('payment.failed', (resp: {
+        error?: { description?: string; reason?: string; metadata?: { payment_id?: string } };
+      }) => {
+        const e = resp?.error ?? {};
+        setPlacing(false);
+        setOutcome({
+          kind: 'declined',
+          description: e.description || 'The payment could not be completed.',
+          reason: e.reason,
+          paymentId: e.metadata?.payment_id,
+        });
+      });
+
       rzp.open();
     } catch {
       toast.error('Payment gateway error. Please try again.');
@@ -311,7 +370,17 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleRazorpay = async () => openRazorpay(false);
+  /**
+   * Every attempt starts from a clean slate, and never opens into a state that
+   * cannot succeed. Opening the Razorpay window with no connection produces a
+   * blank modal and no error, which reads as the shop being broken.
+   */
+  const handleRazorpay = async () => {
+    setOutcome(null);
+    if (typeof navigator !== 'undefined' && !navigator.onLine) { setOutcome({ kind: 'offline' }); return; }
+    if (typeof window === 'undefined' || !(window as any).Razorpay) { setOutcome({ kind: 'offline' }); return; }
+    return openRazorpay(false);
+  };
 
   const handlePlaceOrder = async () => {
     if (!validateAddr()) {
@@ -323,8 +392,24 @@ export default function CheckoutPage() {
 
   const STEPS = ['Where it goes', 'How you pay', 'Check and place'] as const;
 
+  /**
+   * When the money may already have moved, paying again is the one thing the
+   * customer must not be able to do by reflex. The outcome panel says so in
+   * words; this makes it true of the button as well.
+   */
+  const atRisk = outcome ? isMoneyAtRisk(outcome) : false;
+
   return (
     <div className="mx-auto w-full max-w-[104rem] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
+      {/* The outcome takes the top of the page when there is one — it is the
+          answer to the thing the customer just did, so it goes above the form
+          rather than below it. */}
+      {outcome && (
+        <div ref={outcomeRef} tabIndex={-1} className="mb-[clamp(2.5rem,7vh,4.5rem)] focus:outline-none">
+          <PaymentOutcome outcome={outcome} onRetry={handleRazorpay} retrying={placing} />
+        </div>
+      )}
+
       <Link
         href="/cart"
         className="group inline-flex items-baseline gap-3 text-rule uppercase text-graphite-faint transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
@@ -605,15 +690,22 @@ export default function CheckoutPage() {
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="btn-secondary flex-1 py-3">← Back</button>
-                <button onClick={handlePlaceOrder} disabled={placing}
-                  className="btn-gold flex-1 py-3.5 flex items-center justify-center gap-2 text-base font-normal rounded-sm">
+                <button onClick={handlePlaceOrder} disabled={placing || atRisk}
+                  className="btn-gold flex-1 py-3.5 flex items-center justify-center gap-2 text-base font-normal rounded-sm disabled:opacity-60">
                   {placing
                     ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Processing...</>
                     : <><Lock size={18} /> {payMethod === 'razorpay' ? 'Pay with Razorpay' : 'Choose EMI Plan'} · ₹{grandTotal.toLocaleString()}</>
                   }
                 </button>
               </div>
-              <p className="text-xs text-graphite-faint text-center mt-3">By placing this order, you agree to our Terms of Service.</p>
+              {atRisk ? (
+                <p className="mx-auto mt-3 max-w-[46ch] text-center text-xs text-graphite-faint">
+                  Paying again is disabled until we have checked the payment above — we do not
+                  want to take your money twice.
+                </p>
+              ) : (
+                <p className="text-xs text-graphite-faint text-center mt-3">By placing this order, you agree to our Terms of Service.</p>
+              )}
             </div>
           )}
         </div>
