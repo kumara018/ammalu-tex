@@ -27,7 +27,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import TimeoutError as SATimeoutError
 from logging_setup import RequestContextMiddleware, log
-from routers import auth, products, cart, orders, admin, payments, addresses, support, returns, wishlist, webhooks, shipping, client_errors, diagnostics
+from routers import auth, products, cart, orders, admin, payments, addresses, support, returns, wishlist, webhooks, shipping, client_errors, diagnostics, push_subs
 
 
 os.makedirs(os.getenv("UPLOAD_DIR", "uploads/products"), exist_ok=True)
@@ -746,6 +746,8 @@ def _print_integration_banner() -> None:
         ("SMS",      "on" if twilio and on("TWILIO_PHONE") else "not configured"),
         ("Images",   "Cloudinary" if on("CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY",
                                         "CLOUDINARY_API_SECRET") else "NOT CONFIGURED"),
+        ("Web push", "on" if on("VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY")
+                     else "not set up - run: python -m push"),
     ]
 
     print("=" * 68)
@@ -896,6 +898,7 @@ app.include_router(returns.router)
 app.include_router(wishlist.router)
 app.include_router(client_errors.router)
 app.include_router(diagnostics.router)
+app.include_router(push_subs.router)
 app.include_router(webhooks.router)
 app.include_router(shipping.router)
 # Tracking is wired into orders router (/api/orders/{id}/track)

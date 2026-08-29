@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, Suspense } from 'react';
+import OrderNotifications from '@/components/system/OrderNotifications';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -551,6 +552,11 @@ function OrderDetailContent() {
               <p className="text-xs text-caution mt-3 font-medium">Never share this OTP via phone call or message. Only share it in person at your door.</p>
             </div>
           )}
+
+          {/* Offered once an order exists, which is the only moment a
+              notification prompt is an answer rather than an interruption —
+              see components/system/OrderNotifications. */}
+          {!isCancelled && order.status !== 'delivered' && <OrderNotifications />}
 
           {/* ── Cancelled ── */}
           {isCancelled && (
