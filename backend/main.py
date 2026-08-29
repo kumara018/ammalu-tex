@@ -824,11 +824,29 @@ async def lifespan(app: FastAPI):
 
 # ── App ───────────────────────────────────────────────────────────────────────
 
+# ── The API map, and who gets to read it ──────────────────────────────────────
+#
+# /openapi.json is a complete, machine-readable description of every endpoint,
+# every parameter and every shape - including /api/admin/* that no customer
+# ever needs to know exist. It was served publicly here while the other shop
+# correctly returned 404, so anybody could read Ammalu's entire surface.
+#
+# Reconnaissance is cheap to deny and expensive to allow, so the default flips:
+# closed in production, opened with ENABLE_API_DOCS=true when you actually want
+# to read them. Setting that on Render takes a moment and can be turned off
+# again; leaving the map on the doormat cannot be undone once it has been read.
+_DOCS_ENABLED = os.getenv("ENABLE_API_DOCS", "").lower() in ("1", "true", "yes")
+
 app = FastAPI(
     title       = "Ammalu Tex API",
     description = "Premium Textile Shopping — Texvalley Gangapuram",
     version     = "3.0.0",
     lifespan    = lifespan,
+    docs_url    = "/docs" if _DOCS_ENABLED else None,
+    redoc_url   = "/redoc" if _DOCS_ENABLED else None,
+    # The schema itself, not just the viewer — leaving this on would defeat
+    # the whole point, since it is the machine-readable version of the map.
+    openapi_url = "/openapi.json" if _DOCS_ENABLED else None,
 )
 
 @app.exception_handler(SATimeoutError)
