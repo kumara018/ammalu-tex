@@ -107,6 +107,8 @@ function SystemHealthTab() {
   const [data, setData]       = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed]   = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testNote, setTestNote] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true); setFailed(false);
@@ -116,6 +118,31 @@ function SystemHealthTab() {
   };
 
   useEffect(() => { load(); }, []);
+
+  /**
+   * Prove email, rather than wait for it to be proven.
+   *
+   * The Email row can only report what the last real send did, so after every
+   * deploy it reads "nothing sent yet this run" - honest, and useless at the
+   * one moment somebody wants an answer: they have just changed a setting.
+   * This sends a real message down the same path an order confirmation takes
+   * and re-reads the page, so the row turns green or red on one click.
+   *
+   * It can only ever mail the admin who pressed it - the address comes from
+   * the calling account, never from the request.
+   */
+  const testEmail = async () => {
+    setTesting(true); setTestNote(null);
+    try {
+      const res = await adminAPI.sendTestEmail();
+      setTestNote(`Sent to ${res.data?.to}. Check the inbox - and spam, for the first one.`);
+    } catch (e: any) {
+      setTestNote(e?.response?.data?.detail || 'Could not send. The Email row now says why.');
+    } finally {
+      setTesting(false);
+      await load();
+    }
+  };
 
   /* Three states, not two. "Off" is not always bad - SMS is optional if
      WhatsApp carries the OTPs - so the amber tier exists to say "absent, and
@@ -129,8 +156,9 @@ function SystemHealthTab() {
     />
   );
 
-  const Row = ({ label, tone, value, note }: {
+  const Row = ({ label, tone, value, note, action }: {
     label: string; tone: 'on' | 'off' | 'warn'; value: string; note?: string;
+    action?: React.ReactNode;
   }) => (
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-paper-edge/60 py-3">
       <Dot tone={tone} />
@@ -139,6 +167,7 @@ function SystemHealthTab() {
         {value}
       </span>
       {note && <span className="w-full pl-5 text-xs text-graphite-faint sm:w-auto sm:pl-0">{'·'} {note}</span>}
+      {action && <span className="ml-auto shrink-0">{action}</span>}
     </div>
   );
 
@@ -208,6 +237,18 @@ function SystemHealthTab() {
                   ? `Sending via ${d.email.active}${d.email.last_send.host ? ` (${d.email.last_send.host})` : ''}`
                   : `Configured for ${d.email.active} - nothing sent yet this run`
           }
+          action={
+            d.email?.configured ? (
+              <button
+                type="button"
+                onClick={testEmail}
+                disabled={testing}
+                className="text-sm text-thread underline underline-offset-4 hover:text-graphite disabled:opacity-50"
+              >
+                {testing ? 'Sending…' : 'Send test'}
+              </button>
+            ) : undefined
+          }
           note={
             d.email?.last_send?.ok === false && String(d.email.last_send.detail ?? '').includes('SMTP_HOST')
               ? 'set SMTP_HOST - a custom-domain mailbox cannot be guessed. Hostinger uses smtp.hostinger.com on 587'
@@ -268,6 +309,9 @@ function SystemHealthTab() {
         />
       </div>
 
+      {testNote && (
+        <p role="status" className="mt-5 max-w-[62ch] text-sm text-graphite">{testNote}</p>
+      )}
       <p className="mt-5 max-w-[62ch] text-xs text-graphite-faint">
         Every row except the database reports that credentials are present and the client builds.
         That is the same check each integration silently fails on, so it catches the real problem -
