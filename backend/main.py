@@ -941,21 +941,18 @@ def health():
     return {"status": "healthy"}
 
 
-@app.get("/seed")
 def seed_database():
     from seed_data import seed
     seed()
     return {"status": "Database seeded successfully"}
 
 
-@app.get("/reset-admin")
 def reset_admin():
     _ensure_admin()
     admin_email = os.getenv("ADMIN_EMAIL", "admin@ammalutex.com")
     return {"status": "Admin reset successfully", "email": admin_email}
 
 
-@app.get("/test-notification")
 def test_notification(to: str = "", type: str = "welcome"):
     """
     Instantly send a real notification email to verify the template.
@@ -1008,7 +1005,6 @@ def test_notification(to: str = "", type: str = "welcome"):
             "note": "Check your inbox (and spam folder). Email sent in background."}
 
 
-@app.get("/test-email")
 def test_email(to: str = ""):
     """
     Diagnostic endpoint — tests email delivery and returns the exact result.

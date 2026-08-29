@@ -185,8 +185,6 @@ export const adminAPI = {
   getClientErrors:     ()             => api.get('/api/client-errors/recent'),
   /** Which third parties are actually switched on. Admin-only, never returns a key. */
   getIntegrations:     ()             => api.get('/api/diagnostics/integrations'),
-  /** Prove email works now. Only ever mails the calling admin. */
-  sendTestEmail:       ()             => api.post('/api/diagnostics/test-email'),
   dashboard:          ()                           => api.get('/api/admin/dashboard'),
   getProducts:        ()                           => api.get('/api/admin/products'),
   createProduct:      (data: object)               => api.post('/api/admin/products', data),
