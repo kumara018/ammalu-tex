@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Determine backend URL based on where the app is running.
-// - localhost / 127.0.0.1  →  local FastAPI server
-// - anywhere else (Vercel) →  Render backend
+/** Used only when nothing valid is configured. See getApiBase below. */
+const FALLBACK_API = 'https://ammalu-tex.onrender.com';
+
 /**
  * The one place that decides which backend the browser talks to.
  *
@@ -12,17 +12,53 @@ import axios from 'axios';
  * from localhost sent the customer's bearer token to the LIVE backend on two of
  * them. CORS blocked it, which means the "fetch fresh user data" path had never
  * worked locally at all.
+ *
+ * WHY THIS READS THE ENVIRONMENT AND NO LONGER HARDCODES A HOST.
+ *
+ * It used to return the Render URL for every non-localhost host and ignore
+ * NEXT_PUBLIC_API_URL completely — while next.config.js built the Content
+ * Security Policy FROM that variable. The policy and the requests came from
+ * two different sources of truth, and nothing checked they agreed.
+ *
+ * The consequence that actually blocked a migration: the API origin could not
+ * be changed by configuration. Setting the variable on the host moved the CSP
+ * and nothing else, so the browser was handed a policy naming the new origin
+ * while the code carried on calling the old one — a change that looks applied,
+ * deploys green, and serves a shop that quietly cannot reach its backend.
+ *
+ * next.config.js validates this variable and rewrites it to a bare origin
+ * before it reaches the bundle, so what arrives here has already been checked
+ * and normalised. The guard below is belt and braces — this value decides
+ * where a customer's bearer token is sent, as the AuthContext bug above shows.
  */
 export function getApiBase(): string {
-  if (typeof window === 'undefined') {
-    // Server-side (Next.js SSR) — always use Render
-    return 'https://ammalu-tex.onrender.com';
+  /*
+   * Local development keeps its local backend with no configuration at all,
+   * and this is checked FIRST on purpose: it means a production value left in
+   * a developer's environment can never point their browser — and the token in
+   * their localStorage — at the live shop. That is the same failure the
+   * AuthContext note above describes, closed off at the source this time.
+   */
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:8000';
+    }
   }
-  const host = window.location.hostname;
-  if (host === 'localhost' || host === '127.0.0.1') {
-    return 'http://localhost:8000';
+
+  const configured = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+  if (configured) {
+    try {
+      const url = new URL(configured);
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        return url.origin; // normalised: no trailing slash, no path
+      }
+    } catch {
+      // Deliberately silent here. next.config.js has already printed the
+      // reason into the build log, where somebody can actually see it.
+    }
   }
-  return 'https://ammalu-tex.onrender.com';
+  return FALLBACK_API;
 }
 
 const API_BASE = getApiBase();
