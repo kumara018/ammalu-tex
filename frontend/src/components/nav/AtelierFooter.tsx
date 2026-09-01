@@ -235,7 +235,7 @@ export default function AtelierFooter() {
                 The header has carried the tagline since it was added and this
                 did not, which is the sort of gap that only shows when the two
                 are seen together. */}
-            <span className="flex flex-col">
+            <span className="flex flex-col items-start">
               <span className="font-display text-band font-normal leading-none text-paper transition-colors duration-500 group-hover:text-thread-pale">
                 {STORE.name}
               </span>

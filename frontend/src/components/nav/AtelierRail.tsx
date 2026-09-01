@@ -184,7 +184,7 @@ export default function AtelierRail() {
               and the mark and the name are the identity there. */}
           {/* A shade smaller on a phone, so the top row has room for the
               actions without the name reaching for the middle of the screen. */}
-        <span className="flex flex-col">
+        <span className="flex flex-col items-start">
           <span className="relative inline-block font-display text-[1.2rem] leading-none tracking-tight sm:text-[1.45rem]">
             {STORE.name}
             <span
