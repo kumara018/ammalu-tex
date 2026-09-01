@@ -260,11 +260,15 @@ For production, change in .env:
 DELHIVERY SHIPPING — SHARED ACCOUNT WARNING
 ================================================================
 
-⚠️ Ammalu Tex and Vijey Textile use the SAME Delhivery account
-(kumaraguru27102@gmail.com). If DELHIVERY_PICKUP_NAME is left unset when
-this site is deployed, it will default to "Primary" — the exact same
-default Vijey Textile uses — so couriers could be dispatched to the wrong
-shop for one store's orders.
+RESOLVED — the two shops now have SEPARATE Delhivery accounts, with
+distinct pickup names registered ("AMMALU TEX B2C" here, "Vijey Textile"
+on the sister shop). Verified against both live environments.
+
+This warning is kept because the failure it describes is worth knowing:
+the shops once shared one account, and DELHIVERY_PICKUP_NAME defaults to
+"Primary" when unset — the same default the other shop would use — so a
+courier could be dispatched to the wrong shop for one store's orders.
+Leaving DELHIVERY_PICKUP_NAME unset is still the thing not to do.
 
 Before deploying this site for real:
   1. In the Delhivery dashboard, register a pickup location for THIS shop
