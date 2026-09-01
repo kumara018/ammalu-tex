@@ -171,17 +171,20 @@ export default function AtelierRail() {
           className="group order-1 flex shrink-0 items-center gap-3 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
           <LogoMark size={32} className="shrink-0 text-thread transition-colors duration-500 group-hover:text-thread-deep" />
-          {/* The name, and nothing under it.
-              A strapline was tried here — the shop's location, set as a label
-              line beneath the name. It made the lockup taller than the rail
-              needed, it repeated what the footer already says, and a name that
-              needs a caption to feel like a name is not yet a name. The
-              distinctiveness has to live in the letterforms and the stamp, so
-              it does: the mark is stitched, and the name is set in Instrument
-              Serif at a size that reads as a signature rather than a label,
-              with a thread rule that draws itself under it on approach. */}
+          {/* THE NAME, AND THE SHOP'S OWN LINE UNDER IT.
+              A strapline was tried here once and removed: it was the shop's
+              LOCATION, it repeated what the footer already says, and a name
+              needing a caption to feel like a name is not yet a name. All true
+              of that line.
+              A tagline is a different object. "Timeless fabrics. Thoughtful
+              choices." is not explaining the name — it is the sentence the shop
+              signs itself with, and it is what the owner's own artwork sets
+              beneath it. So it returns, at rule size in the accent, and only
+              from `sm` up: on a phone the rail needs its width for the actions,
+              and the mark and the name are the identity there. */}
           {/* A shade smaller on a phone, so the top row has room for the
               actions without the name reaching for the middle of the screen. */}
+        <span className="flex flex-col">
           <span className="relative inline-block font-display text-[1.2rem] leading-none tracking-tight sm:text-[1.45rem]">
             {STORE.name}
             <span
@@ -189,6 +192,12 @@ export default function AtelierRail() {
               className="absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-thread transition-transform duration-[520ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:scale-x-100 motion-reduce:transition-none"
             />
           </span>
+          {/* `mt-2` clears the rule that draws itself under the name on hover;
+              at `mt-1` the two collided. Hidden below `sm` — see the note above. */}
+          <span className="mt-2 hidden text-[0.55rem] uppercase leading-none tracking-[0.19em] text-thread-deep sm:block">
+            {STORE.tagline}
+          </span>
+        </span>
         </Link>
 
         {/* Three destinations, not six duplicated filters — see RAIL above.

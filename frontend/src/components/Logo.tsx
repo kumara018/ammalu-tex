@@ -68,6 +68,15 @@ export function LogoMark({ className = '', size = 32 }: { className?: string; si
        * whole point of using the supplied artwork rather than a redrawing.
        */
       unoptimized
+      /*
+       * EAGER, ALWAYS. Dropping `priority` when the optimiser was turned off
+       * left next/image's default of `loading="lazy"`, and on the live site the
+       * header mark then reported complete:false with naturalWidth 0 — the
+       * identity, above the fold, simply not drawn. A logo is never the thing
+       * to defer: it is 2KB, it is the first thing a visitor should see, and
+       * lazily loading it can only ever cost.
+       */
+      priority
       className={`object-contain ${className}`}
       style={{ width: size, height: size }}
     />
