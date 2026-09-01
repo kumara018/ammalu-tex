@@ -43,7 +43,23 @@ import ErrorReporting from '@/components/ErrorReporting';
 import { STORE } from '@/lib/config';
 
 export const metadata: Metadata = {
-  title: `${STORE.name} — Premium Women's Textiles | Texvalley Erode`,
+  /*
+   * THE TAGLINE, NOT A DESCRIPTION OF THE STOCK.
+   *
+   * These titles read "Premium Women's Textiles" -- a phrase chosen because it is what somebody
+   * types into a search box. The shop's own line is what it signs itself with
+   * everywhere else: the header, the footer, the invoice, the mail masthead
+   * and its WhatsApp messages. Having the browser tab and every shared link
+   * introduce the shop by a different phrase than the shop itself uses was the
+   * inconsistency the owner kept seeing, and consistency of name won.
+   *
+   * The location stays. "Texvalley Erode" is the part that helps somebody in
+   * Erode find a shop in Erode, and it costs the tagline nothing to sit beside
+   * it. The descriptions below still carry the categories in full, so what the
+   * shop sells is still stated -- in the sentence written for that purpose
+   * rather than in the name.
+   */
+  title: `${STORE.name} — ${STORE.tagline} | Texvalley Erode`,
   description: 'Shop premium Chudithar, Tops, Lehenga, Crop Tops & Party Wears at Ammalu Tex. Located at Texvalley Gangapuram, Erode. Fast delivery across India. 100% authentic products.',
   keywords: 'Ammalu Tex, ammalu tex, ammalutex, textile shop Erode, Texvalley Gangapuram, chudithar, lehenga, tops, crop tops, party wear, women fashion, Erode textile, buy chudithar online, women clothing India',
   authors: [{ name: 'Ammalu Tex' }],
@@ -52,7 +68,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://ammalutex.com'),
   alternates: { canonical: 'https://ammalutex.com' },
   openGraph: {
-    title: 'Ammalu Tex — Premium Women\'s Textiles',
+    title: `${STORE.name} — ${STORE.tagline}`,
     description: 'Shop Chudithar, Tops, Lehenga, Crop Tops & Party Wears at Ammalu Tex, Texvalley Gangapuram, Erode.',
     url: 'https://ammalutex.com',
     siteName: 'Ammalu Tex',
@@ -61,7 +77,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Ammalu Tex — Premium Women\'s Textiles',
+    title: `${STORE.name} — ${STORE.tagline}`,
     description: 'Shop Chudithar, Tops, Lehenga & more at Ammalu Tex, Texvalley Erode.',
   },
   robots: {
