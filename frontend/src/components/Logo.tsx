@@ -44,12 +44,24 @@ export function LogoMark({ className = '', size = 32 }: { className?: string; si
          text; the name is the accessible label. An empty alt keeps a screen
          reader from announcing "Ammalu Tex" twice in a row. */
       aria-hidden="true"
-      /* Sharp at any size without shipping four files: the source is 171px, so
-         a 34px header mark is already served at 5x. */
-      sizes={`${size}px`}
+      /*
+       * SERVED AS-IS, AND `sizes` IS DELIBERATELY ABSENT.
+       *
+       * With `sizes` set, next/image builds a srcset across every device width
+       * up to 3840 and lets the browser choose. On the live site one instance
+       * duly asked for a 3840px render — of a 171px source. That is Next
+       * upscaling a small photograph twenty-two times over: slower, no sharper,
+       * and a billed image optimisation for every size it lands on.
+       *
+       * `unoptimized` skips the optimiser entirely. The file is 32KB and never
+       * displayed above 46px, so there is nothing for a transform to win: the
+       * source is already smaller than any rendition of it would be. It also
+       * means the mark is byte-identical everywhere it appears, which is the
+       * whole point of using the supplied artwork rather than a redrawing.
+       */
+      unoptimized
       className={`rounded-[3px] object-cover ${className}`}
       style={{ width: size, height: size }}
-      priority={size >= 34}
     />
   );
 }
