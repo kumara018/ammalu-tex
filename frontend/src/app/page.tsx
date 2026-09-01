@@ -11,7 +11,7 @@ import Reveal from '@/components/home/Reveal';
 import BoltRow from '@/components/home/BoltRow';
 import MeasureRule from '@/components/home/MeasureRule';
 import { dyeFor } from '@/lib/dyes';
-import PaperDrift from '@/components/home/PaperDrift';
+import GarmentSlide from '@/components/home/GarmentSlide';
 
 /**
  * The Atelier — Ammalu Tex's homepage.
@@ -130,28 +130,20 @@ export default function HomePage() {
           it growing without limit on tall ones. Same failure the hero line had
           before it was given min(9.4vw, 12.2vh): a single-axis viewport unit
           has no idea what shape the screen actually is. */}
-      <section className="relative flex flex-col justify-start px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(1.25rem,4vh,2.25rem)] sm:px-10 md:min-h-[min(46svh,22rem)] md:justify-end md:pt-[clamp(2rem,6vh,3.5rem)]">
-        <PaperDrift />
-        {/**
-          * A soft wash under the copy only.
-          *
-          * The atelier scene is bright — pale muslin and window light — so
-          * graphite type over it is legible in most of the frame but not all
-          * of it, and the luminance moves as the light crosses the room. This
-          * keeps the reading column settled without putting a sheet over the
-          * whole page: it fades out entirely by the middle of the frame, where
-          * the room is doing the work.
-          */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background:
-              'linear-gradient(94deg, rgba(250,246,243,0.94) 0%, rgba(250,246,243,0.86) 26%, rgba(250,246,243,0.5) 44%, rgba(250,246,243,0) 64%)',
-          }}
-        />
-
-        <div className="mx-auto w-full max-w-[104rem]">
+      <section className="relative overflow-hidden flex flex-col justify-start px-6 pb-[clamp(1.5rem,4vh,2.5rem)] pt-[clamp(1.25rem,4vh,2.25rem)] sm:px-10 md:min-h-[min(46svh,22rem)] md:justify-end md:pt-[clamp(2rem,6vh,3.5rem)]">
+        {/* THE OPENING IS A GARMENT NOW, NOT AN ABSTRACTION.
+            PaperDrift put translucent panels behind the headline — pattern
+            paper, in keeping with the palette, and abstract. Beside the sister
+            shop, which opens on a photograph of a piece turning slowly, it read
+            as decoration where there should have been product. The owner asked
+            for the garments.
+            Falls back to the shop's own photographs when public/hero/ is empty,
+            which it is; see lib/heroGarments.ts. */}
+        <GarmentSlide products={[...featuredItems, ...recentItems]} />
+        {/* `relative z-10`: GarmentSlide is absolutely positioned behind this,
+            and without a stacking context of its own the copy would be painted
+            over by it. */}
+        <div className="relative z-10 mx-auto w-full max-w-[104rem]">
           <Reveal>
             <p className="mb-[clamp(1rem,2.4vh,1.75rem)] text-rule uppercase text-thread">
               {STORE.area}&nbsp;·&nbsp;{STORE.city}&nbsp;·&nbsp;Sizes&nbsp;S–XXXL
