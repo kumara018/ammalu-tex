@@ -264,6 +264,12 @@ RESOLVED — the two shops now have SEPARATE Delhivery accounts, with
 distinct pickup names registered ("AMMALU TEX B2C" here, "Vijey Textile"
 on the sister shop). Verified against both live environments.
 
+This shop's Delhivery AND Razorpay accounts are both registered under
+ammalutexpartywear@gmail.com — the same address the site publishes as its
+contact. Worth writing down: it is the address to sign in with when a
+courier or a payment needs checking, and the sister shop's accounts are a
+different login entirely.
+
 This warning is kept because the failure it describes is worth knowing:
 the shops once shared one account, and DELHIVERY_PICKUP_NAME defaults to
 "Primary" when unset — the same default the other shop would use — so a
