@@ -343,30 +343,30 @@ _HEADER_HTML = f"""\
               <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                 <tr>
                   <!--
-                    THE MARK, AS A BITMAP, AND WHY IT IS NOT THE SVG.
+                    THE SHOP'S OWN ARTWORK, AS SUPPLIED.
 
-                    This was a Georgia "A" — a stand-in, because the site's mark
-                    is an SVG and Outlook renders mail through Word, which will
-                    not draw one. The shop now has a real mark (a plain weave;
-                    see components/Logo.tsx) so the stand-in goes.
+                    This slot has held three stand-ins: a Georgia "A", then a
+                    rasterised weave drawn on the shop's behalf. Both existed
+                    only because there was no real mark. There is one now — a
+                    carved botanical sprig — so it is placed rather than drawn.
 
-                    Rasterised from the same coordinates as the component rather
-                    than screenshotted from it, at 120px for a 60px slot so it
-                    stays sharp on a retina screen, and served from the shop's
-                    own domain the way the sister shop serves its mark. Solid
-                    ground rather than a transparent one: a PNG with alpha is
-                    fine in most clients and grey-boxed in a few old ones, and
-                    the ground is the brand colour anyway.
+                    The brown ground is part of the photograph, not a layer
+                    behind it, so the mark rides its own tile. That is also how
+                    the sister shop's masthead works, and it suits mail better
+                    than a cut-out would: a transparent PNG is grey-boxed by a
+                    few old clients, and a tile never is.
 
-                    `border:0` and `display:block` are not decoration — without
-                    them Outlook draws a blue link border around the image and
-                    Gmail leaves a gap under it.
+                    Served from the shop's own domain, so there is no
+                    third-party host to keep in sync. `border:0` and
+                    `display:block` stop Outlook drawing a blue link border and
+                    Gmail leaving a gap underneath — both are the usual
+                    email-image faults rather than decoration.
                   -->
                   <td valign="middle" style="padding-right:12px;">
                     <img src="{STORE_URL}/logo-mail.png" width="46" height="46"
                          alt="{STORE_NAME}"
                          style="display:block;border:0;outline:none;text-decoration:none;
-                                width:46px;height:46px;">
+                                width:46px;height:46px;border-radius:3px;">
                   </td>
                   <td valign="middle" style="text-align:left;">
                     <p style="margin:0;padding:0;font-family:Georgia,'Times New Roman',Times,serif;font-size:24px;
