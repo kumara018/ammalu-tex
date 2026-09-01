@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { STORE } from '@/lib/config';
 
 /**
  * The maker's mark.
@@ -19,15 +20,22 @@ import Image from 'next/image';
  * conversion to paths, and tracing it would be exactly the redrawing the owner
  * asked not to have. So the file is placed as it is.
  *
- * WHY THE GROUND COMES WITH IT. The brown is part of the photograph, not a
- * layer behind it. Cutting the leaves out at 171px would leave ragged edges and
- * would mean altering the supplied file. So the mark sits on its own brown
- * tile — which is also how the sister shop works, where a photographed mark
- * rides a cerise tile. It is a badge, deliberately, rather than a silhouette.
+ * WHY THE GROUND IS GONE. It shipped once as a brown tile, because the brown is
+ * part of the photograph rather than a layer behind it. On the cream header
+ * that read as a badge stuck beside the name, which is not what the artwork is,
+ * so the ground was keyed out on luminance: the leaves sit around 110–160 and
+ * the ground around 60, which is a wide enough gap to separate cleanly with a
+ * soft ramp for the edges.
  *
- * `size` is the rendered edge in pixels. The square file is used so the tile is
- * square wherever it lands; the padding on it is the artwork's own edge rows
- * replicated, so the gradient runs to the border without a seam.
+ * WHY IT IS TERRACOTTA RATHER THAN THE ARTWORK'S OWN TAN. The tan measures
+ * 2.5:1 against the shop's paper — under the 3:1 WCAG asks of a graphical
+ * object, so on the header it would be a pale smudge. thread-deep gives 4.2:1
+ * on paper and still 3.2:1 on the dark counter, so one file serves both grounds
+ * and the shape is exactly the shape that was supplied.
+ *
+ * `size` is the rendered edge in pixels. The file is cropped square to the ink
+ * with a tenth of its width as margin, so the mark fills its box at every size
+ * instead of floating in the middle of one.
  *
  * ONE PLACE, EVERY SURFACE. The header, the account menu, the invoice and the
  * auth pages all render this component, so replacing the artwork later means
@@ -36,7 +44,7 @@ import Image from 'next/image';
 export function LogoMark({ className = '', size = 32 }: { className?: string; size?: number }) {
   return (
     <Image
-      src="/logo-square.png"
+      src="/logo-mark.png"
       alt=""
       width={size}
       height={size}
@@ -53,34 +61,49 @@ export function LogoMark({ className = '', size = 32 }: { className?: string; si
        * upscaling a small photograph twenty-two times over: slower, no sharper,
        * and a billed image optimisation for every size it lands on.
        *
-       * `unoptimized` skips the optimiser entirely. The file is 32KB and never
+       * `unoptimized` skips the optimiser entirely. The file is 2KB and never
        * displayed above 46px, so there is nothing for a transform to win: the
        * source is already smaller than any rendition of it would be. It also
        * means the mark is byte-identical everywhere it appears, which is the
        * whole point of using the supplied artwork rather than a redrawing.
        */
       unoptimized
-      className={`rounded-[3px] object-cover ${className}`}
+      className={`object-contain ${className}`}
       style={{ width: size, height: size }}
     />
   );
 }
 
 /**
- * The lockup: the mark and the name, and nothing else.
+ * The lockup: the mark, the name, and the line the shop signs itself with.
  *
- * A location line was set under the name for one pass — the thing sewn into a
- * garment, saying who made it and where. It read as a caption, and a name that
- * needs a caption to feel like a name is not yet a name. The address belongs
- * in the footer, where somebody looking for the shop will go.
+ * A LOCATION line was set here once — the thing sewn into a garment, saying who
+ * made it and where. It read as a caption, and a name needing a caption to feel
+ * like a name is not yet a name; the address belongs in the footer, where
+ * somebody looking for the shop will go.
+ *
+ * A TAGLINE is a different object. "Timeless fabrics. Thoughtful choices." is
+ * not explaining the name, it is the shop's own sentence, and it is what the
+ * owner's own artwork sets beneath it. So it stays.
  */
 export default function Logo({ className = '' }: { className?: string }) {
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <LogoMark className="flex-shrink-0" size={34} />
-      <p className="hidden font-display text-[1.4rem] leading-none tracking-tight text-graphite sm:block">
-        Ammalu Tex
-      </p>
+      <LogoMark className="flex-shrink-0" size={38} />
+      {/* Name and line set as one block, so the mark reads as sitting beside a
+          signature rather than beside a stack of two unrelated things. Hidden
+          together below `sm`, where the mark alone is the identity. */}
+      <div className="hidden sm:block">
+        <p className="font-display text-[1.4rem] leading-none tracking-tight text-graphite">
+          {STORE.name}
+        </p>
+        {/* The tagline the shop signs itself with. Set at rule size in the
+            accent, which is where terracotta belongs — carrying a short line of
+            small caps, not a paragraph. */}
+        <p className="mt-1 text-[0.58rem] uppercase tracking-[0.19em] text-thread-deep">
+          {STORE.tagline}
+        </p>
+      </div>
     </div>
   );
 }

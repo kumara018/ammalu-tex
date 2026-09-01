@@ -73,9 +73,9 @@ export const metadata: Metadata = {
     google: 'vdZpTkr1hRH3z7cLVbtyzehOWAEgqlJQLkwY14gEhUg',
   },
   icons: {
-    icon: [{ url: '/logo-square.png', type: 'image/png' }],
-    shortcut: '/logo-square.png',
-    apple: '/logo-square.png',
+    icon: [{ url: '/logo-mark.png', type: 'image/png' }],
+    shortcut: '/logo-mark.png',
+    apple: '/logo-mark.png',
   },
 };
 
@@ -83,9 +83,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <head>
-        <link rel="icon" type="image/png" href="/logo-square.png?v=4" />
-        <link rel="shortcut icon" href="/logo-square.png?v=4" />
-        <link rel="apple-touch-icon" href="/logo-square.png?v=4" />
+        <link rel="icon" type="image/png" href="/logo-mark.png?v=5" />
+        <link rel="shortcut icon" href="/logo-mark.png?v=5" />
+        <link rel="apple-touch-icon" href="/logo-mark.png?v=5" />
       </head>
       <body className="bg-paper text-graphite min-h-screen flex flex-col font-sans antialiased">
         {/* Notices what the React boundaries cannot: throws outside render —

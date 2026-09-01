@@ -4,7 +4,7 @@
 
 export const STORE = {
   name:        'Ammalu Tex',
-  tagline:     'Premium Women\'s Textiles',
+  tagline:     'Timeless fabrics. Thoughtful choices.',
 
   // ── Contact Details ──────────────────────────────
   phone1:      '+91 99941 68839',

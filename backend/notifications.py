@@ -366,7 +366,7 @@ _HEADER_HTML = f"""\
                     <img src="{STORE_URL}/logo-mail.png" width="46" height="46"
                          alt="{STORE_NAME}"
                          style="display:block;border:0;outline:none;text-decoration:none;
-                                width:46px;height:46px;border-radius:3px;">
+                                width:46px;height:46px;">
                   </td>
                   <td valign="middle" style="text-align:left;">
                     <p style="margin:0;padding:0;font-family:Georgia,'Times New Roman',Times,serif;font-size:24px;
