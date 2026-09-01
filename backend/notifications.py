@@ -434,14 +434,28 @@ def _wrap(body: str) -> str:
           </tr>
 
           <!-- The counter, at the end of the letter as it is at the end of the
-               site. Dark, so the message has a floor. -->
+               site. Dark, so the message has a floor.
+
+               NO `opacity` HERE, AND THAT IS NOT A STYLE PREFERENCE. Outlook
+               renders through Word and ignores it outright, so the same message
+               arrived washed-out in Gmail and full-strength in Outlook — the
+               hierarchy existed for some readers and not others. Worse, the
+               copyright at 0.4 computed to 3.56:1 against this ground, under the
+               4.5:1 it needs. Both lines now carry an explicit token: the paper
+               edge for the address at 11.0:1, the accent for the copyright at
+               5.4:1. Same hierarchy, every client.
+
+               The shop name stays in the accent, and can: terracotta measures
+               5.4:1 on this ground. The sister shop had to give its name up to
+               warm white, because cerise manages only 2.1:1 here — the same
+               design decision, decided differently by the two palettes. -->
           <tr>
             <td style="padding:26px 36px;background:#2C1D18;">
               <p style="margin:0 0 10px;font-family:Helvetica,Arial,sans-serif;
                         font-size:11px;letter-spacing:2px;text-transform:uppercase;
                         color:#C1876F;">{STORE_NAME}</p>
               <p style="margin:0 0 14px;font-family:Helvetica,Arial,sans-serif;
-                        font-size:13px;line-height:1.6;color:#FAF6F3;opacity:0.72;">
+                        font-size:13px;line-height:1.6;color:#E1D2C9;">
                 {STORE_ADDR}
               </p>
               <p style="margin:0 0 14px;font-family:Helvetica,Arial,sans-serif;font-size:13px;">
@@ -455,7 +469,7 @@ def _wrap(body: str) -> str:
                    border-bottom:1px solid #C1876F;padding-bottom:1px;">Speak to us</a>
               </p>
               <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:11px;
-                        letter-spacing:1px;text-transform:uppercase;color:#FAF6F3;opacity:0.4;">
+                        letter-spacing:1px;text-transform:uppercase;color:#C1876F;">
                 &copy; {YEAR} {STORE_NAME}
               </p>
             </td>
