@@ -182,21 +182,6 @@ body {
 ::-webkit-scrollbar-thumb { background: #b3735f; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #6c463b; }
 
-/* ── The maker's stamp ─────────────────────────────────────────────────────
-   The stitch travels when the mark is hovered — one dash period (4 + 5 = 9
-   user units) over 900ms, so the thread appears to be drawn through the
-   cloth rather than to spin. Animating `stroke-dashoffset` on an SVG stroke
-   is a paint-only change on one small element; it never touches layout.
-
-   Held to the group's hover so the whole lockup is the target, not the 34px
-   glyph, and stopped entirely for anyone who asked for less motion. */
-.logo-stitch {
-  transition: stroke-dashoffset 900ms cubic-bezier(0.22, 0.61, 0.24, 1);
-}
-.group:hover .logo-stitch,
-.logo-mark:hover .logo-stitch {
-  stroke-dashoffset: -9;
-}
 /* ── Decorative loading motion, stopped once rather than per-component ──
    The keyboard gate found twelve pulsing skeletons still animating on
    /products under `prefers-reduced-motion: reduce`, and there are eighteen
@@ -215,12 +200,6 @@ body {
   .animate-ping {
     animation: none !important;
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .logo-stitch { transition: none; }
-  .group:hover .logo-stitch,
-  .logo-mark:hover .logo-stitch { stroke-dashoffset: 0; }
 }
 
 /* ── The drifting panels (components/home/PaperDrift.tsx) ──────────────────

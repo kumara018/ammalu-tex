@@ -16,20 +16,39 @@
  *     yet — which is exactly why it read as generic brand text rather than as
  *     this shop's own mark.
  *
- * WHAT IT IS NOW. A stitched stamp. The A is set in Instrument Serif, the same
- * high-contrast face the shop signs its headlines with, so the mark and the
- * name are visibly the same hand. Around it runs a **running stitch** — a
- * dashed oval whose dash and gap are the proportions of a real hand stitch,
- * drawn with a round cap so each dash is a thread end rather than a tick.
+ * The pass after that made it a stitched stamp — the A in Instrument Serif
+ * inside a dashed oval. Better, and it still had the flaw underneath: a letter.
+ * The owner, shown five alternatives, ruled out every one that contained one.
  *
- * The stitch is the whole idea: it is the one mark a tailoring workroom would
- * actually make, no storefront template ships it, and it is four attributes of
- * SVG rather than an asset. On hover the stitch travels — `stroke-dashoffset`
- * animating by exactly one dash period, so it reads as thread being pulled
- * through rather than as a spinner.
+ * WHAT IT IS NOW. A plain weave. Three weft threads crossed by three warp
+ * threads, alternating over and under exactly as woven cloth does.
  *
- * The A is still an A: swapping in a real logo file later means replacing this
- * one component, and nothing else on the site knows the difference.
+ * THE GAPS ARE THE MARK, and they are worth explaining because they look like
+ * a drawing error if you do not know what they are for.
+ *
+ * The first attempt drew the weft whole, the warp whole on top, and then
+ * redrew short weft segments over the crossings that should pass over. That
+ * does nothing: every stroke is `currentColor`, so painting the same colour on
+ * itself is invisible. Rendered at five sizes it was a hash — a grid, a
+ * spreadsheet, a window — and no amount of intent made it read as cloth.
+ *
+ * Interlacing is only visible when the thread underneath is INTERRUPTED. So
+ * each line breaks where another crosses over it, and the breaks alternate, so
+ * every one of the nine crossings has exactly one thread over and one under.
+ * That is a plain weave, and it is the difference between a symbol of textiles
+ * and the structure of the thing itself.
+ *
+ * WHY IT BEAT THE OTHER FOUR. It is the only one that survives every place a
+ * logo has to go: 16px in a browser tab, embroidered on a label, stamped on a
+ * bag, printed one-colour on an invoice. The kolam softened at favicon size,
+ * the bolt and the drape lost their curves, and the stitch — the closest
+ * runner-up — needs a dash pattern that thickens into a solid ring when the
+ * stroke gets heavy enough to read small.
+ *
+ * Six strokes, no letterform, no asset, and `currentColor` throughout so it
+ * inherits whatever it is set on. The header, the account menu, the invoice
+ * and the auth pages all read from this one component, so the mark is the same
+ * shape everywhere rather than four approximations of one drawing.
  */
 export function LogoMark({ className = '', size = 32 }: { className?: string; size?: number }) {
   return (
@@ -41,31 +60,19 @@ export function LogoMark({ className = '', size = 32 }: { className?: string; si
       className={`logo-mark ${className}`}
       aria-hidden="true"
     >
-      {/* The oval sits slightly off square, the way a stamp lands by hand. */}
-      <g transform="rotate(-6 30 30)">
-        <ellipse
-          className="logo-stitch"
-          cx="30" cy="30" rx="22.5" ry="26.5"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          // 4 on, 5 off: a stitch slightly shorter than its gap, which is what
-          // hand running-stitch actually looks like. A machine stitch has no
-          // gap at all, and that is the difference being drawn here.
-          strokeDasharray="4 5"
-        />
+      <g stroke="currentColor" strokeWidth="3.2" strokeLinecap="round">
+        {/* Weft — carried across. Each line breaks where a warp thread
+            crosses over it: y=20 and y=40 pass under at x=20 and x=40, y=30
+            passes under at x=30. */}
+        <path d="M15 20 H17.4 M22.6 20 H37.4 M42.6 20 H45" />
+        <path d="M15 30 H27.4 M32.6 30 H45" />
+        <path d="M15 40 H17.4 M22.6 40 H37.4 M42.6 40 H45" />
+        {/* Warp — held on the loom. Breaks are the mirror of the weft's, so
+            every crossing has exactly one thread over and one under. */}
+        <path d="M20 15 V27.4 M20 32.6 V45" />
+        <path d="M30 15 V17.4 M30 22.6 V37.4 M30 42.6 V45" />
+        <path d="M40 15 V27.4 M40 32.6 V45" />
       </g>
-      <text
-        x="30" y="32"
-        fontFamily="var(--font-display), Georgia, 'Times New Roman', serif"
-        fontWeight="400"
-        fontSize="34"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="currentColor"
-      >
-        A
-      </text>
     </svg>
   );
 }
