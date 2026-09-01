@@ -343,23 +343,30 @@ _HEADER_HTML = f"""\
               <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                 <tr>
                   <!--
-                    THE MARK IS A LETTER, NOT A BOX.
+                    THE MARK, AS A BITMAP, AND WHY IT IS NOT THE SVG.
 
-                    This was a 42px cell with a 1px border around a 21px "A",
-                    which read as a placeholder icon sitting next to the name
-                    rather than as part of it — a square where a logo has not
-                    arrived yet. The border is gone and the A is set in the
-                    wordmark's own face at the wordmark's own size, so the two
-                    read as one line of type.
+                    This was a Georgia "A" — a stand-in, because the site's mark
+                    is an SVG and Outlook renders mail through Word, which will
+                    not draw one. The shop now has a real mark (a plain weave;
+                    see components/Logo.tsx) so the stand-in goes.
 
-                    Deliberately a letterform rather than the site's stitched
-                    stamp: that mark is an SVG, and mail clients strip SVG.
-                    A real logo file replaces this later.
+                    Rasterised from the same coordinates as the component rather
+                    than screenshotted from it, at 120px for a 60px slot so it
+                    stays sharp on a retina screen, and served from the shop's
+                    own domain the way the sister shop serves its mark. Solid
+                    ground rather than a transparent one: a PNG with alpha is
+                    fine in most clients and grey-boxed in a few old ones, and
+                    the ground is the brand colour anyway.
+
+                    `border:0` and `display:block` are not decoration — without
+                    them Outlook draws a blue link border around the image and
+                    Gmail leaves a gap under it.
                   -->
                   <td valign="middle" style="padding-right:12px;">
-                    <p style="margin:0;padding:0;font-family:Georgia,'Times New Roman',Times,serif;
-                              font-size:26px;color:#C1876F;line-height:1.1;
-                              mso-line-height-rule:exactly;">A</p>
+                    <img src="{STORE_URL}/logo-mail.png" width="46" height="46"
+                         alt="{STORE_NAME}"
+                         style="display:block;border:0;outline:none;text-decoration:none;
+                                width:46px;height:46px;">
                   </td>
                   <td valign="middle" style="text-align:left;">
                     <p style="margin:0;padding:0;font-family:Georgia,'Times New Roman',Times,serif;font-size:24px;
