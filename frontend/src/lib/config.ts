@@ -15,6 +15,13 @@ export const STORE = {
      and put every order confirmation in a spam folder. This is where customers
      write TO, and it is the address the shop actually reads. */
   email:       'ammalutexpartywear@gmail.com',
+  /* SECOND, AND DELIBERATELY SECOND. This is SMTP_EMAIL — the identity Brevo's
+     domain authentication signs, so it has to keep existing whatever else
+     changes. It is listed because it is real and a customer may already have
+     it; it is not listed first because `email` is what the footer and the
+     invoice print, and that should be the mailbox the shop actually reads.
+     Mirrors the sister shop, which lists its domain address the same way. */
+  email2:      'admin@ammalutex.com',
   supportEmail:'ammalutexpartywear@gmail.com',
   whatsapp:    '919994168839',   // country code + number, no + or spaces
 
