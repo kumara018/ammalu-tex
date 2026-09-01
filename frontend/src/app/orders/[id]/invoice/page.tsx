@@ -137,10 +137,19 @@ function InvoiceContent() {
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <div className="flex items-center gap-3">
-                <LogoMark size={40} className="flex-shrink-0 text-graphite" />
-                <p className="font-display text-[1.5rem] leading-none text-graphite">
-                  {STORE.name}
-                </p>
+                <LogoMark size={40} className="flex-shrink-0" />
+                <div>
+                  <p className="font-display text-[1.5rem] leading-none text-graphite">
+                    {STORE.name}
+                  </p>
+                  {/* The shop's own line, on the document a customer keeps.
+                      thread-deep rather than thread: this is 9px small caps,
+                      and the lighter accent measures 2.5:1 on paper — which is
+                      exactly the size and weight where that fails. */}
+                  <p className="mt-1.5 text-[9px] uppercase leading-none tracking-[0.18em] text-thread-deep">
+                    {STORE.tagline}
+                  </p>
+                </div>
               </div>
               <div className="mt-4 text-[11px] leading-relaxed text-graphite">
                 <p>{STORE.shopNo}</p>

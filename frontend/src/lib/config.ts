@@ -29,7 +29,7 @@ export const STORE = {
   shippingFee: 49,
 
   // ── Social Media ─────────────────────────────────
-  instagram:   'https://instagram.com/ammalutexpartywears',
+  instagram:   'https://www.instagram.com/ammalutexpartywears',
 
   // ── Google Maps ───────────────────────────────────
   /* THE SHOP ITSELF, BY ITS GOOGLE PLACE ID — not a text search.

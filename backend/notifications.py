@@ -21,6 +21,9 @@ from datetime import datetime, timedelta
 SMTP_EMAIL    = os.getenv("SMTP_EMAIL", "")
 SMTP_PASS     = os.getenv("SMTP_PASSWORD", "")
 STORE_NAME    = "Ammalu Tex"
+# Kept beside the name so the mail and the messages cannot drift from the site.
+# Mirrors STORE.tagline in the frontend's lib/config.ts.
+STORE_TAGLINE = "Timeless fabrics. Thoughtful choices."
 STORE_URL     = os.getenv("FRONTEND_URL", "https://ammalu-tex.vercel.app")
 SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "admin@ammalutex.com")
 STORE_ADDR    = "Shop Ground Floor No 129, Texvalley Gangapuram"
@@ -372,6 +375,15 @@ _HEADER_HTML = f"""\
                     <p style="margin:0;padding:0;font-family:Georgia,'Times New Roman',Times,serif;font-size:24px;
                               color:#332722;line-height:1.1;
                               mso-line-height-rule:exactly;">{STORE_NAME}</p>
+                    <!-- The shop's own line, at rule size in the accent. The
+                         same sentence the header carries, so a customer meets
+                         one identity rather than two. thread-deep, not thread:
+                         #C1876F on this sheet is 2.5:1 and this is small caps
+                         at 10px, which is exactly where that fails. -->
+                    <p style="margin:4px 0 0;padding:0;font-family:Helvetica,Arial,sans-serif;
+                              font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
+                              color:#A4664D;line-height:1.3;
+                              mso-line-height-rule:exactly;">{STORE_TAGLINE}</p>
                   </td>
                 </tr>
               </table>
@@ -1423,7 +1435,11 @@ def _send_sms(to_phone: str, message: str):
 
 def _send_whatsapp(to_phone: str, message: str):
     """Send WhatsApp message via Twilio. Runs in a daemon thread."""
-    _brand = f"\n\n━━━━━━━━━━━━━━━\n👑 *Ammalu Tex* — Premium Women's Textiles\n🌐 {STORE_URL}"
+    # The crown was from the shop's gold era and the tagline was the old one,
+    # both written in by hand here and nowhere else. Reads from the constants
+    # now, so the message signs off the way the site does.
+    _brand = f"\n\n━━━━━━━━━━━━━━━\n*{STORE_NAME}*\n{STORE_TAGLINE}\n🌐 {STORE_URL}"
+
     def _do():
         to = "whatsapp:" + _normalize_phone(to_phone)
         client, _, wa_from = _twilio_client()

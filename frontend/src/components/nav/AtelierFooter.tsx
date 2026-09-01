@@ -95,6 +95,16 @@ function Chat() {
   );
 }
 
+function Instagram() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
+      <rect x="3" y="3" width="14" height="14" rx="4.2" stroke="currentColor" strokeWidth="1.3" />
+      <circle cx="10" cy="10" r="3.4" stroke="currentColor" strokeWidth="1.3" />
+      <circle cx="14.1" cy="5.9" r="0.95" fill="currentColor" />
+    </svg>
+  );
+}
+
 function Shop() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className={fico}>
@@ -320,6 +330,24 @@ export default function AtelierFooter() {
                 className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
               >
                 WhatsApp
+              </a>
+            </li>
+            {/* THE SHOP'S INSTAGRAM, WHICH WAS NOWHERE ON THE SITE.
+                It has been in `lib/config.ts` all along and rendered only by
+                components/Footer.tsx — a footer this layout does not mount. So
+                the one place customers actually look for a textile shop's
+                photographs led nowhere, and the link existed in the codebase
+                the entire time. It belongs beside WhatsApp: both are places to
+                reach the shop rather than facts about it. */}
+            <li className="flex gap-2.5">
+              <Instagram />
+              <a
+                href={STORE.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-paper/80 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale"
+              >
+                Instagram
               </a>
             </li>
           </ul>
