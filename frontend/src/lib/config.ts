@@ -9,8 +9,13 @@ export const STORE = {
   // ── Contact Details ──────────────────────────────
   phone1:      '+91 99941 68839',
   phone2:      '+91 94439 48272',
-  email:       'admin@ammalutex.com',
-  supportEmail:'admin@ammalutex.com',
+  /* THE SHOP'S CONTACT ADDRESS, WHICH IS NOT THE SENDING ADDRESS.
+     Mail goes OUT as admin@ammalutex.com — that is the mailbox Brevo's domain
+     authentication signs, and swapping it for a Gmail would fail SPF and DKIM
+     and put every order confirmation in a spam folder. This is where customers
+     write TO, and it is the address the shop actually reads. */
+  email:       'ammalutexpartywear@gmail.com',
+  supportEmail:'ammalutexpartywear@gmail.com',
   whatsapp:    '919994168839',   // country code + number, no + or spaces
 
   // ── Address ──────────────────────────────────────
