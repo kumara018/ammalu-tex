@@ -168,7 +168,7 @@ export default function AtelierRail() {
         <Link
           href="/"
           aria-label={`${STORE.name} — home`}
-          className="group order-1 flex shrink-0 items-center gap-3 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+          className="group order-1 flex shrink-0 items-center gap-2 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
           <LogoMark size={32} className="shrink-0 text-thread transition-colors duration-500 group-hover:text-thread-deep" />
           {/* THE NAME, AND THE SHOP'S OWN LINE UNDER IT.

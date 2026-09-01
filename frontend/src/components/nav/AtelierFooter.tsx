@@ -214,7 +214,7 @@ export default function AtelierFooter() {
                at every width rather than tuned to 1440. It is on the LINK so
                the mark and the name rise together and the lock-up stays
                intact. */
-            className="group -mt-[clamp(0.25rem,0.533vw,0.4rem)] inline-flex items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
+            className="group -mt-[clamp(0.25rem,0.533vw,0.4rem)] inline-flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
           >
             <LogoMark
               size={34}
@@ -230,8 +230,18 @@ export default function AtelierFooter() {
                 removes it. Expressed this way rather than as a negative margin
                 because `text-band` is a clamp() that scales with the viewport,
                 so a fixed -4px nudge would only be correct at one width. */}
-            <span className="font-display text-band font-normal leading-none text-paper transition-colors duration-500 group-hover:text-thread-pale">
-              {STORE.name}
+            {/* Name and tagline as one block, so the mark sits beside the
+                signature rather than beside a name with a line loose under it.
+                The header has carried the tagline since it was added and this
+                did not, which is the sort of gap that only shows when the two
+                are seen together. */}
+            <span className="flex flex-col">
+              <span className="font-display text-band font-normal leading-none text-paper transition-colors duration-500 group-hover:text-thread-pale">
+                {STORE.name}
+              </span>
+              <span className="mt-1.5 text-[0.55rem] uppercase leading-none tracking-[0.19em] text-thread-pale/90">
+                {STORE.tagline}
+              </span>
             </span>
           </Link>
           <address className="mt-5 flex gap-2.5 not-italic text-paper/80">

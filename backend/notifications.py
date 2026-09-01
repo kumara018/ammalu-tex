@@ -365,7 +365,7 @@ _HEADER_HTML = f"""\
                     Gmail leaving a gap underneath — both are the usual
                     email-image faults rather than decoration.
                   -->
-                  <td valign="middle" style="padding-right:12px;">
+                  <td valign="middle" style="padding-right:9px;">
                     <img src="{STORE_URL}/logo-mail.png" width="46" height="46"
                          alt="{STORE_NAME}"
                          style="display:block;border:0;outline:none;text-decoration:none;

@@ -54,8 +54,12 @@ function InvoiceContent() {
 
   const handleWhatsApp = () => {
     const url = encodeURIComponent(`${window.location.origin}/orders/${id}/invoice`);
+    /* Read from config rather than written out here. This line was still
+       "Premium Women's Textiles" — the tagline the shop retired — so an
+       invoice shared over WhatsApp introduced the shop by a name it no longer
+       uses, long after the site had stopped. */
     const msg = encodeURIComponent(
-      `📄 *Invoice — ${order?.order_number}*\nAmmalu Tex · Premium Women's Textiles\nView invoice: ${window.location.origin}/orders/${id}/invoice`
+      `📄 *Invoice — ${order?.order_number}*\n${STORE.name} · ${STORE.tagline}\nView invoice: ${window.location.origin}/orders/${id}/invoice`
     );
     window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
   };
@@ -136,7 +140,7 @@ function InvoiceContent() {
         <div className="border-b border-graphite/25 px-8 pb-7 pt-8">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <LogoMark size={40} className="flex-shrink-0" />
                 <div>
                   <p className="font-display text-[1.5rem] leading-none text-graphite">
