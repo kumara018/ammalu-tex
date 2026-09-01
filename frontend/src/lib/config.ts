@@ -32,7 +32,14 @@ export const STORE = {
   instagram:   'https://instagram.com/ammalutexpartywears',
 
   // ── Google Maps ───────────────────────────────────
-  googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Texvalley+Gangapuram+Erode+Tamil+Nadu',
+  /* THE SHOP ITSELF, BY ITS GOOGLE PLACE ID — not a text search.
+     The previous value searched for "Texvalley Gangapuram Erode Tamil Nadu",
+     which drops the customer on the mall, or on whatever Google decides that
+     phrase means today. A `cid` link resolves to this exact listing, with its
+     reviews, photographs and hours, and cannot drift as the search index
+     changes. 511591655254571759 is 0x71989e66180baef from the place URL.
+     Coordinates 11.3716624, 77.6444374. */
+  googleMapsUrl: 'https://www.google.com/maps?cid=511591655254571759',
 
   // ── SEO / Meta ────────────────────────────────────
   description: 'Shop premium Chudithar, Tops, Lehenga, Crop Tops & Party Wears at Ammalu Tex. Located at Shop Ground Floor No 129, Texvalley Gangapuram.',
