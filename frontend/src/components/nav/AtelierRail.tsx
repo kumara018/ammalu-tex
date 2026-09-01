@@ -168,9 +168,9 @@ export default function AtelierRail() {
         <Link
           href="/"
           aria-label={`${STORE.name} — home`}
-          className="group order-1 flex shrink-0 items-center gap-2 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
+          className="order-1 flex shrink-0 items-center gap-2 self-center text-graphite transition-colors duration-500 hover:text-thread focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread"
         >
-          <LogoMark size={32} className="shrink-0 text-thread transition-colors duration-500 group-hover:text-thread-deep" />
+          <LogoMark size={32} className="shrink-0" />
           {/* THE NAME, AND THE SHOP'S OWN LINE UNDER IT.
               A strapline was tried here once and removed: it was the shop's
               LOCATION, it repeated what the footer already says, and a name
@@ -185,16 +185,19 @@ export default function AtelierRail() {
           {/* A shade smaller on a phone, so the top row has room for the
               actions without the name reaching for the middle of the screen. */}
         <span className="flex flex-col items-start">
-          <span className="relative inline-block font-display text-[1.2rem] leading-none tracking-tight sm:text-[1.45rem]">
+          {/* NO RULE UNDER THE NAME.
+              A thread-coloured line drew itself under the wordmark on hover.
+              It was a nice detail when the name stood alone; with the tagline
+              beneath it the line lands BETWEEN the two and reads as a divider
+              cutting the lockup in half rather than as an underline. The
+              lockup is now a name and its line, and nothing should come
+              between them. The link still has a colour transition and a focus
+              ring, so it is no less obviously a link. */}
+          <span className="font-display text-[1.2rem] leading-none tracking-tight sm:text-[1.45rem]">
             {STORE.name}
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-thread transition-transform duration-[520ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] group-hover:scale-x-100 motion-reduce:transition-none"
-            />
           </span>
-          {/* `mt-2` clears the rule that draws itself under the name on hover;
-              at `mt-1` the two collided. Hidden below `sm` — see the note above. */}
-          <span className="mt-2 hidden text-[0.55rem] uppercase leading-none tracking-[0.19em] text-thread-deep sm:block">
+          {/* `mt-1.5` now the rule is gone — `mt-2` existed to clear it. */}
+          <span className="mt-1.5 hidden text-[0.55rem] uppercase leading-none tracking-[0.19em] text-thread-deep sm:block">
             {STORE.tagline}
           </span>
         </span>
