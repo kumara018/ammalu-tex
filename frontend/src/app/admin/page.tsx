@@ -9,6 +9,7 @@ import {
 import api, { adminAPI, adminReturnsAPI, adminNotifAPI, supportAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { lockPageScroll, unlockPageScroll } from '@/lib/smoothScroll';
 
 const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Crop Tops', 'Party Wears'];
 const ORDER_STATUSES = ['pending','confirmed','processing','shipped','out_for_delivery','delivered','cancelled'];
@@ -722,6 +723,21 @@ function AdminPageInner() {
   const [shipSaving, setShipSaving] = useState(false);
   const [creatingDelhivery, setCreatingDelhivery] = useState<number | null>(null);
   const [syncingDelhivery, setSyncingDelhivery] = useState<number | null>(null);
+
+  /*
+   * A dialog freezes the page behind it.
+   *
+   * Without this the catalogue scrolls underneath the form — which is what
+   * happens when the wheel reaches the end of the form's own scroll area and
+   * chains outwards — and closing the dialog leaves the admin somewhere they
+   * never chose to be. lockPageScroll also stops Lenis, which otherwise keeps
+   * its rAF loop running and writing positions behind the overlay.
+   */
+  useEffect(() => {
+    if (!showForm && !shipModal) return;
+    lockPageScroll();
+    return () => unlockPageScroll();
+  }, [showForm, shipModal]);
 
   useEffect(() => {
     if (authLoading) return;            // wait for localStorage restore
@@ -2331,15 +2347,28 @@ function AdminPageInner() {
         </div>
       )}
 
-      {/* Product Form Modal */}
+      {/*
+        * Product Form Modal — one scroll area, centred on the screen.
+        *
+        * This had `items-start` and TWO nested scrollers: the overlay was
+        * `overflow-y-auto` and so was the field list inside it. That is why
+        * the form opened pinned to the top of the window instead of centred,
+        * and why scrolling it was unpredictable — the wheel had two candidate
+        * containers and (with Lenis swallowing wheel events site-wide) often
+        * reached neither.
+        *
+        * Now the overlay only centres. The panel is a flex column capped at
+        * 90vh, so the title and the Cancel/Save row stay put and exactly one
+        * element scrolls: the fields between them.
+        */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
-          <div className="bg-paper-bright rounded-sm w-full max-w-2xl my-4 border border-paper-edge">
-            <div className="flex items-center justify-between p-6 border-b border-maroon-200">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-paper-bright rounded-sm w-full max-w-2xl border border-paper-edge flex max-h-[90vh] flex-col overflow-hidden">
+            <div className="flex shrink-0 items-center justify-between p-6 border-b border-maroon-200">
               <h2 className="font-normal text-xl text-maroon-900">{editing ? 'Edit Product' : 'Add New Product'}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-paper-shade rounded-sm"><X size={20} /></button>
             </div>
-            <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-4">
               <div>
                 <label className="label">Product Name *</label>
                 <input value={form.name} onChange={F('name')} placeholder="e.g. Kashmiri Floral Chudithar Set" className={`input-field ${formErrors.name ? 'input-error' : ''}`} />
@@ -2597,7 +2626,7 @@ function AdminPageInner() {
                 </div>
               </label>
             </div>
-            <div className="p-6 border-t border-maroon-200 flex gap-3">
+            <div className="shrink-0 p-6 border-t border-maroon-200 flex gap-3">
               <button onClick={() => setShowForm(false)} className="btn-secondary flex-1 py-3">Cancel</button>
               <button onClick={handleSave} disabled={saving} className="btn-primary flex-1 py-3 flex items-center justify-center gap-2">
                 {saving ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Saving...</> : <><CheckCircle size={16} /> {editing ? 'Save Changes' : 'Add Product'}</>}
@@ -2610,7 +2639,7 @@ function AdminPageInner() {
       {/* ── Shipping Details Modal ── */}
       {shipModal && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShipModal(null)}>
-          <div className="bg-paper-bright rounded-sm border border-paper-edge max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-paper-bright rounded-sm border border-paper-edge max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto overscroll-contain" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="font-normal text-graphite text-lg">📦 Ship Order Details</h3>

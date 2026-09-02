@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { detectCapabilities } from './core/capabilities';
 import { useSceneStore, sceneForPath } from '@/store/useSceneStore';
+import { registerScroller, scrollPageTo, shouldPreventSmoothing } from '@/lib/smoothScroll';
 
 /**
  * The canvas is client-only: R3F touches window/document at import time, and
@@ -117,7 +118,14 @@ export default function ThreeProvider() {
 
       gsap.registerPlugin(ScrollTrigger);
 
-      lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+      // `prevent` is what lets a scrollable panel inside the page keep its own
+      // wheel events — without it Lenis calls preventDefault() on every wheel
+      // anywhere, and a dialog can only be scrolled by dragging its scrollbar.
+      lenis = new Lenis({ duration: 1.05, smoothWheel: true, prevent: shouldPreventSmoothing });
+
+      // Published so that anything needing to move the page can go through
+      // Lenis rather than fighting it with window.scrollTo.
+      registerScroller(lenis);
 
       // ScrollTrigger must be told about Lenis's virtual scroll position, and
       // Lenis must be driven by GSAP's ticker rather than its own rAF — two
@@ -140,6 +148,7 @@ export default function ThreeProvider() {
       cleanup = () => {
         window.removeEventListener('scroll', onScroll);
         gsap.ticker.remove(tick);
+        registerScroller(null);
         lenis?.destroy();
         lenis = null;
       };
@@ -148,10 +157,15 @@ export default function ThreeProvider() {
     return () => { cancelled = true; cleanup(); };
   }, [capabilities]);
 
-  // Route changes must reset scroll position — Lenis holds its own virtual
-  // offset that survives navigation otherwise, landing users mid-page.
+  // Route changes reset the scroll position — Lenis keeps its own virtual
+  // offset, which otherwise survives a navigation and lands you mid-page.
+  //
+  // scrollPageTo, not window.scrollTo({behavior:'smooth'}): a native SMOOTH
+  // scroll does not move the page at all while Lenis is running, because Lenis
+  // overwrites the position every frame for the whole animation. See the note
+  // in lib/smoothScroll.ts — it was measured, not assumed.
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollPageTo(0);
     useSceneStore.getState().setScroll(0);
   }, [pathname]);
 

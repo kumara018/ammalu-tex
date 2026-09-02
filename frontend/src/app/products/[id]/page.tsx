@@ -259,7 +259,7 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
               }`}
             >
               {s.type === 'image' ? (
-                <img src={s.src} alt="" className="h-full w-full object-cover" />
+                <img src={s.src} alt="" className="h-full w-full object-contain" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center bg-graphite">
                   <span aria-hidden="true" className="block h-0 w-0 border-y-[5px] border-l-[8px] border-y-transparent border-l-thread-pale" />
@@ -281,7 +281,21 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
           current.type === 'image' ? 'cursor-zoom-in' : ''
         }`}
         style={{
-          aspectRatio: current.type === 'video' ? (isPortraitVideo ? '9/16' : '16/9') : '1/1',
+          /*
+           * THE FRAME IS THE SHAPE OF THE PHOTOGRAPHS, NOT A SQUARE.
+           *
+           * This asked for 1/1 and filled it with object-cover, so a garment
+           * shot — every one of them is 600x900, a 2:3 portrait — lost a
+           * third of its height off the top and bottom. On a clothes shop
+           * that is the model's head and the hem of the very thing being
+           * sold. The shelf card next door has always been portrait, which is
+           * why the same piece looked whole on the homepage and cut short on
+           * its own page.
+           *
+           * 2/3 is the photographs' own ratio, so they fill the frame exactly:
+           * nothing cropped, and no empty bars either.
+           */
+          aspectRatio: current.type === 'video' ? (isPortraitVideo ? '9/16' : '16/9') : '2/3',
           maxWidth: isPortraitVideo ? '420px' : undefined,
         }}
         onTouchStart={onTouchStart}
@@ -300,7 +314,10 @@ function ProductCarousel({ images, videoUrl, videoOrientation, name, category, s
             alt={`${name} — view ${active + 1} of ${slides.length}`}
             draggable={false}
             style={{ transformOrigin: origin, transform: zoom && !reduced ? 'scale(2)' : 'scale(1)' }}
-            className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] motion-reduce:transition-none"
+            /* contain, not cover: the frame matches the photographs, but a
+               piece shot at some other ratio must still arrive whole rather
+               than be trimmed to fit. */
+            className="h-full w-full object-contain transition-transform duration-[600ms] ease-[cubic-bezier(0.22,0.61,0.24,1)] motion-reduce:transition-none"
           />
         ) : (
           <VideoSlide url={current.src} />

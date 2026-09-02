@@ -214,11 +214,26 @@ export default function AtelierFooter() {
                at every width rather than tuned to 1440. It is on the LINK so
                the mark and the name rise together and the lock-up stays
                intact. */
-            className="group -mt-[clamp(0.25rem,0.533vw,0.4rem)] inline-flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
+            className="group -mt-[clamp(0.25rem,0.533vw,0.4rem)] inline-block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-thread-pale"
           >
+            {/* THE MARK BELONGS TO THE NAME, NOT TO THE NAME PLUS THE TAGLINE.
+                The lock-up was one `items-center` row holding the mark beside a
+                two-line block, so the mark centred on the BLOCK — which put it
+                level with the gap between the name and the tagline, reading as
+                a stamp sitting low against its own wordmark.
+                It now centres on the wordmark alone. `mt-1` is the last 4px of
+                that: `items-center` centres the mark on the line BOX, and this
+                face puts its cap-top 10px below the top of a 38.4px box, so
+                the ink's centre is about 4px lower than the box's.
+                `-mt-0.5` then lifts it 6px above that geometric answer, which
+                is a judgement rather than a measurement: the sprig carries its
+                weight low and reads as sitting under the wordmark when its box
+                is centred on it. Optical centring, and the owner's eye on the
+                rendered lock-up, is the only authority for this number. */}
+            <span className="flex items-center gap-2">
             <LogoMark
               size={34}
-              className="shrink-0 text-thread-pale transition-colors duration-500 group-hover:text-paper"
+              className="-mt-0.5 shrink-0 text-thread-pale transition-colors duration-500 group-hover:text-paper"
             />
             {/* `leading-none` is doing alignment work, not typography.
                 Measured against the three column headings beside it: their
@@ -235,13 +250,25 @@ export default function AtelierFooter() {
                 The header has carried the tagline since it was added and this
                 did not, which is the sort of gap that only shows when the two
                 are seen together. */}
-            <span className="flex flex-col items-start">
               <span className="font-display text-band font-normal leading-none text-paper transition-colors duration-500 group-hover:text-thread-pale">
                 {STORE.name}
               </span>
-              <span className="mt-1.5 text-[0.55rem] uppercase leading-none tracking-[0.19em] text-thread-pale/90">
-                {STORE.tagline}
-              </span>
+            </span>
+            {/* ONE LINE, AND ENOUGH ROOM TO STAY THAT WAY.
+                This broke into "TIMELESS FABRICS. THOUGHTFUL / CHOICES." on the
+                owner's screen while measuring clean on mine, which is the
+                signature of a line that only just fits: at 1440 it renders 242px
+                into 261px of column, 19px of slack. Any wider face — a font that
+                has not loaded yet, another platform's rendering of the fallback —
+                spends that and wraps.
+                So it is held on one line explicitly, and the tracking is eased
+                from 0.19em to 0.13em to pay for it: about 222px now, 39px of
+                slack, and still unmistakably letterspaced. The size is untouched,
+                so it still matches the masthead's tagline exactly.
+                The indent keeps it under the wordmark rather than under the mark,
+                which is how the masthead sets the same two lines. */}
+            <span className="mt-1.5 block whitespace-nowrap pl-[2.625rem] text-[0.55rem] uppercase leading-none tracking-[0.13em] text-thread-pale/90">
+              {STORE.tagline}
             </span>
           </Link>
           <address className="mt-5 flex gap-2.5 not-italic text-paper/80">
