@@ -2348,27 +2348,38 @@ function AdminPageInner() {
       )}
 
       {/*
-        * Product Form Modal — one scroll area, centred on the screen.
+        * Product Form Modal — one scroll area, and it is the OVERLAY.
         *
-        * This had `items-start` and TWO nested scrollers: the overlay was
-        * `overflow-y-auto` and so was the field list inside it. That is why
-        * the form opened pinned to the top of the window instead of centred,
-        * and why scrolling it was unpredictable — the wheel had two candidate
-        * containers and (with Lenis swallowing wheel events site-wide) often
-        * reached neither.
+        * Three versions of this, and the last two were each half right.
         *
-        * Now the overlay only centres. The panel is a flex column capped at
-        * 90vh, so the title and the Cancel/Save row stay put and exactly one
-        * element scrolls: the fields between them.
+        * It began with `items-start` and TWO nested scrollers, so it opened
+        * pinned to the top and the wheel had two candidate containers. Then it
+        * became a flex column capped at 90vh with the fields scrolling inside
+        * it — centred, one scroller, correct on a normal screen and wrong on a
+        * short one. On a laptop at browser zoom, 90vh leaves a field area only
+        * a couple of rows tall, the page behind is frozen so there is no
+        * scrollbar to fall back on, and the form is simply hard to finish.
+        * That is what "there is no website scroll to move" was describing.
+        *
+        * So the scroll moves out to the overlay. The panel takes its natural
+        * height and the `min-h-full` wrapper centres it while it fits; when it
+        * does not, the overlay scrolls and everything — title, fields, Save —
+        * is reachable. The wrapper is what makes that safe: `items-center` on
+        * a scroll container alone clips the top of anything taller than it,
+        * and the top becomes unreachable.
+        *
+        * Still exactly one scroll container, which was the point of the last
+        * version and is preserved here.
         */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-paper-bright rounded-sm w-full max-w-2xl border border-paper-edge flex max-h-[90vh] flex-col overflow-hidden">
-            <div className="flex shrink-0 items-center justify-between p-6 border-b border-maroon-200">
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/50">
+          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="bg-paper-bright rounded-sm w-full max-w-2xl border border-paper-edge">
+            <div className="flex items-center justify-between p-6 border-b border-maroon-200">
               <h2 className="font-normal text-xl text-maroon-900">{editing ? 'Edit Product' : 'Add New Product'}</h2>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-paper-shade rounded-sm"><X size={20} /></button>
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-4">
+            <div className="p-6 space-y-4">
               <div>
                 <label className="label">Product Name *</label>
                 <input value={form.name} onChange={F('name')} placeholder="e.g. Kashmiri Floral Chudithar Set" className={`input-field ${formErrors.name ? 'input-error' : ''}`} />
@@ -2626,20 +2637,22 @@ function AdminPageInner() {
                 </div>
               </label>
             </div>
-            <div className="shrink-0 p-6 border-t border-maroon-200 flex gap-3">
+            <div className="p-6 border-t border-maroon-200 flex gap-3">
               <button onClick={() => setShowForm(false)} className="btn-secondary flex-1 py-3">Cancel</button>
               <button onClick={handleSave} disabled={saving} className="btn-primary flex-1 py-3 flex items-center justify-center gap-2">
                 {saving ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Saving...</> : <><CheckCircle size={16} /> {editing ? 'Save Changes' : 'Add Product'}</>}
               </button>
             </div>
           </div>
+          </div>
         </div>
       )}
 
       {/* ── Shipping Details Modal ── */}
       {shipModal && (
-        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShipModal(null)}>
-          <div className="bg-paper-bright rounded-sm border border-paper-edge max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto overscroll-contain" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-black/50" onClick={() => setShipModal(null)}>
+          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="bg-paper-bright rounded-sm border border-paper-edge max-w-lg w-full p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="font-normal text-graphite text-lg">📦 Ship Order Details</h3>
@@ -2717,6 +2730,7 @@ function AdminPageInner() {
                 {shipSaving ? <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Saving...</> : '✅ Save & Notify Customer'}
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}
