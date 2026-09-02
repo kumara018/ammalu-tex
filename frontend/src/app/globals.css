@@ -207,9 +207,24 @@ body {
 .star-filled { color: #eab308; }
 .star-empty  { color: #d1d5db; }
 
-::-webkit-scrollbar { width: 6px; }
+/*
+ * A SCROLLBAR YOU CAN ACTUALLY SEE.
+ *
+ * #b3735f on #eeddd8 measured 2.89:1 — visible, but under the 3:1 a graphical
+ * control needs. #A4664D is 3.48:1, and it is already this shop's own colour:
+ * the mark in the masthead is drawn in it.
+ *
+ * 10px rather than 6 because this is a grip as well as an indicator, and 6px
+ * is hard to catch with a pointer.
+ *
+ * `scrollbar-width`/`scrollbar-color` carry the same treatment to Firefox,
+ * which ignores ::-webkit-scrollbar entirely and was showing its default grey
+ * bar. Set on html so it inherits to every nested scroller.
+ */
+html { scrollbar-width: thin; scrollbar-color: #A4664D #eeddd8; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #eeddd8; }
-::-webkit-scrollbar-thumb { background: #b3735f; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #A4664D; border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: #6c463b; }
 
 /* ── Decorative loading motion, stopped once rather than per-component ──
