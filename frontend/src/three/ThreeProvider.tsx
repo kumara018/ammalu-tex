@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { detectCapabilities } from './core/capabilities';
 import { useSceneStore, sceneForPath } from '@/store/useSceneStore';
-import { registerScroller, scrollPageTo, shouldPreventSmoothing } from '@/lib/smoothScroll';
+import { registerScroller, scrollPageTo, shouldPreventSmoothing, isHistoryNavigation } from '@/lib/smoothScroll';
 
 /**
  * The canvas is client-only: R3F touches window/document at import time, and
@@ -165,7 +165,9 @@ export default function ThreeProvider() {
   // overwrites the position every frame for the whole animation. See the note
   // in lib/smoothScroll.ts — it was measured, not assumed.
   useEffect(() => {
-    scrollPageTo(0);
+    // Back and Forward restore the visitor's place; only a new destination
+    // starts at the top.
+    if (!isHistoryNavigation()) scrollPageTo(0);
     useSceneStore.getState().setScroll(0);
   }, [pathname]);
 
