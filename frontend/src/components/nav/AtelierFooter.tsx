@@ -358,16 +358,6 @@ export default function AtelierFooter() {
                 {STORE.email}
               </a>
             </li>
-            {/* The domain address, second. It is the shop's sending identity
-                and has to keep existing, so a customer who already has it
-                should find it here rather than wonder whether it still works.
-                Its own envelope rather than an indent, because that is what
-                this footer already does — the two phone numbers above each
-                carry their own handset. (The sister shop indents instead; the
-                pattern to follow is the one on the page you are editing.) */}
-            <li className="flex min-w-0 gap-2.5">
-              <Envelope />
-            </li>
             <li className="flex gap-2.5">
               <Chat />
               <a
