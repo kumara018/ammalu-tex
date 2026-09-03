@@ -122,7 +122,13 @@ export default function SupportPage() {
 
       <MeasureRule className="mb-2" />
 
-      <div className="mb-[clamp(3rem,10vh,7rem)]">
+      {/*
+        * id="contact" — the target of the footer's "Speak to us" heading.
+        * scroll-mt-52 clears the sticky header, measured rather than guessed:
+        * it reports 205px tall on this page (the nav row plus the delivery
+        * bar beneath it), and 13rem/208px is the nearest step on the scale.
+        */}
+      <div id="contact" className="mb-[clamp(3rem,10vh,7rem)] scroll-mt-52">
 
         {/* The two lines. One fact, two numbers — and the second one had
             never appeared on this page at all. */}

@@ -369,7 +369,7 @@ function BrowserErrorsTab() {
           switched off.
         </p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <table className="w-full text-sm">
             <caption className="sr-only">Browser errors, most frequent first</caption>
             <thead>
@@ -538,7 +538,7 @@ function CSInteractionsTab() {
 
       {/* Interactions Table */}
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <table className="w-full text-sm">
             <thead className="bg-maroon-50">
               <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
@@ -1403,7 +1403,7 @@ function AdminPageInner() {
         * rail on the storefront, and leaves the numbers as the loudest thing
         * on a page whose whole job is numbers.
         */}
-      <div className="mb-8 flex gap-x-7 overflow-x-auto border-b border-paper-edge">
+      <div className="mb-8 flex gap-x-7 overflow-x-auto overflow-y-hidden border-b border-paper-edge">
         {TABS.map(({ key, label }) => {
           const isCancel = key === 'cancellations';
           const isReturn = key === 'returns';
@@ -1536,7 +1536,7 @@ function AdminPageInner() {
                 All orders &rarr;
               </button>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-hidden">
               <table className="w-full text-sm">
                 <thead><tr className="border-b border-paper-edge text-left text-graphite-faint">
                   <th className="pb-3 pr-4">Order #</th>
@@ -1573,7 +1573,7 @@ function AdminPageInner() {
       {/* Products */}
       {tab === 'products' && (
         <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-hidden">
             <table className="w-full text-sm">
               <thead className="bg-maroon-50">
                 <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
@@ -1683,7 +1683,7 @@ function AdminPageInner() {
       {/* Orders */}
       {tab === 'orders' && (
         <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-hidden">
             <table className="w-full text-sm">
               <thead className="bg-maroon-50">
                 <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
@@ -1840,7 +1840,7 @@ function AdminPageInner() {
       {/* Users */}
       {tab === 'users' && (
         <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-hidden">
             <table className="w-full text-sm">
               <thead className="bg-maroon-50">
                 <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
@@ -1899,7 +1899,7 @@ function AdminPageInner() {
           ) : orders.filter(o => o.status === 'cancelled').length === 0 ? (
             <div className="text-center py-12 text-graphite-faint">No cancelled orders</div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-graphite-faint border-b border-maroon-200 text-xs uppercase tracking-wide">
@@ -1981,7 +1981,7 @@ function AdminPageInner() {
             )}
           </div>
           <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-maroon-50">
                   <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
@@ -2304,7 +2304,7 @@ function AdminPageInner() {
               <h2 className="text-lg font-normal text-maroon-900">Current Admin Accounts ({admins.length})</h2>
               <button onClick={loadAdmins} className="text-xs text-maroon-600 hover:underline">Refresh</button>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-maroon-50 text-maroon-800 text-xs uppercase tracking-wider">

@@ -196,7 +196,7 @@ function InvoiceContent() {
           </div>
 
           {/* ── Items Table ── */}
-          <div className="overflow-x-auto rounded-none border border-graphite/15">
+          <div className="overflow-x-auto overflow-y-hidden rounded-none border border-graphite/15">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-maroon-800 text-white text-xs uppercase tracking-wider">

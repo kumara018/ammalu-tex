@@ -210,7 +210,7 @@ export default function SizeGuide() {
        * screen reader gets, since the tapes are `aria-hidden` decoration over
        * data that lives here.
        */}
-      <div className="mt-10 overflow-x-auto">
+      <div className="mt-10 overflow-x-auto overflow-y-hidden">
         <table className="w-full min-w-[34rem] text-sm">
           <caption className="mb-4 text-left text-rule uppercase text-graphite-faint">
             Every size, in inches and centimetres

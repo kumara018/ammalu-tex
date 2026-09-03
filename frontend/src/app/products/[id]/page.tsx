@@ -767,7 +767,7 @@ export default function ProductDetailPage() {
           selected label is the whole indicator — the same rule the shelf
           filter and the rail use, so selection reads one way site-wide. */}
       <div id="reviews" className="mt-[clamp(3rem,9vh,6rem)] scroll-mt-28">
-        <div className="flex gap-8 overflow-x-auto border-b border-paper-edge">
+        <div className="flex gap-8 overflow-x-auto overflow-y-hidden border-b border-paper-edge">
           {TABS.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
               className={`-mb-px whitespace-nowrap border-b py-4 text-caption uppercase transition-colors duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread ${tab === t.key ? 'border-thread text-thread' : 'border-transparent text-graphite-faint hover:text-graphite'}`}>
