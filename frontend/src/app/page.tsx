@@ -145,7 +145,12 @@ export default function HomePage() {
             over by it. */}
         <div className="relative z-10 mx-auto w-full max-w-[104rem]">
           <Reveal>
-            <p className="mb-[clamp(1rem,2.4vh,1.75rem)] text-rule uppercase text-thread">
+            {/* thread-deep, not thread. The accent measures 2.81:1 on the paper
+              ground, and this is 11px running text carrying the shop's address
+              and its size range — the two facts a customer checks first. The
+              deeper tone is 4.26:1, still unmistakably the accent, and the
+              line is over the hero wash where it needs every bit of it. */}
+            <p className="mb-[clamp(1rem,2.4vh,1.75rem)] text-rule uppercase text-thread-deep">
               {STORE.area}&nbsp;·&nbsp;{STORE.city}&nbsp;·&nbsp;Sizes&nbsp;S–XXXL
             </p>
 
@@ -238,7 +243,7 @@ export default function HomePage() {
               <h2 id="shelf-heading" className="font-display text-[clamp(1.35rem,2.4vw,1.9rem)] font-normal text-graphite">
                 Shop by category
               </h2>
-              <span className="flex items-center gap-3 text-rule uppercase text-thread">
+              <span className="flex items-center gap-3 text-rule uppercase text-thread-deep">
                 <span className="hidden sm:inline">Six bolts · Sizes S–XXXL</span>
                 <span
                   aria-hidden="true"
