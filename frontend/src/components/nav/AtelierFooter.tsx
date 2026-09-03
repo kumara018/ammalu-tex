@@ -367,9 +367,6 @@ export default function AtelierFooter() {
                 pattern to follow is the one on the page you are editing.) */}
             <li className="flex min-w-0 gap-2.5">
               <Envelope />
-              <a href={`mailto:${STORE.email2}`} className="break-all text-paper/65 transition-colors duration-500 hover:text-thread-pale focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread-pale">
-                {STORE.email2}
-              </a>
             </li>
             <li className="flex gap-2.5">
               <Chat />

@@ -689,6 +689,25 @@ function AdminPageInner() {
   );
 
   const [admins, setAdmins] = useState<any[]>([]);
+  /*
+   * WHO IS ALLOWED TO REMOVE AN ADMIN — DERIVED, NOT HARDCODED.
+   *
+   * This used to read `user?.email === 'admin@ammalutex.com'` directly, which
+   * is the account's identity ONLY as long as ADMIN_EMAIL on the server is
+   * still that address. It was changed to ammalutexpartywear@gmail.com
+   * earlier this session, and nothing here was told: the primary admin could
+   * sign in, see every account, and never see a Remove Admin button next to
+   * any of them, because the one string this compared against was still the
+   * old one.
+   *
+   * The list this page already loads carries the true answer per row —
+   * `is_primary`, set by the server from ADMIN_EMAIL — so the fix is to ask
+   * that data instead of restating an email address here. Whatever the
+   * primary admin's address is changed to next, this keeps working without
+   * an edit. Mirrors the sister shop's admin-accounts screen, which was never
+   * written with the hardcoded version of this check.
+   */
+  const isPrimaryAdmin = admins.some((a) => a.is_primary && a.email === user?.email);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [expandedReturn, setExpandedReturn] = useState<number | null>(null);
   const [returnUpdateForm, setReturnUpdateForm] = useState<Record<number, { status: string; admin_notes: string }>>({});
@@ -2314,7 +2333,7 @@ function AdminPageInner() {
                       <td className="px-5 py-4">
                         {a.is_primary
                           ? <span className="text-xs text-graphite-faint">Protected</span>
-                          : user?.email === 'admin@ammalutex.com'
+                          : isPrimaryAdmin
                           ? (
                             <button
                               onClick={() => revokeAdmin(a.id, a.email)}
@@ -2338,7 +2357,15 @@ function AdminPageInner() {
           <div className="bg-amber-50 border border-amber-200 rounded-sm p-4 text-sm text-amber-800">
             <p className="font-semibold mb-1">ℹ️ How it works</p>
             <ul className="list-disc list-inside space-y-1 text-amber-700">
-              <li>This store runs on a single admin account (<strong>admin@ammalutex.com</strong>) by design — there's no way to grant admin access from this dashboard</li>
+              <li>
+                This store runs on a single admin account
+                {/* Named from the list itself, not a literal — the address on
+                    the server changes without notice to this page otherwise. */}
+                {admins.find((a) => a.is_primary)?.email && (
+                  <> (<strong>{admins.find((a) => a.is_primary)!.email}</strong>)</>
+                )}
+                {' '}by design — there's no way to grant admin access from this dashboard
+              </li>
               <li>A second admin can only be added by a code/database change on the backend, never through the UI</li>
               <li>The primary admin account cannot be revoked</li>
               <li>Revoked accounts return to regular customer accounts automatically</li>
