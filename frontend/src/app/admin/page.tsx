@@ -430,7 +430,6 @@ function CSInteractionsTab() {
   const [showForm, setShowForm]         = useState(false);
   const [saving, setSaving]             = useState(false);
   const [form, setForm] = useState({
-    cs_name:'', cs_email:'', cs_phone:'',
     customer_name:'', customer_email:'', customer_phone:'', issue_summary:'',
   });
 
@@ -444,15 +443,14 @@ function CSInteractionsTab() {
   useEffect(() => { load(); }, []);
 
   const handleLog = async () => {
-    if (!form.cs_name.trim())            { toast.error('CS engineer name is required'); return; }
     if (!form.customer_name.trim())      { toast.error('Customer name is required'); return; }
     if (!form.customer_email.trim())     { toast.error('Customer email is required'); return; }
     setSaving(true);
     try {
       await supportAPI.createInteraction(form);
-      toast.success('Interaction logged! Rating link sent to customer via email & WhatsApp ✅', { duration: 5000 });
+      toast.success('Logged. The rating link is on its way to the customer by email.', { duration: 5000 });
       setShowForm(false);
-      setForm({ cs_name:'', cs_email:'', cs_phone:'', customer_name:'', customer_email:'', customer_phone:'', issue_summary:'' });
+      setForm({ customer_name:'', customer_email:'', customer_phone:'', issue_summary:'' });
       load();
     } catch (e: any) {
       toast.error(e.response?.data?.detail || 'Failed to log interaction');
@@ -473,7 +471,7 @@ function CSInteractionsTab() {
           </span>
         )}
         <button onClick={() => setShowForm(true)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2 ml-auto">
-          <Plus size={15} /> Log CS Interaction
+          <Plus size={15} /> Log a conversation
         </button>
       </div>
 
@@ -482,31 +480,15 @@ function CSInteractionsTab() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-paper-bright rounded-sm w-full max-w-lg border border-paper-edge overflow-hidden">
             <div className="bg-maroon-800 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-white font-normal text-lg">Log Support Interaction</h3>
+              <h3 className="text-white font-normal text-lg">Log a conversation</h3>
               <button onClick={() => setShowForm(false)} className="text-maroon-200 hover:text-white"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4">
               <p className="text-xs text-graphite-faint bg-maroon-50 border border-maroon-200 rounded-sm px-3 py-2">
-                After saving, the customer will receive a <b>unique rating link</b> via email + WhatsApp. Only they can use it.
+                After saving, the customer gets a <b>unique rating link</b> by email. Only they can use it.
               </p>
 
-              <p className="text-xs font-normal text-maroon-700 uppercase tracking-wide">CS Engineer Details</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label">Name *</label>
-                  <input value={form.cs_name} onChange={e => setForm(f=>({...f, cs_name:e.target.value}))} placeholder="Engineer name" className="input-field" />
-                </div>
-                <div>
-                  <label className="label">Mobile</label>
-                  <input value={form.cs_phone} onChange={e => setForm(f=>({...f, cs_phone:e.target.value}))} placeholder="9876543210" className="input-field" />
-                </div>
-              </div>
-              <div>
-                <label className="label">Email</label>
-                <input type="email" value={form.cs_email} onChange={e => setForm(f=>({...f, cs_email:e.target.value}))} placeholder="cs@ammalutex.com" className="input-field" />
-              </div>
-
-              <p className="text-xs font-normal text-maroon-700 uppercase tracking-wide mt-4">Customer Details</p>
+              <p className="text-xs font-normal text-maroon-700 uppercase tracking-wide">Who you helped</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Name *</label>
@@ -542,7 +524,7 @@ function CSInteractionsTab() {
           <table className="w-full text-sm">
             <thead className="bg-maroon-50">
               <tr className="text-left text-maroon-800 text-xs font-semibold uppercase tracking-wide">
-                <th className="px-4 py-3">CS Engineer</th>
+                <th className="px-4 py-3">Answered by</th>
                 <th className="px-4 py-3">Customer</th>
                 <th className="px-4 py-3">Issue</th>
                 <th className="px-4 py-3">Rating</th>
@@ -555,7 +537,7 @@ function CSInteractionsTab() {
               )) : interactions.length === 0 ? (
                 <tr><td colSpan={5} className="px-4 py-12 text-center text-graphite-faint">
                   <div className="text-3xl mb-2">💬</div>
-                  No interactions logged yet. Click "Log CS Interaction" to start.
+                  No conversations logged yet. Click "Log a conversation" to start.
                 </td></tr>
               ) : interactions.map(i => (
                 <tr key={i.id} className="hover:bg-maroon-50">
