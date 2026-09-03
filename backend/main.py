@@ -67,7 +67,7 @@ def _ensure_admin():
     from auth import hash_password
     db = SessionLocal()
     try:
-        admin_email    = os.getenv("ADMIN_EMAIL",    "admin@ammalutex.com")
+        admin_email    = os.getenv("ADMIN_EMAIL",    "ammalutexpartywear@gmail.com")
         admin_password = os.getenv("ADMIN_PASSWORD", "AmmaluTex@2026")
         admin_phone    = os.getenv("ADMIN_PHONE",    "9994168839")
         force_reset    = os.getenv("ADMIN_PASSWORD_RESET", "").strip().lower() in ("1", "true", "yes")
@@ -949,7 +949,7 @@ def seed_database():
 
 def reset_admin():
     _ensure_admin()
-    admin_email = os.getenv("ADMIN_EMAIL", "admin@ammalutex.com")
+    admin_email = os.getenv("ADMIN_EMAIL", "ammalutexpartywear@gmail.com")
     return {"status": "Admin reset successfully", "email": admin_email}
 
 
