@@ -107,39 +107,39 @@ const SECTIONS: PolicySection[] = [
     ],
   },
   {
+    /*
+     * THE WINDOWS, AND A LINK. This section used to restate the whole
+     * cancellation policy — the reasons, the proof, how the refund settles,
+     * the non-returnable rule — and then link to it anyway. Two copies of a
+     * contractual term is two places to amend and one chance to disagree with
+     * itself. The binding periods stay here because they are terms; the rest
+     * lives in one place.
+     */
     title: 'Cancellation, return and exchange',
     clauses: [
       {
-        heading: 'Cancelling',
+        heading: 'The three periods',
         body: (
-          <>
-            Orders can be <strong>cancelled within 1 hour</strong> of purchase — instant, automatic,
-            no reason required.
-          </>
+          <ul>
+            <li>
+              <strong>1 hour</strong> from purchase to cancel.
+            </li>
+            <li>
+              <strong>4 hours</strong> from delivery to return for a refund.
+            </li>
+            <li>
+              <strong>12 hours</strong> from delivery to exchange.
+            </li>
+          </ul>
         ),
       },
       {
-        heading: 'After delivery',
+        heading: 'Conditions and settlement',
         body: (
           <>
-            Once delivered, a <strong>return (for refund)</strong> can be requested within{' '}
-            <strong>4 hours</strong>, or an <strong>exchange</strong> within <strong>12 hours</strong>.
-            Both need a valid reason — a size issue or damage — with 2–3 photographs as proof, and
-            both need our approval.
-          </>
-        ),
-      },
-      {
-        heading: 'How the money moves',
-        body: 'Approved returns are refunded through Razorpay to the original payment method once the item has been picked up. An exchange can be for any product of equal or higher value; a price difference is payable online, and no refund is issued for choosing something cheaper.',
-      },
-      {
-        heading: 'Exceptions',
-        body: (
-          <>
-            Products marked <strong>Non-Returnable</strong> are not eligible for return or exchange,
-            except where the item received is genuinely damaged. The full terms are in the{' '}
-            <Link href="/cancellation">cancellation, return &amp; exchange policy</Link>.
+            Set out in full in the{' '}
+            <Link href="/cancellation">cancellation, return &amp; exchange policy</Link>, which
+            forms part of these terms.
           </>
         ),
       },

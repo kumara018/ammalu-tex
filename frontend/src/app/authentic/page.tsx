@@ -45,12 +45,13 @@ const SECTIONS: PolicySection[] = [
     title: 'How the cloth reaches us',
     clauses: [
       {
-        heading: 'Direct from the weaver',
-        body: 'We work directly with skilled weavers and manufacturers in Tamil Nadu and the major textile hubs across India. No middlemen, and no markup added by anybody between them and the counter.',
-      },
-      {
-        heading: 'Who the money reaches',
-        body: 'We buy from local artisans on fair terms. Shopping here supports the craftspeople who made the piece, which is a claim we can make because we know their names.',
+        heading: 'Who we buy from',
+        body: (
+          <ul>
+            <li>Weavers and manufacturers we deal with by name.</li>
+            <li>Fair terms, so the money reaches the people who made the piece.</li>
+          </ul>
+        ),
       },
     ],
   },
@@ -59,39 +60,39 @@ const SECTIONS: PolicySection[] = [
     clauses: [
       {
         heading: 'Colour',
-        body: 'We photograph in natural light, so the colour you see is the colour that arrives. Slight variation between screens is normal and is the only variation there should be.',
+        body: 'Photographed in natural light. Screens vary slightly; that is the only variation there should be.',
       },
       {
         heading: 'Size',
-        body: 'Our size guide is calibrated against actual garment measurements, in inches and centimetres, not against a generic national standard.',
+        body: 'Measured from the actual garment, in inches and centimetres — not a generic national chart.',
       },
       {
         heading: 'Fabric',
-        body: 'Cotton, silk, georgette, crepe — every fabric comes from a certified supplier and is named accurately on the product page. If the page says silk, it is silk.',
+        body: 'Cotton, silk, georgette, crepe, all from certified suppliers. If the page says silk, it is silk.',
       },
     ],
   },
   {
-    title: 'Checked before it is folded',
+    title: 'The eight checks before dispatch',
     clauses: [
       {
         heading: 'Every piece, by hand',
-        body: 'Each garment is inspected before it reaches the shop floor: fabric, stitching, colour fastness, finishing. Nothing is sent on from a supplier unopened.',
-      },
-      {
-        heading: 'The eight checks before dispatch',
         body: (
           <ol>
-            <li>Fabric composition matches the product description.</li>
+            <li>Fabric matches the description.</li>
             <li>No loose threads or stitching defects.</li>
-            <li>Colour matches the product photograph.</li>
+            <li>Colour matches the photograph.</li>
             <li>Correct sizing, against our size guide.</li>
-            <li>Embroidery and embellishments are secure.</li>
+            <li>Embroidery and embellishments secure.</li>
             <li>Zips, buttons and hooks all work.</li>
             <li>No stains or storage damage.</li>
             <li>Pressed and presented properly.</li>
           </ol>
         ),
+      },
+      {
+        heading: 'Nothing passes through unopened',
+        body: 'No supplier parcel reaches the shop floor without being checked first.',
       },
     ],
   },
@@ -99,22 +100,12 @@ const SECTIONS: PolicySection[] = [
     title: 'If we got it wrong',
     clauses: [
       {
-        heading: 'The window',
+        heading: 'Tell us',
         body: (
           <>
-            If a piece arrives with a genuine size issue or damage, you can request a{' '}
-            <strong>return within 4 hours of delivery</strong>, or an{' '}
-            <strong>exchange within 12 hours</strong>.
-          </>
-        ),
-      },
-      {
-        heading: 'What happens then',
-        body: (
-          <>
-            Once the request is approved and the piece is picked up, the refund is processed
-            automatically through Razorpay to your original payment method. The full terms are in
-            the <Link href="/cancellation">cancellation, return &amp; exchange policy</Link>.
+            A genuine size issue or damage is covered by the{' '}
+            <Link href="/cancellation">cancellation, return &amp; exchange policy</Link>, which
+            holds the windows and how the refund is paid.
           </>
         ),
       },
@@ -127,8 +118,8 @@ export default function AuthenticPage() {
     <PolicyDoc
       eyebrow="Our word"
       title="100% authentic"
-      standfirst="Every garment is handpicked from verified weavers, manufacturers and trusted suppliers. No imitations, and no compromises on what the label says."
-      updated="21 May 2026"
+      standfirst="No imitations, and no compromises on what the label says."
+      updated="3 September 2026"
       summary={<Guarantee />}
       sections={SECTIONS}
       footnote="This page is a set of commitments, not a marketing claim. If a piece you received does not match any line on it, we want to hear about that specific line."

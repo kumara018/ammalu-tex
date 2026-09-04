@@ -67,41 +67,57 @@ function Windows() {
 
 const SECTIONS: PolicySection[] = [
   {
-    title: 'How the windows work',
+    title: 'The two valid reasons',
     clauses: [
       {
-        heading: 'Counted by the system, not by hand',
-        body: 'Each window is timed automatically from the moment of purchase or the moment of delivery, and enforced by the system. A request raised after its window has closed cannot be accepted, so please act promptly.',
+        heading: 'For any return or exchange',
+        body: (
+          <ul>
+            <li>The size does not fit.</li>
+            <li>The piece arrived damaged.</li>
+          </ul>
+        ),
+      },
+      {
+        heading: 'There is no third',
+        body: 'A change of mind is not one. Cancelling inside the first hour needs no reason at all.',
+      },
+      {
+        heading: 'Proof',
+        body: '2–3 clear photographs, showing the problem you have stated. Requests without them are refused — that is what keeps the policy workable for everybody else.',
       },
     ],
   },
   {
-    title: 'Cancelling an order',
+    title: 'How the windows work',
     clauses: [
       {
-        heading: 'Within 1 hour of purchase',
-        body: (
-          <>
-            You can cancel an order yourself from <strong>My Orders</strong> up to{' '}
-            <strong>1 hour</strong> after placing it. No reason is required and no approval is
-            needed.
-          </>
-        ),
+        heading: 'Counted by the system',
+        body: 'Timed automatically from purchase or delivery. A request raised after its window has closed cannot be accepted.',
       },
+    ],
+  },
+  {
+    title: 'Cancelling',
+    clauses: [
       {
-        heading: 'What happens immediately',
+        heading: 'Inside the hour',
         body: (
-          <>
-            The order moves to <strong>Cancelled</strong> and the reserved stock is released. If
-            payment had gone through, a refund is{' '}
-            <strong>automatically initiated with Razorpay</strong> the instant you cancel — you get
-            an email and a WhatsApp message confirming it, with the expected credit date.
-          </>
+          <ul>
+            <li>
+              Do it yourself from <strong>My orders</strong>.
+            </li>
+            <li>
+              The order becomes <strong>Cancelled</strong> and the stock is released at once.
+            </li>
+            <li>If you had paid, Razorpay refunds you automatically — nothing to request.</li>
+            <li>Email and WhatsApp confirm it, with the date the money should land.</li>
+          </ul>
         ),
       },
       {
         heading: 'After the hour',
-        body: 'The order has already moved into processing and dispatch, and can no longer be cancelled. You can request a return once it has been delivered instead.',
+        body: 'It has gone into processing and cannot be cancelled. Wait for delivery and raise a return.',
       },
     ],
   },
@@ -109,125 +125,91 @@ const SECTIONS: PolicySection[] = [
     title: 'Returning for a refund',
     clauses: [
       {
-        heading: 'The only two valid reasons',
-        body: (
-          <ul>
-            <li>The size does not fit, or</li>
-            <li>The item arrived damaged.</li>
-          </ul>
-        ),
-      },
-      {
-        heading: 'Proof',
-        body: 'You will need to upload 2–3 clear photographs of the product. Requests without valid proof are rejected — this is what keeps the policy workable for everybody else.',
-      },
-      {
         heading: 'What happens, in order',
         body: (
           <ol>
-            <li>Raise the request within 4 hours of delivery, with photographs and a clear reason.</li>
+            <li>Raise it within 4 hours of delivery, with your photographs.</li>
             <li>
-              Our team reviews it. This is <strong>not automatic</strong> — a valid reason and proof
-              are required for approval.
+              We review it. This one is <strong>not automatic</strong>.
             </li>
-            <li>Once approved, pickup is scheduled with our courier partner.</li>
+            <li>Approved, we schedule a pickup.</li>
             <li>
-              The moment pickup is confirmed, the refund is{' '}
-              <strong>automatically initiated with Razorpay</strong> to your original payment
-              method.
+              Pickup confirmed, Razorpay refunds your original payment method automatically.
             </li>
-            <li>
-              You receive “Refund Initiated” and “Refund Processed” notifications by email and
-              WhatsApp, each with the expected credit date.
-            </li>
+            <li>Refund Initiated and Refund Processed both reach you, with credit dates.</li>
           </ol>
         ),
       },
     ],
   },
   {
-    title: 'Exchanging for something else',
+    title: 'Exchanging',
     clauses: [
       {
-        heading: 'The same two reasons',
-        body: 'A size issue or damage, with 2–3 photographs as proof — but instead of a refund, you get a replacement.',
-      },
-      {
-        heading: 'You are not limited to the same piece',
+        heading: 'What you may swap to',
         body: (
-          <>
-            You can exchange for a different size, a different colour, or an{' '}
-            <strong>entirely different product</strong>.
-          </>
-        ),
-      },
-      {
-        heading: 'Equal or higher value',
-        body: (
-          <>
-            The replacement must cost the <strong>same or more</strong> than your original item. If
-            it costs more, you pay the difference online through Razorpay to confirm the exchange.
-            You <strong>cannot</strong> choose a cheaper item in order to be paid the difference —
-            no refund is issued for a price difference on an exchange.
-          </>
+          <ul>
+            <li>A different size, a different colour, or a different piece entirely.</li>
+            <li>
+              It must cost the <strong>same or more</strong>.
+            </li>
+            <li>Costs more — pay the difference through Razorpay to confirm it.</li>
+            <li>
+              Costs less — <strong>not allowed</strong>. No money is refunded on a price difference.
+            </li>
+          </ul>
         ),
       },
       {
         heading: 'The two legs',
-        body: 'Once approved, we arrange pickup of the original item, and your replacement ships after the pickup is verified.',
+        body: 'Approved, we collect the original. The replacement ships once that pickup is verified.',
       },
     ],
   },
   {
-    title: 'How to raise a request',
+    title: 'Raising a request',
     clauses: [
       {
-        heading: 'From the order',
+        heading: 'Where',
         body: (
           <>
-            Go to <strong>My Orders → View order</strong> and choose Cancel, Return or Exchange.
-            Only the options still inside their window will be shown.
+            <strong>My orders → View order</strong>, then Cancel, Return or Exchange. Only the
+            options still inside their window appear.
           </>
         ),
       },
       {
-        heading: 'What you will be asked for',
-        body: 'The valid reason — size issue or damage — 2–3 photographs, and for an exchange, the replacement product, size and colour.',
+        heading: 'What to attach',
+        body: (
+          <ul>
+            <li>Which of the two reasons applies.</li>
+            <li>2–3 photographs.</li>
+            <li>For an exchange, the replacement piece, size and colour.</li>
+          </ul>
+        ),
       },
       {
         heading: 'Following it',
-        body: 'Approval, pickup and refund or replacement are all tracked on the order page, and you get email and WhatsApp updates at every step.',
+        body: 'Approval, pickup and refund all show on the order page, and each step reaches you by email and WhatsApp.',
       },
     ],
   },
   {
-    title: 'What is not eligible',
+    title: 'What we cannot accept',
     clauses: [
       {
-        heading: 'Seven exclusions',
+        heading: 'The list',
         body: (
           <ul>
-            <li>Cancellation requested more than 1 hour after purchase.</li>
+            <li>Anything raised after its window has closed.</li>
+            <li>A change of mind.</li>
+            <li>Photographs that do not show the problem claimed.</li>
+            <li>Pieces used, washed, or damaged after delivery rather than on arrival.</li>
             <li>
-              Return or exchange requested after its window — 4 hours or 12 hours from delivery —
-              has closed.
+              Anything marked <strong>Non-Returnable</strong> on its product page — unless it
+              arrived damaged.
             </li>
-            <li>
-              Any reason other than a genuine size issue or damage. A change of mind is not a valid
-              reason.
-            </li>
-            <li>
-              Requests without the required photographs, or with photographs that do not support the
-              stated reason.
-            </li>
-            <li>Items used, washed, or damaged after delivery rather than on arrival.</li>
-            <li>
-              Items marked <strong>Non-Returnable</strong> on the product page, except where the
-              item received is genuinely damaged.
-            </li>
-            <li>
-              Choosing a cheaper replacement on an exchange in order to be refunded the difference.
-            </li>
+            <li>Swapping to a cheaper piece to be paid the difference.</li>
           </ul>
         ),
       },
@@ -237,12 +219,12 @@ const SECTIONS: PolicySection[] = [
     title: 'Who pays the shipping',
     clauses: [
       {
-        heading: 'A genuine fault',
-        body: 'For a genuine size issue, damage, or our error, we bear the pickup and the forward shipping cost of the return or replacement.',
+        heading: 'We do',
+        body: 'For a genuine size issue, damage, or our mistake — both the pickup and sending the replacement.',
       },
       {
-        heading: 'Before dispatch',
-        body: 'A cancellation before dispatch involves no shipping charge at all.',
+        heading: 'Nobody does',
+        body: 'A cancellation before dispatch carries no shipping charge at all.',
       },
     ],
   },
@@ -263,7 +245,7 @@ const SECTIONS: PolicySection[] = [
       },
       {
         heading: 'Hours',
-        body: 'Monday to Saturday, 9:00 am to 8:00 pm.',
+        body: `${STORE.weekdays} · ${STORE.weekend}`,
       },
     ],
   },
@@ -276,12 +258,11 @@ export default function CancellationPage() {
       title="Cancellation, return & exchange"
       standfirst={
         <>
-          Three windows, counted automatically. What each one allows, what proof we need, and how
-          the money comes back — the full terms are also summarised in the{' '}
+          Three windows, counted automatically. Full terms in the{' '}
           <Link href="/terms">terms</Link>.
         </>
       }
-      updated="4 August 2026"
+      updated="3 September 2026"
       summary={<Windows />}
       sections={SECTIONS}
       footnote="If your window has closed and something has genuinely gone wrong with the garment, still call. The windows are how the system works; they are not the whole of how we work."

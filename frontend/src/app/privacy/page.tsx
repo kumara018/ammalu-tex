@@ -4,8 +4,11 @@ import { STORE } from '@/lib/config';
 /**
  * Privacy policy.
  *
- * Content carried across clause for clause — the named processors (Delhivery,
- * Razorpay, SendGrid), the data categories, the rights list and the minors
+ * The named processors are the ones that actually receive data — Delhivery,
+ * Razorpay, Brevo and Twilio. SendGrid was named here and is not the live
+ * sender; Twilio was not named at all despite receiving every customer's
+ * phone number for SMS and WhatsApp. The data categories, the rights list and
+ * the minors
  * clause are legal statements and are reproduced exactly. Only the
  * presentation changed: out of a white card, into a document.
  *
@@ -28,10 +31,8 @@ const SECTIONS: PolicySection[] = [
         heading: 'Introduction',
         body: (
           <>
-            <strong>{STORE.name}</strong> (“we”, “our”, “us”) is committed to protecting your
-            personal information and your right to privacy. This policy explains how we collect,
-            use, disclose and safeguard your information when you visit{' '}
-            <strong>ammalutex.com</strong> and make purchases from us.
+            What <strong>{STORE.name}</strong> collects when you shop at{' '}
+            <strong>ammalutex.com</strong>, what we do with it, and who else sees it.
           </>
         ),
       },
@@ -85,26 +86,31 @@ const SECTIONS: PolicySection[] = [
     title: 'Who else sees it',
     clauses: [
       {
-        heading: 'We do not sell your data',
-        body: 'We do not sell or rent your personal data. We share it only with the parties below, and only with what they need to do their part of the job.',
+        heading: 'Never sold, never rented',
+        body: 'Shared only with these, and only with what each one needs.',
       },
       {
-        heading: 'Our four processors',
+        heading: 'The four',
         body: (
           <ul>
             <li>
-              <strong>Delhivery</strong> — our shipping partner, for delivery. They receive your
-              name, address and phone number.
+              <strong>Delhivery</strong> — delivery. Your name, address and phone number.
             </li>
             <li>
-              <strong>Razorpay</strong> — our payment gateway, for processing payments securely.
+              <strong>Razorpay</strong> — payment. Card and UPI details go straight to them.
             </li>
             <li>
-              <strong>SendGrid</strong> — for sending transactional email.
+              <strong>Brevo</strong> — order emails. Your name and email address.
             </li>
-            <li>Government or legal authorities, when required by law.</li>
+            <li>
+              <strong>Twilio</strong> — SMS and WhatsApp updates. Your phone number.
+            </li>
           </ul>
         ),
+      },
+      {
+        heading: 'And the law',
+        body: 'Government or legal authorities, where we are required to.',
       },
     ],
   },
@@ -113,11 +119,11 @@ const SECTIONS: PolicySection[] = [
     clauses: [
       {
         heading: 'Security',
-        body: 'We use industry-standard measures including SSL encryption, secure servers and access controls to protect your personal information. No method of transmission over the internet is 100% secure, and we will not claim otherwise.',
+        body: 'SSL encryption, secure servers, access controls. No transmission over the internet is 100% secure, and we will not claim otherwise.',
       },
       {
         heading: 'Cookies',
-        body: 'We use cookies and similar technologies to keep you signed in, remember your bag and understand website traffic. You can disable cookies in your browser settings; some parts of the site will stop working if you do.',
+        body: 'To keep you signed in, remember your bag, and count visits. Disable them in your browser and parts of the site stop working.',
       },
     ],
   },
