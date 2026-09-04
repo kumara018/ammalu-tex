@@ -611,7 +611,23 @@ function AdminPageInner() {
   // /admin (same route, just a new query string) wouldn't re-run it since
   // Next.js doesn't remount the page for a same-route navigation.
   useEffect(() => {
-    const valid: TabKey[] = ['dash','products','orders','cancellations','users','ratings','returns','admins'];
+    /*
+     * 'ratings' IS NOT IN THIS LIST, AND THAT IS WHAT ACTUALLY HIDES IT.
+     *
+     * Taking the tab out of the nav was not enough. The last tab you opened is
+     * remembered in localStorage and restored on every later visit, so anyone
+     * who happened to be on Support Ratings when it was hidden kept landing
+     * back on it — the link was gone from the bar while the panel below still
+     * rendered, which reads as the change simply not having worked.
+     *
+     * Leaving it out here rejects both routes back to it: `?tab=ratings` is no
+     * longer an accepted parameter, and a stale `admin_tab` of 'ratings' fails
+     * this same check and falls through to the dashboard.
+     *
+     * The tab's markup, its view and everything behind it are untouched. Put
+     * the string back here and in TABS and it returns.
+     */
+    const valid: TabKey[] = ['dash','products','orders','cancellations','users','returns','admins'];
     const tabParam = searchParams.get('tab') as TabKey | null;
     if (tabParam && valid.includes(tabParam)) {
       setTab(tabParam);
