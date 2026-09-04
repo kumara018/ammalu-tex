@@ -1255,7 +1255,21 @@ function AdminPageInner() {
     { key: 'cancellations', label: 'Cancellations'     },
     { key: 'returns',       label: 'Returns & Exchange'},
     { key: 'users',         label: 'Customers'         },
-    { key: 'ratings',       label: 'Support Ratings'   },
+    /*
+     * SUPPORT RATINGS IS HIDDEN, NOT REMOVED.
+     *
+     * It was built for a company with several support agents, where the point
+     * is knowing which agent is doing well. This shop is the owner and a
+     * phone, so it amounted to collecting ratings of yourself — and it cost
+     * real work to do it: after every call, open the panel, type the
+     * customer's name and email, send a link, and hope they click it.
+     * Product reviews already give the same signal from verified buyers for
+     * no work at all.
+     *
+     * Everything behind it still runs: the endpoints, the customer's rating
+     * page at /support/rate/[token], the one-time link, and the view below.
+     * Only this line is gone, so restoring it is putting the line back.
+     */
     { key: 'admins',        label: 'Admin Accounts' },
     { key: 'errors',        label: 'Browser Errors'  },
     { key: 'health',        label: 'System Health'   },
