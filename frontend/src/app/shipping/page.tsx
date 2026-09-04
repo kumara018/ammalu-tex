@@ -18,6 +18,16 @@ import { STORE } from '@/lib/config';
  * So the timetable is a ruled two-up with the duration set largest, the four
  * steps are numbered rows because they genuinely happen in that order, and
  * everything else is the document.
+ *
+ * EACH FACT APPEARS ONCE. The timetable above already gives the fee, the two
+ * timings and the coverage, so the sections below no longer restate them —
+ * "What it costs" was the same ₹49 a second time and has gone entirely.
+ *
+ * ITS WEIGHT CLAUSE WAS FALSE. It said the final cost "is calculated from the
+ * parcel weight and is shown at checkout". It is not: routers/orders.py sets
+ * `shipping_fee = 49.0` outright, and weight appears nowhere in order pricing
+ * on either shop. Describing a pricing model the shop does not operate is
+ * worse than saying nothing, so it is gone rather than reworded.
  */
 
 export const metadata = {
@@ -63,47 +73,6 @@ function Timetable() {
 
 const SECTIONS: PolicySection[] = [
   {
-    title: 'What it costs',
-    clauses: [
-      {
-        heading: 'The flat fee',
-        body: (
-          <>
-            A flat shipping fee of <strong>₹{STORE.shippingFee}</strong> applies to every order.
-          </>
-        ),
-      },
-      {
-        heading: 'Weight',
-        body: 'The final shipping cost is calculated from the parcel weight and is shown at checkout before you pay. There is nothing added afterwards.',
-      },
-    ],
-  },
-  {
-    title: 'What happens after you pay',
-    clauses: [
-      {
-        heading: 'Four steps',
-        body: (
-          <ol>
-            <li>
-              <strong>Order placed.</strong> Your bag becomes an order the moment payment succeeds.
-            </li>
-            <li>
-              <strong>Confirmed.</strong> We confirm and process it within 24 hours.
-            </li>
-            <li>
-              <strong>Dispatched.</strong> Packed at the shop and handed to Delhivery.
-            </li>
-            <li>
-              <strong>Delivered.</strong> To your door, against the delivery code sent to you.
-            </li>
-          </ol>
-        ),
-      },
-    ],
-  },
-  {
     title: 'Where we deliver',
     clauses: [
       {
@@ -112,7 +81,7 @@ const SECTIONS: PolicySection[] = [
           <ul>
             <li>All 28 states and 8 union territories.</li>
             <li>Tier 1, tier 2 and tier 3 cities.</li>
-            <li>Rural and remote areas, which typically add one or two days.</li>
+            <li>Rural and remote addresses — one to two days longer.</li>
             <li>Jammu &amp; Kashmir and the North-East, on standard timelines.</li>
           </ul>
         ),
@@ -120,18 +89,36 @@ const SECTIONS: PolicySection[] = [
     ],
   },
   {
-    title: 'Following your parcel',
+    title: 'After you pay',
     clauses: [
       {
-        heading: 'Tracking',
+        heading: 'The four steps',
+        body: (
+          <ol>
+            <li>
+              <strong>Ordered.</strong> Your bag becomes an order the moment payment succeeds.
+            </li>
+            <li>
+              <strong>Confirmed.</strong> Within 24 hours.
+            </li>
+            <li>
+              <strong>Dispatched.</strong> Packed at the counter and handed to Delhivery.
+            </li>
+            <li>
+              <strong>Delivered.</strong> To your door, against the code sent to you.
+            </li>
+          </ol>
+        ),
+      },
+      {
+        heading: 'Following it',
         body: (
           <ul>
-            <li>The tracking number is sent by SMS and email as soon as it exists.</li>
-            <li>Status comes straight from Delhivery, not from a copy we keep.</li>
+            <li>Tracking number by SMS and email, as soon as it exists.</li>
             <li>
-              You can check it any time under <strong>My orders</strong>.
+              Live status under <strong>My orders</strong>, read from Delhivery directly.
             </li>
-            <li>The delivery agent's contact is shared on the day of delivery.</li>
+            <li>The agent&rsquo;s contact is shared on the delivery day.</li>
           </ul>
         ),
       },
@@ -141,12 +128,12 @@ const SECTIONS: PolicySection[] = [
     title: 'How it is packed',
     clauses: [
       {
-        heading: 'Every parcel',
-        body: 'Garments are folded and packed in protective covers so they arrive in the condition they left in.',
+        heading: 'Every garment',
+        body: 'Folded into a protective cover, so it arrives as it left the shop.',
       },
       {
-        heading: 'Delicate cloth',
-        body: 'Silk and embroidered pieces are wrapped individually in tissue and placed in rigid boxes.',
+        heading: 'Silk and embroidered pieces',
+        body: 'Wrapped individually in tissue and boxed rigid.',
       },
     ],
   },
@@ -154,8 +141,14 @@ const SECTIONS: PolicySection[] = [
     title: 'When it is late',
     clauses: [
       {
-        heading: 'What we cannot control',
-        body: 'We are not responsible for delays caused by the courier, by weather, or by government action. We are responsible for telling you about them — if a parcel stops moving, call the shop and we will chase Delhivery ourselves rather than sending you to them.',
+        heading: 'Not our doing',
+        body: (
+          <ul>
+            <li>Courier delays, weather, and government action are outside our control.</li>
+            <li>Telling you about them is not — call the shop.</li>
+            <li>We chase Delhivery ourselves rather than sending you to them.</li>
+          </ul>
+        ),
       },
     ],
   },
@@ -166,8 +159,8 @@ export default function ShippingPage() {
     <PolicyDoc
       eyebrow="Getting it to you"
       title="Shipping"
-      standfirst="Delivered across India by Delhivery. How long it takes, what it costs, and how to follow the parcel."
-      updated="21 May 2026"
+      standfirst="Delivered across India by Delhivery."
+      updated="3 September 2026"
       summary={<Timetable />}
       sections={SECTIONS}
       footnote="Every parcel leaves from the counter at Texvalley. If something has gone wrong with yours, the person who packed it can look it up."

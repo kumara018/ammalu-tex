@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Reveal from '@/components/home/Reveal';
+import Disclosure from './Disclosure';
 import MeasureRule from '@/components/home/MeasureRule';
 import PageShell from '@/components/PageShell';
 import PageHeader from '@/components/PageHeader';
@@ -71,30 +71,30 @@ const PROSE = [
   '[&_ol]:marker:tabular-nums [&_ol]:marker:text-thread',
 ].join(' ');
 
+/** `Who pays the shipping` -> `who-pays-the-shipping`, for deep links. */
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export default function PolicyDoc({
   eyebrow,
   title,
   standfirst,
   updated,
-  sections,
   summary,
+  sections,
   footnote,
 }: {
   eyebrow: string;
   title: string;
   standfirst: ReactNode;
-  /** Absolute date. "Recently updated" tells a reader nothing they can use. */
   updated: string;
-  sections: PolicySection[];
-  /**
-   * The one fact most readers came for, set above the document.
-   *
-   * Only two pages have earned it: the cancellation windows and the delivery
-   * timetable. Both are consulted far more often than they are read, and
-   * making someone scroll a 2,000-word policy to find "4 hours" is a design
-   * that serves the shop rather than the customer.
-   */
+  /** The figures this page exists to answer, shown before anything is opened. */
   summary?: ReactNode;
+  sections: PolicySection[];
   footnote?: ReactNode;
 }) {
   return (
@@ -103,8 +103,6 @@ export default function PolicyDoc({
         <p className="text-rule uppercase text-graphite-faint">Last updated · {updated}</p>
       </PageHeader>
 
-      {/* The rule, labelled with the count. A reader deciding whether to start
-          a long document wants to know how long it is before they start it. */}
       <MeasureRule
         label={`${sections.length} ${sections.length === 1 ? 'part' : 'parts'}`}
         className="mb-[clamp(3rem,8vh,5rem)]"
@@ -112,74 +110,33 @@ export default function PolicyDoc({
 
       {summary && <div className="mb-[clamp(3rem,9vh,6rem)]">{summary}</div>}
 
-      <div className="grid gap-x-14 gap-y-[6vh] lg:grid-cols-12">
-        <div className="lg:col-span-8">
-          {sections.map((section, i) => (
-            <section
-              key={section.title}
-              id={`section-${i + 1}`}
-              // scroll-mt clears the sticky rail — without it an anchor jump
-              // lands with the heading hidden underneath it.
-              className="scroll-mt-28 border-t border-paper-edge pt-9 first:border-t-0 first:pt-0 [&+section]:mt-[6vh]"
-            >
-              <Reveal>
-                {/* The number hangs in the margin on wide screens and sits
-                    inline on narrow ones — a hanging figure that wraps is
-                    worse than no hanging figure. */}
-                <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-5 sm:gap-x-8">
-                  <span className="text-rule uppercase tabular-nums text-thread">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <h2 className="font-display text-doc-head font-normal text-graphite">
-                    {section.title}
-                  </h2>
+      <div className="max-w-[76ch]">
+        {sections.map((section, i) => (
+          <Disclosure
+            key={section.title}
+            id={slugify(section.title)}
+            index={String(i + 1).padStart(2, '0')}
+            title={section.title}
+          >
+            <dl className="mt-2 space-y-8">
+              {section.clauses.map((c) => (
+                <div key={c.heading}>
+                  <dt className="text-rule uppercase text-graphite-faint">{c.heading}</dt>
+                  <dd className={PROSE}>{c.body}</dd>
                 </div>
-              </Reveal>
-
-              <dl className="mt-7 space-y-8 sm:pl-[calc(2ch+2rem)]">
-                {section.clauses.map((c) => (
-                  <div key={c.heading}>
-                    <dt className="text-rule uppercase text-graphite-faint">{c.heading}</dt>
-                    <dd className={PROSE}>{c.body}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          ))}
-
-          {footnote && (
-            <div className="mt-[8vh] border-t border-paper-edge pt-9">
-              <p className="max-w-[62ch] text-lede text-graphite-muted">{footnote}</p>
-              <div className="mt-8">
-                <ActionLink href="/support">Speak to us</ActionLink>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Contents, in the right margin — the same margin the counter details
-            occupy on the sign-in screens. Sticky, because someone who reached
-            part 9 should be able to get back to part 2 without scrolling. */}
-        <nav aria-label="Contents" className="hidden lg:col-span-3 lg:col-start-10 lg:block">
-          <div className="sticky top-28">
-            <h2 className="text-rule uppercase text-thread">Contents</h2>
-            <ol className="mt-6 space-y-3.5">
-              {sections.map((s, i) => (
-                <li key={s.title}>
-                  <a
-                    href={`#section-${i + 1}`}
-                    className="group grid grid-cols-[auto_1fr] items-baseline gap-x-3 text-sm text-graphite-muted transition-colors duration-500 hover:text-graphite motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-thread"
-                  >
-                    <span className="text-rule tabular-nums text-graphite-faint transition-colors duration-500 group-hover:text-thread motion-reduce:transition-none">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    {s.title}
-                  </a>
-                </li>
               ))}
-            </ol>
+            </dl>
+          </Disclosure>
+        ))}
+
+        {footnote && (
+          <div className="mt-[8vh] border-t border-paper-edge pt-9">
+            <p className="max-w-[62ch] text-lede text-graphite-muted">{footnote}</p>
+            <div className="mt-8">
+              <ActionLink href="/support">Speak to us</ActionLink>
+            </div>
           </div>
-        </nav>
+        )}
       </div>
     </PageShell>
   );
