@@ -63,6 +63,19 @@ export default function CheckoutPage() {
   // Declare state first so useEffect hooks below can reference them
   const [step,    setStep]    = useState<1 | 2 | 3>(1);
   const [placing, setPlacing] = useState(false);
+  /*
+   * WHETHER RAZORPAY'S SCRIPT HAS ARRIVED, WHICH IS NOT THE SAME AS BEING ONLINE.
+   *
+   * The pay button used to be live from first paint while the script was still
+   * downloading. Tapping it in that window found no window.Razorpay and showed
+   * "You appear to be offline" — to somebody who was plainly online, on a shop
+   * that had just started taking real money. On a phone on mobile data that
+   * window is seconds long, and the customer is told the shop is broken at the
+   * exact moment they were trying to pay.
+   *
+   * The sister shop has always gated the button on this. This is that gate.
+   */
+  const [scriptReady, setScriptReady] = useState(false);
   /**
    * How the payment ended. Null while nothing has been attempted.
    *
@@ -85,15 +98,36 @@ export default function CheckoutPage() {
     if (typeof window !== 'undefined'
         && new URLSearchParams(window.location.search).get('buy') === '1') return;
     if (items.length === 0) { router.push('/cart'); return; }
-    // Load Razorpay script
+    const markReady = () => setScriptReady(true);
+
+    // Already parsed and running from an earlier visit to this route.
+    if ((window as any).Razorpay) { markReady(); return; }
+
+    /*
+     * The tag is reused rather than recreated. This effect depends on `items`,
+     * so every change to the bag used to remove the script and append a fresh
+     * one — reopening the download window, and with it the chance of tapping
+     * Pay while nothing was loaded.
+     *
+     * A tag that is still downloading is not a tag that is ready, so this waits
+     * on its load event rather than assuming. Treating "a script tag exists" as
+     * "Razorpay is available" would be the same bug in a narrower window.
+     */
+    const existing = document.querySelector<HTMLScriptElement>('script[data-razorpay]');
+    if (existing) {
+      existing.addEventListener('load', markReady);
+      return () => existing.removeEventListener('load', markReady);
+    }
+
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
+    script.dataset.razorpay = 'true';
+    script.onload = markReady;
     // A blocked or failed script is indistinguishable from a dead pay button
     // unless it is said out loud.
     script.onerror = () => setOutcome({ kind: 'offline' });
     document.body.appendChild(script);
-    return () => { document.body.removeChild(script); };
   }, [user, items, authLoading]);
 
   // Any outcome replaces the task the customer was doing, so move focus to it.
@@ -294,9 +328,37 @@ export default function CheckoutPage() {
     } finally { setPlacing(false); }
   };
 
+  /**
+   * True only when a Razorpay window can actually open. Anything else sets the
+   * offline outcome and stops.
+   *
+   * "No script yet" and "no connection" are different states, but the button is
+   * disabled for the whole time the script is loading, so by the time this runs
+   * a missing script means it failed to arrive — which is the same thing to the
+   * customer as being offline, and is reported that way.
+   */
+  const canOpenRazorpay = () => {
+    if (typeof window === 'undefined') return false;
+    if (!navigator.onLine || !scriptReady || !(window as any).Razorpay) {
+      setOutcome({ kind: 'offline' });
+      return false;
+    }
+    return true;
+  };
+
   // ── Razorpay flow (card / net banking / UPI via Razorpay modal) ──
   const openRazorpay = async (isEmi = false) => {
     if (!validateAddr()) { toast.error('Please fill all address fields'); return; }
+    /*
+     * The check lives here, before the first server call, because this function
+     * creates a Razorpay order and only then reaches for window.Razorpay. Going
+     * ahead without the script would leave an order on Razorpay's side that no
+     * customer was ever shown a window for.
+     *
+     * The EMI button calls this directly, so a guard sitting only in
+     * handleRazorpay would have covered one of the two ways to pay.
+     */
+    if (!canOpenRazorpay()) return;
     setPlacing(true);
     try {
       const orderRes = await api.post('/api/payments/create-order', { amount: grandTotal });
@@ -377,8 +439,6 @@ export default function CheckoutPage() {
    */
   const handleRazorpay = async () => {
     setOutcome(null);
-    if (typeof navigator !== 'undefined' && !navigator.onLine) { setOutcome({ kind: 'offline' }); return; }
-    if (typeof window === 'undefined' || !(window as any).Razorpay) { setOutcome({ kind: 'offline' }); return; }
     return openRazorpay(false);
   };
 
@@ -386,7 +446,9 @@ export default function CheckoutPage() {
     if (!validateAddr()) {
       toast.error('Please complete all required fields'); return;
     }
-    if (payMethod === 'emi') { await openRazorpay(true); return; }
+    // Cleared for EMI too — a stale banner from a previous attempt must not
+    // outlive the attempt that replaces it.
+    if (payMethod === 'emi') { setOutcome(null); await openRazorpay(true); return; }
     await handleRazorpay();
   };
 
@@ -690,11 +752,13 @@ export default function CheckoutPage() {
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="btn-secondary flex-1 py-3">← Back</button>
-                <button onClick={handlePlaceOrder} disabled={placing || atRisk}
+                <button onClick={handlePlaceOrder} disabled={placing || atRisk || !scriptReady}
                   className="btn-gold flex-1 py-3.5 flex items-center justify-center gap-2 text-base font-normal rounded-sm disabled:opacity-60">
                   {placing
                     ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Processing...</>
-                    : <><Lock size={18} /> {payMethod === 'razorpay' ? 'Pay with Razorpay' : 'Choose EMI Plan'} · ₹{grandTotal.toLocaleString()}</>
+                    : !scriptReady
+                      ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Preparing...</>
+                      : <><Lock size={18} /> {payMethod === 'razorpay' ? 'Pay with Razorpay' : 'Choose EMI Plan'} · ₹{grandTotal.toLocaleString()}</>
                   }
                 </button>
               </div>
