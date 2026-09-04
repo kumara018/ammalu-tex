@@ -275,7 +275,6 @@ export const adminAPI = {
   resetToRefundInitiated:  (id: number)                 => api.post(`/api/payments/admin/orders/${id}/reset-to-refund-initiated`),
   getUsers:                ()                           => api.get('/api/admin/users'),
   updateSettings:          (data: object)               => api.put('/api/admin/settings', data),
-  getSupportRatings:       ()                           => api.get('/api/admin/support-ratings'),
 };
 
 export const supportAPI = {

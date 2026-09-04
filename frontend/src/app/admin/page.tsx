@@ -642,7 +642,6 @@ function AdminPageInner() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const [supportRatings, setSupportRatings] = useState<any[]>([]);
   const [returns, setReturns] = useState<any[]>([]);
   // Latest return/exchange (by id) per order — lets order tables show an
   // Amazon-style compound status ("Delivered → Return: Picked Up") instead
@@ -783,13 +782,6 @@ function AdminPageInner() {
     finally { setLoading(false); }
   };
 
-  const loadSupportRatings = async () => {
-    setLoading(true);
-    try { const res = await adminAPI.getSupportRatings(); setSupportRatings(res.data); }
-    catch { toast.error('Failed to load support ratings. Please refresh and try again.'); }
-    finally { setLoading(false); }
-  };
-
   const loadReturns = async () => {
     setLoading(true);
     try { const res = await adminReturnsAPI.getAll(); setReturns(res.data); }
@@ -832,7 +824,6 @@ function AdminPageInner() {
     if (tab === 'products') loadProducts();
     if (tab === 'orders') { loadOrders(); loadReturns(); }
     if (tab === 'users') loadUsers();
-    if (tab === 'ratings') loadSupportRatings();
     if (tab === 'returns') loadReturns();
     if (tab === 'admins') loadAdmins();
   }, [tab]);
