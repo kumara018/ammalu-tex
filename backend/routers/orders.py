@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-import models, schemas, auth as auth_utils, notifications
+import models, schemas, auth as auth_utils, notifications, pricing, refunds
 
 router = APIRouter(prefix="/api/orders", tags=["Orders"])
 
@@ -56,29 +56,8 @@ def _refund_uncredited_payment(payment_id: str, reason: str):
     and payment), the customer has already been charged. Refund it rather
     than leaving them charged with no order. Fetches the exact captured
     amount from Razorpay itself so it can never mismatch what was taken."""
-    key_id     = os.getenv("RAZORPAY_KEY_ID", "")
-    key_secret = os.getenv("RAZORPAY_KEY_SECRET", "")
-    if not key_id or not key_secret:
-        print(f"[Razorpay] ⚠️ REFUND SKIPPED (no keys) — payment {payment_id} "
-              f"must be refunded MANUALLY. Reason: {reason}")
-        return None
-    try:
-        import razorpay as _rp
-        client = _rp.Client(auth=(key_id, key_secret))
-        captured = client.payment.fetch(payment_id)
-        amount = captured.get("amount")
-        if not amount:
-            print(f"[Razorpay] ❌ Could not fetch captured amount for {payment_id} — refund skipped.")
-            return None
-        refund = client.payment.refund(payment_id, {
-            "amount": amount, "speed": "normal", "notes": {"reason": reason},
-        })
-        refund_id = refund.get("id", "initiated")
-        print(f"[Razorpay] ✅ Refund {refund_id} initiated for undeliverable order — payment {payment_id}")
-        return refund_id
-    except Exception as e:
-        print(f"[Razorpay] ❌ Refund FAILED for payment {payment_id}: {e}")
-        return None
+    refund_id, _error = refunds.refund_payment(payment_id, reason)
+    return refund_id
 
 
 @router.post("/", response_model=schemas.OrderOut, status_code=status.HTTP_201_CREATED)
@@ -101,36 +80,14 @@ def place_order(
     # assigning `.product` on one associates it with a persistent Product, and
     # SQLAlchemy would cascade it into the session and write a real cart row on
     # commit. A SimpleNamespace cannot.
+    #
+    # WHICH LINES, AND WHAT THEY COST, BOTH COME FROM pricing.py — the same
+    # module /payments/create-order prices with. They were separate arithmetic
+    # before, and they disagreed: the browser told create-order the amount, so
+    # a Buy It Now authorised 49 rupees while this endpoint recorded the real
+    # total. The gap made every refund on such an order fail.
     buying_now = payload.buy_now is not None
-    if buying_now:
-        product = (
-            db.query(models.Product)
-            .filter(models.Product.id == payload.buy_now.product_id)
-            .first()
-        )
-        if not product:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="That piece is no longer available.",
-            )
-        cart_items = [SimpleNamespace(
-            product=product,
-            product_id=product.id,
-            quantity=payload.buy_now.quantity,
-            size=payload.buy_now.size,
-            color=payload.buy_now.color,
-        )]
-    else:
-        cart_items = (
-            db.query(models.CartItem)
-            .filter(models.CartItem.user_id == current_user.id)
-            .all()
-        )
-        if not cart_items:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Your cart is empty. Please add items before placing an order.",
-            )
+    cart_items = pricing.resolve_line_items(db, current_user.id, payload.buy_now)
 
     # ── VERIFY FIRST. NOTHING ELSE HAPPENS BEFORE THIS. ─────────────────
     #
@@ -156,32 +113,7 @@ def place_order(
     # before the cart is even inspected.
     _verify_razorpay_payment(payload.payment)
 
-    items_snapshot = []
-    subtotal = 0.0
-    stock_error = None
-
-    for item in cart_items:
-        product = item.product
-        if not product or not product.is_active:
-            stock_error = f"Product '{product.name if product else 'Unknown'}' is no longer available."
-            break
-        if product.stock < item.quantity:
-            stock_error = f"'{product.name}' has only {product.stock} items left. Please update your cart."
-            break
-        item_total = product.price * item.quantity
-        subtotal += item_total
-        items_snapshot.append({
-            "product_id": product.id,
-            "name": product.name,
-            "category": product.category,
-            "price": product.price,
-            "quantity": item.quantity,
-            "size": item.size,
-            "color": item.color,
-            "image": product.images[0] if product.images else None,
-            "subtotal": item_total,
-            "is_returnable": getattr(product, "is_returnable", True),
-        })
+    items_snapshot, subtotal, _total_unused, stock_error = pricing.price_items(cart_items)
 
     if stock_error:
         # Safe to refund here, and only here: the signature above has already
@@ -202,7 +134,7 @@ def place_order(
             )
         raise HTTPException(status_code=400, detail=stock_error)
 
-    shipping_fee = 49.0
+    shipping_fee = pricing.SHIPPING_FEE
     total = subtotal + shipping_fee
 
     order_number = generate_order_number()
@@ -347,40 +279,52 @@ def cancel_order(
         except Exception as e:
             print(f"[Courier cancel error] {e}")
 
-    # ── Auto-refund via Razorpay for paid online orders ───────────────────────
+    # ── The refund, which is not optional and is not an admin's job ──────────
+    #
+    # Cancelling a paid order refunds it. There is no button, no queue and no
+    # step where somebody has to remember: the customer pressed cancel, so the
+    # money goes back.
+    #
+    # The failure this replaces is worth naming. The amount asked for was
+    # `order.total`, Razorpay will not return more than it captured, and the
+    # rejection was caught by a bare `except` that only printed. So an order
+    # whose captured amount was a rupee short went to "cancelled" with the
+    # money kept, no refund, and nothing on screen admitting it — the shop
+    # looked like it had refunded and had not. refunds.refund_payment reads the
+    # outstanding amount back from Razorpay, so it cannot ask for the wrong
+    # figure, and the outcome is recorded either way rather than swallowed.
     refund_status = None
+    refund_error = None
     if (
         order.payment_method != "cod"
         and order.payment_status == "paid"
         and order.payment_transaction_id
-        and order.payment_transaction_id.startswith("pay_")
     ):
-        import razorpay as _rp, os as _os
-        key_id     = _os.getenv("RAZORPAY_KEY_ID", "")
-        key_secret = _os.getenv("RAZORPAY_KEY_SECRET", "")
-        if not key_id or not key_secret:
-            print(f"[Razorpay] ⚠️  REFUND SKIPPED — RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set in env vars. "
-                  f"Order {order.order_number} txn {order.payment_transaction_id} "
-                  f"₹{order.total} must be refunded MANUALLY from Razorpay Dashboard.")
+        refund_status, refund_error = refunds.refund_payment(
+            order.payment_transaction_id,
+            order.cancel_reason or "Cancelled by customer",
+            {"order_number": order.order_number},
+        )
+        if refund_status == "already_refunded":
+            order.payment_status = "refunded"
+        elif refund_status:
+            order.payment_status = "refund_initiated"
         else:
+            # Kept as an explicit state rather than left reading "paid", so the
+            # workroom can show it and the customer is not told money is coming
+            # back when it is not.
+            order.payment_status = "refund_failed"
+            print(f"[Cancel] refund failed for {order.order_number}: {refund_error}")
             try:
-                client = _rp.Client(auth=(key_id, key_secret))
-                refund = client.payment.refund(
-                    order.payment_transaction_id,
-                    {
-                        "amount": int(order.total * 100),   # paise
-                        "speed":  "normal",
-                        "notes":  {
-                            "order_number": order.order_number,
-                            "reason":       order.cancel_reason,
-                        },
-                    },
-                )
-                order.payment_status = "refund_initiated"
-                refund_status = refund.get("id", "initiated")
-                print(f"[Razorpay] ✅ Refund {refund_status} initiated for {order.order_number} ₹{order.total}")
+                db.add(models.AdminNotification(
+                    type="refund_failed",
+                    title=f"Refund failed — {order.order_number}",
+                    message=(f"₹{order.total} could not be refunded automatically: "
+                             f"{refund_error}. Refund it from the Razorpay dashboard."),
+                    order_id=order.id,
+                ))
             except Exception as e:
-                print(f"[Razorpay] ❌ Refund FAILED for {order.order_number} txn {order.payment_transaction_id}: {e}")
+                print(f"[Cancel] could not raise refund-failed alert: {e}")
 
     db.commit()
     db.refresh(order)

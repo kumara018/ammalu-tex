@@ -67,6 +67,24 @@ export default function CheckoutPage() {
     } catch { /* fall through to the bag */ }
     setBuyNowChecked(true);
   }, []);
+
+  /**
+   * The piece itself, fetched for its price.
+   *
+   * sessionStorage carries only the id, quantity, size and colour — no price,
+   * deliberately, because a price held in the browser is a price the customer
+   * can edit. So it is read from the shop, and the total stays unknown until
+   * it arrives rather than quietly falling back to zero.
+   */
+  const [buyNowProduct, setBuyNowProduct] = useState<{ price: number; name: string } | null>(null);
+  useEffect(() => {
+    if (!buyNow?.product_id) return;
+    let cancelled = false;
+    api.get(`/api/products/${buyNow.product_id}`)
+      .then(res => { if (!cancelled) setBuyNowProduct(res.data); })
+      .catch(() => { /* the total stays unknown, and the button stays disabled */ });
+    return () => { cancelled = true; };
+  }, [buyNow?.product_id]);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -292,8 +310,28 @@ export default function CheckoutPage() {
     );
   };
 
+  /**
+   * WHAT THIS COSTS — and it is not the bag's total when one piece is being
+   * bought directly.
+   *
+   * `grandTotal` was `total + shipping`, where `total` is the CART total. A
+   * direct purchase deliberately has an empty bag, so `total` was 0 and this
+   * page charged the shipping fee and nothing for the garment. Order
+   * AMT-NU23B2RU captured ₹49 against a ₹50 order; on a ₹3,000 saree it would
+   * have taken ₹49 and recorded ₹3,049.
+   *
+   * The server prices the order now — /payments/create-order computes it from
+   * Product rows and ignores anything sent from here, so a wrong number on
+   * this page can no longer become a wrong charge. This is what the customer
+   * SEES, and it has to agree with that, which is why it prices the piece.
+   */
   const shipping   = 49;
-  const grandTotal = total + shipping;
+  const directSubtotal = buyNowProduct
+    ? buyNowProduct.price * (buyNow?.quantity ?? 1)
+    : null;
+  const subtotal = isDirect ? directSubtotal : total;
+  /** Null until a direct purchase's piece has loaded and its price is known. */
+  const grandTotal = subtotal === null ? null : subtotal + shipping;
 
   const setA = (f: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setAddr({ ...addr, [f]: e.target.value });
@@ -401,12 +439,23 @@ export default function CheckoutPage() {
     if (!canOpenRazorpay()) return;
     setPlacing(true);
     try {
-      const orderRes = await api.post('/api/payments/create-order', { amount: grandTotal });
+      /*
+       * `buy_now` says WHAT is being bought; the server works out what it
+       * costs. `amount` is still sent so the log can flag a disagreement, but
+       * it is not what the customer is charged — see backend/pricing.py.
+       */
+      const orderRes = await api.post('/api/payments/create-order', {
+        amount: grandTotal,
+        ...(buyNow ? { buy_now: buyNow } : {}),
+      });
       const { order_id, key_id } = orderRes.data;
+      // The authoritative figure, straight from the priced order.
+      const chargeable: number = orderRes.data.total ?? grandTotal;
 
       const options: any = {
         key:         key_id,
-        amount:      grandTotal * 100,
+        // From the priced order, not from this page's arithmetic.
+        amount:      Math.round(chargeable * 100),
         currency:    'INR',
         name:        'Ammalu Tex',
         description: 'Premium Textile Purchase',
@@ -705,7 +754,7 @@ export default function CheckoutPage() {
                       <span key={m} className="text-caption uppercase text-graphite">{m}</span>
                     ))}
                   </div>
-                  {grandTotal < 1000 ? (
+                  {grandTotal !== null && grandTotal < 1000 ? (
                     <div className="bg-maroon-50 border border-caution rounded-sm p-3">
                       <p className="text-sm text-graphite">This order is ₹{grandTotal}. Instalments need a total of ₹1,000 or more.</p>
                       <p className="mt-1 text-sm text-graphite-muted">Card or UPI above will work.</p>
@@ -792,11 +841,15 @@ export default function CheckoutPage() {
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)} className="btn-secondary flex-1 py-3">← Back</button>
-                <button onClick={handlePlaceOrder} disabled={placing || atRisk || !scriptReady}
+                {/* Not payable until the price is known. Offering a Pay button
+                    while the total is still unknown is how a direct purchase
+                    got charged the shipping fee on its own. */}
+                <button onClick={handlePlaceOrder}
+                  disabled={placing || atRisk || !scriptReady || grandTotal === null}
                   className="btn-gold flex-1 py-3.5 flex items-center justify-center gap-2 text-base font-normal rounded-sm disabled:opacity-60">
                   {placing
                     ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Processing...</>
-                    : !scriptReady
+                    : (!scriptReady || grandTotal === null)
                       ? <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> Preparing...</>
                       : <><Lock size={18} /> {payMethod === 'razorpay' ? 'Pay with Razorpay' : 'Choose EMI Plan'} · ₹{grandTotal.toLocaleString()}</>
                   }
@@ -819,15 +872,31 @@ export default function CheckoutPage() {
           {/* Opaque because it is sticky — see the note on the bag's summary. */}
           <div className="card bg-paper p-5 sticky top-28">
             <h3 className="font-normal text-maroon-900 mb-4">Price Details</h3>
+            {/* A direct purchase shows the ONE piece being bought. This
+                listed the bag, which for a direct purchase is empty — hence a
+                summary reading "Items (0)" with blank totals on a page that
+                was about to take money. */}
             <div className="space-y-2.5 text-sm">
-              {items.map(item => (
-                <div key={item.id} className="flex justify-between text-graphite-muted">
-                  <span className="truncate mr-2">{item.product.name} × {item.quantity}</span>
-                  <span className="font-medium flex-shrink-0">₹{(item.product.price * item.quantity).toLocaleString()}</span>
+              {isDirect ? (
+                <div className="flex justify-between text-graphite-muted">
+                  <span className="truncate mr-2">
+                    {buyNowProduct ? `${buyNowProduct.name} × ${buyNow?.quantity ?? 1}` : 'Loading your piece…'}
+                  </span>
+                  <span className="font-medium flex-shrink-0">
+                    {directSubtotal === null ? '—' : `₹${directSubtotal.toLocaleString()}`}
+                  </span>
                 </div>
-              ))}
+              ) : (
+                items.map(item => (
+                  <div key={item.id} className="flex justify-between text-graphite-muted">
+                    <span className="truncate mr-2">{item.product.name} × {item.quantity}</span>
+                    <span className="font-medium flex-shrink-0">₹{(item.product.price * item.quantity).toLocaleString()}</span>
+                  </div>
+                ))
+              )}
               <div className="border-t border-maroon-200 pt-2.5 flex justify-between text-graphite-muted">
-                <span>Subtotal</span><span className="font-medium">₹{total.toLocaleString()}</span>
+                <span>Subtotal</span>
+                <span className="font-medium">{subtotal === null ? '—' : `₹${subtotal.toLocaleString()}`}</span>
               </div>
               <div className="flex justify-between text-graphite-muted">
                 <span>Shipping</span>
@@ -835,7 +904,9 @@ export default function CheckoutPage() {
               </div>
               <div className="border-t-2 border-maroon-100 pt-2.5 flex justify-between font-normal text-base">
                 <span className="text-maroon-900">Total</span>
-                <span className="text-maroon-900">₹{grandTotal.toLocaleString()}</span>
+                <span className="text-maroon-900">
+                  {grandTotal === null ? '—' : `₹${grandTotal.toLocaleString()}`}
+                </span>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-maroon-200 space-y-1.5">
