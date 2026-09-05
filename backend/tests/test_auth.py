@@ -192,6 +192,72 @@ class TestR6ProgressiveSignIn:
         assert a.json() == b.json(), "a wrong code reveals whether the account exists"
 
 
+class TestLookupBranchesTheSignInForm:
+    """
+    /auth/lookup — the one bit the sign-in form needs to send a new customer to
+    Create Account instead of failing them on a password they never had.
+
+    Unlike /begin this DOES answer whether an account exists, deliberately and
+    with its reasoning written at the endpoint. What these tests hold down is
+    the boundary of that decision: one bit and a masked echo, nothing more, and
+    never a real answer for an account that cannot actually sign in.
+    """
+
+    def test_says_yes_for_a_real_account(self, client, make_user):
+        user, _ = make_user(email="found@test.local", phone="9000008801")
+        r = client.post("/api/auth/lookup", json={"identifier": "found@test.local"})
+        assert r.status_code == 200, r.text
+        assert r.json()["exists"] is True
+
+    def test_finds_the_same_account_by_phone(self, client, make_user):
+        # The single field takes either, so both must resolve to one account.
+        make_user(email="byphone@test.local", phone="9000008802")
+        r = client.post("/api/auth/lookup", json={"identifier": "9000008802"})
+        assert r.status_code == 200, r.text
+        assert r.json()["exists"] is True
+
+    def test_says_no_for_an_account_that_does_not_exist(self, client):
+        r = client.post("/api/auth/lookup", json={"identifier": "nobody@test.local"})
+        assert r.status_code == 200, r.text
+        assert r.json()["exists"] is False
+
+    def test_an_unverified_signup_is_not_an_account_yet(self, client, db):
+        # /register resumes an abandoned signup, so this customer belongs on the
+        # create-account form — not on a password screen no password will open.
+        import models, auth as auth_utils
+        db.add(models.User(
+            full_name="Half Done", email="halfway@test.local", phone="9000008803",
+            password_hash=auth_utils.hash_password("whatever"), is_verified=False,
+        ))
+        db.commit()
+        r = client.post("/api/auth/lookup", json={"identifier": "halfway@test.local"})
+        assert r.status_code == 200, r.text
+        assert r.json()["exists"] is False
+
+    def test_answers_one_bit_and_a_hint_and_nothing_else(self, client, make_user):
+        # The guard against this quietly growing into a profile lookup. A name
+        # or an email here would hand anyone who can guess a phone number the
+        # identity behind it.
+        user, _ = make_user(email="minimal@test.local", phone="9000008804")
+        body = client.post("/api/auth/lookup", json={"identifier": "9000008804"}).json()
+        assert set(body) == {"exists", "hint"}, body
+        assert user.full_name not in str(body)
+        assert "minimal@test.local" not in str(body)
+
+    def test_rejects_something_that_is_neither(self, client):
+        r = client.post("/api/auth/lookup", json={"identifier": "not-a-contact"})
+        assert r.status_code == 400, r.text
+
+    def test_walking_the_number_space_runs_out(self, client):
+        # The whole justification for shipping an oracle is that it is bounded.
+        # If the limiter is ever removed this test is what notices.
+        codes = {
+            client.post("/api/auth/lookup", json={"identifier": f"9333{i:06d}"}).status_code
+            for i in range(30)
+        }
+        assert 429 in codes, "lookup answered 30 identifiers without ever throttling"
+
+
 class TestR5RevokeAll:
     """AUTH-SPEC R5. One transaction, and the caller's own choice honoured."""
 
