@@ -185,6 +185,10 @@ export const authAPI = {
   verifyRegisterOtp:   (data: object) => api.post('/api/auth/verify-register-otp', data),
   resendRegisterOtp:   (data: object) => api.post('/api/auth/resend-register-otp', data),
   login:               (data: object) => api.post('/api/auth/login', data),
+  // Does this phone or email have an account? Asked by the sign-in form's
+  // first step so a new customer is sent to Create Account rather than being
+  // failed on a password they never had. Answers one bit and a masked echo.
+  lookup:              (data: object) => api.post('/api/auth/lookup', data),
   sendLoginOtp:        (data: object) => api.post('/api/auth/send-login-otp', data),
   verifyLoginOtp:      (data: object) => api.post('/api/auth/verify-login-otp', data),
   evictAndLogin:       (data: object) => api.post('/api/auth/sessions/evict-and-login', data),

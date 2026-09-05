@@ -39,6 +39,13 @@ import { STORE } from '@/lib/config';
  *                  most reassuring thing on a site asking for your password —
  *                  evidence there is a real shop behind it.
  */
+/** Quiet, but a real target — 44px of height, not a 12px line of text. */
+const BACK_CLS =
+  'mb-6 -ml-1 inline-flex items-center gap-2 px-1 py-2 text-caption uppercase ' +
+  'text-graphite-faint transition-colors duration-500 hover:text-thread ' +
+  'motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 ' +
+  'focus-visible:outline-offset-4 focus-visible:outline-thread';
+
 export default function AuthShell({
   title,
   standfirst,
@@ -48,6 +55,7 @@ export default function AuthShell({
   /** 1-based position in the flow, for the numbered spine. */
   step = 1,
   steps = 3,
+  back,
 }: {
   title: string;
   standfirst?: ReactNode;
@@ -59,6 +67,20 @@ export default function AuthShell({
   /** A line above the form, for state the form itself cannot express —
       currently only "you are still signed in as someone else". */
   notice?: React.ReactNode;
+  /**
+   * The way out, one step at a time.
+   *
+   * A progressive form replaces the page's contents without touching the URL,
+   * so the browser's own Back button leaves the whole flow instead of undoing
+   * the last step — and the wordmark, which was the only marked exit, does the
+   * same. Somebody who mistyped their number and wanted to correct it had no
+   * visible way to do it except starting over.
+   *
+   * `label` says where it goes rather than just "Back", because on the first
+   * step it leaves the flow and on the others it does not, and those should not
+   * look like the same action.
+   */
+  back?: { label: string; onClick?: () => void; href?: string };
 }) {
   return (
     <div className="relative min-h-[100svh] px-6 py-[clamp(2.5rem,7vh,4.5rem)] sm:px-10">
@@ -88,6 +110,19 @@ export default function AuthShell({
 
         <div className="mt-[clamp(3rem,11vh,7rem)] grid gap-x-16 gap-y-14 lg:grid-cols-12">
           <main className="lg:col-span-7 xl:col-span-6">
+            {/* Above the step count, because it undoes the step count. */}
+            {back && (
+              back.href ? (
+                <Link href={back.href} className={BACK_CLS}>
+                  <span aria-hidden="true">&larr;</span> {back.label}
+                </Link>
+              ) : (
+                <button type="button" onClick={back.onClick} className={BACK_CLS}>
+                  <span aria-hidden="true">&larr;</span> {back.label}
+                </button>
+              )
+            )}
+
             {/* The spine: the operation count, then the rule. */}
             <div className="mb-8 flex items-center gap-4">
               <span className="flex items-baseline gap-2 text-rule uppercase tabular-nums">
