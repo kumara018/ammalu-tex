@@ -48,14 +48,24 @@ export default function CheckoutPage() {
    */
   const [buyNow, setBuyNow] = useState<BuyNowItem | null>(null);
   const isDirect = buyNow !== null;
+  /**
+   * Whether the sessionStorage read has happened yet — NOT whether it found
+   * anything. The guard below has to wait for this before deciding the page is
+   * empty, or it would bounce every direct purchase to the cart on first paint.
+   */
+  const [buyNowChecked, setBuyNowChecked] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (new URLSearchParams(window.location.search).get('buy') !== '1') return;
+    if (new URLSearchParams(window.location.search).get('buy') !== '1') {
+      setBuyNowChecked(true);
+      return;
+    }
     try {
       const raw = sessionStorage.getItem('buyNow');
       const parsed = raw ? JSON.parse(raw) as BuyNowItem : null;
       if (parsed?.product_id) setBuyNow(parsed);
     } catch { /* fall through to the bag */ }
+    setBuyNowChecked(true);
   }, []);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -92,27 +102,57 @@ export default function CheckoutPage() {
   // and bounce a customer who just paid back to an empty cart page.
   const orderPlacedRef = useRef(false);
 
+  /**
+   * Nobody should be standing on a checkout page with nothing to buy.
+   *
+   * THE TEST IS "IS THERE A DIRECT PURCHASE", NOT "IS `buy=1` IN THE URL".
+   * Those are not the same thing, and the difference stranded people: the item
+   * lives in sessionStorage, so `?buy=1` opened in a fresh tab, reloaded after
+   * the tab was restored, or simply shared as a link has the flag and no item.
+   * Skipping the redirect on the flag alone left that customer on a checkout
+   * reading ITEMS (0), with blank totals, no route onward and nothing on screen
+   * admitting anything was wrong.
+   *
+   * Now a real direct purchase is left alone and everything else falls back to
+   * the bag — which, being empty, goes to the cart like any other empty
+   * checkout.
+   */
   useEffect(() => {
     if (authLoading || !user) return;
     if (orderPlacedRef.current) return;
-    if (typeof window !== 'undefined'
-        && new URLSearchParams(window.location.search).get('buy') === '1') return;
-    if (items.length === 0) { router.push('/cart'); return; }
+    if (!buyNowChecked) return;   // the item may still be one tick away
+    if (buyNow) return;           // a genuine direct purchase; the bag is meant to be empty
+    if (items.length === 0) router.push('/cart');
+  }, [user, items, authLoading, buyNowChecked, buyNow, router]);
+
+  /**
+   * Razorpay's script, on its own effect and behind no conditions at all.
+   *
+   * IT USED TO LOAD INSIDE THE GUARD ABOVE, AND SO DID NOT LOAD FOR BUY IT NOW.
+   * That path returns early — the bag is legitimately empty, the item is in the
+   * URL — and the early return took the script loader out with it. The page
+   * then had no Razorpay at all: before the button was gated it answered "you
+   * appear to be offline", and once gated it sat on "Preparing…" forever. Same
+   * missing script, two different wrong answers, and the whole Buy It Now
+   * route unable to take money either way.
+   *
+   * Loading is also not conditional on being signed in. A customer who signs in
+   * from this page would otherwise start the download only at that point,
+   * putting the wait back exactly where it is most expensive.
+   *
+   * No `items` dependency, and no cleanup that removes the tag: the effect runs
+   * once for the life of the page, so changing the bag cannot restart the
+   * download and reopen the window this gate exists to close.
+   */
+  useEffect(() => {
     const markReady = () => setScriptReady(true);
 
     // Already parsed and running from an earlier visit to this route.
     if ((window as any).Razorpay) { markReady(); return; }
 
-    /*
-     * The tag is reused rather than recreated. This effect depends on `items`,
-     * so every change to the bag used to remove the script and append a fresh
-     * one — reopening the download window, and with it the chance of tapping
-     * Pay while nothing was loaded.
-     *
-     * A tag that is still downloading is not a tag that is ready, so this waits
-     * on its load event rather than assuming. Treating "a script tag exists" as
-     * "Razorpay is available" would be the same bug in a narrower window.
-     */
+    // A tag that is still downloading is not a tag that is ready, so this waits
+    // on its load event rather than assuming. Treating "a script tag exists" as
+    // "Razorpay is available" would be the same bug in a narrower window.
     const existing = document.querySelector<HTMLScriptElement>('script[data-razorpay]');
     if (existing) {
       existing.addEventListener('load', markReady);
@@ -128,7 +168,7 @@ export default function CheckoutPage() {
     // unless it is said out loud.
     script.onerror = () => setOutcome({ kind: 'offline' });
     document.body.appendChild(script);
-  }, [user, items, authLoading]);
+  }, []);
 
   // Any outcome replaces the task the customer was doing, so move focus to it.
   // A screen reader user who pressed Pay and heard nothing has no way to find
