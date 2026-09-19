@@ -41,6 +41,7 @@ import ThreeProvider from '@/three/ThreeProvider';
 import SiteToaster from '@/components/system/SiteToaster';
 import ErrorReporting from '@/components/ErrorReporting';
 import ScrollManager from '@/components/system/ScrollManager';
+import ReturnPathRecorder from '@/components/system/ReturnPathRecorder';
 import { STORE } from '@/lib/config';
 
 export const metadata: Metadata = {
@@ -115,6 +116,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             already on — the masthead, a footer link, a shelf filter. Renders
             nothing; it is one listener on the document. */}
         <ScrollManager />
+        <ReturnPathRecorder />
         {/* The single persistent 3D canvas. Sits outside the providers and
             outside PageTransition so a route change never remounts it — the
             GL context, compiled shaders and uploaded textures survive
