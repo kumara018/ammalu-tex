@@ -10,7 +10,8 @@ import ProductCard from '@/components/ProductCard';
 import Reveal from '@/components/home/Reveal';
 import BoltRow from '@/components/home/BoltRow';
 import MeasureRule from '@/components/home/MeasureRule';
-import { dyeFor } from '@/lib/dyes';
+import { bandFor } from '@/lib/dyes';
+import { useCategories } from '@/lib/useCategories';
 import GarmentSlide from '@/components/home/GarmentSlide';
 
 /**
@@ -64,16 +65,25 @@ const unwrap = (raw: unknown): Product[] =>
 /* One line per bolt. These were 80–92 characters of prose each, six of them
    stacked down the homepage — a paragraph per category between a customer and
    the shelf. The names and the dyes carry it. */
-const BOLTS = [
-  { index: '01', name: 'Chudithar',   note: 'Every day',      dye: dyeFor('Chudithar').band,      copy: 'Cotton and silk, for a working day.' },
-  { index: '02', name: 'Lehenga',     note: 'The occasion',   dye: dyeFor('Lehenga').band,      copy: 'Weight, drape, and a hem that holds its line.' },
-  { index: '03', name: 'Half Saree',  note: 'The ceremony',   dye: dyeFor('Half Saree').band,    copy: 'For the ceremony, and the photographs after it.' },
-  { index: '04', name: 'Party Wears', note: 'For the room',   dye: dyeFor('Party Wears').band,         copy: 'Colour that survives a camera flash.' },
-  { index: '05', name: 'Tops',        note: 'The everyday',   dye: dyeFor('Tops').band,   copy: 'Worn on their own, or under everything else.' },
-  { index: '06', name: 'Crop Tops',   note: 'Newer cuts',     dye: dyeFor('Crop Tops').band, copy: 'Shorter lines, same cloth as the rest of the shelf.' },
-];
+/* The bolts are the workroom's categories, in the workroom's order — see
+   `bolts` in HomePage. They were typed out here, so a category the shop
+   added never reached the shelf. */
+
+const COUNT_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+/** "Seven", not "7" — the shelf's label has always spelled its count out. */
+const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
 
 export default function HomePage() {
+  // One bolt per category. The note and line are the category's own copy,
+  // editable in the workroom; the dye is its own, or one of the six by position.
+  const { categories } = useCategories();
+  const bolts = categories.map((c, i) => ({
+    index: String(i + 1).padStart(2, '0'),
+    name: c.name,
+    note: c.eyebrow ?? '',
+    copy: c.description ?? '',
+    dye: bandFor(c.name, i),
+  }));
   const featured = useQuery({
     queryKey: ['products', 'featured'],
     queryFn: async () => (await productsAPI.getAll({ featured: true, limit: 6 })).data,
@@ -244,7 +254,9 @@ export default function HomePage() {
                 Shop by category
               </h2>
               <span className="flex items-center gap-3 text-rule uppercase text-thread-deep">
-                <span className="hidden sm:inline">Six bolts · Sizes S–XXXL</span>
+                {/* Counted, not written: this said "Six" and would have been
+                    wrong the day the workroom added a seventh. */}
+                <span className="hidden sm:inline">{countWord(bolts.length)} bolt{bolts.length === 1 ? '' : 's'} · Sizes S–XXXL</span>
                 <span
                   aria-hidden="true"
                   className="text-lg leading-none transition-transform duration-300 group-open:rotate-45 motion-reduce:transition-none"
@@ -255,7 +267,7 @@ export default function HomePage() {
             </summary>
 
             <div className="pt-[3vh]">
-              {BOLTS.map((b, i) => (
+              {bolts.map((b, i) => (
                 <BoltRow key={b.name} {...b} delay={i * 60} />
               ))}
               <MeasureRule className="mt-2" />

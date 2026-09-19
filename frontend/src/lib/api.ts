@@ -279,6 +279,13 @@ export const adminAPI = {
   resetToRefundInitiated:  (id: number)                 => api.post(`/api/payments/admin/orders/${id}/reset-to-refund-initiated`),
   getUsers:                ()                           => api.get('/api/admin/users'),
   updateSettings:          (data: object)               => api.put('/api/admin/settings', data),
+  // Categories. Every call returns the whole list, in order, with product
+  // counts — the screen replaces its state with that, so it cannot drift.
+  getCategories:           ()                           => api.get('/api/admin/categories'),
+  createCategory:          (data: object)               => api.post('/api/admin/categories', data),
+  updateCategory:          (id: number, data: object)   => api.put(`/api/admin/categories/${id}`, data),
+  reorderCategories:       (ids: number[])              => api.put('/api/admin/categories/reorder', { ids }),
+  deleteCategory:          (id: number)                 => api.delete(`/api/admin/categories/${id}`),
 };
 
 export const supportAPI = {

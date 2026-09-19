@@ -6,6 +6,7 @@ import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, AlertCircle,
 import { ordersAPI, returnsAPI } from '@/lib/api';
 import { Order, ReturnRequest } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import { useCategories } from '@/lib/useCategories';
 
 // Mirrors orders/[id]/page.tsx's RETURN_STATUS_LABEL — kept in sync so a
 // return/exchange reads the same everywhere a customer sees it. No "Return:"/
@@ -77,6 +78,7 @@ function getDeliveryLine(status: string): string {
   return 'Expected: 3–7 business days';
 }
 
+/** Built-in icons, for a category the workroom has given none. */
 function getCategoryEmoji(category?: string): string {
   if (!category) return '👚';
   if (category === 'Lehenga') return '👗';
@@ -89,6 +91,9 @@ function getCategoryEmoji(category?: string): string {
 
 export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
+  // The icon the workroom set for a category wins; the built-in map covers
+  // any it has left blank, and past orders under a since-renamed name.
+  const { emojiFor } = useCategories();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [returnsByOrder, setReturnsByOrder] = useState<Record<number, ReturnRequest>>({});
@@ -225,7 +230,7 @@ export default function OrdersPage() {
                           className="flex h-9 w-9 items-center justify-center overflow-hidden border border-paper-edge bg-paper-shade"
                           title={item.name}
                         >
-                          {getCategoryEmoji(item.category)}
+                          {emojiFor(item.category) ?? getCategoryEmoji(item.category)}
                         </div>
                       ))}
                       {items.length > 4 && (

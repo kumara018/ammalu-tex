@@ -95,6 +95,25 @@ export function dyeFor(category?: string | null): Dye {
   return { ...CALICO, band: BANDS[key] ?? 'bg-paper-shade' };
 }
 
+/** The six dyes, in shelf order, for categories the box above does not name. */
+const PALETTE = [
+  'bg-dye-indigo', 'bg-dye-madder', 'bg-dye-turmeric',
+  'bg-dye-lac', 'bg-dye-myrobalan', 'bg-dye-pomegranate',
+];
+
+/**
+ * The selvedge band for a shelf row.
+ *
+ * A category's own dye when it has one; otherwise one of the six, picked by
+ * the row's position. Categories are added from the workroom now, and a new
+ * one — with no entry in BANDS — would otherwise sit on the shelf as the only
+ * undyed bolt, which reads as a fault rather than as a new line.
+ */
+export function bandFor(category: string | null | undefined, position: number): string {
+  const key = (category ?? '').trim().toLowerCase().replace(/[-_]+/g, ' ');
+  return BANDS[key] ?? PALETTE[Math.abs(position) % PALETTE.length];
+}
+
 /**
  * THE DYE LOT — why two pieces in the same category are not the same colour.
  *

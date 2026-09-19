@@ -10,6 +10,7 @@ import { ArrowLeft, Download, Mail, Share2, Printer } from 'lucide-react';
 import { LogoMark } from '@/components/Logo';
 import { STORE } from '@/lib/config';
 import { mediaUrl } from '@/lib/media';
+import { useCategories } from '@/lib/useCategories';
 
 const PAY_LABEL: Record<string, string> = {
   razorpay: 'Online Payment (Razorpay)',
@@ -24,6 +25,7 @@ const PAY_STATUS_COLOR: Record<string, string> = {
 };
 
 function InvoiceContent() {
+  const { emojiFor } = useCategories();
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -211,7 +213,7 @@ function InvoiceContent() {
                   const imgSrc = item.image
                     ? (mediaUrl(item.image))
                     : null;
-                  const emoji = item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : '👚';
+                  const emoji = emojiFor(item.category) ?? (item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : '👚');
                   return (
                     <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-transparent'}>
                       <td className="px-4 py-4">

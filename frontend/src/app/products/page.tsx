@@ -11,8 +11,10 @@ import { EmptyState, ErrorState } from '@/components/system/States';
 import { ActionButton, ActionLink } from '@/components/system/Action';
 import Reveal from '@/components/home/Reveal';
 import MeasureRule from '@/components/home/MeasureRule';
+import { useCategories } from '@/lib/useCategories';
 
-const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
+/* The filters read the workroom's category list (useCategories). It was typed
+   out here, so a category the shop added could not be filtered to. */
 const SORT_OPTIONS = [
   { label: 'Newest First',    value: 'created_at:desc' },
   { label: 'Price: Low–High', value: 'price:asc' },
@@ -24,6 +26,7 @@ const SORT_OPTIONS = [
 function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { names: CATEGORIES } = useCategories();
 
   const [products, setProducts]       = useState<Product[]>([]);
   const [loading, setLoading]         = useState(true);

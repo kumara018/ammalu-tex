@@ -16,6 +16,7 @@ import { Order, OrderItem, Product, ReturnRequest } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 import { mediaUrl } from '@/lib/media';
+import { useCategories } from '@/lib/useCategories';
 
 declare global {
   interface Window { Razorpay: any; }
@@ -69,6 +70,7 @@ const RETURN_STATUS_LABEL: Record<string, { label: string; color: string }> = {
 };
 
 function OrderDetailContent() {
+  const { emojiFor } = useCategories();
   const { id } = useParams();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
@@ -612,7 +614,7 @@ function OrderDetailContent() {
             <h3 className="font-normal text-maroon-900 mb-4">Ordered Items</h3>
             <div className="space-y-4">
               {(order.items_snapshot as any[]).map((item, i) => {
-                const emoji = item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : item.category === 'Crop Tops' ? '🎽' : item.category === 'Party Wears' ? '✨' : '👚';
+                const emoji = emojiFor(item.category) ?? (item.category === 'Lehenga' ? '👗' : item.category === 'Chudithar' ? '👘' : item.category === 'Half Saree' ? '🥻' : item.category === 'Crop Tops' ? '🎽' : item.category === 'Party Wears' ? '✨' : '👚');
                 const imgSrc = item.image ? (mediaUrl(item.image)) : null;
                 const itemVisual = (
                   <>

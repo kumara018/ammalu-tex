@@ -9,8 +9,12 @@ import {
 import api, { adminAPI, adminReturnsAPI, adminNotifAPI, supportAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import CategoriesTab from './CategoriesTab';
+import { useAdminCategories, useCategories } from '@/lib/useCategories';
 
-const CATEGORIES = ['Chudithar', 'Tops', 'Lehenga', 'Crop Tops', 'Party Wears'];
+/* Categories are not listed here any more — they come from the workroom's
+   Categories tab (useAdminCategories). This list had drifted from the
+   shop's: it had no Half Saree. */
 const ORDER_STATUSES = ['pending','confirmed','processing','shipped','out_for_delivery','delivered','cancelled'];
 const SIZE_OPTIONS   = ['XS','S','M','L','XL','XXL','XXXL','Free Size'];
 
@@ -61,8 +65,6 @@ const RETURN_STATUS_BADGE: Record<string, string> = {
   refunded:            'bg-green-100 text-green-700',
   completed:           'bg-paper-shade text-graphite-muted',
 };
-
-const CATEGORIES_WITH_HALF_SAREE = ['Chudithar', 'Tops', 'Lehenga', 'Half Saree', 'Crop Tops', 'Party Wears'];
 
 // ── CS Interactions Tab ───────────────────────────────────────────────────────
 /**
@@ -592,6 +594,10 @@ const emptyProduct = {
 
 function AdminPageInner() {
   const { user, loading: authLoading, refresh } = useAuth();
+  // Hidden categories included: hiding one takes it out of the shop's menus,
+  // not out of the admin's reach when filing a product.
+  const { categories: adminCategories } = useAdminCategories(!!user?.is_admin);
+  const { emojiFor } = useCategories();
   const router = useRouter();
   const searchParams = useSearchParams();
   // True once we've confirmed admin status against a FRESH /me response —
@@ -599,7 +605,7 @@ function AdminPageInner() {
   // on another device) can briefly read is_admin:false before the background
   // refresh catches up, which was bouncing real admins to the customer site.
   const [confirmedFresh, setConfirmedFresh] = useState(false);
-  type TabKey = 'dash'|'products'|'orders'|'cancellations'|'users'|'ratings'|'returns'|'admins'|'errors'|'health';
+  type TabKey = 'dash'|'products'|'categories'|'orders'|'cancellations'|'users'|'ratings'|'returns'|'admins'|'errors'|'health';
   const [tab, setTab] = useState<TabKey>('dash');
 
   // A specific nav link (e.g. "Manage Products") always wins over whatever
@@ -627,7 +633,7 @@ function AdminPageInner() {
      * The tab's markup, its view and everything behind it are untouched. Put
      * the string back here and in TABS and it returns.
      */
-    const valid: TabKey[] = ['dash','products','orders','cancellations','users','returns','admins'];
+    const valid: TabKey[] = ['dash','products','categories','orders','cancellations','users','returns','admins'];
     const tabParam = searchParams.get('tab') as TabKey | null;
     if (tabParam && valid.includes(tabParam)) {
       setTab(tabParam);
@@ -1267,6 +1273,7 @@ function AdminPageInner() {
   const TABS = [
     { key: 'dash',          label: 'Dashboard'        },
     { key: 'products',      label: 'Products'          },
+    { key: 'categories',    label: 'Categories'        },
     { key: 'orders',        label: 'Orders'            },
     { key: 'cancellations', label: 'Cancellations'     },
     { key: 'returns',       label: 'Returns & Exchange'},
@@ -1625,7 +1632,7 @@ function AdminPageInner() {
                             className="text-xl"
                             style={{ display: imgSrc ? 'none' : 'flex' }}
                           >
-                            {catEmoji[p.category] || '👕'}
+                            {emojiFor(p.category) || catEmoji[p.category] || '👕'}
                           </span>
                         </div>
                         {/* Name + badges */}
@@ -1879,6 +1886,10 @@ function AdminPageInner() {
       {/* Support Ratings — CS Interactions */}
       {tab === 'ratings' && (
         <CSInteractionsTab />
+      )}
+
+      {tab === 'categories' && (
+        <CategoriesTab />
       )}
 
       {tab === 'errors' && (
@@ -2436,8 +2447,18 @@ function AdminPageInner() {
                   <label className="label">Category *</label>
                   <select value={form.category} onChange={F('category')} className={`input-field ${formErrors.category ? 'input-error' : ''}`}>
                     <option value="" disabled>-- Select Category --</option>
-                    {CATEGORIES_WITH_HALF_SAREE.map(c => <option key={c} value={c}>{c}</option>)}
+                    {adminCategories.map(c => (
+                      <option key={c.id} value={c.name}>{c.name}{c.is_active ? '' : ' (hidden from the shop)'}</option>
+                    ))}
+                    {/* A product filed under a name the list does not hold still
+                        shows its real value, so saving cannot silently move it. */}
+                    {form.category && !adminCategories.some(c => c.name === form.category) && (
+                      <option value={form.category}>{form.category}</option>
+                    )}
                   </select>
+                  <a href="/admin?tab=categories" className="mt-1 inline-block text-xs text-maroon-700 underline underline-offset-2 hover:text-maroon-900">
+                    Add or edit categories
+                  </a>
                   {formErrors.category && <p className="text-red-500 text-xs mt-1">{formErrors.category}</p>}
                 </div>
                 <div>

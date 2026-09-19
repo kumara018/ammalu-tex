@@ -77,8 +77,8 @@ export default function CartPage() {
         Your bag is empty
       </h1>
       <p className="mt-6 max-w-[46ch] text-lede text-graphite-muted">
-        Six bolts on the shelf, all of them cut and finished here. Start wherever
-        the next occasion is.
+        Every bolt on the shelf is cut and finished here. Start wherever the next
+        occasion is.
       </p>
       <Link
         href="/products"

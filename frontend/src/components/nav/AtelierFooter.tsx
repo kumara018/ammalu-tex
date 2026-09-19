@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { STORE } from '@/lib/config';
 import { LogoMark } from '@/components/Logo';
 import { isAuthRoute } from '@/lib/routes';
+import { useCategories } from '@/lib/useCategories';
 
 /**
  * The counter at the end of the room.
@@ -35,7 +36,8 @@ import { isAuthRoute } from '@/lib/routes';
  * itself in scroll distance.
  */
 
-const SHELF = ['Chudithar', 'Lehenga', 'Half Saree', 'Party Wears', 'Tops', 'Crop Tops'];
+/* The shelf column reads the workroom's category list (useCategories). It
+   was typed out here, so a category the shop added never reached the footer. */
 
 const POLICIES = [
   { href: '/shipping',     label: 'Shipping' },
@@ -126,6 +128,7 @@ function Pin() {
 
 export default function AtelierFooter() {
   const pathname = usePathname();
+  const { names: shelf } = useCategories();
   // Auth screens are one focused card on an otherwise empty page. A footer
   // full of links there is an invitation to abandon signing in.
   if (isAuthRoute(pathname)) return null;
@@ -308,7 +311,7 @@ export default function AtelierFooter() {
         <div className="min-w-0 min-[900px]:col-span-2">
           <h2 className="text-rule uppercase text-thread-pale/90">The shelf</h2>
           <ul className="mt-5 space-y-2.5">
-            {SHELF.map((name) => (
+            {shelf.map((name) => (
               <li key={name}>
                 <Link
                   href={`/products?category=${encodeURIComponent(name)}`}
