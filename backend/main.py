@@ -27,7 +27,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import TimeoutError as SATimeoutError
 from logging_setup import RequestContextMiddleware, log
-from routers import auth, products, cart, orders, admin, payments, addresses, support, returns, wishlist, webhooks, shipping, client_errors, diagnostics, push_subs
+from routers import auth, products, cart, orders, admin, payments, addresses, support, returns, wishlist, webhooks, shipping, client_errors, diagnostics, push_subs, categories
 
 
 os.makedirs(os.getenv("UPLOAD_DIR", "uploads/products"), exist_ok=True)
@@ -151,6 +151,23 @@ def _migrate_db():
                 print("[Startup] Migrated: added is_verified to users")
         except Exception as e:
             print(f"[Startup] User migration note: {e}")
+
+        # ── categories columns ─────────────────────────────────────────────
+        # The landing-page copy, so a category added from the workroom gets a
+        # real page. Nullable, so every existing row stays valid as it is.
+        try:
+            cat_cols = [c["name"] for c in inspector.get_columns("categories")]
+            for col, ddl in (
+                ("eyebrow",    "VARCHAR(60)"),
+                ("headline",   "VARCHAR(160)"),
+                ("updated_at", "TIMESTAMP WITH TIME ZONE"),
+            ):
+                if col not in cat_cols:
+                    conn.execute(text(f"ALTER TABLE categories ADD COLUMN {col} {ddl}"))
+                    conn.commit()
+                    print(f"[Startup] Migrated: added {col} to categories")
+        except Exception as e:
+            print(f"[Startup] categories migration note: {e}")
 
         # ── orders columns ─────────────────────────────────────────────────
         try:
@@ -471,21 +488,15 @@ def _migrate_db():
             db.commit()
             print(f"[Startup] Added {len(hs_products)} Half Saree product(s).")
 
-        # Seed categories table if empty
-        cat_count = db.query(models.Category).count()
-        if cat_count == 0:
-            DEFAULT_CATEGORIES = [
-                {"name": "Chudithar",   "emoji": "👘", "description": "Traditional & Casual",  "sort_order": 1},
-                {"name": "Tops",        "emoji": "👕", "description": "Trendy & Stylish",       "sort_order": 2},
-                {"name": "Lehenga",     "emoji": "👗", "description": "Bridal & Festive",       "sort_order": 3},
-                {"name": "Half Saree",  "emoji": "🥻", "description": "Traditional & Elegant",  "sort_order": 4},
-                {"name": "Crop Tops",   "emoji": "🎽", "description": "Casual & Modern",        "sort_order": 5},
-                {"name": "Party Wears", "emoji": "✨", "description": "Glam & Elegant",         "sort_order": 6},
-            ]
-            for c in DEFAULT_CATEGORIES:
-                db.add(models.Category(**c))
-            db.commit()
+        # The categories table: seeded only when empty, then kept in step with
+        # the products. After this it is edited from the workroom, never here.
+        import category_store
+        from shop_categories import DEFAULT_CATEGORIES
+        if category_store.seed_defaults(db, DEFAULT_CATEGORIES):
             print("[Startup] Categories seeded.")
+        healed = category_store.reconcile_with_products(db)
+        if healed:
+            print(f"[Startup] Categories added for products that used them: {healed}")
         db.close()
     except Exception as e:
         print(f"[Startup] Size/seed migration note: {e}")
@@ -909,6 +920,7 @@ app.include_router(products.router)
 app.include_router(cart.router)
 app.include_router(orders.router)
 app.include_router(admin.router)
+app.include_router(categories.router)
 app.include_router(payments.router)
 app.include_router(addresses.router)
 app.include_router(support.router)
