@@ -234,8 +234,11 @@ export default function AtelierFooter() {
                 is centred on it. Optical centring, and the owner's eye on the
                 rendered lock-up, is the only authority for this number. */}
             <span className="flex items-center gap-2">
+            {/* 32px, the rail's size. It was 34 here: close enough to look like
+                a mistake rather than a decision, and the two are seen together
+                on every page. */}
             <LogoMark
-              size={34}
+              size={32}
               className="-mt-0.5 shrink-0 text-thread-pale transition-colors duration-500 group-hover:text-paper"
             />
             {/* `leading-none` is doing alignment work, not typography.
@@ -253,7 +256,14 @@ export default function AtelierFooter() {
                 The header has carried the tagline since it was added and this
                 did not, which is the sort of gap that only shows when the two
                 are seen together. */}
-              <span className="font-display text-band font-normal leading-none text-paper transition-colors duration-500 group-hover:text-thread-pale">
+              {/* THE RAIL'S SIZES, NOT A CLAMP OF ITS OWN. `text-band` is
+                  clamp(1.5rem, 3.2vw, 2.4rem) — it grows with the viewport,
+                  while the rail's wordmark is a fixed 1.2rem / 1.45rem. So the
+                  same name was set at two different sizes on one page, and the
+                  gap widened as the window did: identical on a phone, half as
+                  big again at the top of a desktop. These are now the rail's
+                  own values, so the lock-up matches at every width. */}
+              <span className="whitespace-nowrap font-display text-[1.2rem] font-normal leading-none tracking-tight text-paper transition-colors duration-500 group-hover:text-thread-pale sm:text-[1.45rem]">
                 {STORE.name}
               </span>
             </span>
@@ -270,7 +280,15 @@ export default function AtelierFooter() {
                 so it still matches the masthead's tagline exactly.
                 The indent keeps it under the wordmark rather than under the mark,
                 which is how the masthead sets the same two lines. */}
-            <span className="mt-1.5 block whitespace-nowrap pl-[2.625rem] text-[0.55rem] uppercase leading-none tracking-[0.13em] text-thread-pale/90">
+            {/* FLUSH WITH THE COLUMN, NOT INDENTED UNDER THE WORDMARK.
+                It carried a 2.6rem indent so it would start under the "A" of
+                the name. That is right in the rail, where the lock-up stands
+                alone — but here the column continues underneath it: the
+                address, the hours and the map link all begin at the column's
+                left edge, and the mark does too. The indented line was the
+                only thing in the column that started anywhere else, which is
+                what reads as crooked. One left edge for the whole column. */}
+            <span className="mt-1.5 block whitespace-nowrap text-[0.55rem] uppercase leading-none tracking-[0.13em] text-thread-pale/90">
               {STORE.tagline}
             </span>
           </Link>
