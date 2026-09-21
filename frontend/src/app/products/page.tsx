@@ -154,6 +154,7 @@ function ProductsContent() {
     filters.minPrice,
     filters.maxPrice,
     filters.featured,
+    filters.size,
     filters.sort,
     reloadKey,
   ]);
@@ -172,7 +173,7 @@ function ProductsContent() {
     router.replace('/products', { scroll: false });
   };
 
-  const hasFilters = filters.category || filters.search || filters.minPrice || filters.maxPrice || filters.featured;
+  const hasFilters = filters.category || filters.search || filters.minPrice || filters.maxPrice || filters.featured || filters.size;
 
   return (
     <PageShell rhythm="tight">
