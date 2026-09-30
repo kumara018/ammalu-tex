@@ -9,10 +9,11 @@ from sqlalchemy import or_
 from database import get_db
 import models, schemas, auth as auth_utils
 from rate_limit import (
-    enforce_ip_limit, enforce_identifier_limit,
+    enforce_ip_limit, enforce_identifier_limit, record_identifier_failure,
     SEND_CODE, VERIFY_CODE, REGISTER, SESSION_SWAP,
     BEGIN_PER_IP, BEGIN_PER_IDENTIFIER,
     LOOKUP_PER_IP, LOOKUP_PER_IDENTIFIER,
+    LOGIN_PER_IDENTIFIER, LOGIN_SCOPE,
 )
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -361,10 +362,17 @@ def login(payload: schemas.UserLogin, request: Request, db: Session = Depends(ge
     # AUTH-SPEC R1: per-address budget, counted in the database so it
     # survives the restarts this instance does constantly.
     enforce_ip_limit(db, request, "login", VERIFY_CODE)
-    enforce_identifier_limit(db, payload.identifier)
+    # Checked but not charged for: only a WRONG password spends a slot, below.
+    # Signing in successfully costs nothing, and this budget is no longer shared
+    # with forgot-password and send-login-otp — resetting a password used to eat
+    # the allowance needed to sign in with the new one.
+    enforce_identifier_limit(
+        db, payload.identifier, LOGIN_PER_IDENTIFIER, scope=LOGIN_SCOPE, record=False
+    )
     user = _find_user(db, payload.identifier)
 
     if not user or not auth_utils.verify_password(payload.password, user.password_hash):
+        record_identifier_failure(db, payload.identifier)
         raise HTTPException(
             status_code=401,
             detail="Incorrect email/phone or password. Please check and try again.",
