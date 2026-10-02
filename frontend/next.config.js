@@ -106,12 +106,18 @@ const nextConfig = {
    *   for product media, and the site's own assets. Nothing else may execute or
    *   be connected to.
    *
-   *   'unsafe-inline' and 'unsafe-eval' are present for scripts, and that is an
-   *   honest compromise rather than an oversight: Next's inline bootstrap
-   *   requires them and Razorpay injects inline script of its own. Removing
-   *   them needs a nonce-based CSP wired through the document, which is real
-   *   work and would break the payment modal if got wrong. The policy still
-   *   blocks the main prize — loading script from an attacker's domain.
+   *   'unsafe-inline' is present for scripts, and that is an honest compromise
+   *   rather than an oversight: Next's inline bootstrap requires it and
+   *   Razorpay injects inline script of its own. Removing it needs a
+   *   nonce-based CSP wired through the document, which is real work and would
+   *   break the payment modal if got wrong. The policy still blocks the main
+   *   prize — loading script from an attacker's domain.
+   *
+   *   'unsafe-eval' IS NOW DEVELOPMENT-ONLY. Checked in October 2026 before
+   *   taking it out of production: no chunk of the build calls eval or new
+   *   Function, and Razorpay's checkout.js reaches for Function() only in
+   *   browsers too old to have `globalThis`. `next dev` still gets it, because
+   *   its source maps are built with eval.
    *
    *   `res.cloudinary.com` is not optional. The backend uploads product
    *   photographs and videos there and stores the absolute URL, so a policy
@@ -128,8 +134,9 @@ const nextConfig = {
    *   honour only the header and newer ones only the directive.
    *
    * Permissions-Policy
-   *   Nothing needs the camera, the microphone or geolocation, so they are off.
-   *   A dependency that asks fails loudly instead of silently prompting.
+   *   Nothing needs the camera or the microphone, so they are off; a
+   *   dependency that asks fails loudly instead of silently prompting.
+   *   Geolocation is `self` — checkout's "Use my current location" needs it.
    */
   async headers() {
     // The configured origin, with RENDER_URL always allowed alongside it.
@@ -143,13 +150,14 @@ const nextConfig = {
     const api = apiOrigin() === RENDER_URL ? RENDER_URL : `${apiOrigin()} ${RENDER_URL}`;
     const local = 'http://localhost:8000 http://127.0.0.1:8000';
     const media = 'https://res.cloudinary.com';
+    const devEval = process.env.NODE_ENV === 'production' ? '' : " 'unsafe-eval'";
     const csp = [
       "default-src 'self'",
       "base-uri 'self'",
       "object-src 'none'",
       "frame-ancestors 'none'",
       "form-action 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com",
+      "script-src 'self' 'unsafe-inline'" + devEval + " https://checkout.razorpay.com https://*.razorpay.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: " + api + ' ' + local + ' ' + media + ' https://*.razorpay.com',
       "media-src 'self' data: blob: " + media,

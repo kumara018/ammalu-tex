@@ -62,7 +62,8 @@ export const metadata: Metadata = {
    * rather than in the name.
    */
   title: `${STORE.name} — ${STORE.tagline} | Texvalley Erode`,
-  description: 'Shop premium Chudithar, Tops, Lehenga, Crop Tops & Party Wears at Ammalu Tex. Located at Texvalley Gangapuram, Erode. Fast delivery across India. 100% authentic products.',
+  // Under 160 characters: Google cuts a longer one off mid-word in the result.
+  description: 'Premium chudithar, tops, lehenga, crop tops & party wear at Ammalu Tex, Texvalley Gangapuram, Erode. 100% authentic, delivered across India.',
   keywords: 'Ammalu Tex, ammalu tex, ammalutex, textile shop Erode, Texvalley Gangapuram, chudithar, lehenga, tops, crop tops, party wear, women fashion, Erode textile, buy chudithar online, women clothing India',
   authors: [{ name: 'Ammalu Tex' }],
   creator: 'Ammalu Tex',
@@ -76,11 +77,16 @@ export const metadata: Metadata = {
     siteName: 'Ammalu Tex',
     locale: 'en_IN',
     type: 'website',
+    // The picture a shared link shows on WhatsApp, Facebook and the rest.
+    // Without one, every link to the shop previewed as bare text — and a
+    // product with no photograph, which inherits this, did the same.
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Ammalu Tex — Timeless fabrics. Thoughtful choices.' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: `${STORE.name} — ${STORE.tagline}`,
     description: 'Shop Chudithar, Tops, Lehenga & more at Ammalu Tex, Texvalley Erode.',
+    images: ['/og.jpg'],
   },
   robots: {
     index: true,
