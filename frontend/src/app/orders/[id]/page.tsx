@@ -250,14 +250,24 @@ function OrderDetailContent() {
 
   // Pay the price difference via Razorpay before the exchange can be submitted
   const handlePayDifference = async () => {
-    if (!newProduct || priceDifference <= 0) return;
+    if (!newProduct || !selectedItem || priceDifference <= 0) return;
     setPayingDiff(true);
     try {
-      const orderRes = await api.post('/api/payments/create-order', { amount: priceDifference });
-      const { order_id, key_id } = orderRes.data;
+      // Say WHAT is being exchanged; the server works out the difference.
+      // `{ amount }` was ignored by the server, which priced the customer's
+      // bag instead — so this charged the bag, or the bare shipping fee, and
+      // the exchange then accepted it (PAY-05, October 2026 test pass).
+      const orderRes = await api.post('/api/payments/create-order', {
+        exchange: {
+          order_id: Number(id),
+          product_id: selectedItem.product_id,
+          new_product_id: newProduct.id,
+        },
+      });
+      const { order_id, key_id, amount } = orderRes.data;
       const options: any = {
         key: key_id,
-        amount: priceDifference * 100,
+        amount,
         currency: 'INR',
         name: order?.order_number ? `Exchange — ${order.order_number}` : 'Exchange Price Difference',
         description: `Price difference for exchanging into ${newProduct.name}`,

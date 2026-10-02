@@ -973,11 +973,22 @@ function AdminPageInner() {
   };
 
   const handleOrderStatus = async (id: number, status: string) => {
-    const hadAwb = orders.find(o => o.id === id)?.awb_code;
+    const order  = orders.find(o => o.id === id);
+    const hadAwb = order?.awb_code;
+    // Cancelling a paid order now refunds it there and then, as the customer's
+    // own Cancel does — so say so before it happens, not after.
+    if (
+      status === 'cancelled' && order && order.payment_method !== 'cod' && order.payment_status === 'paid' &&
+      !confirm(`Cancel ${order.order_number}?\n\n₹${order.total} goes back to the customer's original payment method straight away.`)
+    ) return;
     try {
       const res = await adminAPI.updateOrderStatus(id, { status });
       if (status === 'out_for_delivery' && res.data?.delivery_otp) {
         toast.success(`Status updated! Delivery OTP: ${res.data.delivery_otp}`, { duration: 8000 });
+      } else if (status === 'cancelled' && res.data?.payment_status === 'refund_initiated') {
+        toast.success(`Cancelled — refund of ₹${order?.total} started, customer notified`, { duration: 8000 });
+      } else if (status === 'cancelled' && res.data?.payment_status === 'refund_failed') {
+        toast.error('Cancelled, but the refund did not go through — use Initiate Refund to try again', { duration: 10000 });
       } else if (status === 'shipped' && !hadAwb && res.data?.awb_code) {
         toast.success(`Shipped — Delhivery AWB ${res.data.awb_code} created, customer notified`, { duration: 8000 });
       } else {
@@ -1835,8 +1846,9 @@ function AdminPageInner() {
                             {syncingDelhivery === o.id ? '⏳...' : '🔄 Sync'}
                           </button>
                         )}
-                        {/* Initiate Refund — show only for cancelled, online-paid, not yet refunded */}
-                        {o.status === 'cancelled' && o.payment_method !== 'cod' && o.payment_status === 'paid' && (
+                        {/* Initiate Refund — cancelled, online-paid, and the money is not on its way back:
+                            'paid' (nothing was attempted) or 'refund_failed' (an attempt was refused). */}
+                        {o.status === 'cancelled' && o.payment_method !== 'cod' && ['paid', 'refund_failed'].includes(o.payment_status) && (
                           <button
                             onClick={() => handleInitiateRefund(o.id, o.order_number, o.total)}
                             disabled={initiatingRefund === o.id}
@@ -1960,7 +1972,7 @@ function AdminPageInner() {
                 <tbody className="divide-y divide-orange-50">
                   {orders.filter(o => o.status === 'cancelled').map(o => {
                     const addr = o.shipping_address || {};
-                    const needsRefund = o.payment_method !== 'cod' && o.payment_status === 'paid';
+                    const needsRefund = o.payment_method !== 'cod' && ['paid', 'refund_failed'].includes(o.payment_status);
                     const refundDone  = ['refund_initiated','refunded'].includes(o.payment_status);
                     return (
                       <tr key={o.id} className="hover:bg-rose-50 transition-colors">
