@@ -21,7 +21,6 @@ export default function DeleteAccountPage() {
   const [step,      setStep]      = useState<Step>('warning');
   const [otp,       setOtp]       = useState('');
   const [emailHint, setEmailHint] = useState('');
-  const [devOtp,    setDevOtp]    = useState('');
   const [timer,     setTimer]     = useState(0);
   const [loading,   setLoading]   = useState(false);
   const [error,     setError]     = useState('');
@@ -41,7 +40,6 @@ export default function DeleteAccountPage() {
         ? await authAPI.requestDeactivateAccount()
         : await authAPI.requestDeleteAccount();
       setEmailHint(res.data.email_hint || '');
-      setDevOtp(res.data.dev_otp || '');
       setStep('otp');
       startTimer();
     } catch (err: any) {
@@ -280,13 +278,6 @@ export default function DeleteAccountPage() {
             <p className="text-center text-graphite-faint text-sm mb-5">
               OTP sent to <strong>{emailHint}</strong>
             </p>
-
-            {devOtp && (
-              <div className="border-l-2 border-caution/50 pl-4 p-4 mb-4">
-                <p className="text-caution-deep text-xs font-semibold mb-1">Dev mode</p>
-                <p className="text-caution-deep text-sm">OTP: <span className="font-mono font-normal text-lg tracking-widest">{devOtp}</span></p>
-              </div>
-            )}
 
             {error && (
               <div className="mb-4 flex items-center gap-2 border-l-2 border-critical/50 pl-4 p-3">

@@ -81,7 +81,8 @@ export function Details() {
     if (!fullName.trim()) { setMsg({ type: 'err', text: 'Your name cannot be empty.' }); return; }
     setSaving(true); setMsg(null);
     try {
-      await authAPI.updateProfile({ full_name: fullName.trim(), phone: phone.trim() });
+      // The mobile number is not sent: it is read-only, like the email.
+      await authAPI.updateProfile({ full_name: fullName.trim() });
       await refresh();
       setMsg({ type: 'ok', text: 'Saved.' });
       toast.success('Details saved');
@@ -102,10 +103,14 @@ export function Details() {
       </div>
 
       <div>
-        <label htmlFor="acc-phone" className={LABEL}>Mobile number</label>
-        <input id="acc-phone" type="tel" autoComplete="tel" value={phone}
-          onChange={(e) => { setPhone(e.target.value); setMsg(null); }}
-          className={`${FIELD} mt-2`} placeholder="10-digit mobile number" />
+        <span className={LABEL}>Mobile number</span>
+        {/* Read-only, like the email: sign-in and reset codes go to this
+            number, so changing it from a signed-in device would let whoever
+            holds that device take the account. */}
+        <p id="acc-phone" className="mt-2 border-b border-paper-edge pb-2 text-graphite-muted">{phone || '—'}</p>
+        <p className="mt-2 text-caption text-graphite-faint">
+          Your sign-in and reset codes come to this number. Ask us at the counter to change it.
+        </p>
       </div>
 
       <div>
