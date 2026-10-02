@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Package, ShoppingBag, Users, TrendingUp, Plus, Pencil,
   Trash2, X, AlertCircle, CheckCircle, Star, Upload, ImagePlus,
-  Bell, Ban, RotateCcw, GripVertical,
+  Bell, Ban, RotateCcw, GripVertical, EyeOff,
 } from 'lucide-react';
 import api, { adminAPI, adminReturnsAPI, adminNotifAPI, supportAPI } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -939,6 +939,31 @@ function AdminPageInner() {
     } catch { toast.error('Failed to deactivate product'); }
   };
 
+  /**
+   * DELETE, FOR GOOD — the sister shop's Remove, brought here.
+   *
+   * Deactivate only ever hid a piece, which is right for something coming back
+   * next season and wrong for a sample made to try something out: it stayed in
+   * this list for ever. This asks the server to delete the row outright.
+   *
+   * The server refuses when a customer has any stake in the piece — an order,
+   * a bag, a kept list, a review, a return — because bags, kept lists and
+   * reviews would be erased along with it. It hides the piece instead, and the
+   * reason comes back in words, which is shown as it is.
+   */
+  const handlePermanentDelete = async (id: number, name: string) => {
+    if (!confirm(`Delete "${name}" for good?\n\nThis cannot be undone. If a customer has ever ordered, saved or reviewed it, it will be hidden instead so their history is kept.`)) return;
+    try {
+      const res = await adminAPI.deleteProduct(id, true);
+      if (res.data?.deleted) {
+        toast.success(`"${name}" deleted`);
+      } else {
+        toast(res.data?.reason || 'Hidden from the site, not deleted.', { duration: 7000 });
+      }
+      loadProducts();
+    } catch { toast.error('Failed to delete product'); }
+  };
+
   const handleReactivate = async (p: any) => {
     try {
       await adminAPI.updateProduct(p.id, { is_active: true });
@@ -1670,15 +1695,21 @@ function AdminPageInner() {
                         <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-maroon-100 rounded-sm text-maroon-700 transition-colors" title={`Edit #${p.id}`}>
                           <Pencil size={15} />
                         </button>
+                        {/* The icons say what each does. The bin used to mean
+                            "hide", which is not what a bin means; hiding is the
+                            crossed-out eye now, and the bin really deletes. */}
                         {p.is_active ? (
-                          <button onClick={() => handleDelete(p.id, p.name)} className="p-1.5 hover:bg-red-100 rounded-sm text-red-600 transition-colors" title="Deactivate (hide from site)">
-                            <Trash2 size={15} />
+                          <button onClick={() => handleDelete(p.id, p.name)} className="p-1.5 hover:bg-paper-shade rounded-sm text-graphite-muted transition-colors" title="Deactivate (hide from site — can be brought back)" aria-label={`Deactivate ${p.name}`}>
+                            <EyeOff size={15} />
                           </button>
                         ) : (
-                          <button onClick={() => handleReactivate(p)} className="p-1.5 hover:bg-green-100 rounded-sm text-green-600 transition-colors" title="Reactivate (make visible on site)">
+                          <button onClick={() => handleReactivate(p)} className="p-1.5 hover:bg-green-100 rounded-sm text-green-600 transition-colors" title="Reactivate (make visible on site)" aria-label={`Reactivate ${p.name}`}>
                             <RotateCcw size={15} />
                           </button>
                         )}
+                        <button onClick={() => handlePermanentDelete(p.id, p.name)} className="p-1.5 hover:bg-red-100 rounded-sm text-red-600 transition-colors" title="Delete for good" aria-label={`Delete ${p.name} for good`}>
+                          <Trash2 size={15} />
+                        </button>
                       </div>
                     </td>
                   </tr>
