@@ -1,0 +1,186 @@
+# The gates, enforced on every push and pull request.
+#
+# WHY THIS EXISTS. Until now nothing ran here unless someone chose to run it.
+# Vijey Textile has had these gates since August; this is the same set, cut
+# down to the checks this shop actually has. The two shops share most of their
+# backend, and the bug that kept Vijey's gate red for two weeks (a cache that
+# trusted time.monotonic() on a freshly booted machine) was sitting in this
+# repo too, passing on every PC that had been up for days. A gate on a clean
+# runner is the only place that class of bug shows itself.
+#
+# WHAT IT DOES NOT DO. No browser drills or accessibility passes; both need GPU
+# Chrome against a live server and stay local. No hero, frame or bundle checks;
+# this shop has none to run.
+#
+# Failures are reported as annotations as well as in the log, because the job
+# log needs a signed-in GitHub session and annotations do not. A red run should
+# say what broke on the page where anyone can see it.
+
+name: gates
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# A second push to the same branch makes the first run irrelevant.
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+# Both jobs pin ubuntu-24.04 rather than ubuntu-latest. GitHub moves the
+# `latest` label to Ubuntu 26 from 19 October 2026, and an OS swap nobody chose
+# can change the Python build setup-python finds and sharp's prebuilt binary
+# at once, on a commit that touched neither. Moving up should be a commit of
+# its own that can be read and reverted.
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # package.json has no `engines`, so this states the major the shop is
+          # developed and built on. If engines is ever added, track it here.
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # `ci` not `install`: it fails loudly when package.json and the lockfile
+      # disagree, instead of quietly resolving something nobody reviewed.
+      - name: install
+        run: npm ci
+
+      - name: types
+        run: npx tsc --noEmit
+
+      - name: tailwind config
+        run: npm run check:tailwind
+
+      # Pure-logic tests: API origin, sign-in and sign-out, password rules,
+      # return paths. No browser, no GPU.
+      - name: tests
+        run: npm test
+
+      - name: build
+        id: build
+        run: |
+          set -o pipefail
+          npx next build 2>&1 | tee "$RUNNER_TEMP/next-build.log"
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+
+      # next build downloads its fonts from Google, so a failure can be the
+      # network rather than the code: exactly the distinction worth seeing
+      # without opening the log.
+      - name: say why the build failed
+        if: failure() && steps.build.outcome == 'failure'
+        run: |
+          tail -n 30 "$RUNNER_TEMP/next-build.log" | sed 's/%/%25/g' |
+            awk 'NF { printf "%s%%0A", $0 }' | sed 's/^/::error title=next build::/'
+          echo
+
+      # A CSP is the one security header that can take a shop down: too tight
+      # and the browser silently refuses to open the Razorpay modal, so checkout
+      # appears to do nothing. Neither shows up in a build, so this drives real
+      # Chrome (preinstalled on the runner; see scripts/chrome-path.mjs) and
+      # reads the console. If the server never comes up the step says THAT and
+      # prints the server's log, instead of blaming the policy.
+      - name: csp breaks nothing
+        run: |
+          npx next start -p 3100 > "$RUNNER_TEMP/next-start.log" 2>&1 &
+          for i in $(seq 1 90); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3100/ || true)
+            [ "$code" = "200" ] && break
+            sleep 1
+          done
+          if [ "$code" != "200" ]; then
+            echo "::error title=csp breaks nothing::next start never became ready on :3100 (last: ${code:-none}) — this is not a CSP failure."
+            cat "$RUNNER_TEMP/next-start.log"
+            exit 1
+          fi
+          npm run check:csp -- --url http://localhost:3100
+
+  backend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # backend/runtime.txt is Render format ("python-3.11.9"), which
+          # setup-python's python-version-file does not parse. Stated directly,
+          # and it must track that file.
+          python-version: '3.11'
+
+      - name: install
+        run: pip install -r requirements.txt
+
+      # Import-compile every module: the class of error that otherwise only
+      # appears when the server boots and the first request 500s.
+      - name: compile
+        run: python -m compileall -q .
+
+      # Chosen by consequence rather than coverage: an order total that does
+      # not add up, a cancellation that fails to restore stock, an endpoint
+      # that answers another customer's order, a forged payment signature, and
+      # the AUTH-SPEC security properties. None of those raise an exception.
+      - name: tests
+        id: tests
+        run: |
+          set -o pipefail
+          python -m pytest tests/ -q -rfE --tb=short 2>&1 | tee "$RUNNER_TEMP/pytest.log"
+
+      - name: name the failing tests
+        if: failure() && steps.tests.outcome == 'failure'
+        run: |
+          if grep -qE '^(FAILED|ERROR) ' "$RUNNER_TEMP/pytest.log"; then
+            grep -E '^(FAILED|ERROR) ' "$RUNNER_TEMP/pytest.log" | head -n 10 | sed 's/%/%25/g' |
+              while IFS= read -r line; do echo "::error title=backend tests::$line"; done
+          else
+            echo "::error title=backend tests::pytest stopped before reporting: $(tail -n 5 "$RUNNER_TEMP/pytest.log" | tr '\n' ' ' | sed 's/%/%25/g')"
+          fi
+
+      # Schema, referential integrity, money arithmetic and the auth boundary,
+      # against a throwaway SQLite database the app creates from the models.
+      # It cannot see production data, and should not, but it catches what
+      # breaks structurally: a model column with no matching table, an order
+      # whose totals cannot reconcile, a protected route that stops refusing
+      # anonymous callers. An empty catalogue is correct here: demo seeding is
+      # off unless SEED_DEMO_PRODUCTS is set, and every check holds for zero rows.
+      - name: database + api integrity
+        run: |
+          set -o pipefail
+          python -m uvicorn main:app --port 8000 > "$RUNNER_TEMP/uvicorn.log" 2>&1 &
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/products/ || true)
+            [ "$code" = "200" ] && break
+            sleep 1
+          done
+          if [ "$code" != "200" ]; then
+            echo "::error title=database + api integrity::the API never answered 200 on :8000/api/products/ (last: ${code:-none}) — it did not start; this is not a healthcheck finding."
+            cat "$RUNNER_TEMP/uvicorn.log"
+            exit 1
+          fi
+          if ! python healthcheck.py --api http://localhost:8000 2>&1 | tee "$RUNNER_TEMP/healthcheck.log"; then
+            # Its closing summary lists every problem as "  x ...", including
+            # ones that never got a [FAIL] line; no summary means it crashed.
+            if grep -q '^  x ' "$RUNNER_TEMP/healthcheck.log"; then
+              sed -n 's/^  x //p' "$RUNNER_TEMP/healthcheck.log" | head -n 10 | sed 's/%/%25/g' |
+                while IFS= read -r line; do echo "::error title=database + api integrity::$line"; done
+            else
+              echo "::error title=database + api integrity::healthcheck.py crashed: $(tail -n 1 "$RUNNER_TEMP/healthcheck.log" | sed 's/%/%25/g')"
+            fi
+            echo "----- server log -----"
+            tail -n 60 "$RUNNER_TEMP/uvicorn.log"
+            exit 1
+          fi
