@@ -68,12 +68,15 @@ export const metadata: Metadata = {
   authors: [{ name: 'Ammalu Tex' }],
   creator: 'Ammalu Tex',
   publisher: 'Ammalu Tex',
-  metadataBase: new URL('https://ammalutex.com'),
-  alternates: { canonical: 'https://ammalutex.com' },
+  // The host the site is actually served from. The bare domain answers with a
+  // redirect to www, so canonicals, og:url and the sitemap on the bare host all
+  // pointed search engines at a redirect (SEO-10, October 2026 test pass).
+  // No site-wide canonical: see app/(home)/layout.tsx.
+  metadataBase: new URL('https://www.ammalutex.com'),
   openGraph: {
     title: `${STORE.name} — ${STORE.tagline}`,
     description: 'Shop Chudithar, Tops, Lehenga, Crop Tops & Party Wears at Ammalu Tex, Texvalley Gangapuram, Erode.',
-    url: 'https://ammalutex.com',
+    url: 'https://www.ammalutex.com',
     siteName: 'Ammalu Tex',
     locale: 'en_IN',
     type: 'website',

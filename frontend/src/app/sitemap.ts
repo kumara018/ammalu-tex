@@ -31,7 +31,7 @@ async function products(): Promise<Listed[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = 'https://ammalutex.com';
+  const base = 'https://www.ammalutex.com';   // the served host, not the bare one that redirects
   const now  = new Date();
 
   const pages: MetadataRoute.Sitemap = [

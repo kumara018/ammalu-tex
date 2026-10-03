@@ -2,6 +2,10 @@
 
 import { useEffect } from 'react';
 import { reportError } from '@/lib/errorReporter';
+// Plain constants, bundled into this chunk — nothing here can fail to load.
+// Read from the shop's config because this screen once carried the SISTER
+// shop's name and phone number (BRAND-02, October 2026 test pass).
+import { STORE } from '@/lib/config';
 
 /**
  * Last-resort boundary — a failure in the root layout itself.
@@ -62,7 +66,7 @@ export default function GlobalError({
               fontFamily: 'ui-sans-serif, system-ui, sans-serif',
             }}
           >
-            Vijey Textile
+            {STORE.name}
           </p>
 
           <h1
@@ -90,8 +94,8 @@ export default function GlobalError({
           >
             Something went wrong before the page could start. Reloading usually clears it.
             If it does not, please call the shop on{' '}
-            <a href="tel:+919443947853" style={{ color: '#332722', textDecoration: 'underline' }}>
-              +91 94439 47853
+            <a href={`tel:${STORE.phone1.replace(/\s/g, '')}`} style={{ color: '#332722', textDecoration: 'underline' }}>
+              {STORE.phone1}
             </a>{' '}
             — we can take your order directly.
           </p>

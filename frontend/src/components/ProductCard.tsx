@@ -95,11 +95,25 @@ export default function ProductCard({ product }: Props) {
   }, [product, queryClient]);
 
   // ── Slides ────────────────────────────────────────────────────────────────
-  const images = (product.images || []).filter(Boolean);
+  const allImages = (product.images || []).filter(Boolean);
   const hasVideo = Boolean(product.video_url);
+  /**
+   * A PHOTOGRAPH THAT WILL NOT LOAD IS SKIPPED (UI-02, October 2026 test pass).
+   * This card had no failure handling at all, so a dead link or one dropped
+   * request showed the browser's broken-image glyph where the garment should
+   * be. The slide is now left out; the dyed no-photograph panel appears only
+   * when none of the piece's photographs can be shown. (The sister shop's card
+   * remembered failures but showed its placeholder for each failed slide.)
+   */
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const images = allImages.filter((u) => !failedImages.includes(mediaUrl(u)));
   const totalSlides = images.length + (hasVideo ? 1 : 0);
 
   const [imgIdx, setImgIdx] = useState(0);
+  // A slide that dropped out can leave the index past the end; start again.
+  useEffect(() => {
+    if (totalSlides > 0 && imgIdx >= totalSlides) setImgIdx(0);
+  }, [imgIdx, totalSlides]);
   const [hovering, setHovering] = useState(false);
   const touchStartX = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -272,6 +286,9 @@ export default function ProductCard({ product }: Props) {
                   src={currentImg}
                   alt={product.name}
                   loading="lazy"
+                  onError={() =>
+                    setFailedImages((prev) => (prev.includes(currentImg) ? prev : [...prev, currentImg]))
+                  }
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
