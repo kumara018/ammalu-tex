@@ -179,9 +179,11 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     request, long after the customer has closed the tab, and this webhook is the
     only way the shop ever learns it completed.
 
-    NOT YET REGISTERED for this shop — the Razorpay account is still awaiting
-    activation. When it is activated, register the URL above directly; this
-    shop never had a webhook on the old host, so there is nothing to migrate.
+    REGISTERED in the Razorpay dashboard on 4 September 2026 with exactly the
+    URL and three events above, and a secret; confirmed by the owner during
+    the October 2026 test pass. If refunds stop moving to "refunded", compare
+    that secret with RAZORPAY_WEBHOOK_SECRET first — a mismatch is logged here
+    as "Rejected: invalid Razorpay signature".
 
     Flow:
       1. Customer cancels → Razorpay refund API called → payment_status = "refund_initiated"
