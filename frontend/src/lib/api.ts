@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { keepFromFirstLive, renewSavedToken, sameAccount } from './sessionTokens';
 
 /** Used only when nothing valid is configured. See getApiBase below. */
 const FALLBACK_API = 'https://ammalu-tex.onrender.com';
@@ -93,8 +94,15 @@ api.interceptors.request.use((config) => {
 function _applyNewTokenHeader(res: any) {
   const newToken = res?.headers?.['x-new-token'];
   if (newToken && typeof window !== 'undefined') {
-    localStorage.setItem('token', newToken);
-    document.cookie = `auth_token=${newToken}; path=/; max-age=7776000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`; // 90 days
+    // The renewal belongs to whichever account SENT this request. Only when
+    // that is the account in use does it replace the active token: a late
+    // reply for an account just signed out of, or switched away from, used to
+    // take the device back over (SESSION-01, October 2026).
+    if (sameAccount(newToken, localStorage.getItem('token'))) {
+      localStorage.setItem('token', newToken);
+      document.cookie = `auth_token=${newToken}; path=/; max-age=2592000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`; // 30 days
+    }
+    renewSavedToken(newToken);   // and the saved copy of its own account
   }
 }
 
@@ -156,12 +164,17 @@ api.interceptors.response.use(
             remaining = [];   // unreadable list — treat as none rather than throw
           }
 
+          // Promote only an account that still works (SESSION-02): after a long
+          // absence every saved account can be dead at once, and promoting each
+          // in turn meant one reload per dead account before reaching sign-in.
+          remaining = await keepFromFirstLive(remaining, getApiBase());
+
           if (remaining.length > 0) {
             const next = remaining[0];
             localStorage.setItem('sessions', JSON.stringify(remaining));
             localStorage.setItem('token', next.token);
             localStorage.setItem('user', JSON.stringify(next.user));
-            document.cookie = `auth_token=${next.token}; path=/; max-age=7776000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+            document.cookie = `auth_token=${next.token}; path=/; max-age=2592000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
             // A full load, not a push: the dead account's bag and kept pieces
             // are still in memory. Same reasoning as switching by hand.
             window.location.href = next.user?.is_admin ? '/admin' : '/';
